@@ -1,0 +1,28 @@
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+service-account*.json
+firebase-adminsdk-*.json
+
+# Editors and OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
