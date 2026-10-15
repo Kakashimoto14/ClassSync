@@ -1,0 +1,8 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All application data is accessed through server-side services until a
+    // collection-level model and client access requirements are approved.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

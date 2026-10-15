@@ -1,0 +1,43 @@
+import { Link } from 'react-router-dom';
+import { StatusBadge } from '../ui/StatusBadge';
+
+export interface AttentionItem {
+  id: string;
+  title: string;
+  detail: string;
+  status: 'Blocking conflict' | 'Pending decision';
+  href: string;
+  action: string;
+}
+export function AttentionQueue({ items }: { items: readonly AttentionItem[] }) {
+  return (
+    <section className="attention-queue" aria-labelledby="attention-title">
+      <div className="section-head">
+        <h2 id="attention-title">Needs attention</h2>
+        <span className="muted">
+          {items.length} {items.length === 1 ? 'item' : 'items'}
+        </span>
+      </div>
+      {items.length ? (
+        <ol>
+          {items.map((item) => (
+            <li key={item.id}>
+              <StatusBadge tone={item.status === 'Blocking conflict' ? 'danger' : 'warning'}>
+                {item.status}
+              </StatusBadge>
+              <h3>{item.title}</h3>
+              <p>{item.detail}</p>
+              <Link className="text-action" to={item.href}>
+                {item.action}
+              </Link>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="muted">
+          No attention items in the supplied demo records. This is not a live validation result.
+        </p>
+      )}
+    </section>
+  );
+}

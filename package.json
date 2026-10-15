@@ -1,0 +1,17 @@
+{
+  "name": "classync",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=@classync/web",
+    "build": "npm run build --workspace=@classync/web",
+    "lint": "npm run lint --workspace=@classync/web",
+    "typecheck": "npm run typecheck --workspace=@classync/web",
+    "test:web": "npm run test --workspace=@classync/web",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {"prettier": "^3.5.3"},
+  "engines": {"node": ">=20"}
+}
