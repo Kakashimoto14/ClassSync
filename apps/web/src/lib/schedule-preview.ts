@@ -81,8 +81,17 @@ export function summarizeDay(
 
 export function selectRequests(data: SchedulePreviewData, teacherId?: string): PreviewRequest[] {
   return data.requests
-    .filter((item) => !teacherId || item.teacherId === teacherId)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || a.id.localeCompare(b.id));
+    .filter((item) => {
+      if (!teacherId) return true;
+      const assignment = data.occurrences.find((record) => record.id === item.assignmentId);
+      return item.teacherId === teacherId && (!assignment || assignment.teacher.id === teacherId);
+    })
+    .sort(
+      (a, b) =>
+        Number(b.status === 'pending') - Number(a.status === 'pending') ||
+        b.updatedAt.localeCompare(a.updatedAt) ||
+        a.id.localeCompare(b.id),
+    );
 }
 
 export function summarizeAdministration(data: SchedulePreviewData | null, reference: string) {
@@ -101,6 +110,27 @@ export function summarizeAdministration(data: SchedulePreviewData | null, refere
     publishedCount: today.filter((item) => item.publication === 'published').length,
     draftCount: today.filter((item) => item.publication === 'draft').length,
     attentionCount: conflicts.length + pending.length,
+    // These four metrics share the entire supplied preview scope, not today's list.
+    recordCounts: {
+      published: data.occurrences.filter((item) => item.publication === 'published').length,
+      draft: data.occurrences.filter((item) => item.publication === 'draft').length,
+      conflicts: conflicts.length,
+      pending: pending.length,
+    },
+  };
+}
+
+export function remainingAfterSummary(schedule: DaySchedule): ScheduleOccurrence[] {
+  const featured = new Set([...schedule.current.map((item) => item.id), schedule.next?.id]);
+  return schedule.remaining.filter((item) => !featured.has(item.id));
+}
+
+export function summarizeResources(data: SchedulePreviewData | null) {
+  if (!data?.resources) return null;
+  return {
+    total: data.resources.length,
+    active: data.resources.filter((room) => room.condition === 'active').length,
+    maintenance: data.resources.filter((room) => room.condition === 'maintenance'),
   };
 }
 

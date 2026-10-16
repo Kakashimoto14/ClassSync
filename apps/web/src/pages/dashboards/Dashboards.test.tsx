@@ -117,8 +117,9 @@ describe('role-specific dashboard compositions', () => {
         <TeacherDashboard data={schedulePreview} />
       </MemoryRouter>,
     );
-    const agenda = screen.getByRole('region', { name: 'Today’s teaching agenda' });
-    expect(within(agenda).getAllByText(/Prof. Maria Santos/)).toHaveLength(2);
+    const agenda = screen.getByRole('region', { name: 'Remaining teaching agenda' });
+    expect(within(agenda).getAllByText(/Prof. Maria Santos/)).toHaveLength(1);
+    expect(within(agenda).queryByText('Database Management Systems')).not.toBeInTheDocument();
     expect(screen.getByText('1 pending')).toBeInTheDocument();
     expect(screen.queryByText('Human Computer Interaction')).not.toBeInTheDocument();
     for (const link of screen.getAllByRole('link'))
@@ -130,10 +131,13 @@ describe('role-specific dashboard compositions', () => {
         <AdministratorDashboard data={schedulePreview} />
       </MemoryRouter>,
     );
-    expect(screen.getByText('2 items')).toBeInTheDocument();
+    expect(screen.getByText('1 item')).toBeInTheDocument();
     expect(
-      within(screen.getByRole('region', { name: 'Needs attention' })).getAllByRole('listitem'),
-    ).toHaveLength(2);
+      within(screen.getByRole('region', { name: 'Scheduling attention' })).getAllByRole('listitem'),
+    ).toHaveLength(1);
+    expect(
+      within(screen.getByRole('region', { name: 'Pending decisions' })).getAllByRole('listitem'),
+    ).toHaveLength(1);
     const agenda = screen.getByRole('region', { name: 'Today’s campus schedule' });
     expect(within(agenda).getAllByText('Published')).toHaveLength(3);
     expect(within(agenda).getAllByText('Draft')).toHaveLength(1);

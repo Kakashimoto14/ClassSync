@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useId } from 'react';
 import { StatusBadge } from '../ui/StatusBadge';
 
 export interface AttentionItem {
@@ -9,11 +10,18 @@ export interface AttentionItem {
   href: string;
   action: string;
 }
-export function AttentionQueue({ items }: { items: readonly AttentionItem[] }) {
+export function AttentionQueue({
+  items,
+  title = 'Needs attention',
+}: {
+  items: readonly AttentionItem[];
+  title?: string;
+}) {
+  const titleId = useId();
   return (
-    <section className="attention-queue" aria-labelledby="attention-title">
+    <section className="attention-queue" aria-labelledby={titleId}>
       <div className="section-head">
-        <h2 id="attention-title">Needs attention</h2>
+        <h2 id={titleId}>{title}</h2>
         <span className="muted">
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </span>

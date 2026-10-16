@@ -9,10 +9,12 @@ export function NextClassSummary({
   schedule,
   title = 'Next class',
   action,
+  showPublication = false,
 }: {
   schedule: DaySchedule;
   title?: string;
   action?: { to: string; label: string };
+  showPublication?: boolean;
 }) {
   const titleId = useId();
   const unavailable = schedule.state === 'unavailable' || schedule.state === 'unpublished';
@@ -42,7 +44,12 @@ export function NextClassSummary({
             <div className="current-classes">
               <h3>In progress at the demo time</h3>
               {schedule.current.map((item) => (
-                <ScheduleEntry key={item.id} occurrence={item} showDate />
+                <ScheduleEntry
+                  key={item.id}
+                  occurrence={item}
+                  showDate
+                  showPublication={showPublication}
+                />
               ))}
             </div>
           )}
@@ -53,7 +60,7 @@ export function NextClassSummary({
             </Alert>
           )}
           {schedule.next ? (
-            <ScheduleEntry occurrence={schedule.next} showDate />
+            <ScheduleEntry occurrence={schedule.next} showDate showPublication={showPublication} />
           ) : (
             <p className="muted">No upcoming published class in the available records.</p>
           )}

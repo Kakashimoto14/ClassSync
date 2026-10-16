@@ -8,6 +8,13 @@ export interface PreviewRoom extends AcademicReference {
   building: string;
   floor?: string;
 }
+export interface PreviewResource extends PreviewRoom {
+  floor: string;
+  type: string;
+  seats: number;
+  facilities: string;
+  condition: 'active' | 'maintenance';
+}
 export interface ScheduleOccurrence {
   id: string;
   subject: AcademicReference;
@@ -28,7 +35,7 @@ export interface PreviewRequest {
   id: string;
   assignmentId: string;
   teacherId: string;
-  status: 'pending' | 'declined';
+  status: 'pending' | 'approved' | 'declined';
   updatedAt: string;
   reason: string;
 }
@@ -45,6 +52,7 @@ export interface PreviewUpdate {
   detail: string;
 }
 export interface SchedulePreviewData {
+  resources?: readonly PreviewResource[];
   occurrences: readonly ScheduleOccurrence[];
   students: readonly PreviewStudent[];
   requests: readonly PreviewRequest[];
@@ -87,6 +95,34 @@ const rooms = {
   },
   newBuilding: { id: 'room-nb-405', name: 'Room 405', building: 'New Building', floor: 'Floor 4' },
 } as const;
+
+// Existing directory samples, not a complete campus inventory or availability feed.
+export const previewResources: readonly PreviewResource[] = [
+  {
+    ...rooms.science,
+    type: 'Computer laboratory',
+    seats: 42,
+    facilities: 'Projector · Lab PCs · Internet',
+    condition: 'active',
+  },
+  {
+    ...rooms.engineering,
+    type: 'Lecture room',
+    seats: 40,
+    facilities: 'Projector · Whiteboard',
+    condition: 'active',
+  },
+  {
+    id: 'room-lab-04',
+    name: 'LAB-04',
+    building: 'Computing Building',
+    floor: 'Level 1',
+    type: 'Computer laboratory',
+    seats: 28,
+    facilities: 'Lab PCs · Internet',
+    condition: 'maintenance',
+  },
+];
 const subjects = {
   hci: { id: 'subject-hci', name: 'Human Computer Interaction' },
   database: { id: 'subject-database', name: 'Database Management Systems' },
@@ -102,6 +138,7 @@ const sections = {
 // Explicit development fixtures. These are not enrollment, reservations, validation
 // results, or production identities. No clock or persistence drives this scenario.
 export const schedulePreview: SchedulePreviewData = {
+  resources: previewResources,
   occurrences: [
     {
       id: 'occ-hci-mon',

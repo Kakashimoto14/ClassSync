@@ -7,6 +7,7 @@ import {
 } from '../../data/schedule-preview';
 import {
   formatPreviewDate,
+  remainingAfterSummary,
   selectAssignments,
   selectRequests,
   selectUpdates,
@@ -14,7 +15,7 @@ import {
 } from '../../lib/schedule-preview';
 import { NextClassSummary } from '../../components/scheduling/NextClassSummary';
 import { ScheduleAgenda } from '../../components/scheduling/ScheduleAgenda';
-import { StatusBadge } from '../../components/ui/StatusBadge';
+import { RequestSummary } from '../../components/scheduling/RequestSummary';
 import { rolePath } from '../../routes/route-config';
 import { ScheduleUpdates } from './DashboardSupport';
 
@@ -27,61 +28,58 @@ export function TeacherDashboard({
 }) {
   const assignments = selectAssignments(data, previewViewer('teacher'));
   const schedule = summarizeDay(assignments, reference);
+  const remaining = remainingAfterSummary(schedule);
   const requests = data ? selectRequests(data, previewProfiles.teacher.id) : [];
   const pending = requests.filter((item) => item.status === 'pending').length;
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Teacher</p>
-          <h1>Your teaching day</h1>
-        </div>
-        <Link className="text-action" to={rolePath('teacher', 'schedule')}>
-          Teaching schedule
-        </Link>
-      </div>
+    <div className="teacher-dashboard">
+      <header className="operations-heading">
+        <h1>Your teaching day</h1>
+        <p>
+          Sample day · {formatPreviewDate(reference)} · {reference.slice(11, 16)}
+        </p>
+      </header>
       <div className="dashboard-columns">
         <div className="dashboard-primary">
-          <NextClassSummary schedule={schedule} title="Next teaching assignment" />
-          {schedule.state !== 'unavailable' && schedule.state !== 'unpublished' && (
+          <NextClassSummary
+            schedule={schedule}
+            title="Next teaching assignment"
+            showPublication
+            action={{ to: rolePath('teacher', 'schedule'), label: 'View teaching schedule' }}
+          />
+          {remaining.length > 0 && (
             <ScheduleAgenda
-              title="Today’s teaching agenda"
-              occurrences={schedule.today}
-              emptyMessage="No teaching assignments today"
+              title="Remaining teaching agenda"
+              occurrences={remaining}
+              emptyMessage="No other teaching assignments today"
             />
           )}
         </div>
         <aside className="dashboard-secondary">
-          <section className="dashboard-section" aria-label="Your requests">
+          <section className="dashboard-panel" aria-label="Requests and decisions">
             <div className="section-head">
-              <h2>Your requests</h2>
+              <h2>Requests & decisions</h2>
               {data && <span className="muted">{pending} pending</span>}
             </div>
             {!data ? (
-              <p className="muted">Request data is unavailable.</p>
+              <p>Request data unavailable.</p>
             ) : !requests.length ? (
-              <p className="muted">No requests in this demo.</p>
+              <p>No requests in this demo.</p>
             ) : (
-              <ul className="dashboard-updates">
-                {requests.map((request) => {
-                  const assignment = assignments?.find((item) => item.id === request.assignmentId);
-                  return (
-                    <li key={request.id}>
-                      <StatusBadge tone={request.status === 'pending' ? 'warning' : 'neutral'}>
-                        {request.status === 'pending' ? 'Pending review' : 'Declined'}
-                      </StatusBadge>
-                      <strong>{assignment?.subject.name ?? 'Assignment unavailable'}</strong>
-                      <p>{request.reason}</p>
-                      <small>
-                        {formatPreviewDate(request.updatedAt)} · {request.updatedAt.slice(11, 16)}
-                      </small>
-                    </li>
-                  );
-                })}
+              <ul className="request-summary-list">
+                {requests.map((request) => (
+                  <li key={request.id}>
+                    <RequestSummary
+                      request={request}
+                      assignment={assignments?.find((item) => item.id === request.assignmentId)}
+                      role="teacher"
+                    />
+                  </li>
+                ))}
               </ul>
             )}
             <Link className="text-action" to={rolePath('teacher', 'requests')}>
-              View requests
+              All requests
             </Link>
           </section>
           {data && assignments && (
@@ -95,8 +93,11 @@ export function TeacherDashboard({
               Report an issue
             </Link>
           </nav>
+          <p className="demo-footnote">
+            Fixed demo time and sample assignments. Official changes require administrator review.
+          </p>
         </aside>
       </div>
-    </>
+    </div>
   );
 }
