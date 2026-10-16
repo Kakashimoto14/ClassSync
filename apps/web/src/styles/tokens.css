@@ -1,0 +1,236 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Sapphire Campus Design Tokens
+   Single source of truth for colors, spacing, elevation, radius,
+   and motion. Dark mode overrides at the bottom.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Color Primitives ──────────────────────────────────────── */
+
+  /* Primary — Sapphire Blue */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #2563EB;
+  --color-primary-700: #1D4ED8;
+  --color-primary-800: #1E40AF;
+  --color-primary-900: #1E3A5F;
+
+  /* Navy — Dark surfaces */
+  --color-navy-800: #1E293B;
+  --color-navy-900: #0F172A;
+  --color-navy-950: #0B1120;
+
+  /* Teal — Success / Availability */
+  --color-teal-50: #F0FDFA;
+  --color-teal-100: #CCFBF1;
+  --color-teal-200: #99F6E4;
+  --color-teal-400: #2DD4BF;
+  --color-teal-500: #14B8A6;
+  --color-teal-600: #0D9488;
+  --color-teal-700: #0F766E;
+
+  /* Amber — Warning / Attention */
+  --color-amber-50: #FFFBEB;
+  --color-amber-100: #FEF3C7;
+  --color-amber-200: #FDE68A;
+  --color-amber-400: #FBBF24;
+  --color-amber-500: #F59E0B;
+  --color-amber-600: #D97706;
+  --color-amber-700: #B45309;
+
+  /* Rose — Danger / Conflict */
+  --color-rose-50: #FFF1F2;
+  --color-rose-100: #FFE4E6;
+  --color-rose-200: #FECDD3;
+  --color-rose-400: #FB7185;
+  --color-rose-500: #F43F5E;
+  --color-rose-600: #E11D48;
+  --color-rose-700: #BE123C;
+
+  /* Sky — Info / Neutral highlights */
+  --color-sky-50: #F0F9FF;
+  --color-sky-100: #E0F2FE;
+  --color-sky-200: #BAE6FD;
+  --color-sky-400: #38BDF8;
+  --color-sky-500: #0EA5E9;
+  --color-sky-600: #0284C7;
+  --color-sky-700: #0369A1;
+
+  /* Slate — Neutral scale */
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+
+  /* ── Semantic Color Tokens ─────────────────────────────────── */
+
+  /* Brand — Logo artwork colors (preserved per branding.md) */
+  --brand-midnight: #040B15;
+  --brand-rouge: #640000;
+  --brand-rose: #B67E7D;
+
+  /* Surfaces */
+  --canvas: #FAFBFC;
+  --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --surface-sunken: var(--color-slate-100);
+  --surface-strong: var(--color-slate-100);
+
+  /* Text */
+  --ink: var(--color-slate-900);
+  --ink-soft: var(--color-slate-500);
+  --ink-muted: var(--color-slate-400);
+
+  /* Borders */
+  --line: var(--color-slate-200);
+  --line-strong: var(--color-slate-300);
+  --control-border: var(--color-slate-300);
+
+  /* Primary */
+  --primary: var(--color-primary-600);
+  --primary-hover: var(--color-primary-700);
+  --primary-active: var(--color-primary-800);
+  --primary-soft: var(--color-primary-50);
+  --primary-soft-hover: var(--color-primary-100);
+  --primary-border: var(--color-primary-200);
+
+  /* Success */
+  --success: var(--color-teal-600);
+  --success-hover: var(--color-teal-700);
+  --success-soft: var(--color-teal-50);
+  --success-border: var(--color-teal-200);
+
+  /* Warning */
+  --warning: var(--color-amber-600);
+  --warning-hover: var(--color-amber-700);
+  --warning-soft: var(--color-amber-50);
+  --warning-border: var(--color-amber-200);
+
+  /* Danger */
+  --danger: var(--color-rose-600);
+  --danger-hover: var(--color-rose-700);
+  --danger-soft: var(--color-rose-50);
+  --danger-border: var(--color-rose-200);
+
+  /* Info */
+  --info: var(--color-sky-600);
+  --info-hover: var(--color-sky-700);
+  --info-soft: var(--color-sky-50);
+  --info-border: var(--color-sky-200);
+
+  /* Focus */
+  --focus-ring: var(--color-primary-500);
+  --focus-on-dark: var(--color-primary-300);
+
+  /* Navigation (dark sidebar) */
+  --nav-bg: var(--color-navy-900);
+  --nav-text: var(--color-slate-100);
+  --nav-muted: var(--color-slate-400);
+  --nav-hover: var(--color-navy-800);
+  --nav-divider: var(--color-slate-700);
+  --nav-active: var(--color-primary-600);
+
+  /* Overlay */
+  --overlay-bg: rgba(15, 23, 42, 0.6);
+  --overlay-blur: 4px;
+
+  /* ── Spacing Scale (4px base) ──────────────────────────────── */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-1_5: 6px;
+  --space-2: 8px;
+  --space-2_5: 10px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+
+  /* ── Border Radius ─────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ── Elevation (Box Shadows) ───────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px rgba(15, 23, 42, 0.08), 0 4px 6px rgba(15, 23, 42, 0.03);
+  --shadow-xl: 0 20px 25px rgba(15, 23, 42, 0.08), 0 8px 10px rgba(15, 23, 42, 0.03);
+  --shadow-overlay: 0 16px 48px rgba(15, 23, 42, 0.16);
+
+  /* ── Motion ────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* ── Layout Constants ──────────────────────────────────────── */
+  --sidebar-width: 272px;
+  --sidebar-collapsed: 72px;
+  --header-height: 64px;
+  --control-height: 40px;
+  --control-height-lg: 44px;
+  --bottom-nav-height: 72px;
+  --max-content: 1360px;
+}
+
+/* ── Dark Mode ─────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --canvas: var(--color-navy-950);
+  --surface: var(--color-navy-800);
+  --surface-elevated: var(--color-slate-700);
+  --surface-sunken: var(--color-navy-900);
+  --surface-strong: var(--color-slate-800);
+
+  --ink: var(--color-slate-100);
+  --ink-soft: var(--color-slate-400);
+  --ink-muted: var(--color-slate-500);
+
+  --line: var(--color-slate-700);
+  --line-strong: var(--color-slate-600);
+  --control-border: var(--color-slate-600);
+
+  --primary: var(--color-primary-400);
+  --primary-hover: var(--color-primary-300);
+  --primary-soft: rgba(96, 165, 250, 0.1);
+  --primary-soft-hover: rgba(96, 165, 250, 0.15);
+
+  --success-soft: rgba(13, 148, 136, 0.1);
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --danger-soft: rgba(225, 29, 72, 0.1);
+  --info-soft: rgba(14, 165, 233, 0.1);
+
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.4);
+}

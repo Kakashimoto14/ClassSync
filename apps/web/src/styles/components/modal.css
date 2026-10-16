@@ -1,0 +1,77 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Modal & Drawer Components
+   Overlay dialogs with animations.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Overlay ─────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(var(--overlay-blur));
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fade-in var(--duration-fast) var(--ease-out);
+}
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.modal,
+.drawer {
+  background: var(--surface);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-height: 100%;
+}
+
+.modal {
+  max-width: 560px;
+  border-radius: var(--radius-xl);
+  animation: scale-in var(--duration-normal) var(--ease-out);
+}
+
+/* ── Drawer ──────────────────────────────────────────────────── */
+.drawer-overlay {
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.drawer {
+  max-width: 400px;
+  height: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: slide-in-right var(--duration-normal) var(--ease-out);
+}
+
+/* ── Dialog Headers & Content ────────────────────────────────── */
+.modal header,
+.drawer header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.dialog-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-actions {
+  justify-content: flex-end;
+}

@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Card Component
+   Surface containers with elevation and hover effects.
+   ═══════════════════════════════════════════════════════════════ */
+
+.workspace-card,
+.state-card,
+.agenda-panel,
+.quick-panel,
+.metric-card,
+.room-result,
+.playground-section,
+.room-directory-card,
+.conflict-entry,
+.notice-list > article {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  min-width: 0;
+  box-shadow: var(--shadow-xs);
+  transition:
+    box-shadow var(--duration-normal) var(--ease-in-out),
+    border-color var(--duration-normal) var(--ease-in-out),
+    transform var(--duration-normal) var(--ease-in-out);
+}
+
+/* Cards that should lift on hover */
+.metric-card:hover,
+.room-directory-card:hover,
+.notice-list > article:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+/* ── State Card ──────────────────────────────────────────────── */
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.state-card p,
+.state-card label {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.state-card > svg {
+  color: var(--primary);
+}
+.state-card label {
+  width: 100%;
+}
+
+/* ── Metric Card ─────────────────────────────────────────────── */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.metric-card {
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--color-primary-400));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-in-out);
+}
+.metric-card:hover::after {
+  opacity: 1;
+}
+.metric-card p,
+.metric-card span {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.metric-card strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin: 16px 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+.metric-icon {
+  display: none;
+}
+
+/* ── Conflict Card ───────────────────────────────────────────── */
+.conflict-card {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  background: var(--danger-soft);
+  border-left: 4px solid var(--danger);
+  padding: 16px;
+  border-radius: var(--radius);
+}
+.conflict-card > div {
+  display: grid;
+  gap: 8px;
+}
+.conflict-card > svg {
+  color: var(--danger);
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-lg);
+  color: var(--ink-soft);
+  text-align: center;
+  animation: fade-in var(--duration-normal) var(--ease-out);
+}
+.empty-state strong {
+  color: var(--ink);
+}
+.empty-state svg {
+  color: var(--ink-muted);
+}

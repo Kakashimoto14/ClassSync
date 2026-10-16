@@ -1,0 +1,281 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Dashboard Pages
+   Student, teacher, and administrator dashboard layouts.
+   ═══════════════════════════════════════════════════════════════ */
+
+.dashboard {
+  max-width: var(--max-content);
+  margin-inline: auto;
+}
+
+.preview-context {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 24px;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.preview-context strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ── Dashboard Grid ──────────────────────────────────────────── */
+.dashboard-columns,
+.dashboard-primary,
+.dashboard-secondary {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+  align-content: start;
+}
+
+/* ── Next Class Hero Card ────────────────────────────────────── */
+.next-class {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--ease-in-out);
+}
+.next-class:hover {
+  box-shadow: var(--shadow-md);
+}
+.next-class > h2 {
+  color: var(--primary);
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.next-class > h2::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: pulse-subtle 2s var(--ease-in-out) infinite;
+}
+.next-class .schedule-entry {
+  padding: 0;
+}
+.next-class .schedule-entry__body > strong {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+/* ── Schedule Entry ──────────────────────────────────────────── */
+.schedule-entry {
+  display: grid;
+  gap: 12px;
+  padding-block: 20px;
+  min-width: 0;
+}
+.schedule-entry__time {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.schedule-entry__time > span {
+  color: var(--ink-soft);
+}
+.schedule-entry__time time {
+  font-weight: 600;
+}
+.schedule-entry__body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.schedule-entry__body > strong {
+  line-height: 1.5;
+}
+.schedule-entry__body > span {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.schedule-entry__location {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.schedule-entry__location svg {
+  margin-top: 2px;
+  color: var(--primary);
+}
+.schedule-entry__location b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── Schedule Agenda ─────────────────────────────────────────── */
+.schedule-agenda {
+  min-width: 0;
+}
+.schedule-agenda__list,
+.dashboard-updates,
+.attention-queue ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.schedule-agenda__list > li {
+  border-top: 1px solid var(--line);
+}
+.schedule-agenda .section-head {
+  align-items: baseline;
+  gap: 12px;
+}
+.schedule-agenda .section-head > span {
+  font-size: 0.875rem;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+/* ── Dashboard Sections ──────────────────────────────────────── */
+.dashboard-section {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  min-width: 0;
+}
+.dashboard-section h2 {
+  font-size: 1rem;
+}
+
+.dashboard-updates {
+  display: grid;
+  gap: 20px;
+}
+.dashboard-updates li {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius);
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+.dashboard-updates li:hover {
+  background: var(--surface-sunken);
+}
+.dashboard-updates p,
+.dashboard-section > p {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.dashboard-updates small {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+.dashboard-actions {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.schedule-state {
+  color: var(--ink-soft);
+}
+
+.current-classes {
+  display: grid;
+  gap: 16px;
+}
+
+/* ── Attention Queue (Admin) ─────────────────────────────────── */
+.attention-queue {
+  margin-bottom: 32px;
+}
+.attention-queue ol {
+  display: grid;
+  gap: 16px;
+}
+.attention-queue li {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition:
+    box-shadow var(--duration-normal) var(--ease-in-out),
+    transform var(--duration-normal) var(--ease-in-out);
+}
+.attention-queue li:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.attention-queue p {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.attention-queue .section-head > span {
+  font-size: 0.875rem;
+}
+
+.schedule-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.schedule-counts strong {
+  color: var(--ink);
+  font-size: 1.125rem;
+}
+
+/* ── Responsive Dashboard ────────────────────────────────────── */
+@media (min-width: 640px) {
+  .schedule-entry {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .schedule-entry__time {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .schedule-entry > .status {
+    grid-column: 2;
+  }
+  .next-class {
+    padding: 24px;
+  }
+  .next-class .schedule-entry {
+    grid-template-columns: 1fr;
+  }
+  .next-class .schedule-entry__time {
+    flex-direction: row;
+    gap: 16px;
+  }
+  .attention-queue ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-columns {
+    grid-template-columns: minmax(0, 1.8fr) minmax(264px, 1fr);
+    gap: 32px;
+  }
+  .dashboard-secondary {
+    border-left: 1px solid var(--line);
+    padding-left: 24px;
+  }
+  .dashboard-secondary .dashboard-section:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}

@@ -34,7 +34,7 @@ paths in `approvedAssets` in `ClassSyncLogo.tsx` and adding the favicon to index
 ## Placement
 
 - Login: full lockup; mobile hides the tagline when space is limited.
-- Expanded sidebar: horizontal dark-surface lockup, within the existing 256px shell.
+- Expanded sidebar: horizontal light-surface lockup, within the existing 256px shell.
 - Mobile header: small horizontal lockup; no duplicate logos in content cards.
 - Development preview: horizontal light-surface lockup.
 - A future branded loading indicator may use `symbol`; announce loading separately.

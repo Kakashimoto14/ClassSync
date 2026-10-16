@@ -1,0 +1,126 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Page Layout Grids
+   Content grids, headings, sections, and responsive breakpoints.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page Heading ────────────────────────────────────────────── */
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.page-heading > div {
+  display: grid;
+  gap: 8px;
+}
+.page-heading > div > p:last-child {
+  color: var(--ink-soft);
+  max-width: 72ch;
+  font-size: 0.9375rem;
+}
+
+/* ── Section Head ────────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-head h2 {
+  margin-top: 4px;
+}
+
+/* ── Layout Grids ────────────────────────────────────────────── */
+.role-layout,
+.two-column,
+.report-grid,
+.specimen-grid,
+.feedback-grid,
+.state-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── Screen Toolbar ──────────────────────────────────────────── */
+.screen-toolbar,
+.admin-schedule-filters,
+.form-grid,
+.form-demo {
+  display: grid;
+  align-items: end;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 24px;
+}
+.screen-toolbar > label:has(> svg) {
+  position: relative;
+}
+.screen-toolbar > label > svg {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: var(--ink-soft);
+}
+.screen-toolbar > label:has(> svg) input {
+  padding-left: 40px;
+}
+
+/* ── Detail Lists (key-value) ────────────────────────────────── */
+.detail-list {
+  display: grid;
+  gap: 8px;
+  margin: 24px 0;
+  font-size: 0.875rem;
+}
+.detail-list dt {
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.detail-list dd {
+  margin: 0 0 8px;
+  min-width: 0;
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────────── */
+@media (min-width: 640px) {
+  .page-heading {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .form-grid,
+  .specimen-grid,
+  .feedback-grid,
+  .state-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .screen-toolbar,
+  .admin-schedule-filters {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  .detail-list {
+    grid-template-columns: 144px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .detail-list dd {
+    margin: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .role-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .role-layout,
+  .two-column,
+  .report-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+  }
+}

@@ -20,15 +20,15 @@ export function ScheduleEntry({
       </div>
       <div className="schedule-entry__body">
         <strong>{occurrence.subject.name}</strong>
-        <span>
-          {occurrence.section.name} · {occurrence.teacher.name}
-        </span>
         <span className="schedule-entry__location">
           <MapPin size={16} aria-hidden="true" />
           <span>
             <b>{occurrence.room.name}</b> · {occurrence.room.building}
             {occurrence.room.floor && ` · ${occurrence.room.floor}`}
           </span>
+        </span>
+        <span>
+          {occurrence.section.name} · {occurrence.teacher.name}
         </span>
       </div>
       {showPublication && (

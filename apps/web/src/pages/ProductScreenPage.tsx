@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Building2, CalendarDays, ClipboardList, FileBarChart, MapPin, Search, ShieldAlert, UsersRound } from 'lucide-react';
+import { Building2, CalendarDays, ClipboardList, FileBarChart, MapPin, Search, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { RoomDirectoryCard } from '../components/scheduling/RoomDirectoryCard';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -68,7 +69,102 @@ function RequestDetailScreen({ role }: { role: RouteDefinition['role'] }) { cons
 
 function IssueReportScreen() { return <form className="workspace-card request-form" onSubmit={event => event.preventDefault()}><h2>Classroom or schedule issue</h2><p className="muted">Reports go to an administrator. They do not change an official schedule.</p><label>Related class<select defaultValue=""><option value="" disabled>Select a class</option><option>Database Management · Tuesday 10:00 AM</option></select></label><label>Issue type<select defaultValue="room"><option value="room">Classroom issue</option><option value="schedule">Schedule conflict</option></select></label><label>Describe the issue<textarea required rows={4} placeholder="Include the room, time, and what needs attention."/></label><Button type="submit" disabled>Submit report</Button></form>; }
 
-function RoomScreen({ definition }: { definition: RouteDefinition }) { const availability = definition.title.toLowerCase().includes('availability') || definition.title.toLowerCase().includes('available'); const detailPath=definition.role==='administrator'?'/admin/rooms/detail':definition.role==='teacher'?'/teacher/find-room':'/student/rooms'; const [building, setBuilding] = useState('all'); const [capacity, setCapacity] = useState(''); const [roomType, setRoomType] = useState('all'); const filteredRooms = rooms.filter(room => (building === 'all' || room.building === building) && (!capacity || room.seats >= Number(capacity)) && (roomType === 'all' || room.type === roomType)); return <><div className="screen-toolbar room-filter-toolbar">{availability && <><label>Date<input type="date" defaultValue="2026-09-23" disabled aria-describedby="availability-preview-note"/></label><label>Time window<input type="time" defaultValue="10:00" disabled aria-describedby="availability-preview-note"/></label></>}<label>Building<select value={building} onChange={event => setBuilding(event.target.value)}><option value="all">All buildings</option>{[...new Set(rooms.map(room => room.building))].map(name => <option key={name}>{name}</option>)}</select></label><label>Minimum capacity<input type="number" min="1" value={capacity} onChange={event => setCapacity(event.target.value)} placeholder="Any"/></label><label>Room type<select value={roomType} onChange={event => setRoomType(event.target.value)}><option value="all">All room types</option>{[...new Set(rooms.map(room => room.type))].map(type => <option key={type}>{type}</option>)}</select></label></div>{availability && <p id="availability-preview-note" className="occupancy-note"><CalendarDays size={15}/>Time-window availability is a local preview until live schedule data is connected.</p>}<section className="room-results">{filteredRooms.map(room => <article className="room-directory-card" key={room.id}><div className="room-thumb"><Building2/></div><div><StatusBadge tone={room.status === 'Available' ? 'success' : 'warning'}>{room.status}</StatusBadge><h2>{room.id}</h2><p>{room.building} · {room.floor} · {room.type}</p><div className="room-meta"><span><UsersRound size={15}/>{room.seats} seats</span><span><MapPin size={15}/>{room.facilities}</span></div>{availability && <small>Representative availability: no scheduled reservation in the preview window.</small>}</div><Link className="button button--secondary" to={detailPath}>View room</Link></article>)}</section>{filteredRooms.length === 0 && <EmptyState title="No matching rooms" detail="Try a different building, capacity, or room type."/>}</>; }
+function RoomScreen({ definition }: { definition: RouteDefinition }) {
+  const availability =
+    definition.title.toLowerCase().includes('availability') ||
+    definition.title.toLowerCase().includes('available');
+  const [building, setBuilding] = useState('all');
+  const [capacity, setCapacity] = useState('');
+  const [roomType, setRoomType] = useState('all');
+  const filteredRooms = rooms.filter(
+    (room) =>
+      (building === 'all' || room.building === building) &&
+      (!capacity || room.seats >= Number(capacity)) &&
+      (roomType === 'all' || room.type === roomType),
+  );
+  return (
+    <>
+      <div className="screen-toolbar room-filter-toolbar">
+        {availability && (
+          <>
+            <label>
+              Date
+              <input
+                type="date"
+                defaultValue="2026-09-23"
+                disabled
+                aria-describedby="availability-preview-note"
+              />
+            </label>
+            <label>
+              Time window
+              <input
+                type="time"
+                defaultValue="10:00"
+                disabled
+                aria-describedby="availability-preview-note"
+              />
+            </label>
+          </>
+        )}
+        <label>
+          Building
+          <select value={building} onChange={(event) => setBuilding(event.target.value)}>
+            <option value="all">All buildings</option>
+            {[...new Set(rooms.map((room) => room.building))].map((name) => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Minimum capacity
+          <input
+            type="number"
+            min="1"
+            value={capacity}
+            onChange={(event) => setCapacity(event.target.value)}
+            placeholder="Any"
+          />
+        </label>
+        <label>
+          Room type
+          <select value={roomType} onChange={(event) => setRoomType(event.target.value)}>
+            <option value="all">All room types</option>
+            {[...new Set(rooms.map((room) => room.type))].map((type) => (
+              <option key={type}>{type}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {availability && (
+        <p id="availability-preview-note" className="occupancy-note">
+          <CalendarDays size={15} />
+          Time-window availability is a local preview until live schedule data is connected.
+        </p>
+      )}
+      <section className="room-results">
+        {filteredRooms.map((room) => (
+          <RoomDirectoryCard
+            key={room.id}
+            room={room}
+            availabilityPreview={availability}
+            detailsPath={
+              definition.role === 'administrator' && room.id === 'SCI-218'
+                ? rolePath('administrator', 'room-detail')
+                : undefined
+            }
+          />
+        ))}
+      </section>
+      {filteredRooms.length === 0 && (
+        <EmptyState
+          title="No matching rooms"
+          detail="Try a different building, capacity, or room type."
+        />
+      )}
+    </>
+  );
+}
 
 function BuildingScreen() { return <section className="room-results">{['Science Building','Engineering Building','Computing Building'].map((building, index) => <article className="room-directory-card" key={building}><div className="room-thumb"><Building2/></div><div><h2>{building}</h2><p>{index + 2} floors · {8 + index * 3} classrooms</p><div className="room-meta"><span>{12 + index * 4} scheduled rooms</span><span>{4 + index} rooms available today</span></div></div><Link className="button button--secondary" to="/admin/buildings/detail">View building</Link></article>)}</section>; }
 function RoomDetailScreen() { return <section className="two-column"><article className="workspace-card"><StatusBadge tone="success">Resource active</StatusBadge><h2>SCI-218 · Computer laboratory</h2><dl className="detail-list"><dt>Building</dt><dd>Science Building · Level 2</dd><dt>Capacity</dt><dd>42 seats</dd><dt>Facilities</dt><dd>Projector · Lab PCs · Internet</dd><dt>Resource status</dt><dd>Available for scheduling</dd></dl><h3>Upcoming schedule</h3><p className="muted">Tuesday · 10:00 AM · No scheduled reservation</p></article><aside className="state-card"><CalendarDays/><h2>Scheduled availability</h2><p>This status is based on schedule records. It does not indicate real time physical occupancy.</p></aside></section>; }

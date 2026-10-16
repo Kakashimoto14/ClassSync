@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { Link } from 'react-router-dom';
 import type { DaySchedule } from '../../lib/schedule-preview';
 import { Alert } from '../ui/Alert';
 import { EmptyState } from '../ui/EmptyState';
@@ -7,9 +8,11 @@ import { ScheduleEntry } from './ScheduleEntry';
 export function NextClassSummary({
   schedule,
   title = 'Next class',
+  action,
 }: {
   schedule: DaySchedule;
   title?: string;
+  action?: { to: string; label: string };
 }) {
   const titleId = useId();
   const unavailable = schedule.state === 'unavailable' || schedule.state === 'unpublished';
@@ -61,6 +64,11 @@ export function NextClassSummary({
             </Alert>
           )}
         </>
+      )}
+      {action && (
+        <Link className="button next-class__action" to={action.to}>
+          {action.label}
+        </Link>
       )}
     </section>
   );

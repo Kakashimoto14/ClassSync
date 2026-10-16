@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Schedule Pages
+   Schedule views, personal classes, export, admin filters.
+   ═══════════════════════════════════════════════════════════════ */
+
+.schedule-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+.schedule-tabs strong {
+  color: var(--primary);
+  position: relative;
+}
+.schedule-tabs strong::after {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+}
+
+/* ── Personal Schedule ───────────────────────────────────────── */
+.agenda-list,
+.personal-schedule {
+  display: grid;
+}
+.personal-class {
+  display: grid;
+  align-items: start;
+  grid-template-columns: 64px 3px minmax(0, 1fr);
+  gap: 8px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+.personal-class:hover {
+  background: var(--surface-sunken);
+  margin-inline: -8px;
+  padding-inline: 8px;
+  border-radius: var(--radius);
+}
+.class-accent {
+  background: linear-gradient(180deg, var(--primary), var(--color-primary-400));
+  align-self: stretch;
+  border-radius: 2px;
+}
+.personal-class > .status,
+.personal-class > .text-action {
+  grid-column: 3;
+}
+
+.class-content {
+  display: grid;
+  gap: 4px;
+}
+.class-content strong {
+  font-size: 0.9375rem;
+}
+.class-content span {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Schedule Export ──────────────────────────────────────────── */
+.schedule-admin-footer,
+.schedule-export {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.schedule-export {
+  display: grid;
+  gap: 16px;
+}
+.schedule-export h2 {
+  font-size: 1rem;
+}
+.schedule-export p,
+.schedule-export__unavailable {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.schedule-export__unavailable {
+  background: var(--info-soft);
+  border-left: 3px solid var(--info);
+  padding: 16px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  grid-column: 1 / -1;
+}
+
+/* ── Responsive Schedule ─────────────────────────────────────── */
+@media (min-width: 640px) {
+  .personal-class {
+    grid-template-columns: 80px 3px minmax(0, 1fr) auto;
+    gap: 16px;
+  }
+  .personal-class > .status {
+    grid-column: 4;
+  }
+  .schedule-export {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

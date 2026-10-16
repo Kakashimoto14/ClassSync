@@ -1,0 +1,122 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Conflicts & Requests Pages
+   Conflict entries, request forms, request flows.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Conflict Entry ──────────────────────────────────────────── */
+.conflict-entry {
+  border-left: 4px solid var(--danger);
+  display: grid;
+  gap: 16px;
+}
+.conflict-entry p {
+  color: var(--ink-soft);
+}
+.conflict-entry > .button,
+.conflict-entry > .text-action {
+  justify-self: start;
+}
+
+.conflict-pair {
+  display: grid;
+  gap: 8px;
+}
+.conflict-pair span {
+  background: var(--surface-sunken);
+  padding: 16px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+/* ── Request Form ────────────────────────────────────────────── */
+.request-form {
+  display: grid;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.request-entry {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+.request-entry:hover {
+  background: var(--surface-sunken);
+  margin-inline: -12px;
+  padding-inline: 12px;
+  border-radius: var(--radius);
+}
+.request-entry > p,
+.request-entry > span:not(.status) {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.request-flow,
+.validation-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.request-flow span {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  position: relative;
+}
+.request-flow span:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -14px;
+  color: var(--ink-muted);
+}
+
+.validation-checks {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.validation-checks h3 {
+  width: 100%;
+}
+
+/* ── Admin Attention Banner ──────────────────────────────────── */
+.admin-attention {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 24px;
+}
+.admin-attention > div {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.admin-attention h2 {
+  margin: 8px 0;
+}
+.admin-attention p {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.admin-attention svg {
+  color: var(--danger);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .conflict-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,94 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Alert & Status Badge Components
+   Semantic state indicators and notification banners.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Alert ───────────────────────────────────────────────────── */
+
+.alert,
+.status {
+  --tone: var(--ink-soft);
+  --tone-soft: var(--surface-strong);
+  --tone-border: var(--line);
+  color: var(--tone);
+  background: var(--tone-soft);
+}
+
+.alert--success, .status--success {
+  --tone: var(--success);
+  --tone-soft: var(--success-soft);
+  --tone-border: var(--success-border);
+}
+.alert--warning, .status--warning {
+  --tone: var(--warning);
+  --tone-soft: var(--warning-soft);
+  --tone-border: var(--warning-border);
+}
+.alert--danger, .status--danger {
+  --tone: var(--danger);
+  --tone-soft: var(--danger-soft);
+  --tone-border: var(--danger-border);
+}
+.alert--info, .status--info {
+  --tone: var(--info);
+  --tone-soft: var(--info-soft);
+  --tone-border: var(--info-border);
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  border: 1px solid var(--tone-border);
+  border-left: 3px solid var(--tone);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  animation: fade-in-up var(--duration-normal) var(--ease-out);
+}
+
+.alert strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--tone);
+}
+
+.alert p {
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+/* ── Status Badge ────────────────────────────────────────────── */
+
+.status {
+  align-items: center;
+  display: inline-flex;
+  justify-self: start;
+  width: fit-content;
+  gap: 6px;
+  border: 1px solid var(--tone-border);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 3px 10px;
+  max-width: 100%;
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+
+/* Dot indicator inside status */
+.status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--tone);
+  flex-shrink: 0;
+}
+
+.status--neutral {
+  --tone: var(--ink-soft);
+  --tone-soft: var(--surface-strong);
+  --tone-border: var(--line);
+}

@@ -1,0 +1,55 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Table Component
+   Data tables with sticky headers and hover rows.
+   ═══════════════════════════════════════════════════════════════ */
+
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 620px;
+  width: 100%;
+  background: var(--surface);
+}
+
+th, td {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+tr {
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+
+tbody tr:hover td {
+  background: var(--primary-soft);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Mobile record list alternative */
+.mobile-record-list {
+  display: none;
+}
