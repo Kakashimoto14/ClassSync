@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Logo Component
+   Brand placement styles for login, sidebar, and mobile header.
+   ═══════════════════════════════════════════════════════════════ */
+
+.classsync-logo {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 100%;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.classsync-logo__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--primary), var(--color-primary-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.classsync-logo--dark {
+  color: var(--nav-text);
+}
+
+.classsync-logo--dark .classsync-logo__name {
+  background: linear-gradient(135deg, #FFFFFF, var(--color-primary-200));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.classsync-logo--small .classsync-logo__name {
+  font-size: 1.25rem;
+}
+
+.classsync-logo--large .classsync-logo__name {
+  font-size: 2rem;
+}
+
+.classsync-logo__tagline {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.classsync-logo--dark .classsync-logo__tagline {
+  color: var(--nav-muted);
+}
+
+.classsync-logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 208px;
+  max-height: 44px;
+  object-fit: contain;
+}
+
+.classsync-logo--small img {
+  max-width: 144px;
+  max-height: 32px;
+}
+
+.classsync-logo--large img {
+  max-width: 100%;
+  max-height: 96px;
+}

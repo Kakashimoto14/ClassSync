@@ -40,7 +40,7 @@ export function AuthPage() {
   return (
     <div className="auth-page">
       <aside className="auth-brand">
-        <ClassSyncLogo variant="full" size="large" surface="dark" />
+        <ClassSyncLogo variant="full" size="large" />
         <div className="auth-brand-copy">
           <h2>Your university day, in one place.</h2>
           <p>Class schedules, assigned rooms, and the updates that matter.</p>

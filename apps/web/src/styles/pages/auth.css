@@ -1,0 +1,188 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Auth Pages
+   Login, sign-in, forbidden, system states.
+   ═══════════════════════════════════════════════════════════════ */
+
+.auth-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--canvas);
+}
+
+.auth-brand {
+  background: linear-gradient(135deg, var(--color-navy-900), var(--color-primary-900));
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative gradient orb */
+.auth-brand::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15), transparent 70%);
+  top: -200px;
+  right: -200px;
+  pointer-events: none;
+}
+
+.auth-brand .eyebrow,
+.auth-brand-copy > p:last-child {
+  color: var(--color-slate-300);
+}
+.auth-brand .eyebrow {
+  color: var(--color-primary-300);
+}
+
+.auth-brand-copy {
+  display: none;
+  gap: 16px;
+}
+.auth-brand h2 {
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  max-width: 20ch;
+  color: #FFFFFF;
+}
+.auth-brand .classsync-logo__tagline {
+  display: none;
+}
+.auth-brand .classsync-logo__name {
+  font-size: 1.5rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: fade-in-up var(--duration-slow) var(--ease-out);
+}
+.auth-card__title {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.auth-card__title > p:last-child {
+  color: var(--ink-soft);
+}
+.auth-card form {
+  display: grid;
+  gap: 16px;
+}
+
+.password-field button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--ink-soft);
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius);
+  transition: color var(--duration-fast) var(--ease-in-out);
+}
+.password-field button:hover {
+  color: var(--primary);
+}
+
+.auth-demo-access {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 24px;
+}
+.auth-demo-access p {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+/* ── System State Pages ──────────────────────────────────────── */
+.system-state-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 16px;
+  background: var(--canvas);
+}
+.system-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 48px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: fade-in-up var(--duration-normal) var(--ease-out);
+}
+.system-state > svg {
+  color: var(--primary);
+}
+.system-state > p:not(.eyebrow) {
+  color: var(--ink-soft);
+}
+
+/* ── Role Preview ────────────────────────────────────────────── */
+.role-preview-card {
+  display: grid;
+  gap: 16px;
+  max-width: 600px;
+}
+.demo-role-options {
+  display: grid;
+  gap: 8px;
+}
+
+/* ── Desktop Auth Split ──────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .auth-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .auth-brand {
+    padding: 48px;
+    justify-content: center;
+    gap: 64px;
+  }
+  .auth-brand-copy {
+    display: grid;
+  }
+  .auth-brand .classsync-logo__tagline {
+    display: block;
+  }
+  .auth-brand .classsync-logo__name {
+    font-size: 2rem;
+  }
+  .auth-main {
+    padding: 32px;
+  }
+}

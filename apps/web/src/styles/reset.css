@@ -1,0 +1,87 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — CSS Reset & Base Styles
+   Normalizations on top of Tailwind preflight.
+   ═══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--ink);
+  background: var(--canvas);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button, a, input, select, textarea, summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  color: var(--ink-soft);
+  background: var(--surface-strong);
+  border-color: var(--line);
+  opacity: 0.7;
+}
+
+/* Focus visible ring */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin-block: 88px;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Selection */
+::selection {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Scrollbar styling for sidebar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--color-slate-600);
+}

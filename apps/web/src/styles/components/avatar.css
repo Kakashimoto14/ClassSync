@@ -1,0 +1,31 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Avatar Component
+   User identity circles with gradient accent.
+   ═══════════════════════════════════════════════════════════════ */
+
+.avatar {
+  align-items: center;
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  flex: 0 0 40px;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  user-select: none;
+  transition: transform var(--duration-fast) var(--ease-in-out);
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+  font-size: 1rem;
+}

@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════════════════
+   ClassSync — Room Pages
+   Room directory, results, availability, room details, buildings.
+   ═══════════════════════════════════════════════════════════════ */
+
+.room-result {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  margin-top: 24px;
+}
+.room-card {
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  transition: border-color var(--duration-fast) var(--ease-in-out);
+}
+.room-card:hover {
+  border-color: var(--primary-border);
+}
+.room-card > div:first-child span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  margin-top: 4px;
+}
+
+.room-facts,
+.room-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.room-facts {
+  grid-column: 1 / -1;
+}
+.room-facts span,
+.room-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.room-meta {
+  margin-top: 8px;
+}
+
+.room-results,
+.conflict-list,
+.notice-list {
+  display: grid;
+  gap: 16px;
+}
+
+/* ── Room Directory Card ─────────────────────────────────────── */
+.room-directory-card {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.room-directory-card .button {
+  grid-column: 1 / -1;
+}
+.room-directory-card h2 {
+  margin: 8px 0 4px;
+}
+.room-directory-card p,
+.room-directory-card small {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.room-directory-card small {
+  display: block;
+  margin-top: 8px;
+}
+
+.room-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  color: var(--primary);
+  background: var(--primary-soft);
+  transition: background var(--duration-fast) var(--ease-in-out);
+}
+.room-directory-card:hover .room-thumb {
+  background: var(--primary-soft-hover);
+}
+
+.occupancy-note {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+/* ── Responsive Rooms ────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .room-directory-card {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .room-directory-card .button {
+    grid-column: 3;
+  }
+  .room-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .room-result {
+    flex-direction: row;
+    align-items: center;
+  }
+  .room-card {
+    max-width: 520px;
+  }
+}

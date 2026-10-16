@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </a>
       <aside className="sidebar" aria-label="Workspace sidebar">
         <Link className="brand" to={dashboardPath(role)} aria-label="ClassSync home">
-          <ClassSyncLogo surface="dark" decorative />
+          <ClassSyncLogo decorative />
         </Link>
         <nav className="sidebar-navigation" aria-label="Primary navigation">
           <div className="primary-links">{primaryItems.map(destination)}</div>
