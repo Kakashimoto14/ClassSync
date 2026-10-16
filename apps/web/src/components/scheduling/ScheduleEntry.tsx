@@ -33,7 +33,11 @@ export function ScheduleEntry({
       </div>
       {showPublication && (
         <StatusBadge tone={occurrence.publication === 'published' ? 'info' : 'neutral'}>
-          {occurrence.publication === 'published' ? 'Published' : 'Draft'}
+          {
+            { published: 'Published', draft: 'Draft', cancelled: 'Cancelled' }[
+              occurrence.publication
+            ]
+          }
         </StatusBadge>
       )}
     </article>

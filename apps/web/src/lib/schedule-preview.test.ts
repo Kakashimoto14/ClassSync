@@ -7,6 +7,7 @@ import {
   selectUpdates,
   summarizeAdministration,
   summarizeDay,
+  summarizeResources,
 } from './schedule-preview';
 
 const student = () => selectAssignments(schedulePreview, { role: 'student', id: 'student-maria' });
@@ -99,7 +100,40 @@ describe('explicit, deterministic preview assignments', () => {
     expect(admin.draftCount).toBe(1);
     expect(admin.attentionCount).toBe(admin.conflicts.length + admin.pending.length);
     expect(admin.attentionCount).toBe(2);
+    expect(admin.recordCounts).toEqual({ published: 4, draft: 1, conflicts: 1, pending: 1 });
     expect(summarizeAdministration(null, previewContext.reference)).toBeNull();
+  });
+  it('excludes resolved issues and decisions from actionable counts', () => {
+    const data = {
+      ...schedulePreview,
+      requests: schedulePreview.requests.map((item) => ({ ...item, status: 'approved' as const })),
+      conflicts: schedulePreview.conflicts.map((item) => ({
+        ...item,
+        status: 'resolved' as const,
+      })),
+    };
+    expect(summarizeAdministration(data, previewContext.reference)?.recordCounts).toEqual({
+      published: 4,
+      draft: 1,
+      conflicts: 0,
+      pending: 0,
+    });
+  });
+  it('does not expose a request with conflicting teacher ownership', () => {
+    const data = {
+      ...schedulePreview,
+      requests: [{ ...schedulePreview.requests[0], assignmentId: 'occ-hci-mon' }],
+    };
+    expect(selectRequests(data, 'teacher-santos')).toEqual([]);
+  });
+  it('distinguishes missing resource data from an empty directory', () => {
+    expect(summarizeResources(null)).toBeNull();
+    expect(summarizeResources({ ...schedulePreview, resources: undefined })).toBeNull();
+    expect(summarizeResources({ ...schedulePreview, resources: [] })).toEqual({
+      total: 0,
+      active: 0,
+      maintenance: [],
+    });
   });
   it('keeps all fixture references valid and gives each occurrence a stable unique ID', () => {
     const ids = new Set(schedulePreview.occurrences.map((item) => item.id));

@@ -1552,6 +1552,204 @@ tr:hover td {
   }
 }
 
+/* UI-02 operations compositions; Student layout remains unchanged. */
+.operations-heading {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+.operations-heading p,
+.demo-footnote {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.demo-footnote {
+  margin-top: 16px;
+}
+.dashboard-panel {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+.dashboard-panel h2,
+.operations-metrics h2 {
+  font-size: 1rem;
+}
+.dashboard-panel .section-head {
+  margin: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dashboard-panel .section-head span,
+.dashboard-panel > p {
+  font-size: 0.875rem;
+}
+.request-summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.request-summary-list > li + li {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.request-summary {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.request-summary h3 {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.request-summary p,
+.request-summary small {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.request-summary .status,
+.request-summary .text-action {
+  justify-self: start;
+}
+.teacher-dashboard .next-class .schedule-entry > .status {
+  grid-column: 1;
+  justify-self: start;
+}
+.teacher-dashboard .next-class .schedule-entry__location {
+  font-size: 1rem;
+  color: var(--ink);
+}
+.teacher-dashboard .next-class .schedule-entry__time time {
+  font-size: 1rem;
+}
+.admin-dashboard .attention-queue {
+  margin-bottom: 24px;
+}
+.admin-dashboard .attention-queue ol {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-dashboard .attention-queue li {
+  padding: 16px;
+  border-left: 3px solid var(--danger);
+  gap: 8px;
+}
+.admin-dashboard .attention-queue .status,
+.admin-dashboard .attention-queue .text-action {
+  justify-self: start;
+}
+.operations-metrics {
+  margin-bottom: 24px;
+}
+.operations-metrics .section-head {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.operations-metrics .section-head span {
+  font-size: 0.875rem;
+}
+.operations-metrics dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.operations-metrics dl > div {
+  background: var(--surface);
+  padding: 16px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+}
+.operations-metrics dt {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.operations-metrics dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.admin-workspace {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+.admin-workspace > * {
+  min-width: 0;
+}
+.resource-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.resource-counts dt {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.resource-counts dd {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.operations-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 16px;
+}
+.preview-records {
+  display: grid;
+  gap: 24px;
+}
+.preview-records .schedule-agenda,
+.preview-records > .request-summary {
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+@media (min-width: 640px) {
+  .operations-metrics dl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .admin-workspace {
+    grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+    grid-template-areas: 'agenda pending' 'agenda resources';
+    gap: 24px 32px;
+  }
+  .admin-agenda {
+    grid-area: agenda;
+  }
+  .admin-pending {
+    grid-area: pending;
+  }
+  .admin-resources {
+    grid-area: resources;
+  }
+  .admin-dashboard .attention-queue li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .admin-dashboard .attention-queue li > .text-action {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: center;
+  }
+}
+
 /* Existing public and planned screens use the same surfaces and controls. */
 .auth-page {
   min-height: 100vh;

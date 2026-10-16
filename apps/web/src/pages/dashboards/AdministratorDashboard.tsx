@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { previewContext, type SchedulePreviewData } from '../../data/schedule-preview';
-import { summarizeAdministration, formatTimeRange } from '../../lib/schedule-preview';
+import { summarizeAdministration, formatPreviewDate } from '../../lib/schedule-preview';
 import { ScheduleAgenda } from '../../components/scheduling/ScheduleAgenda';
 import { AttentionQueue, type AttentionItem } from '../../components/scheduling/AttentionQueue';
+import { RequestSummary } from '../../components/scheduling/RequestSummary';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { rolePath } from '../../routes/route-config';
+import { ResourceOverview } from './ResourceOverview';
 
 export function AdministratorDashboard({
   data,
@@ -14,68 +16,75 @@ export function AdministratorDashboard({
   reference?: string;
 }) {
   const summary = summarizeAdministration(data, reference);
-  const items: AttentionItem[] =
-    !data || !summary
-      ? []
-      : [
-          ...summary.conflicts.map((conflict) => ({
-            id: conflict.id,
-            title: 'Overlapping room assignments',
-            detail: conflict.reason,
-            status: 'Blocking conflict' as const,
-            href: rolePath('administrator', 'conflicts'),
-            action: 'Review conflicts',
-          })),
-          ...summary.pending.map((request) => {
-            const assignment = data.occurrences.find((item) => item.id === request.assignmentId);
-            return {
-              id: request.id,
-              title: assignment
-                ? 'Room change · ' + assignment.subject.name
-                : 'Room change · assignment unavailable',
-              detail: assignment
-                ? assignment.teacher.name +
-                  ' · ' +
-                  formatTimeRange(assignment) +
-                  '. ' +
-                  request.reason
-                : request.reason,
-              status: 'Pending decision' as const,
-              href: rolePath('administrator', 'requests'),
-              action: 'Review requests',
-            };
-          }),
-        ];
+  const issues: AttentionItem[] =
+    summary?.conflicts.map((conflict) => ({
+      id: conflict.id,
+      title: 'Overlapping room assignments',
+      detail: conflict.reason,
+      status: 'Blocking conflict',
+      href: `${rolePath('administrator', 'conflict-detail')}?id=${encodeURIComponent(conflict.id)}`,
+      action: 'Review conflict',
+    })) ?? [];
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Administrator</p>
-          <h1>Scheduling control center</h1>
-        </div>
-        <Link className="button" to={rolePath('administrator', 'schedule-create')}>
-          Create schedule
-        </Link>
-      </div>
-      {!summary ? (
+    <div className="admin-dashboard">
+      <header className="operations-heading">
+        <h1>Scheduling control center</h1>
+        <p>
+          Sample day · {formatPreviewDate(reference)} · {reference.slice(11, 16)}
+        </p>
+      </header>
+      {!summary || !data ? (
         <EmptyState
           title="Operational data unavailable"
-          detail="No counts or conflict-clearance claims can be shown without records."
+          detail="Counts and scheduling issues cannot be determined without records."
         />
       ) : (
         <>
-          <AttentionQueue items={items} />
-          <div className="dashboard-columns dashboard-columns--admin">
-            <div className="dashboard-primary">
-              <div className="schedule-counts" aria-label="Today’s schedule summary">
-                <span>
-                  <strong>{summary.publishedCount}</strong> published classes
-                </span>
-                <span>
-                  <strong>{summary.draftCount}</strong> draft{' '}
-                  {summary.draftCount === 1 ? 'class' : 'classes'}
-                </span>
+          <AttentionQueue title="Scheduling attention" items={issues} />
+          <section className="operations-metrics" aria-label="Demo record summary">
+            <div className="section-head">
+              <h2>Record summary</h2>
+              <span className="muted">All supplied demo records</span>
+            </div>
+            <dl>
+              {[
+                ['Published', summary.recordCounts.published],
+                ['Draft', summary.recordCounts.draft],
+                ['Open conflicts', summary.recordCounts.conflicts],
+                ['Pending requests', summary.recordCounts.pending],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+          <div className="admin-workspace">
+            <section className="dashboard-panel admin-pending" aria-label="Pending decisions">
+              <div className="section-head">
+                <h2>Pending decisions</h2>
+                <span className="muted">{summary.pending.length} pending</span>
               </div>
+              {summary.pending.length ? (
+                <ul className="request-summary-list">
+                  {summary.pending.map((request) => (
+                    <li key={request.id}>
+                      <RequestSummary
+                        request={request}
+                        assignment={data.occurrences.find(
+                          (item) => item.id === request.assignmentId,
+                        )}
+                        role="administrator"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No pending requests in the supplied demo records.</p>
+              )}
+            </section>
+            <div className="admin-agenda">
               <ScheduleAgenda
                 title="Today’s campus schedule"
                 occurrences={summary.today}
@@ -83,26 +92,34 @@ export function AdministratorDashboard({
                 showPublication
               />
             </div>
-            <aside className="dashboard-secondary">
-              <section className="dashboard-section">
-                <h2>Scheduling workspace</h2>
-                <nav className="dashboard-actions" aria-label="Administrator dashboard actions">
-                  <Link className="text-action" to={rolePath('administrator', 'schedule-manager')}>
-                    Open Schedule Manager
-                  </Link>
-                  <Link className="text-action" to={rolePath('administrator', 'availability')}>
-                    Find a classroom
-                  </Link>
-                </nav>
-                <p className="muted">
-                  Validation, publishing, and room availability require connected services. These
-                  attention items are examples, not detected live results.
-                </p>
-              </section>
-            </aside>
+            <div className="admin-resources">
+              <ResourceOverview data={data} />
+            </div>
           </div>
         </>
       )}
-    </>
+      <nav className="operations-actions" aria-label="Administrator dashboard actions">
+        <Link className="text-action" to={rolePath('administrator', 'schedule-manager')}>
+          Schedule Manager
+        </Link>
+        <Link className="text-action" to={rolePath('administrator', 'conflicts')}>
+          Conflict Center
+        </Link>
+        <Link className="text-action" to={rolePath('administrator', 'requests')}>
+          Change requests
+        </Link>
+        <Link className="text-action" to={rolePath('administrator', 'availability')}>
+          Room Availability preview
+        </Link>
+        {!data && (
+          <Link className="text-action" to={rolePath('administrator', 'rooms')}>
+            Room Directory
+          </Link>
+        )}
+      </nav>
+      <p className="demo-footnote">
+        Sample records only. No live validation, publication, or availability service is connected.
+      </p>
+    </div>
   );
 }
