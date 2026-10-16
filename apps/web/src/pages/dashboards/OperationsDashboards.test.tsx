@@ -7,6 +7,18 @@ import { TeacherDashboard } from './TeacherDashboard';
 import { AdministratorDashboard } from './AdministratorDashboard';
 
 describe('UI-02 operations dashboards', () => {
+  it('does not claim all attention is cleared when only conflicts are empty', () => {
+    render(
+      <MemoryRouter>
+        <AdministratorDashboard data={{ ...schedulePreview, conflicts: [] }} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText(/No open conflicts in the supplied demo records/)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Pending decisions' })).getByText('1 pending'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No attention items/)).not.toBeInTheDocument();
+  });
   it('supports an approved decision without counting it as pending', () => {
     const data = {
       ...schedulePreview,
