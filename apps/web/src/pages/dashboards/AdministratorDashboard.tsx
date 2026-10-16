@@ -40,7 +40,11 @@ export function AdministratorDashboard({
         />
       ) : (
         <>
-          <AttentionQueue title="Scheduling attention" items={issues} />
+          <AttentionQueue
+            title="Scheduling attention"
+            items={issues}
+            emptyMessage="No open conflicts in the supplied demo records. Pending decisions are listed below; this is not live validation."
+          />
           <section className="operations-metrics" aria-label="Demo record summary">
             <div className="section-head">
               <h2>Record summary</h2>

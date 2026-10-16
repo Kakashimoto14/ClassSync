@@ -13,9 +13,11 @@ export interface AttentionItem {
 export function AttentionQueue({
   items,
   title = 'Needs attention',
+  emptyMessage = 'No attention items in the supplied demo records. This is not a live validation result.',
 }: {
   items: readonly AttentionItem[];
   title?: string;
+  emptyMessage?: string;
 }) {
   const titleId = useId();
   return (
@@ -42,9 +44,7 @@ export function AttentionQueue({
           ))}
         </ol>
       ) : (
-        <p className="muted">
-          No attention items in the supplied demo records. This is not a live validation result.
-        </p>
+        <p className="muted">{emptyMessage}</p>
       )}
     </section>
   );
