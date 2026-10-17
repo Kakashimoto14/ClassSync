@@ -121,6 +121,17 @@ describe('role-specific dashboard compositions', () => {
     expect(within(agenda).getAllByText(/Prof. Maria Santos/)).toHaveLength(1);
     expect(within(agenda).queryByText('Database Management Systems')).not.toBeInTheDocument();
     expect(screen.getByText('1 pending')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View room details' })).toHaveAttribute(
+      'href',
+      '/teacher/rooms/detail?id=room-sci-218',
+    );
+    const requests = screen.getByRole('region', { name: 'Requests and decisions' });
+    expect(within(requests).getByText('Pending review')).toBeInTheDocument();
+    expect(within(requests).getByText('Declined')).not.toBeVisible();
+    expect(within(requests).getByRole('link', { name: 'All requests' })).toHaveAttribute(
+      'href',
+      '/teacher/change-requests',
+    );
     expect(screen.queryByText('Human Computer Interaction')).not.toBeInTheDocument();
     for (const link of screen.getAllByRole('link'))
       expect(link.getAttribute('href')).toMatch(/^\/teacher\//);
@@ -138,8 +149,13 @@ describe('role-specific dashboard compositions', () => {
     expect(
       within(screen.getByRole('region', { name: 'Pending decisions' })).getAllByRole('listitem'),
     ).toHaveLength(1);
+    const priority = screen.getByRole('region', { name: 'Pending decisions' });
+    const actions = screen.getByRole('navigation', { name: 'Administrator dashboard actions' });
+    expect(
+      priority.compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     const agenda = screen.getByRole('region', { name: 'Today’s campus schedule' });
-    expect(within(agenda).getAllByText('Published')).toHaveLength(3);
+    expect(within(agenda).getAllByText('Published')).toHaveLength(2);
     expect(within(agenda).getAllByText('Draft')).toHaveLength(1);
     for (const link of screen.getAllByRole('link'))
       expect(link.getAttribute('href')).toMatch(/^\/admin\//);

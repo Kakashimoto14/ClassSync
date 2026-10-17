@@ -13,6 +13,7 @@ import {
   selectUpdates,
   summarizeDay,
 } from '../../lib/schedule-preview';
+import { roomById, roomCatalog, roomDetailPath } from '../../lib/room-discovery';
 import { NextClassSummary } from '../../components/scheduling/NextClassSummary';
 import { ScheduleAgenda } from '../../components/scheduling/ScheduleAgenda';
 import { RequestSummary } from '../../components/scheduling/RequestSummary';
@@ -28,9 +29,14 @@ export function TeacherDashboard({
 }) {
   const assignments = selectAssignments(data, previewViewer('teacher'));
   const schedule = summarizeDay(assignments, reference);
+  const featuredRoom =
+    schedule.next?.room ?? (schedule.current.length === 1 ? schedule.current[0].room : undefined);
+  const room = data && featuredRoom ? roomById(roomCatalog(data), featuredRoom.id) : undefined;
   const remaining = remainingAfterSummary(schedule);
   const requests = data ? selectRequests(data, previewProfiles.teacher.id) : [];
-  const pending = requests.filter((item) => item.status === 'pending').length;
+  const pendingRequests = requests.filter((item) => item.status === 'pending');
+  const pending = pendingRequests.length;
+  const decisions = requests.filter((item) => item.status !== 'pending');
   return (
     <div className="teacher-dashboard">
       <header className="operations-heading">
@@ -43,8 +49,8 @@ export function TeacherDashboard({
         <div className="dashboard-primary">
           <NextClassSummary
             schedule={schedule}
+            roomAction={room ? roomDetailPath('teacher', room.id) : undefined}
             title="Next teaching assignment"
-            showPublication
             action={{ to: rolePath('teacher', 'schedule'), label: 'View teaching schedule' }}
           />
           {remaining.length > 0 && (
@@ -63,20 +69,38 @@ export function TeacherDashboard({
             </div>
             {!data ? (
               <p>Request data unavailable.</p>
-            ) : !requests.length ? (
-              <p>No requests in this demo.</p>
+            ) : !pending ? (
+              <p>No pending requests. View all requests for previous decisions.</p>
             ) : (
               <ul className="request-summary-list">
-                {requests.map((request) => (
+                {pendingRequests.slice(0, 2).map((request) => (
                   <li key={request.id}>
                     <RequestSummary
                       request={request}
                       assignment={assignments?.find((item) => item.id === request.assignmentId)}
                       role="teacher"
+                      compact
                     />
                   </li>
                 ))}
               </ul>
+            )}
+            {decisions.length > 0 && (
+              <details className="request-history">
+                <summary>Recent decisions</summary>
+                <ul className="request-summary-list">
+                  {decisions.slice(0, 2).map((request) => (
+                    <li key={request.id}>
+                      <RequestSummary
+                        request={request}
+                        assignment={assignments?.find((item) => item.id === request.assignmentId)}
+                        role="teacher"
+                        compact
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </details>
             )}
             <Link className="text-action" to={rolePath('teacher', 'requests')}>
               All requests
@@ -93,9 +117,6 @@ export function TeacherDashboard({
               Report an issue
             </Link>
           </nav>
-          <p className="demo-footnote">
-            Fixed demo time and sample assignments. Official changes require administrator review.
-          </p>
         </aside>
       </div>
     </div>

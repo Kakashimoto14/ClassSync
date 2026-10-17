@@ -1,9 +1,15 @@
-import type { PreviewResource, PreviewRoom, SchedulePreviewData } from '../data/schedule-preview';
+import type {
+  PreviewResource,
+  PreviewRoom,
+  ProvisionalRoom,
+  SchedulePreviewData,
+} from '../data/schedule-preview';
 import { rolePath } from '../routes/route-config';
 import type { UserRole } from '../types/ui';
 
 /** Location identity is usable even when resource metadata has not been supplied. */
 export interface RoomRecord extends PreviewRoom {
+  inventory?: ProvisionalRoom;
   resource?: PreviewResource;
 }
 export interface RoomCriteria {
@@ -23,6 +29,7 @@ export const emptyRoomCriteria: RoomCriteria = {
 
 export function roomCatalog(data: SchedulePreviewData): RoomRecord[] {
   const records = new Map<string, RoomRecord>();
+  for (const room of data.inventory ?? []) records.set(room.id, { ...room, inventory: room });
   for (const resource of data.resources ?? []) records.set(resource.id, { ...resource, resource });
   for (const occurrence of data.occurrences) {
     if (!records.has(occurrence.room.id)) records.set(occurrence.room.id, { ...occurrence.room });
@@ -51,7 +58,10 @@ export function filterRooms(records: readonly RoomRecord[], criteria: RoomCriter
   const search = criteria.search.trim().toLocaleLowerCase();
   return records.filter(
     (room) =>
-      (!search || `${room.name} ${room.id}`.toLocaleLowerCase().includes(search)) &&
+      (!search ||
+        `${room.name} ${room.id} ${room.inventory?.alias ?? ''}`
+          .toLocaleLowerCase()
+          .includes(search)) &&
       (!criteria.building || room.building === criteria.building) &&
       (!criteria.capacity ||
         (room.resource !== undefined && room.resource.seats >= Number(criteria.capacity))) &&

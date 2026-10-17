@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useId } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { StatusBadge } from '../ui/StatusBadge';
 
 export interface AttentionItem {
   id: string;
   title: string;
   detail: string;
+  context?: string;
   status: 'Blocking conflict' | 'Pending decision';
   href: string;
   action: string;
@@ -36,9 +38,10 @@ export function AttentionQueue({
                 {item.status}
               </StatusBadge>
               <h3>{item.title}</h3>
+              {item.context && <p className="attention-queue__context">{item.context}</p>}
               <p>{item.detail}</p>
-              <Link className="text-action" to={item.href}>
-                {item.action}
+              <Link className="button attention-queue__action" to={item.href}>
+                {item.action} <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </li>
           ))}

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { schedulePreview, type SchedulePreviewData } from '../../data/schedule-preview';
@@ -29,7 +29,9 @@ describe('UI-02 operations dashboards', () => {
         <TeacherDashboard data={data} />
       </MemoryRouter>,
     );
-    expect(screen.getByText('Approved')).toBeInTheDocument();
+    expect(screen.getByText('Approved')).not.toBeVisible();
+    fireEvent.click(screen.getByText('Recent decisions'));
+    expect(screen.getByText('Approved')).toBeVisible();
     expect(screen.getByText('0 pending')).toBeInTheDocument();
   });
   it.each(['teacher', 'administrator'] as const)(
@@ -58,6 +60,9 @@ describe('UI-02 operations dashboards', () => {
       </MemoryRouter>,
     );
     const requests = within(screen.getByRole('region', { name: 'Requests and decisions' }));
+    expect(requests.getByText('Pending review')).toBeVisible();
+    expect(requests.getByText('Declined')).not.toBeVisible();
+    fireEvent.click(requests.getByText('Recent decisions'));
     const items = requests.getAllByRole('article');
     expect(within(items[0]).getByText('Pending review')).toBeInTheDocument();
     expect(within(items[1]).getByText('Declined')).toBeInTheDocument();
@@ -147,12 +152,11 @@ describe('UI-02 operations dashboards', () => {
       </MemoryRouter>,
     );
     const resources = screen.getByRole('region', { name: 'Classroom resources' });
+    expect(within(resources).getByText('59')).toBeInTheDocument();
+    expect(within(resources).queryByText('Maintenance')).not.toBeInTheDocument();
+    expect(within(resources).queryByText('LAB-04')).not.toBeInTheDocument();
     expect(
-      within(resources).getByText('3 demo resources with recorded condition'),
-    ).toBeInTheDocument();
-    expect(resources.querySelector('dl')?.textContent).toBe('Resource active2Maintenance1');
-    expect(
-      within(resources).getByText(/Time-based availability is unavailable/),
+      within(resources).getByText(/Condition and time-based availability unverified/),
     ).toBeInTheDocument();
   });
   it('distinguishes unavailable resources from an empty operational dataset', () => {
@@ -162,6 +166,7 @@ describe('UI-02 operations dashboards', () => {
           data={{
             ...schedulePreview,
             resources: undefined,
+            inventory: undefined,
             occurrences: [],
             requests: [],
             conflicts: [],
@@ -169,7 +174,7 @@ describe('UI-02 operations dashboards', () => {
         />
       </MemoryRouter>,
     );
-    expect(screen.getByText('Resource condition data unavailable.')).toBeInTheDocument();
+    expect(screen.getByText('CDM inventory unavailable.')).toBeInTheDocument();
     expect(screen.getByText('No campus classes in this demo day')).toBeInTheDocument();
     expect(
       screen.getByText('No pending requests in the supplied demo records.'),

@@ -17,7 +17,12 @@ function LoginLocation() {
   const location = useLocation();
   return <p>{location.search}</p>;
 }
-function open(role: UserRole | null, path: string) {
+function open(role: UserRole | null, path: string, inventory = 'demo') {
+  if (routeDefinitions.find((route) => route.path === path.split('?')[0])?.kind === 'rooms') {
+    const url = new URL(path, 'http://localhost');
+    url.searchParams.set('inventory', inventory);
+    path = url.pathname + url.search;
+  }
   return render(
     <MemoryRouter initialEntries={[path]}>
       <DevelopmentRoleContext.Provider value={{ role, startDemo: vi.fn(), signOut: vi.fn() }}>
@@ -41,6 +46,27 @@ function open(role: UserRole | null, path: string) {
 const main = () => within(screen.getByRole('main'));
 
 describe('room discovery routes and interactions', () => {
+  it.each(['student', 'teacher', 'administrator'] as const)(
+    'offers provisional CDM inventory to %s without implying verified resources',
+    (role) => {
+      open(role, roomDirectoryPath(role), 'cdm');
+      expect(main().getByText('59 of 59 spaces')).toBeInTheDocument();
+      expect(main().getAllByRole('article')).toHaveLength(12);
+      fireEvent.click(main().getByRole('button', { name: 'Next' }));
+      expect(main().getByText('Page 2 of 5')).toBeInTheDocument();
+      expect(main().getByRole('heading', { name: 'Rooms & spaces' })).toHaveFocus();
+      fireEvent.change(main().getByRole('searchbox', { name: 'Search rooms' }), {
+        target: { value: 'VGA' },
+      });
+      expect(main().getByText('1 of 59 spaces')).toBeInTheDocument();
+      expect(main().getByText('VGA Room · Unconfirmed')).toBeInTheDocument();
+      fireEvent.click(main().getByRole('link', { name: 'View PRRC 302 details' }));
+      expect(main().getByText('Condition unverified')).toBeInTheDocument();
+      expect(main().getAllByText('Unverified')).toHaveLength(4);
+      expect(main().getByText('No recorded assignments')).toBeInTheDocument();
+      expect(main().queryByText('Resource active')).not.toBeInTheDocument();
+    },
+  );
   it.each(
     (['student', 'teacher', 'administrator'] as const).flatMap((role) =>
       [
@@ -115,6 +141,10 @@ describe('room discovery routes and interactions', () => {
     expect(main().getByText('Condition unrecorded')).toBeInTheDocument();
     expect(main().getAllByText('Not recorded')).toHaveLength(3);
     expect(main().getByText('Human Computer Interaction')).toBeInTheDocument();
+    expect(main().getByRole('link', { name: 'Back to Room Directory' })).toHaveAttribute(
+      'href',
+      '/teacher/find-room?inventory=demo',
+    );
   });
   it('shows the actual administrator draft alongside published assignments', () => {
     open('administrator', roomDetailPath('administrator', 'room-sci-218'));

@@ -15,7 +15,7 @@ export function validateLogin(email: string, password: string): LoginValidationE
 }
 
 export function isRoleOwnedPath(role: UserRole, path: string): boolean {
-  const pathname = path.split(/[?#]/, 1)[0];
+  const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
   return routeDefinitions.some(route => route.role === role && route.path === pathname);
 }
 

@@ -79,21 +79,21 @@ export function PreviewScheduleView({ role }: { role: UserRole }) {
         <EmptyState title="No matching assignments" detail="Try another date or search term." />
       )}
       {role === 'teacher' && (
-        <>
-          <Link className="text-action" to={rolePath(role, 'request-create')}>
-            Request a room change
-          </Link>
-          <section className="schedule-export">
-            <h2>Export Schedule</h2>
-            <Button disabled aria-describedby="preview-export-note">
-              Export Schedule
-            </Button>
-            <p id="preview-export-note">
-              Export unavailable: these fictional local dates do not establish an institutional
-              timezone or an official schedule.
-            </p>
-          </section>
-        </>
+        <Link className="text-action" to={rolePath(role, 'request-create')}>
+          Request a room change
+        </Link>
+      )}
+      {role !== 'administrator' && (
+        <section className="schedule-export">
+          <h2>Export Schedule</h2>
+          <Button disabled aria-describedby="preview-export-note">
+            Export Schedule
+          </Button>
+          <p id="preview-export-note">
+            Export unavailable: these fictional local dates do not establish an institutional
+            timezone or an official schedule.
+          </p>
+        </section>
       )}
       {role === 'administrator' && (
         <Link className="text-action" to={rolePath(role, 'conflicts')}>
@@ -321,6 +321,17 @@ export function PreviewUpdatesView({ role }: { role: UserRole }) {
           detail="There are no updates for these assignments."
         />
       )}
+      <Link
+        className="text-action"
+        to={rolePath(role, role === 'administrator' ? 'schedule-manager' : 'schedule')}
+      >
+        Open{' '}
+        {role === 'administrator'
+          ? 'Schedule Manager'
+          : role === 'teacher'
+            ? 'teaching schedule'
+            : 'my schedule'}
+      </Link>
     </section>
   );
 }
