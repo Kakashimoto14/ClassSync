@@ -42,6 +42,17 @@ function renderShell(role: UserRole, path: string) {
 }
 
 describe('workspace navigation', () => {
+  it('focuses the destination and returns to its heading after navigation', () => {
+    renderShell('student', '/student/dashboard');
+    vi.mocked(window.scrollTo).mockClear();
+    fireEvent.click(
+      within(screen.getByRole('navigation', { name: 'Mobile navigation' })).getByRole('link', {
+        name: 'Rooms',
+      }),
+    );
+    expect(screen.getByRole('main')).toHaveFocus();
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
+  });
   it.each(['student', 'teacher', 'administrator'] as const)(
     'keeps every %s navigation and account link registered and role-owned',
     (role) => {

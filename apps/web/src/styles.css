@@ -1,4 +1,5 @@
 @import './theme.css';
+@import './room-discovery.css';
 
 @tailwind base;
 @tailwind components;

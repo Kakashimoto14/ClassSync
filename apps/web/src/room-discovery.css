@@ -1,0 +1,187 @@
+/* Classroom discovery: scoped to preserve the existing dashboard and shell contracts. */
+.room-discovery {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.room-discovery .page-heading {
+  margin: 0;
+  gap: var(--space-3);
+}
+.room-discovery h2 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+.room-discovery p {
+  line-height: 1.5;
+}
+.room-discovery .text-action,
+.discovery-room-card .text-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.discovery-filters {
+  display: grid;
+  gap: var(--space-2);
+}
+.discovery-filters__details summary,
+.discovery-time-criteria summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--primary);
+  font-weight: 600;
+  width: fit-content;
+}
+.discovery-filters__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-2) 0 var(--space-3);
+}
+.discovery-filters__active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.discovery-filters__active p {
+  flex: 1 1 220px;
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.discovery-filter-error {
+  color: var(--danger);
+}
+.discovery-results-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.discovery-results-heading p {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.discovery-results {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+.discovery-room-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.discovery-room-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.discovery-room-card h2 {
+  font-size: 1.125rem;
+}
+.discovery-room-card p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.discovery-room-card__capacity {
+  font-weight: 500;
+}
+.discovery-room-card .text-action {
+  align-self: flex-start;
+  margin-top: auto;
+}
+.discovery-availability,
+.discovery-detail-panel {
+  padding: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.discovery-availability > p,
+.discovery-detail-panel > p,
+.discovery-assignments > p {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.discovery-availability fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.discovery-time-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.discovery-time-fields label:first-child {
+  grid-column: 1 / -1;
+}
+.discovery-detail-layout {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+.discovery-room-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.discovery-room-facts div:first-child,
+.discovery-room-facts div:last-child {
+  grid-column: 1 / -1;
+}
+.discovery-room-facts div {
+  display: grid;
+  gap: var(--space-1);
+}
+.discovery-room-facts dt {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.discovery-room-facts dd {
+  margin: 0;
+}
+.discovery-assignments {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.discovery-detail-panel .discovery-condition-note {
+  color: var(--warning);
+}
+@media (min-width: 640px) {
+  .discovery-filters__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .discovery-time-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .discovery-time-fields label:first-child {
+    grid-column: auto;
+  }
+}
+@media (min-width: 1200px) {
+  .discovery-filters__fields {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .discovery-detail-layout {
+    grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  }
+}

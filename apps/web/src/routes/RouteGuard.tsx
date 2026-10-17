@@ -10,8 +10,8 @@ import type { RouteDefinition } from './route-config';
 
 export function RoleRoute({ definition }: { definition: RouteDefinition }) {
   const { role } = useDevelopmentRole(); const location = useLocation();
-  if (!role) return <Navigate to={`/auth/login?returnTo=${encodeURIComponent(location.pathname)}`} replace/>;
-  if (role !== definition.role) return <Navigate to={`/forbidden?returnTo=${encodeURIComponent(location.pathname)}`} replace/>;
+  if (!role) return <Navigate to={`/auth/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`} replace/>;
+  if (role !== definition.role) return <Navigate to={`/forbidden?returnTo=${encodeURIComponent(location.pathname + location.search)}`} replace/>;
   if (definition.kind === 'dashboard') return <OperationsPreviewPage/>;
   if (definition.kind === 'coming-soon' && definition.plannedFeature) return <AppShell><ComingSoonPage feature={definition.plannedFeature} role={role}/></AppShell>;
   return <ProductScreenPage definition={definition}/>;

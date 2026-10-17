@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { previewResources, previewViewer, schedulePreview } from '../data/schedule-preview';
+import { previewViewer, schedulePreview } from '../data/schedule-preview';
 import { selectAssignments } from '../lib/schedule-preview';
-import { PreviewScheduleView, PreviewRequestsView, PreviewConflictView, PreviewRequestCreateView, PreviewUpdatesView, PreviewRoomDetailView } from './PreviewOperationsViews';
+import { PreviewScheduleView, PreviewRequestsView, PreviewConflictView, PreviewRequestCreateView, PreviewUpdatesView } from './PreviewOperationsViews';
 import { Building2, CalendarDays, FileBarChart, MapPin, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { RoomDiscoveryPage, RoomDetailPage } from './RoomDiscoveryPages';
+import { roomCatalog, roomDetailPath } from '../lib/room-discovery';
 import { RoomDirectoryCard } from '../components/scheduling/RoomDirectoryCard';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
@@ -17,9 +19,11 @@ const classes = [
   { time: '10:00 AM', subject: 'Database Management Systems', section: 'BSIT 2A', teacher: 'Prof. Maria Santos', room: 'Room 301', building: 'Old Building · Floor 3', tone: 'success' as const, status: 'Confirmed' },
   { time: '01:00 PM', subject: 'Information Assurance', section: 'BSIT 2A', teacher: 'Prof. Daniel Reyes', room: 'Computer Lab 2', building: 'Old Building · Floor 2', tone: 'warning' as const, status: 'Room update' },
 ];
-const rooms = previewResources.map((room) => ({ ...room, id: room.name, status: room.condition === 'maintenance' ? 'Maintenance' : 'Resource active' }));
+
 
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
+  if (definition.kind === 'rooms') return <AppShell><RoomDiscoveryPage key={definition.id} definition={definition}/></AppShell>;
+  if (definition.kind === 'room-detail') return <AppShell><RoomDetailPage role={definition.role}/></AppShell>;
   return <AppShell><div className="page-heading"><div><p className="eyebrow">{definition.navigationGroup ?? (definition.role === 'administrator' ? 'Administrator' : definition.role)}</p><h1>{definition.title}</h1><p>{definition.description}</p></div>{definition.kind === 'schedule' && definition.role === 'administrator' && <Link className="button" to="/admin/schedule-manager/create">Create schedule</Link>}</div>
     {definition.kind === 'schedule' && <ScheduleScreen definition={definition}/>}
     {definition.kind === 'schedule-create' && <CreateScheduleScreen/>}
@@ -30,8 +34,6 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
     {definition.kind === 'request-create' && <RequestCreateScreen/>}
     {definition.kind === 'request-detail' && <RequestDetailScreen role={definition.role}/>}
     {definition.kind === 'report-issue' && <IssueReportScreen/>}
-    {definition.kind === 'rooms' && <RoomScreen definition={definition}/>}
-    {definition.kind === 'room-detail' && <RoomDetailScreen/>}
     {definition.kind === 'buildings' && <BuildingScreen/>}
     {definition.kind === 'building-detail' && <BuildingDetailScreen/>}
     {definition.kind === 'academic-list' && <AcademicListScreen definition={definition}/>}
@@ -72,107 +74,9 @@ function RequestDetailScreen({ role }: { role: RouteDefinition['role'] }) { retu
 
 function IssueReportScreen() { return <form className="workspace-card request-form" onSubmit={event => event.preventDefault()}><h2>Classroom or schedule issue</h2><p className="muted">Reports go to an administrator. They do not change an official schedule.</p><label>Related class<select defaultValue=""><option value="" disabled>Select a class</option>{(selectAssignments(schedulePreview, previewViewer('teacher')) ?? []).filter(item => item.publication === 'published').map(item => <option key={item.id} value={item.id}>{item.subject.name} · {item.startsAt.slice(0,10)} {item.startsAt.slice(11,16)} · {item.room.name}</option>)}</select></label><label>Issue type<select defaultValue="room"><option value="room">Classroom issue</option><option value="schedule">Schedule conflict</option></select></label><label>Describe the issue<textarea required rows={4} placeholder="Include the room, time, and what needs attention."/></label><Button type="submit" disabled>Submit report</Button></form>; }
 
-function RoomScreen({ definition }: { definition: RouteDefinition }) {
-  const availability =
-    definition.title.toLowerCase().includes('availability') ||
-    definition.title.toLowerCase().includes('available');
-  const [building, setBuilding] = useState('all');
-  const [capacity, setCapacity] = useState('');
-  const [roomType, setRoomType] = useState('all');
-  const filteredRooms = rooms.filter(
-    (room) =>
-      (building === 'all' || room.building === building) &&
-      (!capacity || room.seats >= Number(capacity)) &&
-      (roomType === 'all' || room.type === roomType),
-  );
-  return (
-    <>
-      <div className="screen-toolbar room-filter-toolbar">
-        {availability && (
-          <>
-            <label>
-              Date
-              <input
-                type="date"
-                defaultValue="2026-09-23"
-                disabled
-                aria-describedby="availability-preview-note"
-              />
-            </label>
-            <label>
-              Time window
-              <input
-                type="time"
-                defaultValue="10:00"
-                disabled
-                aria-describedby="availability-preview-note"
-              />
-            </label>
-          </>
-        )}
-        <label>
-          Building
-          <select value={building} onChange={(event) => setBuilding(event.target.value)}>
-            <option value="all">All buildings</option>
-            {[...new Set(rooms.map((room) => room.building))].map((name) => (
-              <option key={name}>{name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Minimum capacity
-          <input
-            type="number"
-            min="1"
-            value={capacity}
-            onChange={(event) => setCapacity(event.target.value)}
-            placeholder="Any"
-          />
-        </label>
-        <label>
-          Room type
-          <select value={roomType} onChange={(event) => setRoomType(event.target.value)}>
-            <option value="all">All room types</option>
-            {[...new Set(rooms.map((room) => room.type))].map((type) => (
-              <option key={type}>{type}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      {availability && (
-        <p id="availability-preview-note" className="occupancy-note">
-          <CalendarDays size={15} />
-          Time-window availability is a local preview until live schedule data is connected.
-        </p>
-      )}
-      <section className="room-results">
-        {filteredRooms.map((room) => (
-          <RoomDirectoryCard
-            key={room.id}
-            room={room}
-            availabilityPreview={availability}
-            detailsPath={
-              definition.role === 'administrator' && room.id === 'SCI-218'
-                ? rolePath('administrator', 'room-detail')
-                : undefined
-            }
-          />
-        ))}
-      </section>
-      {filteredRooms.length === 0 && (
-        <EmptyState
-          title="No matching rooms"
-          detail="Try a different building, capacity, or room type."
-        />
-      )}
-    </>
-  );
-}
-
 function BuildingScreen() { return <section className="room-results">{['Science Building','Engineering Building','Computing Building'].map((building, index) => <article className="room-directory-card" key={building}><div className="room-thumb"><Building2/></div><div><h2>{building}</h2><p>{index + 2} floors · {8 + index * 3} classrooms</p><div className="room-meta"><span>{12 + index * 4} scheduled rooms</span><span>{4 + index} rooms available today</span></div></div><Link className="button button--secondary" to="/admin/buildings/detail">View building</Link></article>)}</section>; }
-function RoomDetailScreen() { return <PreviewRoomDetailView/>; }
 
-function BuildingDetailScreen() { return <section className="workspace-card"><h2>Science Building</h2><p className="muted">Campus teaching spaces · 3 floors</p><div className="room-results">{rooms.filter(room=>room.building==='Science Building').map(room=><article className="room-directory-card" key={room.id}><div className="room-thumb"><Building2/></div><div><StatusBadge tone={room.status==='Available'?'success':'warning'}>{room.status}</StatusBadge><h2>{room.id}</h2><p>{room.type} · {room.seats} seats</p></div><Link className="button button--secondary" to="/admin/rooms/detail">View room</Link></article>)}</div></section>; }
+function BuildingDetailScreen() { return <section className="workspace-card"><h2>Science Building</h2><p className="muted">Recorded demo classrooms</p><div className="discovery-results">{roomCatalog(schedulePreview).filter(room=>room.building==='Science Building').map(room=><RoomDirectoryCard key={room.id} room={room} detailsPath={roomDetailPath('administrator', room.id)}/>)}</div></section>; }
 
 function AcademicListScreen({ definition }: { definition: RouteDefinition }) { const subject = definition.title === 'Subjects'; const group = definition.title === 'Sections'; const firstColumn = subject ? 'Subject' : group ? 'Section' : definition.title.slice(0, -1); const rows = subject ? ['Database Management Systems','Web Systems','Human Computer Interaction'] : group ? ['BSIT 2A','BSCS 1B','BSIT 3A'] : ['Avery Cruz','Morgan Reyes','Sam Lee']; const [query, setQuery] = useState(''); const [status, setStatus] = useState('all'); const displayedRows = rows.filter((name, index) => name.toLowerCase().includes(query.trim().toLowerCase()) && (status === 'all' || (status === 'attention' ? index === 1 : index !== 1))); return <><div className="screen-toolbar"><label><Search size={16}/><input placeholder={`Search ${definition.title.toLowerCase()}`} aria-label={`Search ${definition.title.toLowerCase()}`} value={query} onChange={event => setQuery(event.target.value)}/></label><label>Status<select value={status} onChange={event => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="attention">Attention</option></select></label></div>{displayedRows.length > 0 ? <><section className="table-wrap"><table><thead><tr><th>{firstColumn}</th><th>{subject ? 'Code' : group ? 'Program · Year' : 'Academic context'}</th><th>Status</th><th>Schedule relation</th><th>Details</th></tr></thead><tbody>{displayedRows.map(name => { const index = rows.indexOf(name); return <tr key={name}><td><strong>{name}</strong></td><td>{subject ? `SUB-${201 + index}` : group ? 'BSIT · Year 2' : 'Academic scheduling'}</td><td><StatusBadge tone={index === 1 ? 'warning' : 'success'}>{index === 1 ? 'Attention' : 'Active'}</StatusBadge></td><td>{index + 1} assigned classes</td><td><Link className="text-action" to="/admin/academic/details">View record</Link></td></tr>; })}</tbody></table></section><div className="mobile-record-list">{displayedRows.map(name => { const index = rows.indexOf(name); return <article key={name}><strong>{name}</strong><span>{subject ? `SUB-${201 + index}` : 'Academic scheduling'}</span><StatusBadge tone={index === 1 ? 'warning' : 'success'}>{index === 1 ? 'Attention' : 'Active'}</StatusBadge></article>; })}</div></> : <EmptyState title={`No matching ${definition.title.toLowerCase()}`} detail="Try another search term or status."/>}</>; }
 function AcademicDetailScreen() { return <section className="workspace-card"><p className="eyebrow">Academic record</p><h2>BSIT 2A · Second Year</h2><dl className="detail-list"><dt>Program</dt><dd>Bachelor of Science in Information Technology</dd><dt>Students</dt><dd>35 active students</dd><dt>Adviser</dt><dd>Prof. Maria Santos</dd><dt>Schedule</dt><dd>Published · 18 class periods</dd></dl><h3>Related subjects</h3><ul className="related-list"><li>Database Management Systems</li><li>Web Systems</li><li>Human Computer Interaction</li></ul></section>; }
