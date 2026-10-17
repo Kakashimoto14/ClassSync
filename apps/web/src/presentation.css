@@ -1,0 +1,85 @@
+/* Presentation refinements reuse the Soft Rouge controls and schedule entries. */
+.discovery-filters__search {
+  display: grid;
+  gap: var(--space-3);
+}
+.discovery-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.discovery-pagination span {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.preview-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+.preview-calendar__days > button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 48px;
+  padding: 4px 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+}
+.preview-calendar__days > button:hover {
+  background: var(--surface-strong);
+}
+.preview-calendar__days > button[aria-pressed='true'] {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 600;
+}
+.preview-calendar__count {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.preview-calendar__days .calendar-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  padding: var(--space-2) 0;
+}
+.preview-calendar__legend {
+  margin-top: var(--space-3);
+  font-size: 0.875rem;
+}
+.preview-calendar .calendar-head h2 {
+  font-size: 1.125rem;
+}
+@media (min-width: 640px) {
+  .discovery-filters__search {
+    grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr);
+  }
+  .preview-calendar__days > button {
+    min-height: 64px;
+  }
+}
+@media (min-width: 1200px) {
+  .preview-calendar {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .preview-calendar > p {
+    grid-column: 1 / -1;
+  }
+  .preview-calendar > .workspace-card {
+    grid-column: 1;
+  }
+  .preview-calendar > div[aria-live] {
+    grid-column: 2;
+  }
+}

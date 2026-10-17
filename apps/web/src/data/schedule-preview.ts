@@ -1,4 +1,5 @@
 import type { UserRole } from '../types/ui';
+import { provisionalCdmRooms } from './cdm-room-inventory';
 
 export interface AcademicReference {
   id: string;
@@ -7,6 +8,12 @@ export interface AcademicReference {
 export interface PreviewRoom extends AcademicReference {
   building: string;
   floor?: string;
+}
+export interface ProvisionalRoom extends PreviewRoom {
+  source: 'user-supplied-provisional';
+  alias?: string;
+  aliasUnconfirmed?: boolean;
+  location?: string;
 }
 export interface PreviewResource extends PreviewRoom {
   floor: string;
@@ -52,6 +59,7 @@ export interface PreviewUpdate {
   detail: string;
 }
 export interface SchedulePreviewData {
+  inventory?: readonly ProvisionalRoom[];
   resources?: readonly PreviewResource[];
   occurrences: readonly ScheduleOccurrence[];
   students: readonly PreviewStudent[];
@@ -138,6 +146,7 @@ const sections = {
 // Explicit development fixtures. These are not enrollment, reservations, validation
 // results, or production identities. No clock or persistence drives this scenario.
 export const schedulePreview: SchedulePreviewData = {
+  inventory: provisionalCdmRooms,
   resources: previewResources,
   occurrences: [
     {

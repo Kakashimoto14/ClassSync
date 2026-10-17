@@ -10,6 +10,7 @@ describe('honest sign-in entry', () => {
         <AuthPage />
       </MemoryRouter>,
     );
+    fireEvent.click(screen.getByText('University sign-in'));
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(screen.getByLabelText('University email')).toHaveFocus();
     expect(screen.getByLabelText('University email')).toHaveAttribute(
@@ -31,6 +32,7 @@ describe('honest sign-in entry', () => {
           <AuthPage />
         </MemoryRouter>,
       );
+      fireEvent.click(screen.getByText('University sign-in'));
       fireEvent.change(screen.getByLabelText('University email'), {
         target: { value: 'sample@example.edu' },
       });
@@ -45,7 +47,7 @@ describe('honest sign-in entry', () => {
       expect(screen.getByText('Sign-in unavailable')).toBeInTheDocument();
       expect(screen.queryByText(/Connecting/)).not.toBeInTheDocument();
       expect(fetchSpy).not.toHaveBeenCalled();
-      expect(screen.getByRole('link', { name: 'Open development demo' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'Explore ClassSync' })).toHaveAttribute(
         'href',
         '/dev/role-preview?returnTo=%2Fteacher%2Fschedule',
       );

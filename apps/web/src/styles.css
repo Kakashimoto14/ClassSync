@@ -1,5 +1,7 @@
 @import './theme.css';
 @import './room-discovery.css';
+@import './presentation.css';
+@import './interface-refinements.css';
 
 @tailwind base;
 @tailwind components;
@@ -166,11 +168,12 @@ time {
   border-radius: var(--radius);
   font-weight: 600;
   text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 .button {
   background: var(--primary);
   border: 1px solid var(--primary);
-  color: var(--surface);
+  color: var(--text-on-action);
   padding: 8px 16px;
   font-size: 0.875rem;
   line-height: 1.4;
@@ -398,6 +401,9 @@ textarea {
   min-width: 0;
   margin-left: auto;
 }
+.preview-indicator { position: relative; }
+.preview-indicator summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: 0.8125rem; color: var(--ink-soft); }
+.preview-indicator p { position: absolute; z-index: 20; right: 0; top: 100%; width: min(280px, 80vw); padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); color: var(--ink); font-size: 0.875rem; }
 .semester span {
   display: block;
   color: var(--ink-soft);
@@ -470,6 +476,7 @@ textarea {
   gap: var(--space-2);
   color: inherit;
   background: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
   border: 0;
   border-radius: var(--radius);
   width: 100%;
@@ -697,6 +704,7 @@ textarea {
   border-radius: var(--radius-lg);
   padding: var(--space-3);
   min-width: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .state-card {
   display: flex;
@@ -1351,6 +1359,7 @@ tr:hover td {
   padding: 16px;
   display: grid;
   gap: 16px;
+  box-shadow: 0 1px 3px rgb(32 36 44 / 6%);
 }
 .next-class__action {
   width: 100%;
@@ -1575,6 +1584,7 @@ tr:hover td {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   min-width: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .dashboard-panel h2,
 .operations-metrics h2 {
@@ -1630,7 +1640,7 @@ tr:hover td {
   font-size: 1rem;
 }
 .admin-dashboard .attention-queue {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 .admin-dashboard .attention-queue ol {
   grid-template-columns: minmax(0, 1fr);
@@ -1665,7 +1675,7 @@ tr:hover td {
 }
 .operations-metrics dl > div {
   background: var(--surface);
-  padding: 16px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column-reverse;
   gap: 4px;
@@ -1751,6 +1761,68 @@ tr:hover td {
   }
 }
 
+.admin-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-action-grid a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  min-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-action-grid a:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgb(135 46 73 / 10%);
+}
+.admin-action-grid a:active { transform: scale(0.98); }
+.admin-action-grid svg { flex-shrink: 0; }
+.all-issues { display: inline-flex; margin: 8px 0 16px; }
+.admin-agenda > .text-action { display: inline-flex; margin-top: 12px; }
+.campus-resources__total strong { font-size: 1.75rem; color: var(--ink); }
+.campus-resources {
+  gap: 12px;
+}
+.campus-resources p + p {
+  margin-top: 4px;
+}
+.campus-resources__areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.campus-resources__areas > div {
+  background: var(--canvas);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.campus-resources__areas dt {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.campus-resources__areas dd {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.request-summary--compact { gap: 4px; }
+@media (min-width: 768px) {
+  .admin-action-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 /* Existing public and planned screens use the same surfaces and controls. */
 .auth-page {
   min-height: 100vh;
@@ -1783,6 +1855,57 @@ tr:hover td {
 }
 .auth-brand .classsync-logo__name {
   font-size: 1.5rem;
+}
+/* Presentation entrance: working preview first, unavailable sign-in disclosed. */
+.auth-entrance .auth-brand { background: var(--surface); }
+.auth-entrance .auth-brand-copy { display: grid; }
+.auth-entrance .auth-brand { padding: 24px 24px 0; gap: 24px; }
+.auth-entrance .auth-brand h2 { font-size: clamp(1.75rem, 3vw, 3rem); line-height: 1.15; letter-spacing: -0.035em; }
+.auth-entrance .auth-brand-copy p { color: var(--ink-soft); font-size: 1rem; max-width: 40ch; }
+.auth-entrance .auth-main { padding: 24px; background: var(--surface); }
+.auth-entrance .auth-card { padding: 0; border: 0; }
+.auth-entrance .auth-card h1 { font-size: 1.5rem; }
+.entrance-primary {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 14px 24px;
+  letter-spacing: -0.01em;
+}
+.entrance-primary:hover { box-shadow: 0 4px 12px rgb(135 46 73 / 25%); }
+.entrance-primary:active { transform: scale(0.98); }
+.entrance-note { font-size: 0.875rem; color: var(--ink-soft); margin: 12px 0 24px; }
+.university-access { border-top: 1px solid var(--line); padding-top: 16px; }
+.university-access summary { cursor: pointer; min-height: 48px; font-weight: 600; }
+.university-access summary span { display: block; margin: 4px 0 0 16px; font-size: 0.875rem; color: var(--ink-soft); font-weight: 400; }
+.university-access > p { margin-bottom: 16px; font-size: 0.875rem; }
+.demo-role-options .role-option {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  text-align: left;
+  white-space: normal;
+  height: auto;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.role-option:hover { box-shadow: 0 2px 8px rgb(32 36 44 / 8%); }
+.role-option:active { transform: scale(0.98); }
+.role-option > svg { flex-shrink: 0; color: var(--primary); }
+.role-option > span { flex: 1; display: grid; gap: 4px; }
+.role-option > span > span { font-size: 0.875rem; color: var(--ink-soft); font-weight: 400; }
+@media (min-width: 1024px) {
+  .auth-entrance .auth-brand {
+    padding: 64px;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface) 100%);
+  }
+  .auth-entrance .auth-main { padding: 64px; background: var(--canvas); }
+  .auth-entrance .auth-card {
+    border: 1px solid var(--line);
+    padding: 32px;
+    box-shadow: 0 4px 24px rgb(32 36 44 / 8%);
+  }
 }
 .auth-field {
   display: grid;
@@ -1872,8 +1995,12 @@ tr:hover td {
 }
 .role-preview-card {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   max-width: 600px;
+  box-shadow: 0 4px 24px rgb(32 36 44 / 8%);
+}
+.role-preview-card > h1 {
+  letter-spacing: -0.03em;
 }
 
 .demo-role-options {

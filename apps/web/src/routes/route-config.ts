@@ -231,7 +231,6 @@ export const routeDefinitions = [
     navigationGroup: 'Rooms',
     navigationLabel: 'Room Availability',
     icon: DoorOpen,
-    mobileLabel: 'Rooms',
   }),
   make({
     id: 'teacher.find-room',
@@ -243,6 +242,7 @@ export const routeDefinitions = [
     roomMode: 'directory',
     navigationGroup: 'Rooms',
     navigationLabel: 'Room Directory',
+    mobileLabel: 'Rooms',
     icon: MapPin,
   }),
   make({
@@ -526,7 +526,7 @@ export const routeDefinitions = [
     id: 'administrator.buildings',
     path: '/admin/buildings',
     role: 'administrator',
-    title: 'Buildings',
+    title: 'Buildings & Areas',
     description: 'Review campus buildings and their classroom resources.',
     kind: 'buildings',
     navigationGroup: 'Resources',
@@ -675,7 +675,7 @@ const mobileNavigationIds: Record<UserRole, readonly RouteId[]> = {
   teacher: [
     'teacher.dashboard',
     'teacher.schedule',
-    'teacher.availability',
+    'teacher.find-room',
     'teacher.notifications',
   ],
   administrator: [
@@ -701,7 +701,7 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
   'student.find-room': 'student.rooms',
   'student.announcements': 'student.notifications',
   'teacher.calendar': 'teacher.schedule',
-  'teacher.find-room': 'teacher.availability',
+  'teacher.availability': 'teacher.find-room',
   'teacher.request-create': 'teacher.requests',
   'teacher.request-detail': 'teacher.requests',
   'teacher.report-issue': 'teacher.requests',
@@ -720,7 +720,7 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
 };
 
 export function navigationOwner(path: string, mobile = false): RouteId | undefined {
-  let route = routesByPath.get(path);
+  let route = routesByPath.get(path.split(/[?#]/, 1)[0].replace(/\/+$/, ''));
   const visited = new Set<RouteId>();
   while (route && !visited.has(route.id)) {
     visited.add(route.id);

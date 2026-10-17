@@ -42,6 +42,42 @@ function renderShell(role: UserRole, path: string) {
 }
 
 describe('workspace navigation', () => {
+  it('discloses preview options and closes them with Escape without changing role', () => {
+    renderShell('student', '/student/dashboard');
+    const summary = screen.getByText('Student demo');
+    const details = summary.closest('details')!;
+    fireEvent.click(summary);
+    expect(details).toHaveAttribute('open');
+    expect(within(details).getByRole('link', { name: 'Switch preview role' })).toHaveAttribute(
+      'href',
+      '/dev/role-preview',
+    );
+    fireEvent.keyDown(summary, { key: 'Escape' });
+    expect(details).not.toHaveAttribute('open');
+    expect(summary).toHaveFocus();
+  });
+  it('takes Teacher Rooms directly to the working resource directory', () => {
+    const rooms = mobileNavigationForRole('teacher').find((route) => route.mobileLabel === 'Rooms');
+    expect(rooms?.path).toBe('/teacher/find-room');
+    expect(navigationOwner('/teacher/room-availability', true)).toBe('teacher.find-room');
+    expect(navigationOwner('/teacher/rooms/detail', true)).toBe('teacher.find-room');
+  });
+  it('searches entry pages without offering record details that have no selection', () => {
+    renderShell('administrator', '/admin/dashboard');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search ClassSync' }), {
+      target: { value: 'Room' },
+    });
+    const results = within(screen.getByRole('navigation', { name: 'Search destinations' }));
+    expect(results.getByRole('link', { name: 'Room Directory' })).toHaveAttribute(
+      'href',
+      '/admin/rooms',
+    );
+    expect(results.queryByRole('link', { name: 'Room Details' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search ClassSync' }), {
+      target: { value: 'Details' },
+    });
+    expect(screen.getByText('No matching pages in your workspace.')).toBeInTheDocument();
+  });
   it('focuses the destination and returns to its heading after navigation', () => {
     renderShell('student', '/student/dashboard');
     vi.mocked(window.scrollTo).mockClear();
@@ -63,7 +99,8 @@ describe('workspace navigation', () => {
         .map((route) => route.path);
       for (const link of screen.getAllByRole('link', { hidden: true })) {
         const href = link.getAttribute('href');
-        if (href !== '#main-content') expect(registered).toContain(href);
+        if (href === '/dev/role-preview') expect(link).toHaveTextContent('Switch preview role');
+        else if (href !== '#main-content') expect(registered).toContain(href);
       }
       const navigation = screen.getByRole('navigation', { name: 'Primary navigation' });
       const links = [...navigation.querySelectorAll('a')].map((link) => link.getAttribute('href'));

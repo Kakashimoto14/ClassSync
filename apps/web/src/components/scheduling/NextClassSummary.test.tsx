@@ -15,6 +15,22 @@ describe('next class presentation', () => {
     expect(screen.getByText('10:00–11:30')).toBeInTheDocument();
     expect(screen.getByText('SCI-218')).toBeInTheDocument();
     expect(screen.getByText(/Science Building/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Database Management Systems' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Professor')).toBeInTheDocument();
+    expect(screen.getByText('Prof. Maria Santos')).toBeInTheDocument();
+    expect(screen.getByText('Section')).toBeInTheDocument();
+    expect(screen.getByText('BSIT 2A')).toBeInTheDocument();
+    expect(screen.getByText(/Level 2/)).toBeInTheDocument();
+    // The dashboard heading already establishes today's date.
+    expect(screen.queryByText('Mon 12 Oct')).not.toBeInTheDocument();
+  });
+  it('retains a date for the next assignment on another day', () => {
+    render(
+      <NextClassSummary schedule={summarizeDay(schedulePreview.occurrences, '2026-10-12T16:00')} />,
+    );
+    expect(screen.getByText('Tue 13 Oct')).toBeInTheDocument();
   });
   it.each(['unavailable', 'unpublished', 'no-classes', 'finished'] as const)(
     'provides an honest %s state',

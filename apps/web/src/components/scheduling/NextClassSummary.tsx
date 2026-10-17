@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { CalendarDays, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { DaySchedule } from '../../lib/schedule-preview';
 import { Alert } from '../ui/Alert';
@@ -10,11 +11,13 @@ export function NextClassSummary({
   title = 'Next class',
   action,
   showPublication = false,
+  roomAction,
 }: {
   schedule: DaySchedule;
   title?: string;
   action?: { to: string; label: string };
   showPublication?: boolean;
+  roomAction?: string;
 }) {
   const titleId = useId();
   const unavailable = schedule.state === 'unavailable' || schedule.state === 'unpublished';
@@ -47,7 +50,7 @@ export function NextClassSummary({
                 <ScheduleEntry
                   key={item.id}
                   occurrence={item}
-                  showDate
+                  featured
                   showPublication={showPublication}
                 />
               ))}
@@ -60,7 +63,12 @@ export function NextClassSummary({
             </Alert>
           )}
           {schedule.next ? (
-            <ScheduleEntry occurrence={schedule.next} showDate showPublication={showPublication} />
+            <ScheduleEntry
+              occurrence={schedule.next}
+              featured
+              showDate={schedule.next.startsAt.slice(0, 10) !== schedule.reference.slice(0, 10)}
+              showPublication={showPublication}
+            />
           ) : (
             <p className="muted">No upcoming published class in the available records.</p>
           )}
@@ -72,11 +80,18 @@ export function NextClassSummary({
           )}
         </>
       )}
-      {action && (
-        <Link className="button next-class__action" to={action.to}>
-          {action.label}
-        </Link>
-      )}
+      <div className="next-class__actions">
+        {action && (
+          <Link className="button next-class__action" to={action.to} aria-label={action.label}>
+            <CalendarDays size={18} aria-hidden="true" /> Schedule
+          </Link>
+        )}
+        {roomAction && !unavailable && (
+          <Link className="button button--secondary" to={roomAction} aria-label="View room details">
+            <MapPin size={18} aria-hidden="true" /> Room details
+          </Link>
+        )}
+      </div>
     </section>
   );
 }

@@ -53,6 +53,15 @@
   --bottom-nav-height: 72px;
   --control-height: 48px;
   --shadow-overlay: 0 16px 48px rgb(28 36 48 / 18%);
+  /* Semantic refinements: future appearance modes can override these values. */
+  --surface-featured: var(--primary-soft);
+  --surface-subtle: var(--canvas);
+  --text-on-action: #ffffff;
+  --border-emphasis: var(--primary);
+  --shadow-card: 0 1px 3px rgb(32 36 44 / 5%);
+  --target-min: 44px;
+  --space-compact: 12px;
+  --radius-featured: 16px;
   font-family:
     Inter,
     ui-sans-serif,

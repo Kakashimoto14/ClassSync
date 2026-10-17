@@ -9,15 +9,20 @@ export function RequestSummary({
   assignment,
   role,
   link = true,
+  compact = false,
 }: {
   request: PreviewRequest;
   assignment?: ScheduleOccurrence;
   role: 'teacher' | 'administrator';
   link?: boolean;
+  compact?: boolean;
 }) {
   const labels = { pending: 'Pending review', approved: 'Approved', declined: 'Declined' };
   return (
-    <article className="request-summary" data-request-id={request.id}>
+    <article
+      className={`request-summary${compact ? ' request-summary--compact' : ''}`}
+      data-request-id={request.id}
+    >
       <StatusBadge
         tone={
           request.status === 'pending'
@@ -30,7 +35,7 @@ export function RequestSummary({
         {labels[request.status]}
       </StatusBadge>
       <h3>{assignment?.subject.name ?? 'Assignment unavailable'}</h3>
-      {assignment && (
+      {assignment && !compact && (
         <p>
           {assignment.section.name} · {formatPreviewDate(assignment.startsAt)} ·{' '}
           {formatTimeRange(assignment)}
@@ -38,10 +43,17 @@ export function RequestSummary({
           {assignment.room.name} · {assignment.teacher.name}
         </p>
       )}
-      <p>{request.reason}</p>
-      <small>
-        Updated {formatPreviewDate(request.updatedAt)} · {request.updatedAt.slice(11, 16)}
-      </small>
+      <p>
+        {compact && assignment
+          ? `${assignment.section.name} · ${assignment.room.name}`
+          : request.reason}
+      </p>
+      {compact && assignment && <p className="request-summary__reason">{request.reason}</p>}
+      {!compact && (
+        <small>
+          Updated {formatPreviewDate(request.updatedAt)} · {request.updatedAt.slice(11, 16)}
+        </small>
+      )}
       {link && (
         <Link
           className="text-action"

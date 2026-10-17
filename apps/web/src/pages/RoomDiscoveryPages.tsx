@@ -1,4 +1,6 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useRef } from 'react';
+import { Button } from '../components/ui/Button';
 import { RoomDirectoryCard, ResourceStatusBadge } from '../components/scheduling/RoomDirectoryCard';
 import { RoomFilters } from '../components/scheduling/RoomFilters';
 import { ScheduleEntry } from '../components/scheduling/ScheduleEntry';
@@ -24,6 +26,12 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
   const availability = definition.roomMode === 'availability';
   const [params, setParams] = useSearchParams();
   const location = useLocation();
+  const resultsHeading = useRef<HTMLHeadingElement>(null);
+  const inventory = params.get('inventory');
+  const inventorySource = inventory === 'demo' ? 'demo' : 'cdm';
+  const inventoryRooms = rooms.filter((room) =>
+    inventorySource === 'cdm' ? !!room.inventory : !room.inventory,
+  );
   const criteria: RoomCriteria = {
     search: params.get('search') ?? '',
     building: params.get('building') ?? '',
@@ -31,16 +39,25 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
     type: params.get('type') ?? '',
     facility: params.get('facility') ?? '',
   };
-  const results = filterRooms(rooms, criteria);
-  function update(key: keyof RoomCriteria, value: string) {
+  const results = filterRooms(inventoryRooms, criteria);
+  const pageCount = Math.max(1, Math.ceil(results.length / 12));
+  const requestedPage = Number(params.get('page') ?? 1);
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 0
+      ? Math.min(requestedPage, pageCount)
+      : 1;
+  const shown = results.slice((page - 1) * 12, page * 12);
+  function update(key: keyof RoomCriteria | 'inventory' | 'page', value: string) {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
     else next.delete(key);
+    if (key !== 'page') next.delete('page');
     setParams(next, { replace: true });
   }
   function reset() {
     const next = new URLSearchParams(params);
     Object.keys(emptyRoomCriteria).forEach((key) => next.delete(key));
+    next.delete('page');
     setParams(next, { replace: true });
   }
   return (
@@ -48,7 +65,11 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
       <div className="page-heading">
         <div>
           <h1>{definition.title}</h1>
-          <p>Demo inventory · Resource condition is separate from time-based availability.</p>
+          <p>
+            {inventorySource === 'cdm'
+              ? 'CDM inventory · User-supplied and provisional.'
+              : 'Demo inventory · Sample resource records.'}
+          </p>
         </div>
         <Link
           className="text-action"
@@ -96,15 +117,25 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
           </details>
         </section>
       )}
-      <RoomFilters rooms={rooms} criteria={criteria} onChange={update} onReset={reset} />
+      <RoomFilters
+        rooms={inventoryRooms}
+        criteria={criteria}
+        onChange={update}
+        onReset={reset}
+        inventorySource={inventorySource}
+        onInventoryChange={(value) => update('inventory', value)}
+      />
       <div className="discovery-results-heading">
-        <h2>{availability ? 'Matching resources' : 'Classrooms'}</h2>
+        <h2 ref={resultsHeading} tabIndex={-1}>
+          {availability ? 'Matching resources' : 'Rooms & spaces'}
+        </h2>
         <p role="status" aria-live="polite">
-          {results.length} of {rooms.length} demo rooms
+          {results.length} of {inventoryRooms.length}{' '}
+          {inventorySource === 'demo' ? 'demo rooms' : 'spaces'}
         </p>
       </div>
       <div className="discovery-results">
-        {results.map((room) => (
+        {shown.map((room) => (
           <RoomDirectoryCard
             key={room.id}
             room={room}
@@ -113,6 +144,35 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
           />
         ))}
       </div>
+      {pageCount > 1 && (
+        <nav className="discovery-pagination" aria-label="Room results pages">
+          <Button
+            variant="secondary"
+            disabled={page === 1}
+            onClick={() => {
+              update('page', String(page - 1));
+              resultsHeading.current?.focus({ preventScroll: true });
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
+          >
+            Previous
+          </Button>
+          <span role="status">
+            Page {page} of {pageCount}
+          </span>
+          <Button
+            variant="secondary"
+            disabled={page === pageCount}
+            onClick={() => {
+              update('page', String(page + 1));
+              resultsHeading.current?.focus({ preventScroll: true });
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
+          >
+            Next
+          </Button>
+        </nav>
+      )}
       {!results.length && (
         <EmptyState
           title="No matching rooms"
@@ -131,9 +191,9 @@ export function RoomDetailPage({ role }: { role: UserRole }) {
   const source =
     typeof candidate === 'string' ? routesByPath.get(candidate.split('?')[0]) : undefined;
   const back =
-    source?.role === role && source.kind === 'rooms'
+    source?.role === role && (source.kind === 'rooms' || source.kind === 'building-detail')
       ? (candidate as string)
-      : roomDirectoryPath(role);
+      : roomDirectoryPath(role) + (room && !room.inventory ? '?inventory=demo' : '');
   if (!room)
     return (
       <div className="room-discovery">
@@ -150,40 +210,54 @@ export function RoomDetailPage({ role }: { role: UserRole }) {
       </div>
     );
   const assignments = roomAssignments(schedulePreview, room.id, role);
+  const unknown = room.inventory ? 'Unverified' : 'Not recorded';
   return (
     <div className="room-discovery">
       <Link className="text-action" to={back}>
-        Back to {source?.roomMode === 'availability' ? 'room search' : 'Room Directory'}
+        Back to{' '}
+        {source?.kind === 'building-detail'
+          ? 'building'
+          : source?.roomMode === 'availability'
+            ? 'room search'
+            : 'Room Directory'}
       </Link>
       <div className="page-heading">
         <div>
           <h1>{room.name}</h1>
           <p>
-            {room.building}
+            {room.inventory?.location ?? room.building}
             {room.floor && ` · ${room.floor}`}
           </p>
         </div>
         <ResourceStatusBadge room={room} />
       </div>
+      {room.inventory && (
+        <p className="muted">
+          User-supplied provisional CDM inventory.{' '}
+          {room.inventory.alias &&
+            `${room.inventory.alias}${room.inventory.aliasUnconfirmed ? ' — Unconfirmed label.' : '.'}`}{' '}
+          Resource details require verification.
+        </p>
+      )}
       <div className="discovery-detail-layout">
         <section className="discovery-detail-panel" aria-labelledby="room-resource-heading">
           <h2 id="room-resource-heading">Room information</h2>
           <dl className="discovery-room-facts">
             <div>
               <dt>Room type</dt>
-              <dd>{room.resource?.type ?? 'Not recorded'}</dd>
+              <dd>{room.resource?.type ?? unknown}</dd>
             </div>
             <div>
               <dt>Seating capacity</dt>
-              <dd>{room.resource ? `${room.resource.seats} seats` : 'Not recorded'}</dd>
+              <dd>{room.resource ? `${room.resource.seats} seats` : unknown}</dd>
             </div>
             <div>
               <dt>Floor</dt>
-              <dd>{room.floor ?? 'Not recorded'}</dd>
+              <dd>{room.floor ?? unknown}</dd>
             </div>
             <div>
               <dt>Facilities</dt>
-              <dd>{roomFacilities(room).join(' · ') || 'Not recorded'}</dd>
+              <dd>{roomFacilities(room).join(' · ') || unknown}</dd>
             </div>
           </dl>
           {room.resource?.condition === 'maintenance' && (
@@ -192,8 +266,7 @@ export function RoomDetailPage({ role }: { role: UserRole }) {
             </p>
           )}
           <p className="muted">
-            Demo records only. Condition and recorded assignments do not confirm availability or
-            suitability.
+            Condition and recorded assignments do not confirm availability or suitability.
           </p>
         </section>
         <section className="discovery-assignments" aria-labelledby="room-assignments-heading">

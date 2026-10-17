@@ -5,11 +5,13 @@ import { StatusBadge } from '../ui/StatusBadge';
 export function ResourceStatusBadge({ room }: { room: RoomRecord }) {
   return (
     <StatusBadge tone={room.resource?.condition === 'maintenance' ? 'warning' : 'neutral'}>
-      {room.resource
-        ? room.resource.condition === 'maintenance'
-          ? 'Maintenance'
-          : 'Resource active'
-        : 'Condition unrecorded'}
+      {room.inventory
+        ? 'Condition unverified'
+        : room.resource
+          ? room.resource.condition === 'maintenance'
+            ? 'Maintenance'
+            : 'Resource active'
+          : 'Condition unrecorded'}
     </StatusBadge>
   );
 }
@@ -30,16 +32,26 @@ export function RoomDirectoryCard({
         <h2>{room.name}</h2>
         <ResourceStatusBadge room={room} />
       </div>
+      {room.inventory?.alias && (
+        <p className="discovery-room-card__capacity">
+          {room.inventory.alias}
+          {room.inventory.aliasUnconfirmed && ' · Unconfirmed'}
+        </p>
+      )}
       <p>
-        {room.building}
+        {room.inventory?.location ?? room.building}
         {room.floor && ` · ${room.floor}`}
       </p>
-      <p className="discovery-room-card__capacity">
-        {room.resource
-          ? `${room.resource.type} · ${room.resource.seats} seats`
-          : 'Capacity and room type unrecorded'}
-      </p>
-      <p className="muted">{roomFacilities(room).join(' · ') || 'Facilities unrecorded'}</p>
+      {!room.inventory && (
+        <p className="discovery-room-card__capacity">
+          {room.resource
+            ? `${room.resource.type} · ${room.resource.seats} seats`
+            : 'Capacity and room type unrecorded'}
+        </p>
+      )}
+      {!room.inventory && (
+        <p className="muted">{roomFacilities(room).join(' · ') || 'Facilities unrecorded'}</p>
+      )}
       <Link
         className="text-action"
         to={detailsPath}

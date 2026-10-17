@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import {
   previewContext,
   previewViewer,
@@ -10,6 +9,7 @@ import {
   selectUpdates,
   summarizeDay,
 } from '../../lib/schedule-preview';
+import { roomById, roomCatalog, roomDetailPath } from '../../lib/room-discovery';
 import { NextClassSummary } from '../../components/scheduling/NextClassSummary';
 import { ScheduleAgenda } from '../../components/scheduling/ScheduleAgenda';
 import { rolePath } from '../../routes/route-config';
@@ -24,6 +24,8 @@ export function StudentDashboard({
 }) {
   const assignments = selectAssignments(data, previewViewer('student'));
   const schedule = summarizeDay(assignments, reference);
+  const featuredRoom = schedule.next?.room ?? (schedule.current.length === 1 ? schedule.current[0].room : undefined);
+  const room = data && featuredRoom ? roomById(roomCatalog(data), featuredRoom.id) : undefined;
   // The summary already presents the current/next assignments. Keep every other
   // remaining record, including a simultaneous assignment, visible in the agenda.
   const featured = new Set([...schedule.current.map((item) => item.id), schedule.next?.id]);
@@ -40,6 +42,7 @@ export function StudentDashboard({
         <div className="dashboard-primary">
           <NextClassSummary
             schedule={schedule}
+            roomAction={room ? roomDetailPath('student', room.id) : undefined}
             action={{ to: rolePath('student', 'schedule'), label: 'View my schedule' }}
           />
           {laterToday.length > 0 && (
@@ -54,20 +57,6 @@ export function StudentDashboard({
           {data && assignments && (
             <ScheduleUpdates updates={selectUpdates(data, assignments)} role="student" />
           )}
-          <section className="dashboard-section">
-            <h2>Explore</h2>
-            <nav aria-label="Student dashboard actions" className="dashboard-actions">
-              <Link className="text-action" to={rolePath('student', 'rooms')}>
-                Room directory
-              </Link>
-              <Link className="text-action" to={rolePath('student', 'calendar')}>
-                My calendar
-              </Link>
-            </nav>
-          </section>
-          <p className="student-demo-note">
-            Fixed demo time. These are sample assignments, not a live schedule.
-          </p>
         </aside>
       </div>
     </div>

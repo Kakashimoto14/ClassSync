@@ -33,6 +33,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [location.pathname, closeMenu]);
 
   useEffect(() => {
+    closeMenu();
+    setQuery('');
+    // Query-only changes (for example directory pagination) own their focus.
+  }, [location.search, location.hash, closeMenu]);
+
+  useEffect(() => {
     const desktop = window.matchMedia('(min-width: 1024px)');
     const onResize = () => {
       if (desktop.matches) closeMenu();
@@ -59,7 +65,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       ),
     }))
     .filter((group) => group.items.length);
-  const roleRoutes = routeDefinitions.filter((route) => route.role === role);
+  const roleRoutes = routeDefinitions.filter(
+    (route) =>
+      route.role === role &&
+      (route.navigationLabel || route.kind === 'profile' || route.kind === 'settings'),
+  );
   const results = query.trim()
     ? roleRoutes
         .filter((route) =>
@@ -72,8 +82,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const owner = navigationOwner(location.pathname);
   const mobileOwner = navigationOwner(location.pathname, true);
   const leaveDemo = () => {
+    // Leave the guarded route before clearing its role, so its missing-session
+    // redirect cannot race the explicit Exit destination.
+    navigate('/auth/login', { replace: true, flushSync: true });
     signOut();
-    navigate('/auth/login', { replace: true });
   };
   const destination = (route: RouteDefinition) => (
     <Link
@@ -119,6 +131,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <LogOut size={18} aria-hidden="true" />
         Exit demo
       </button>
+      <Link className="nav-item" to="/dev/role-preview" onClick={closeMenu}>
+        Switch preview role
+      </Link>
     </div>
   );
 
@@ -170,7 +185,29 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           </div>
           <div className="semester">
-            <span>{profile.label} demo</span>
+            <details
+              className="preview-indicator"
+              key={location.pathname}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.currentTarget.open = false;
+                  event.currentTarget.querySelector('summary')?.focus();
+                }
+              }}
+            >
+              <summary>
+                {profile.label} demo <ChevronDown size={14} aria-hidden="true" />
+              </summary>
+              <div className="preview-menu">
+                <p>
+                  Development preview. Sample schedules use a fixed demonstration time. No live
+                  scheduling, availability, or authentication is connected.
+                </p>
+                <Link className="text-action" to="/dev/role-preview">
+                  Switch preview role
+                </Link>
+              </div>
+            </details>
             <strong>{previewContext.period}</strong>
           </div>
           <div

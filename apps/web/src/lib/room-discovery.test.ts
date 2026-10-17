@@ -25,7 +25,14 @@ describe('room resource discovery', () => {
     expect(roomById(rooms, 'room-nb-405')?.resource).toBeUndefined();
     expect(roomById(rooms, null)).toBeUndefined();
     expect(roomById(rooms, 'SCI-218')).toBeUndefined();
-    expect(roomCatalog({ ...schedulePreview, resources: undefined, occurrences: [] })).toEqual([]);
+    expect(
+      roomCatalog({
+        ...schedulePreview,
+        inventory: undefined,
+        resources: undefined,
+        occurrences: [],
+      }),
+    ).toEqual([]);
   });
   it('combines actual fields and includes the capacity boundary', () => {
     expect(
