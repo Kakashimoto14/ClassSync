@@ -11,7 +11,7 @@ export function ResourceOverview({ data }: { data: SchedulePreviewData | null })
       <h2>Classroom resources</h2>
       {summary ? (
         <>
-          <p className="muted">{summary.total} demo directory records</p>
+          <p className="muted">{summary.total} demo resources with recorded condition</p>
           <dl className="resource-counts">
             <div>
               <dt>Resource active</dt>

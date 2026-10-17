@@ -28,7 +28,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     closeMenu();
     setQuery('');
     // Also runs when switching screen families remounts the shell.
-    main.current?.focus();
+    main.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [location.pathname, closeMenu]);
 
   useEffect(() => {

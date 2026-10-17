@@ -52,6 +52,7 @@ export interface RouteDefinition {
   title: string;
   description: string;
   kind: ScreenKind;
+  roomMode?: 'directory' | 'availability';
   navigationGroup?: string;
   navigationLabel?: string;
   icon: LucideIcon;
@@ -115,6 +116,7 @@ export const routeDefinitions = [
     title: 'Room Directory',
     description: 'Find classroom locations and facilities.',
     kind: 'rooms',
+    roomMode: 'directory',
     navigationGroup: 'Rooms',
     navigationLabel: 'Rooms',
     icon: MapPin,
@@ -125,10 +127,11 @@ export const routeDefinitions = [
     path: '/student/find-room',
     role: 'student',
     title: 'Find a Room',
-    description: 'Search scheduled room availability for your class needs.',
+    description: 'Compare classroom resources and review availability limitations.',
     kind: 'rooms',
+    roomMode: 'availability',
     navigationGroup: 'Rooms',
-    navigationLabel: 'Find Available Room',
+    navigationLabel: 'Find a Room',
     icon: DoorOpen,
   }),
   make({
@@ -153,6 +156,15 @@ export const routeDefinitions = [
     navigationGroup: 'Communication',
     navigationLabel: 'Announcements',
     icon: Megaphone,
+  }),
+  make({
+    id: 'student.room-detail',
+    path: '/student/rooms/detail',
+    role: 'student',
+    title: 'Room Details',
+    description: 'Location, facilities, and recorded demo assignments.',
+    kind: 'room-detail',
+    icon: Building2,
   }),
   make({
     id: 'student.profile',
@@ -215,6 +227,7 @@ export const routeDefinitions = [
     title: 'Room Availability',
     description: 'Check planned classroom availability for a teaching period.',
     kind: 'rooms',
+    roomMode: 'availability',
     navigationGroup: 'Rooms',
     navigationLabel: 'Room Availability',
     icon: DoorOpen,
@@ -224,11 +237,12 @@ export const routeDefinitions = [
     id: 'teacher.find-room',
     path: '/teacher/find-room',
     role: 'teacher',
-    title: 'Find an Available Room',
-    description: 'Compare suitable rooms before submitting a classroom change request.',
+    title: 'Room Directory',
+    description: 'Find classroom locations, capacity, and equipment.',
     kind: 'rooms',
+    roomMode: 'directory',
     navigationGroup: 'Rooms',
-    navigationLabel: 'Find Available Room',
+    navigationLabel: 'Room Directory',
     icon: MapPin,
   }),
   make({
@@ -294,6 +308,15 @@ export const routeDefinitions = [
     navigationGroup: 'Communication',
     navigationLabel: 'Announcements',
     icon: Megaphone,
+  }),
+  make({
+    id: 'teacher.room-detail',
+    path: '/teacher/rooms/detail',
+    role: 'teacher',
+    title: 'Room Details',
+    description: 'Location, facilities, and recorded demo assignments.',
+    kind: 'room-detail',
+    icon: Building2,
   }),
   make({
     id: 'teacher.profile',
@@ -482,9 +505,10 @@ export const routeDefinitions = [
     id: 'administrator.rooms',
     path: '/admin/rooms',
     role: 'administrator',
-    title: 'Rooms',
+    title: 'Room Directory',
     description: 'Review classroom capacity, facilities, and resource status.',
     kind: 'rooms',
+    roomMode: 'directory',
     navigationGroup: 'Resources',
     navigationLabel: 'Rooms',
     icon: MapPin,
@@ -525,6 +549,7 @@ export const routeDefinitions = [
     title: 'Room Availability',
     description: 'Check planned classroom availability by time and requirements.',
     kind: 'rooms',
+    roomMode: 'availability',
     navigationGroup: 'Resources',
     navigationLabel: 'Room Availability',
     icon: DoorOpen,
@@ -669,6 +694,8 @@ export function mobileNavigationForRole(role: UserRole): RouteDefinition[] {
 
 // Explicit ownership preserves section context without prefix-matching unrelated routes.
 const navigationParents: Partial<Record<RouteId, RouteId>> = {
+  'student.room-detail': 'student.rooms',
+  'teacher.room-detail': 'teacher.find-room',
   'student.calendar': 'student.schedule',
   'student.registration-scanner': 'student.schedule',
   'student.find-room': 'student.rooms',

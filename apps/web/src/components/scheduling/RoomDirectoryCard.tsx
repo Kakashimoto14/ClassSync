@@ -1,59 +1,53 @@
-import { Building2, MapPin, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { roomFacilities, type RoomRecord } from '../../lib/room-discovery';
 import { StatusBadge } from '../ui/StatusBadge';
 
-export interface RoomDirectoryRecord {
-  id: string;
-  building: string;
-  floor: string;
-  type: string;
-  seats: number;
-  facilities: string;
-  status: string;
+export function ResourceStatusBadge({ room }: { room: RoomRecord }) {
+  return (
+    <StatusBadge tone={room.resource?.condition === 'maintenance' ? 'warning' : 'neutral'}>
+      {room.resource
+        ? room.resource.condition === 'maintenance'
+          ? 'Maintenance'
+          : 'Resource active'
+        : 'Condition unrecorded'}
+    </StatusBadge>
+  );
 }
 
-/** Resource metadata only. A room record cannot establish time-window availability. */
+/** Inventory condition only; deliberately makes no claim about availability. */
 export function RoomDirectoryCard({
   room,
   detailsPath,
-  availabilityPreview = false,
+  returnTo,
 }: {
-  room: RoomDirectoryRecord;
-  detailsPath?: string;
-  availabilityPreview?: boolean;
+  room: RoomRecord;
+  detailsPath: string;
+  returnTo?: string;
 }) {
   return (
-    <article className="room-directory-card">
-      <div className="room-thumb">
-        <Building2 aria-hidden="true" />
+    <article className="discovery-room-card">
+      <div className="discovery-room-card__heading">
+        <h2>{room.name}</h2>
+        <ResourceStatusBadge room={room} />
       </div>
-      <div>
-        <StatusBadge tone={room.status === 'Maintenance' ? 'warning' : 'neutral'}>
-          {room.status === 'Available' ? 'Resource active' : room.status}
-        </StatusBadge>
-        <h2>{room.id}</h2>
-        <p>
-          {room.building} · {room.floor} · {room.type}
-        </p>
-        <div className="room-meta">
-          <span>
-            <UsersRound size={16} aria-hidden="true" />
-            {room.seats} seats
-          </span>
-          <span>
-            <MapPin size={16} aria-hidden="true" />
-            {room.facilities}
-          </span>
-        </div>
-        {availabilityPreview && (
-          <small>Time-window availability is not verified in this preview.</small>
-        )}
-      </div>
-      {detailsPath && (
-        <Link className="button button--secondary" to={detailsPath}>
-          View room details
-        </Link>
-      )}
+      <p>
+        {room.building}
+        {room.floor && ` · ${room.floor}`}
+      </p>
+      <p className="discovery-room-card__capacity">
+        {room.resource
+          ? `${room.resource.type} · ${room.resource.seats} seats`
+          : 'Capacity and room type unrecorded'}
+      </p>
+      <p className="muted">{roomFacilities(room).join(' · ') || 'Facilities unrecorded'}</p>
+      <Link
+        className="text-action"
+        to={detailsPath}
+        state={{ returnTo }}
+        aria-label={`View ${room.name} details`}
+      >
+        View details <span aria-hidden="true">→</span>
+      </Link>
     </article>
   );
 }

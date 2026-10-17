@@ -147,7 +147,9 @@ describe('UI-02 operations dashboards', () => {
       </MemoryRouter>,
     );
     const resources = screen.getByRole('region', { name: 'Classroom resources' });
-    expect(within(resources).getByText('3 demo directory records')).toBeInTheDocument();
+    expect(
+      within(resources).getByText('3 demo resources with recorded condition'),
+    ).toBeInTheDocument();
     expect(resources.querySelector('dl')?.textContent).toBe('Resource active2Maintenance1');
     expect(
       within(resources).getByText(/Time-based availability is unavailable/),
