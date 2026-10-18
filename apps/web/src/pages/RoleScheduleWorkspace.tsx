@@ -72,8 +72,7 @@ export function RoleScheduleWorkspace({
     d.setUTCMonth(d.getUTCMonth() + delta);
     change({ date: d.toISOString().slice(0, 10) });
   }
-  const unavailable = !!error && !data,
-    unpublished = data?.status === 'not-published';
+  const unpublished = data?.status === 'not-published';
   return (
     <section
       className={`structured-calendar ux-calendar ${dashboard ? 'is-dashboard' : ''}`}
@@ -195,7 +194,9 @@ export function RoleScheduleWorkspace({
               ? 'This timetable is not permitted for your current access. Choose an available sample.'
               : w.errorStatus === 404
                 ? 'That saved sample is unavailable. Choose another sample.'
-                : 'The timetable service is unavailable. Check the connection, then retry.'}
+                : w.errorStatus === 422
+                  ? 'This sample needs valid academic calendar dates. Ask the Administrator to review its academic setup.'
+                  : 'The timetable service is unavailable. Check the connection, then retry.'}
           </p>
           <Button variant="secondary" onClick={w.retry}>
             Retry
@@ -220,7 +221,7 @@ export function RoleScheduleWorkspace({
         </div>
       )}
       {loading && !data && <p role="status">Loading your timetable…</p>}
-      {!loading && !unavailable && (unpublished || !data) && (
+      {!loading && !error && (unpublished || !data) && (
         <div className="workspace-card ux-empty">
           <h2>
             {unpublished
@@ -261,7 +262,7 @@ export function RoleScheduleWorkspace({
             No classes today.
           </p>
         )}
-      {dashboard && next && !unavailable && (
+      {dashboard && next && !error && (
         <article
           className="ux-next-class"
           aria-label={role === 'teacher' ? 'Next teaching assignment' : 'Next class'}
@@ -300,7 +301,7 @@ export function RoleScheduleWorkspace({
           </p>
           {next.changed && <span className="ux-update">Schedule changed</span>}
           <div className="draft-actions">
-            <Link className="button button--secondary" to={base + '/schedule'}>
+            <Link className="button" to={base + '/schedule'}>
               Open Schedule
             </Link>
             {sessionRoomPath(role, next.room.id) && (
@@ -476,13 +477,15 @@ export function RoleScheduleWorkspace({
           )}
         </>
       )}
-      {data && !unpublished && !unavailable && (!dashboard || agenda.length > 0) && (
+      {data && !unpublished && !error && (!dashboard || agenda.length > 0) && (
         <section className="ux-agenda" aria-live="polite">
           <div className="ux-section-heading">
             <h2>{dashboard ? 'Remaining today' : calendarDateLabel(date)}</h2>
             {dashboard && <Link to={base + '/schedule'}>Full schedule</Link>}
           </div>
-          {agenda.length ? (
+          {loading ? (
+            <p role="status">Loading selected day…</p>
+          ) : agenda.length ? (
             agenda.map((o) => (
               <button className="ux-agenda-row" key={o.id} onClick={() => setSelected(o)}>
                 <span className="ux-agenda-time">

@@ -259,6 +259,7 @@
   color: var(--primary);
   font-size: 13px;
 }
+.ux-generation-flow summary { color: var(--ink); }
 .ux-scheduled-rooms .workspace-card {
   padding: 12px;
 }

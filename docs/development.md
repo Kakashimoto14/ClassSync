@@ -12,11 +12,42 @@ services are reused; incompatible ports produce an actionable error. Ctrl+C stop
 processes started by this launcher. There is no automatic import, database reset,
 authentication bypass or publication.
 
+The canonical browser origin is **http://127.0.0.1:5173/**. Use this exact host and
+port for the presentation. Vite binds IPv4 loopback and uses `strictPort`; an occupied
+5173 is an error, never an automatic move to 5174. `localhost`, another port and
+`127.0.0.1` have independent browser session storage. Do not expect a selected role
+or sample to transfer between them. The launcher prints its Gateway and database
+paths so alternate instances can be identified.
+
 For occupied ports: `npm run dev -- --base-port 8830 --web-port 5190`.
 `ACADEMIC_DATABASE_PATH` and `SCHEDULING_DATABASE_PATH` remain configurable; defaults
 continue to use the existing `var/` databases. Set alternate paths explicitly for QA;
 never replace working records with samples. Academic migration v3 adds calendar metadata;
 scheduling draft schema v2 and immutable publication tables retain existing records.
+
+Use alternate ports deliberately, not to work around an unidentified old service.
+If a second frontend is needed against the **same** default backend, run
+`npm run dev --workspace=@classync/web -- --host 127.0.0.1 --port 5174 --strictPort`.
+Its Gateway defaults to 8000; set `CLASSSYNC_GATEWAY_URL` explicitly for another
+Gateway. Leave `VITE_API_BASE_URL` unset for the same-origin `/api/v1` proxy.
+The 5190 QA workspace previously used separate databases; its data is not the
+canonical workspace's data.
+
+### Presentation sample, deliberately created
+
+Open Administrator → Academic Setup → **Sample Academic Scenario** → **Review sample
+setup** → **Import sample period**. Review readiness, generate and Save Draft.
+The default scenario is BSIT 3A, two synthetic offerings/teachers and four synthetic
+classroom candidates. The nine programs and 59 provisional spaces remain intact;
+provisional spaces are not made solver eligible. Imports are idempotent and do not
+overwrite edits. A sample with edited/incomplete requirements must be repaired or
+configured separately, not silently replaced.
+
+In Student/Teacher preview, choose **Open a sample timetable** when no matching
+publication exists. Only server-approved synthetic drafts appear. Unpublished
+review is clearly labelled and remembered within that origin's P0 session. Entered
+or institutional drafts are never silently selected as anonymous review. No saved
+sample means setup is required; no published timetable does not imply a free day.
 
 The browser must use the Vite URL printed by this command so its proxy reaches the
 matching Gateway. `npm run dev:web` alone starts only the frontend and does not verify
@@ -25,8 +56,8 @@ the unavailable timetable as a free day. Real publishing still requires verified
 Administrator credentials even in the local synthetic dataset.
 
 1. Copy `.env.example` to `.env`, and `apps/web/.env.example` to `apps/web/.env`. Leave Firebase values empty to run the neutral web shell and service health checks. The gateway reads the root `.env` regardless of its working directory.
-2. Run `npm install`, then `npm run dev:web` for the Vite app.
-3. For each service, create and activate a Python virtual environment, then from its directory run `pip install -r requirements.txt` and start it with `uvicorn app.main:app --reload --port <port>`.
+2. Install npm and service Python requirements, then run `npm run dev` from the root.
+3. For manual service work only, activate the virtual environment and start each service explicitly; ensure all URLs, sandbox flags and database paths match. This alternative does not replace the verified one-command presentation workflow.
 
 Ports: gateway 8000, academic 8001, scheduling 8002, notification 8003. Check `GET /health` on each process. The gateway can proxy a health check at `/api/v1/services/{academic|scheduling|notification}/health`.
 

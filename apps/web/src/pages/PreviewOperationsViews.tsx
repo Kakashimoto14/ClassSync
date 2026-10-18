@@ -121,7 +121,10 @@ export function PreviewRequestsView({
   const shown = detail ? (selected ? [selected] : []) : requests;
   return (
     <section className="preview-records">
-      <p className="muted">Sample requests · official changes require administrator review.</p>
+      <p className="muted">
+        Demonstration requests · separate from your selected timetable. Official changes require
+        administrator review.
+      </p>
       {shown.map((request) => (
         <RequestSummary
           key={request.id}
@@ -308,7 +311,10 @@ export function PreviewUpdatesView({ role }: { role: UserRole }) {
   const updates = selectUpdates(schedulePreview, assignments);
   return (
     <section className="preview-records">
-      <p className="muted">Sample schedule updates. Notification delivery is not connected.</p>
+      <p className="muted">
+        Demonstration alerts · separate from your selected timetable. Notification delivery is not
+        connected.
+      </p>
       {updates.map((update) => (
         <article key={update.id} className="dashboard-panel">
           <h2>{update.title}</h2>
