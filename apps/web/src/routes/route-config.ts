@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { matchPath } from 'react-router-dom';
 import {
   Bell,
   BookOpen,
@@ -22,6 +23,8 @@ export type ScreenKind =
   | 'dashboard'
   | 'schedule'
   | 'schedule-create'
+  | 'schedule-drafts'
+  | 'schedule-draft-detail'
   | 'calendar'
   | 'conflicts'
   | 'conflict-detail'
@@ -35,6 +38,7 @@ export type ScreenKind =
   | 'building-detail'
   | 'academic-list'
   | 'academic-detail'
+  | 'academic-manage'
   | 'reports'
   | 'notifications'
   | 'announcements'
@@ -58,6 +62,7 @@ export interface RouteDefinition {
   icon: LucideIcon;
   mobileLabel?: string;
   plannedFeature?: PlannedFeature;
+  academicKind?: 'programs' | 'subjects' | 'sections' | 'faculty' | 'resources' | 'offerings' | 'constraints';
 }
 const make = (definition: RouteDefinition): RouteDefinition => definition;
 export const routeDefinitions = [
@@ -371,6 +376,26 @@ export const routeDefinitions = [
     icon: CalendarDays,
   }),
   make({
+    id: 'administrator.schedule-drafts',
+    path: '/admin/schedule-manager/drafts',
+    role: 'administrator',
+    title: 'Saved Drafts',
+    description: 'Reopen validated timetables saved for administrator review.',
+    kind: 'schedule-drafts',
+    navigationGroup: 'Scheduling',
+    navigationLabel: 'Saved Drafts',
+    icon: ClipboardList,
+  }),
+  make({
+    id: 'administrator.schedule-draft-detail',
+    path: '/admin/schedule-manager/drafts/:draftId',
+    role: 'administrator',
+    title: 'Saved Draft',
+    description: 'Review a saved timetable. Drafts are not published schedules.',
+    kind: 'schedule-draft-detail',
+    icon: CalendarDays,
+  }),
+  make({
     id: 'administrator.calendar',
     path: '/admin/calendar',
     role: 'administrator',
@@ -454,7 +479,8 @@ export const routeDefinitions = [
     role: 'administrator',
     title: 'Teachers',
     description: 'Review teacher records, assignments, and availability.',
-    kind: 'academic-list',
+    kind: 'academic-manage',
+    academicKind: 'faculty',
     navigationGroup: 'Academic',
     navigationLabel: 'Teachers',
     icon: UsersRound,
@@ -476,7 +502,8 @@ export const routeDefinitions = [
     role: 'administrator',
     title: 'Subjects',
     description: 'Review subjects and scheduling requirements.',
-    kind: 'academic-list',
+    kind: 'academic-manage',
+    academicKind: 'subjects',
     navigationGroup: 'Academic',
     navigationLabel: 'Subjects',
     icon: BookOpen,
@@ -487,10 +514,32 @@ export const routeDefinitions = [
     role: 'administrator',
     title: 'Sections',
     description: 'Review section assignments, advisers, and schedule status.',
-    kind: 'academic-list',
+    kind: 'academic-manage',
+    academicKind: 'sections',
     navigationGroup: 'Academic',
     navigationLabel: 'Sections',
     icon: UsersRound,
+  }),
+  make({
+    id: 'administrator.academic-data', path: '/admin/academic', role: 'administrator', title: 'Academic Data',
+    description: 'Manage saved academic periods and scheduling inputs.', kind: 'academic-manage', academicKind: 'programs',
+    navigationGroup: 'Academic', navigationLabel: 'Academic Data', icon: BookOpen,
+  }),
+  make({
+    id: 'administrator.programs', path: '/admin/programs', role: 'administrator', title: 'Programs',
+    description: 'Configure program names and section naming policies for a saved period.', kind: 'academic-manage', academicKind: 'programs', icon: BookOpen,
+  }),
+  make({
+    id: 'administrator.offerings', path: '/admin/offerings', role: 'administrator', title: 'Subject Offerings',
+    description: 'Assign subjects, sections, eligible faculty and classrooms.', kind: 'academic-manage', academicKind: 'offerings', icon: BookOpen,
+  }),
+  make({
+    id: 'administrator.resource-metadata', path: '/admin/academic/resources', role: 'administrator', title: 'Resource Metadata',
+    description: 'Enter resource constraints with provenance. Provisional locations remain separate from suitability.', kind: 'academic-manage', academicKind: 'resources', icon: Building2,
+  }),
+  make({
+    id: 'administrator.scheduling-constraints', path: '/admin/scheduling-constraints', role: 'administrator', title: 'Scheduling Constraints',
+    description: 'Set allowed teaching windows, workload rules and locked assignments.', kind: 'academic-manage', academicKind: 'constraints', icon: CalendarDays,
   }),
   make({
     id: 'administrator.academic-detail',
@@ -707,6 +756,8 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
   'teacher.report-issue': 'teacher.requests',
   'teacher.announcements': 'teacher.notifications',
   'administrator.schedule-create': 'administrator.schedule-manager',
+  'administrator.schedule-drafts': 'administrator.schedule-manager',
+  'administrator.schedule-draft-detail': 'administrator.schedule-drafts',
   'administrator.calendar': 'administrator.schedule-manager',
   'administrator.ai-scheduling': 'administrator.schedule-manager',
   'administrator.conflict-detail': 'administrator.conflicts',
@@ -715,12 +766,19 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
   'administrator.room-detail': 'administrator.rooms',
   'administrator.building-detail': 'administrator.buildings',
   'administrator.academic-detail': 'administrator.sections',
+  'administrator.programs': 'administrator.academic-data',
+  'administrator.offerings': 'administrator.academic-data',
+  'administrator.resource-metadata': 'administrator.academic-data',
+  'administrator.scheduling-constraints': 'administrator.academic-data',
   'administrator.utilization': 'administrator.reports',
   'administrator.announcements': 'administrator.notifications',
 };
 
 export function navigationOwner(path: string, mobile = false): RouteId | undefined {
-  let route = routesByPath.get(path.split(/[?#]/, 1)[0].replace(/\/+$/, ''));
+  const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
+  let route = routesByPath.get(pathname) ?? routeDefinitions.find(
+    (item) => item.path.includes('/:') && matchPath({ path: item.path, end: true }, pathname),
+  );
   const visited = new Set<RouteId>();
   while (route && !visited.has(route.id)) {
     visited.add(route.id);

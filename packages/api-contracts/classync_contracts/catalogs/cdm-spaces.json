@@ -1,0 +1,363 @@
+[
+  {
+    "id": "cdm-prrc-101",
+    "name": "PRRC 101",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-102",
+    "name": "PRRC 102",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-103",
+    "name": "PRRC 103",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-104",
+    "name": "PRRC 104",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-105",
+    "name": "PRRC 105",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-106",
+    "name": "PRRC 106",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-107",
+    "name": "PRRC 107",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-108",
+    "name": "PRRC 108",
+    "building": "PRRC",
+    "floor": "Floor 1",
+    "alias": "ITE Lab"
+  },
+  {
+    "id": "cdm-prrc-109",
+    "name": "PRRC 109",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-110",
+    "name": "PRRC 110",
+    "building": "PRRC",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-prrc-201",
+    "name": "PRRC 201",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-202",
+    "name": "PRRC 202",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-203",
+    "name": "PRRC 203",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-204",
+    "name": "PRRC 204",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-205",
+    "name": "PRRC 205",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-206",
+    "name": "PRRC 206",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-207",
+    "name": "PRRC 207",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-208",
+    "name": "PRRC 208",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-209",
+    "name": "PRRC 209",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-210",
+    "name": "PRRC 210",
+    "building": "PRRC",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-prrc-301",
+    "name": "PRRC 301",
+    "building": "PRRC",
+    "floor": "Floor 3",
+    "alias": "COMLAB1"
+  },
+  {
+    "id": "cdm-prrc-302",
+    "name": "PRRC 302",
+    "building": "PRRC",
+    "floor": "Floor 3",
+    "alias": "VGA Room",
+    "aliasUnconfirmed": true
+  },
+  {
+    "id": "cdm-prrc-303",
+    "name": "PRRC 303",
+    "building": "PRRC",
+    "floor": "Floor 3",
+    "alias": "COMLAB2"
+  },
+  {
+    "id": "cdm-prrc-307",
+    "name": "PRRC 307",
+    "building": "PRRC",
+    "floor": "Floor 3",
+    "alias": "COMLAB3"
+  },
+  {
+    "id": "cdm-prrc-308",
+    "name": "PRRC 308",
+    "building": "PRRC",
+    "floor": "Floor 3",
+    "alias": "COMLAB4"
+  },
+  {
+    "id": "cdm-prrc-309",
+    "name": "PRRC 309",
+    "building": "PRRC",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-prrc-310",
+    "name": "PRRC 310",
+    "building": "PRRC",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-101",
+    "name": "New Building 101",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-102",
+    "name": "New Building 102",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-103",
+    "name": "New Building 103",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-104",
+    "name": "New Building 104",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-105",
+    "name": "New Building 105",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-106",
+    "name": "New Building 106",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-107",
+    "name": "New Building 107",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-108",
+    "name": "New Building 108",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-109",
+    "name": "New Building 109",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-110",
+    "name": "New Building 110",
+    "building": "New Building",
+    "floor": "Floor 1"
+  },
+  {
+    "id": "cdm-new-201",
+    "name": "New Building 201",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-202",
+    "name": "New Building 202",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-203",
+    "name": "New Building 203",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-204",
+    "name": "New Building 204",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-205",
+    "name": "New Building 205",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-206",
+    "name": "New Building 206",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-207",
+    "name": "New Building 207",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-208",
+    "name": "New Building 208",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-209",
+    "name": "New Building 209",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-210",
+    "name": "New Building 210",
+    "building": "New Building",
+    "floor": "Floor 2"
+  },
+  {
+    "id": "cdm-new-301",
+    "name": "New Building 301",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-302",
+    "name": "New Building 302",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-303",
+    "name": "New Building 303",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-304",
+    "name": "New Building 304",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-305",
+    "name": "New Building 305",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-306",
+    "name": "New Building 306",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-307",
+    "name": "New Building 307",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-308",
+    "name": "New Building 308",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-309",
+    "name": "New Building 309",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-310",
+    "name": "New Building 310",
+    "building": "New Building",
+    "floor": "Floor 3"
+  },
+  {
+    "id": "cdm-new-function-hall",
+    "name": "Function Hall",
+    "building": "New Building",
+    "floor": "4th floor"
+  },
+  {
+    "id": "cdm-court",
+    "name": "Court",
+    "building": "Court",
+    "location": "Beside New Building"
+  }
+]

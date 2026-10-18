@@ -2,6 +2,8 @@
 @import './room-discovery.css';
 @import './presentation.css';
 @import './interface-refinements.css';
+@import './weekly-scheduling.css';
+@import './academic-management.css';
 
 @tailwind base;
 @tailwind components;

@@ -1,0 +1,1095 @@
+{
+  "contract_version": "v1",
+  "period_id": "synthetic-week",
+  "data_version": "synthetic-v1",
+  "scope_description": "Synthetic presentation batch: 3 programs, 4 sections, 12 offerings. Not CdM curriculum, faculty, enrollment or resource metadata.",
+  "all_intended_offerings_supplied": true,
+  "synthetic": true,
+  "operating_windows": [
+    {
+      "day": 0,
+      "start": 480,
+      "end": 720
+    },
+    {
+      "day": 0,
+      "start": 780,
+      "end": 1020
+    },
+    {
+      "day": 1,
+      "start": 480,
+      "end": 720
+    },
+    {
+      "day": 1,
+      "start": 780,
+      "end": 1020
+    },
+    {
+      "day": 2,
+      "start": 480,
+      "end": 720
+    },
+    {
+      "day": 2,
+      "start": 780,
+      "end": 1020
+    },
+    {
+      "day": 3,
+      "start": 480,
+      "end": 720
+    },
+    {
+      "day": 3,
+      "start": 780,
+      "end": 1020
+    },
+    {
+      "day": 4,
+      "start": 480,
+      "end": 720
+    },
+    {
+      "day": 4,
+      "start": 780,
+      "end": 1020
+    }
+  ],
+  "transition_buffer_minutes": 0,
+  "programs": [
+    {
+      "id": "bsit",
+      "acronym": "BSIT",
+      "name": "Information Technology",
+      "institute": "Institute of Computer Studies",
+      "aliases": [],
+      "section_policy": "degree",
+      "allowed_year_levels": null
+    },
+    {
+      "id": "bscpe",
+      "acronym": "BSCPE",
+      "name": "Computer Engineering",
+      "institute": "Institute of Computer Studies",
+      "aliases": [
+        "BSCpE"
+      ],
+      "section_policy": "degree",
+      "allowed_year_levels": null
+    },
+    {
+      "id": "bsba-hrm",
+      "acronym": "BSBA-HRM",
+      "name": "Business Administration, Human Resource Management",
+      "institute": "Institute of Business",
+      "aliases": [
+        "BSBA HRM"
+      ],
+      "section_policy": "degree",
+      "allowed_year_levels": null
+    }
+  ],
+  "sections": [
+    {
+      "id": "synthetic-section-0",
+      "program_id": "bsit",
+      "year_level": 3,
+      "section_letter": "A",
+      "custom_label": null,
+      "preferred_days": []
+    },
+    {
+      "id": "synthetic-section-1",
+      "program_id": "bsit",
+      "year_level": 3,
+      "section_letter": "B",
+      "custom_label": null,
+      "preferred_days": []
+    },
+    {
+      "id": "synthetic-section-2",
+      "program_id": "bscpe",
+      "year_level": 2,
+      "section_letter": "A",
+      "custom_label": null,
+      "preferred_days": []
+    },
+    {
+      "id": "synthetic-section-3",
+      "program_id": "bsba-hrm",
+      "year_level": 1,
+      "section_letter": "A",
+      "custom_label": null,
+      "preferred_days": []
+    }
+  ],
+  "teachers": [
+    {
+      "id": "synthetic-teacher-0",
+      "name": "Example Instructor A (synthetic)",
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "unavailable": [
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "preferred_days": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "synthetic-teacher-1",
+      "name": "Example Instructor B (synthetic)",
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "unavailable": [],
+      "preferred_days": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "synthetic-teacher-2",
+      "name": "Example Instructor C (synthetic)",
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "unavailable": [],
+      "preferred_days": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "synthetic-teacher-3",
+      "name": "Example Instructor D (synthetic)",
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "unavailable": [],
+      "preferred_days": [
+        1,
+        3
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "synthetic-room-0",
+      "name": "Example Room 1",
+      "building": "Synthetic East",
+      "floor": "Example Floor 1",
+      "location": null,
+      "source": "synthetic",
+      "schedulable": true,
+      "condition": "operational",
+      "room_type": "lecture",
+      "type_verified": true,
+      "capacity": 50,
+      "capacity_verified": true,
+      "equipment": [
+        "projector"
+      ],
+      "equipment_verified": true,
+      "allowed_program_ids": null,
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "blocked": []
+    },
+    {
+      "id": "synthetic-room-1",
+      "name": "Example Room 2",
+      "building": "Synthetic West",
+      "floor": "Example Floor 1",
+      "location": null,
+      "source": "synthetic",
+      "schedulable": true,
+      "condition": "operational",
+      "room_type": "lecture",
+      "type_verified": true,
+      "capacity": 50,
+      "capacity_verified": true,
+      "equipment": [
+        "projector"
+      ],
+      "equipment_verified": true,
+      "allowed_program_ids": null,
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "blocked": []
+    },
+    {
+      "id": "synthetic-room-2",
+      "name": "Example Lab 3",
+      "building": "Synthetic East",
+      "floor": "Example Floor 1",
+      "location": null,
+      "source": "synthetic",
+      "schedulable": true,
+      "condition": "operational",
+      "room_type": "lab",
+      "type_verified": true,
+      "capacity": 30,
+      "capacity_verified": true,
+      "equipment": [
+        "projector",
+        "computers"
+      ],
+      "equipment_verified": true,
+      "allowed_program_ids": null,
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "blocked": []
+    },
+    {
+      "id": "synthetic-room-3",
+      "name": "Example Lab 4",
+      "building": "Synthetic West",
+      "floor": "Example Floor 1",
+      "location": null,
+      "source": "synthetic",
+      "schedulable": true,
+      "condition": "operational",
+      "room_type": "lab",
+      "type_verified": true,
+      "capacity": 30,
+      "capacity_verified": true,
+      "equipment": [
+        "projector",
+        "computers"
+      ],
+      "equipment_verified": true,
+      "allowed_program_ids": null,
+      "availability": [
+        {
+          "day": 0,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 0,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 1,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 2,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 2,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 3,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 4,
+          "start": 480,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 780,
+          "end": 1020
+        }
+      ],
+      "blocked": []
+    }
+  ],
+  "offerings": [
+    {
+      "id": "synthetic-offering-0-0",
+      "subject_id": "synthetic-subject-0",
+      "subject_name": "Example Seminar",
+      "section_id": "synthetic-section-0",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-0",
+        "synthetic-teacher-1"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-0-1",
+      "subject_id": "synthetic-subject-1",
+      "subject_name": "Example Applied Lab",
+      "section_id": "synthetic-section-0",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-0",
+        "synthetic-teacher-1"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-2",
+        "synthetic-room-3"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lab",
+      "required_equipment": [
+        "computers"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-0-2",
+      "subject_id": "synthetic-subject-2",
+      "subject_name": "Example Workshop",
+      "section_id": "synthetic-section-0",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-0",
+        "synthetic-teacher-1"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        },
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-1-0",
+      "subject_id": "synthetic-subject-0",
+      "subject_name": "Example Seminar",
+      "section_id": "synthetic-section-1",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-1",
+        "synthetic-teacher-2"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-1-1",
+      "subject_id": "synthetic-subject-1",
+      "subject_name": "Example Applied Lab",
+      "section_id": "synthetic-section-1",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-1",
+        "synthetic-teacher-2"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-2",
+        "synthetic-room-3"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lab",
+      "required_equipment": [
+        "computers"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-1-2",
+      "subject_id": "synthetic-subject-2",
+      "subject_name": "Example Workshop",
+      "section_id": "synthetic-section-1",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-1",
+        "synthetic-teacher-2"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        },
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-2-0",
+      "subject_id": "synthetic-subject-0",
+      "subject_name": "Example Seminar",
+      "section_id": "synthetic-section-2",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-2",
+        "synthetic-teacher-3"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-2-1",
+      "subject_id": "synthetic-subject-1",
+      "subject_name": "Example Applied Lab",
+      "section_id": "synthetic-section-2",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-2",
+        "synthetic-teacher-3"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-2",
+        "synthetic-room-3"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lab",
+      "required_equipment": [
+        "computers"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-2-2",
+      "subject_id": "synthetic-subject-2",
+      "subject_name": "Example Workshop",
+      "section_id": "synthetic-section-2",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-2",
+        "synthetic-teacher-3"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        },
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-3-0",
+      "subject_id": "synthetic-subject-0",
+      "subject_name": "Example Seminar",
+      "section_id": "synthetic-section-3",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-3",
+        "synthetic-teacher-0"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-3-1",
+      "subject_id": "synthetic-subject-1",
+      "subject_name": "Example Applied Lab",
+      "section_id": "synthetic-section-3",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-3",
+        "synthetic-teacher-0"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-2",
+        "synthetic-room-3"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lab",
+      "required_equipment": [
+        "computers"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    },
+    {
+      "id": "synthetic-offering-3-2",
+      "subject_id": "synthetic-subject-2",
+      "subject_name": "Example Workshop",
+      "section_id": "synthetic-section-3",
+      "eligible_teacher_ids": [
+        "synthetic-teacher-3",
+        "synthetic-teacher-0"
+      ],
+      "eligible_room_ids": [
+        "synthetic-room-0",
+        "synthetic-room-1"
+      ],
+      "required_weekly_minutes": 180,
+      "patterns": [
+        {
+          "id": "one-180",
+          "durations": [
+            180
+          ],
+          "distinct_days": true
+        },
+        {
+          "id": "two-90",
+          "durations": [
+            90,
+            90
+          ],
+          "distinct_days": true
+        }
+      ],
+      "required_room_type": "lecture",
+      "required_equipment": [
+        "projector"
+      ],
+      "minimum_capacity": 25,
+      "allowed_buildings": null
+    }
+  ],
+  "enrollments": [
+    {
+      "student_id": "synthetic-cross-section-student",
+      "offering_ids": [
+        "synthetic-offering-0-0",
+        "synthetic-offering-1-1"
+      ]
+    }
+  ],
+  "locked_assignments": [],
+  "previous_assignments": [],
+  "options": {
+    "time_limit_seconds": 15.0,
+    "seed": 42,
+    "weights": {
+      "idle_gaps": 2,
+      "daily_balance": 1,
+      "preferences": 3,
+      "building_changes": 2,
+      "disruption": 5,
+      "room_balance": 1
+    }
+  }
+}

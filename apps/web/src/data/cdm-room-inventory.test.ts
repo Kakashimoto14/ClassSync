@@ -38,7 +38,7 @@ describe('user-supplied provisional CDM inventory', () => {
     ).toEqual(['PRRC 301']);
     expect(filterRooms(rooms, { ...emptyRoomCriteria, capacity: '1' })).toEqual([]);
     expect(filterRooms(rooms, { ...emptyRoomCriteria, facility: 'Projector' })).toEqual([]);
-    expect(rooms.filter((room) => room.floor)).toHaveLength(1);
+    expect(rooms.filter((room) => room.floor)).toHaveLength(58);
     expect(roomCatalog(schedulePreview).filter((room) => !room.inventory)).toHaveLength(4);
   });
 });

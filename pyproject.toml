@@ -1,6 +1,7 @@
 [tool.pytest.ini_options]
 testpaths = ["services"]
 pythonpath = ["packages/api-contracts"]
+addopts = "--import-mode=importlib"
 [tool.ruff]
 target-version = "py312"
 line-length = 100

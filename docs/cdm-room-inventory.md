@@ -28,8 +28,11 @@ created. New Building 405 is not part of this provisional list.
 
 - Capacities, equipment/facilities, resource type, operational condition, scheduled
   occupancy, availability, suitability, and institutional restrictions are unverified.
-- Numbering is not treated as verified floor information. Only the Function Hall's
-  4th-floor location was explicitly supplied. Other floor fields stay unknown.
+- S1 explicitly supplied floor assignments: PRRC 101–110 = Floor 1, 201–210 =
+  Floor 2, supplied 3xx rooms = Floor 3; New Building 101–110 = Floor 1,
+  201–210 = Floor 2, 301–310 = Floor 3, Function Hall = Floor 4. These 58 floor
+  fields now reflect the owner's supplied information, rather than inference
+  from numbering. Court's floor remains unknown.
 - ITE Lab and COMLAB1–4 are supplied aliases. They do not establish equipment,
   computer counts, usable capacity, or a verified resource-type classification.
 - VGA Room retains an explicit unconfirmed-label flag.
@@ -40,7 +43,10 @@ created. New Building 405 is not part of this provisional list.
 
 ## Frontend integration
 
-- `apps/web/src/data/cdm-room-inventory.ts` contains typed provisional records.
+- `packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json` is the shared
+  canonical provisional list. `apps/web/src/data/cdm-room-inventory.ts` adapts it
+  into the existing typed directory records. S1's solver catalog exposes the same
+  stable IDs, with schedulability false and unknown operational metadata.
 - `SchedulePreviewData.inventory` holds them independently of the existing demo
   `resources` and `occurrences`; `roomCatalog` adapts both using stable IDs.
 - IDs: `cdm-prrc-<number>`, `cdm-new-<number>`, `cdm-new-function-hall`, `cdm-court`.
@@ -53,4 +59,6 @@ created. New Building 405 is not part of this provisional list.
   records. Room 405 is not silently renamed or merged into the Function Hall.
 
 When an official source arrives, reconcile IDs and aliases before adding verified
-metadata. Do not infer capacities, equipment, availability, or floors from names.
+metadata. Do not infer capacities, equipment, availability, or additional floors
+from names. The synthetic solver rooms are a separate dataset, never substitutes
+for these provisional records.

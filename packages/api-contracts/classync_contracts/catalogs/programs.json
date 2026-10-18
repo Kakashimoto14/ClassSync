@@ -1,0 +1,82 @@
+[
+  {
+    "id": "bsit",
+    "acronym": "BSIT",
+    "name": "Information Technology",
+    "institute": "Institute of Computer Studies",
+    "aliases": [],
+    "section_policy": "degree"
+  },
+  {
+    "id": "bscpe",
+    "acronym": "BSCPE",
+    "name": "Computer Engineering",
+    "institute": "Institute of Computer Studies",
+    "aliases": [
+      "BSCpE"
+    ],
+    "section_policy": "degree"
+  },
+  {
+    "id": "bsed-sci",
+    "acronym": "BSEd-SCI",
+    "name": "Secondary Education, Science",
+    "institute": "Institute of Education",
+    "aliases": [
+      "BSEd Science"
+    ],
+    "section_policy": "degree"
+  },
+  {
+    "id": "beed-gen",
+    "acronym": "BEEd-GEN",
+    "name": "Elementary Education, Generalist",
+    "institute": "Institute of Education",
+    "aliases": [
+      "BEEd Generalist"
+    ],
+    "section_policy": "degree"
+  },
+  {
+    "id": "beed-eced",
+    "acronym": "BEEd-ECED",
+    "name": "Early Childhood Education",
+    "institute": "Institute of Education",
+    "aliases": [],
+    "section_policy": "degree"
+  },
+  {
+    "id": "btled-ict",
+    "acronym": "BTLEd-ICT",
+    "name": "Technology and Livelihood Education, ICT",
+    "institute": "Institute of Education",
+    "aliases": [],
+    "section_policy": "degree"
+  },
+  {
+    "id": "tcp",
+    "acronym": "TCP",
+    "name": "Teacher Certificate Program",
+    "institute": "Institute of Education",
+    "aliases": [],
+    "section_policy": "custom"
+  },
+  {
+    "id": "bsba-hrm",
+    "acronym": "BSBA-HRM",
+    "name": "Business Administration, Human Resource Management",
+    "institute": "Institute of Business",
+    "aliases": [
+      "BSBA HRM"
+    ],
+    "section_policy": "degree"
+  },
+  {
+    "id": "bse",
+    "acronym": "BSE",
+    "name": "Entrepreneurship",
+    "institute": "Institute of Business",
+    "aliases": [],
+    "section_policy": "degree"
+  }
+]

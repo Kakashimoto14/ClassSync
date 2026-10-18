@@ -1,0 +1,212 @@
+/* S1: scoped real scheduling workspace; reuse Soft Rouge controls and surfaces. */
+.weekly-scheduler {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.weekly-scheduler .workspace-card,
+.scheduler-result {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.weekly-scheduler h2 {
+  font-size: 1.125rem;
+}
+.scheduler-result > h2 {
+  scroll-margin-top: 112px;
+}
+.draft-save {
+  border-left: 3px solid var(--primary);
+}
+.draft-save h3,
+.saved-draft-summary h2 {
+  scroll-margin-top: 112px;
+}
+.draft-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.saved-drafts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.saved-draft-row {
+  display: grid;
+  gap: 16px;
+}
+.draft-id,
+.weekly-scheduler details p {
+  overflow-wrap: anywhere;
+}
+.weekly-scheduler p,
+.weekly-scheduler li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.scheduling-boundary {
+  padding: 12px 16px;
+  border-left: 3px solid var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius);
+}
+.scheduler-source {
+  display: grid;
+  gap: 12px;
+  align-items: end;
+}
+.weekly-scheduler label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.scheduler-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.scheduler-counts div {
+  padding: 12px;
+  background: var(--canvas);
+  border-radius: var(--radius);
+}
+.scheduler-counts dt {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.scheduler-counts dd {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.weekly-scheduler details {
+  min-width: 0;
+}
+.weekly-scheduler summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 12px;
+  font-size: 0.875rem;
+  color: var(--primary);
+}
+.weekly-scheduler details[open] {
+  display: grid;
+  gap: 12px;
+}
+.weekly-scheduler textarea {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  width: 100%;
+  max-height: 360px;
+  resize: vertical;
+}
+.scheduler-generate {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.scheduler-error {
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  background: var(--danger-soft);
+}
+.scheduler-diagnostics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.scheduler-diagnostics li {
+  border-left: 3px solid var(--warning);
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+.scheduler-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.scheduler-grouping {
+  max-width: 240px;
+}
+.weekly-grid {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.weekly-grid > section {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+.weekly-grid > section > h3 {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.9375rem;
+}
+.generated-session {
+  min-width: 0;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.generated-session time,
+.generated-session > strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.generated-session h4 {
+  font-size: 0.9375rem;
+}
+.generated-session p,
+.generated-session small {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.scheduler-coverage {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+.scheduler-coverage li {
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.scheduler-coverage li span {
+  color: var(--ink-soft);
+}
+@media (min-width: 768px) {
+  .saved-draft-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .scheduler-source {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .weekly-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+}
