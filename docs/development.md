@@ -2,6 +2,28 @@
 
 Prerequisites: Node 20+, Python 3.12+, and a Firebase project only when testing authenticated behavior.
 
+## One-command local workspace
+
+After installing the existing npm/Python dependencies, run `npm run dev` from the repository
+root. The launcher uses `.venv` when present, enables only the explicit local sandbox,
+starts Academic (8001), Scheduling (8002), Gateway (8000), and Vite (5173), then verifies
+service health and sandbox API reachability before reporting Ready. Existing compatible
+services are reused; incompatible ports produce an actionable error. Ctrl+C stops only
+processes started by this launcher. There is no automatic import, database reset,
+authentication bypass or publication.
+
+For occupied ports: `npm run dev -- --base-port 8830 --web-port 5190`.
+`ACADEMIC_DATABASE_PATH` and `SCHEDULING_DATABASE_PATH` remain configurable; defaults
+continue to use the existing `var/` databases. Set alternate paths explicitly for QA;
+never replace working records with samples. Academic migration v3 adds calendar metadata;
+scheduling draft schema v2 and immutable publication tables retain existing records.
+
+The browser must use the Vite URL printed by this command so its proxy reaches the
+matching Gateway. `npm run dev:web` alone starts only the frontend and does not verify
+the backend. If a service fails, retry after restarting the launcher; do not interpret
+the unavailable timetable as a free day. Real publishing still requires verified
+Administrator credentials even in the local synthetic dataset.
+
 1. Copy `.env.example` to `.env`, and `apps/web/.env.example` to `apps/web/.env`. Leave Firebase values empty to run the neutral web shell and service health checks. The gateway reads the root `.env` regardless of its working directory.
 2. Run `npm install`, then `npm run dev:web` for the Vite app.
 3. For each service, create and activate a Python virtual environment, then from its directory run `pip install -r requirements.txt` and start it with `uvicorn app.main:app --reload --port <port>`.

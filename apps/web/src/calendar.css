@@ -1,0 +1,208 @@
+.structured-calendar {
+  display: grid;
+  gap: 16px;
+  max-width: 1200px;
+}
+.calendar-source {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+.calendar-source summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.calendar-toolbar,
+.calendar-view-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.calendar-toolbar h2 {
+  flex: 1;
+}
+.calendar-view-options {
+  justify-content: space-between;
+}
+.calendar-month,
+.calendar-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.calendar-month {
+  display: none;
+}
+.calendar-month.is-expanded {
+  display: grid;
+}
+.calendar-month > span {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+.calendar-month button,
+.calendar-week-strip button {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--ink);
+  font-size: 0.8125rem;
+}
+.calendar-month button[aria-pressed='true'],
+.calendar-week-strip button[aria-pressed='true'] {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.calendar-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+[aria-pressed='true'] .calendar-dot {
+  background: white;
+}
+.calendar-agenda {
+  display: grid;
+  gap: 12px;
+}
+.calendar-agenda article {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.calendar-session-time {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-session-time > span {
+  color: var(--ink-soft);
+}
+.calendar-agenda h3 {
+  font-size: 0.9375rem;
+}
+.calendar-agenda p {
+  font-size: 0.8125rem;
+  margin-top: 4px;
+}
+.calendar-week-grid {
+  display: none;
+}
+.calendar-desktop-view {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .calendar-mobile-expand {
+    display: none;
+  }
+  .calendar-desktop-view {
+    display: block;
+  }
+  .calendar-month.desktop-week-view {
+    display: none;
+  }
+  .calendar-month {
+    display: grid;
+  }
+  .calendar-week-strip {
+    display: none;
+  }
+  .calendar-month button {
+    min-height: 52px;
+  }
+  .calendar-week-grid {
+    display: grid;
+    grid-template-columns: 44px repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .calendar-week-column > strong {
+    font-size: 0.75rem;
+  }
+  .calendar-time-track {
+    position: relative;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--surface) 0,
+      var(--surface) 59px,
+      var(--line) 60px
+    );
+  }
+  .calendar-time-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    overflow: auto;
+    background: var(--primary-soft);
+    border-left: 3px solid var(--primary);
+    font-size: 0.6875rem;
+    padding: 4px;
+  }
+}
+.calendar-month.is-expanded + .calendar-week-strip {
+  display: none;
+}
+.calendar-hour-axis > div {
+  position: relative;
+}
+.calendar-hour-axis span {
+  position: absolute;
+  font-size: 10px;
+}
+.calendar-week-heading {
+  background: transparent;
+  border: 0;
+  min-height: 44px;
+  font-size: 11px;
+  width: 100%;
+}
+.calendar-week-heading[aria-pressed='true'] {
+  color: var(--primary);
+  font-weight: 700;
+}
+.calendar-hour-axis > strong {
+  display: block;
+  height: 44px;
+  font-size: 11px;
+  padding-top: 12px;
+}
+.calendar-context > summary {
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.calendar-context > label {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
+}
+.is-dashboard .calendar-toolbar,
+.is-dashboard .calendar-view-options {
+  display: none;
+}
+.is-dashboard .calendar-week-strip {
+  display: grid;
+}
+.is-dashboard .next-class {
+  grid-template-columns: minmax(96px, 1fr) 2fr;
+}
+.is-dashboard .next-class h2 {
+  font-size: 1rem;
+}

@@ -60,7 +60,7 @@ describe('persistent scheduling draft workflow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Load scheduling inputs' }));
     await screen.findByText('2. Review scheduling inputs');
     fireEvent.click(screen.getByRole('button', { name: 'Generate Weekly Schedule' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Save as Draft' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save Draft' }));
     await screen.findByRole('heading', { name: 'Draft saved' });
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Draft saved' })).toHaveFocus());
     expect(api.saveSchedulingDraft).toHaveBeenCalledWith({
@@ -73,7 +73,7 @@ describe('persistent scheduling draft workflow', () => {
     let complete!: (value: DraftDetail) => void;
     vi.mocked(api.saveSchedulingDraft).mockReturnValue(new Promise(resolve => { complete = resolve; }));
     render(<MemoryRouter><SaveDraftPanel result={result}/></MemoryRouter>);
-    const save = screen.getByRole('button', { name: 'Save as Draft' });
+    const save = screen.getByRole('button', { name: 'Save Draft' });
     fireEvent.click(save); fireEvent.click(save);
     expect(api.saveSchedulingDraft).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: 'Saving draft…' })).toBeDisabled();
@@ -84,10 +84,10 @@ describe('persistent scheduling draft workflow', () => {
   it('shows storage errors and retries with the same idempotency key', async () => {
     vi.mocked(api.saveSchedulingDraft).mockRejectedValueOnce(new Error('Storage unavailable'));
     render(<MemoryRouter><SaveDraftPanel result={result}/></MemoryRouter>);
-    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Draft' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Storage unavailable');
     expect(screen.queryByRole('link', { name: 'Open saved draft' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Draft' }));
     await screen.findByText('Draft saved');
     expect(vi.mocked(api.saveSchedulingDraft).mock.calls[0][0].idempotency_key).toBe(vi.mocked(api.saveSchedulingDraft).mock.calls[1][0].idempotency_key);
   });
@@ -99,7 +99,7 @@ describe('persistent scheduling draft workflow', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading saved drafts');
     fireEvent.click(await screen.findByRole('link', { name: 'Open Draft: Monday review' }));
     await screen.findByRole('heading', { name: 'Monday review' });
-    expect(api.loadSchedulingDraft).toHaveBeenCalledWith('saved-id');
+    expect(api.loadSchedulingDraft).toHaveBeenCalledWith('saved-id', 'academic');
     expect(screen.getByText('Draft · Unpublished')).toBeInTheDocument();
     expect(api.generateWeeklySchedule).not.toHaveBeenCalled();
   });
@@ -136,7 +136,7 @@ describe('persistent scheduling draft workflow', () => {
     await screen.findByText('2. Review scheduling inputs');
     fireEvent.click(screen.getByRole('button', { name: 'Generate Weekly Schedule' }));
     await screen.findByText('Unschedulable — proven infeasible');
-    expect(screen.queryByRole('button', { name: 'Save as Draft' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save Draft' })).not.toBeInTheDocument();
   });
   it.each(['student', 'teacher'] as const)('keeps %s out of saved Administrator drafts without fetching data', async role => {
     writePreviewSession(role);

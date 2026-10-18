@@ -13,7 +13,7 @@ import {
 } from '../../routes/route-config';
 import { Drawer } from '../ui/Drawer';
 import { ClassSyncLogo } from '../brand/ClassSyncLogo';
-import { previewContext, previewProfiles } from '../../data/schedule-preview';
+import { previewProfiles } from '../../data/schedule-preview';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -54,7 +54,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const primaryItems = [...bottomItems];
   if (role !== 'student') {
     const requests = routeDefinitions.find((route) => route.path === rolePath(role, 'requests'));
-    if (requests) primaryItems.splice(3, 0, requests);
+    if (requests && !primaryItems.some((item) => item.id === requests.id))
+      primaryItems.splice(3, 0, requests);
   }
   const secondaryGroups = groups
     .map((group) => ({
@@ -200,15 +201,15 @@ export function AppShell({ children }: { children: ReactNode }) {
               </summary>
               <div className="preview-menu">
                 <p>
-                  Development preview. Sample schedules use a fixed demonstration time. No live
-                  scheduling, availability, or authentication is connected.
+                  Preview role only; no account is authenticated. Synthetic scheduling and published
+                  timetables require the explicitly enabled local services.
                 </p>
                 <Link className="text-action" to="/dev/role-preview">
                   Switch preview role
                 </Link>
               </div>
             </details>
-            <strong>{previewContext.period}</strong>
+            <strong>Asia/Manila · Preview workspace</strong>
           </div>
           <div
             className="global-search"

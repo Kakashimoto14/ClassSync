@@ -109,13 +109,12 @@ describe('room discovery routes and interactions', () => {
     expect(main().getByText('No matching rooms')).toBeInTheDocument();
   });
   it.each(['/student/find-room', '/teacher/room-availability', '/admin/room-availability'])(
-    'keeps %s availability unavailable while resource filters work',
+    'offers published occupancy without asserting resource suitability at %s',
     (path) => {
       const definition = routeDefinitions.find((item) => item.path === path)!;
       open(definition.role, path);
-      expect(main().getByText('Time-based availability unavailable')).toBeInTheDocument();
-      for (const label of ['Date', 'Start time', 'End time'])
-        expect(main().getByLabelText(label)).toBeDisabled();
+      expect(main().getByText('Check published room occupancy')).toBeInTheDocument();
+      expect(main().getByLabelText('Date')).not.toBeDisabled();
       expect(
         main().queryByRole('button', { name: /search availability/i }),
       ).not.toBeInTheDocument();

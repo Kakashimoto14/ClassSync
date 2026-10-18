@@ -225,9 +225,15 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     f"{snapshot.period.title}. {snapshot.period.source} inputs; "
                     "coverage limited to this saved period's active offerings."
                 ),
-                synthetic=False,
+                synthetic=bool(room_ids)
+                and all(rooms[rid].source == "synthetic" for rid in room_ids),
                 all_intended_offerings_supplied=rules.all_intended_offerings_supplied,
-                operating_windows=rules.operating_windows,
+                operating_windows=[
+                    window
+                    for window in rules.operating_windows
+                    if snapshot.period.calendar is None
+                    or window.day in snapshot.period.calendar.instructional_days
+                ],
                 transition_buffer_minutes=rules.transition_buffer_minutes,
                 programs=[solver_fields(p, Program) for p in programs.values()],
                 sections=[solver_fields(s, Section) for s in active_sections],
@@ -265,6 +271,14 @@ def academic_readiness(snapshot: AcademicSnapshot):
         subjects=sum(s.active for s in subjects.values()),
         sections=len(active_sections),
         faculty=sum(t.active for t in faculty.values()),
+        assigned_faculty=len(
+            {
+                tid
+                for o in active_offerings
+                for tid in o.teacher_ids
+                if tid in faculty and faculty[tid].active
+            }
+        ),
         offerings=len(active_offerings),
         eligible_resources=sum(
             r.active and r.schedulable and r.condition == "operational" for r in rooms.values()

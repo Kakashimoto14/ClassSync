@@ -129,19 +129,19 @@ describe('workspace navigation', () => {
     expect(screen.getByRole('main')).toHaveFocus();
   });
 
-  it('keeps Schedule active on administrator creation and Calendar active in Student secondary navigation', () => {
+  it('keeps generation active and consolidates the calendar alias under Schedule', () => {
     expect(navigationOwner('/admin/schedule-manager/create')).toBe(
-      'administrator.schedule-manager',
+      'administrator.ai-scheduling',
     );
     expect(navigationOwner('/admin/schedule-manager/create', true)).toBe(
-      'administrator.schedule-manager',
+      'administrator.ai-scheduling',
     );
-    expect(navigationOwner('/student/calendar')).toBe('student.calendar');
+    expect(navigationOwner('/student/calendar')).toBe('student.schedule');
     expect(navigationOwner('/student/calendar', true)).toBe('student.schedule');
     renderShell('administrator', '/admin/schedule-manager/create');
     expect(
       within(screen.getByRole('navigation', { name: 'Primary navigation' })).getByRole('link', {
-        name: 'Schedule Manager',
+        name: 'AI-Powered Scheduling',
       }),
     ).toHaveAttribute('aria-current', 'location');
   });

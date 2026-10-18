@@ -137,7 +137,7 @@ class AcademicRepository:
     def migrate(self):
         with self.connection(True) as db:
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, 2):
+            if version not in (0, 1, 2, 3):
                 raise AcademicError(
                     409,
                     "academic_schema",
@@ -158,6 +158,14 @@ class AcademicRepository:
                 ).read_text()
                 db.execute(sql)
                 db.execute("PRAGMA user_version=2")
+            if version < 3:
+                db.execute(
+                    "CREATE TABLE academic_calendars (scope TEXT, owner TEXT, period_id TEXT, "
+                    "payload TEXT NOT NULL, PRIMARY KEY(scope,owner,period_id), "
+                    "FOREIGN KEY(scope,owner,period_id) "
+                    "REFERENCES academic_periods(scope,owner,id))"
+                )
+                db.execute("PRAGMA user_version=3")
             if (
                 db.execute("PRAGMA quick_check").fetchone()[0] != "ok"
                 or db.execute("PRAGMA foreign_key_check").fetchone()
@@ -183,7 +191,15 @@ class AcademicRepository:
             revision=row["revision"],
             created_at=row["created_at"],
             source="development-entered" if scope == "sandbox" else "institutional",
+            calendar=self.calendar(db, scope, owner, period_id),
         )
+
+    def calendar(self, db, scope, owner, period_id):
+        row = db.execute(
+            "SELECT payload FROM academic_calendars WHERE scope=? AND owner=? AND period_id=?",
+            (scope, owner, period_id),
+        ).fetchone()
+        return json.loads(row[0]) if row else None
 
     def periods(self, scope, owner):
         with self.connection() as db:
@@ -231,6 +247,11 @@ class AcademicRepository:
                 "INSERT INTO academic_periods VALUES (?,?,?,?,1,?)",
                 (scope, owner, period_id, body.title, timestamp()),
             )
+            if body.calendar:
+                db.execute(
+                    "INSERT INTO academic_calendars VALUES (?,?,?,?)",
+                    (scope, owner, period_id, body.calendar.model_dump_json()),
+                )
             records = [AcademicConstraints()]
             if body.include_cdm_catalog:
                 programs, rooms = catalog_data()
@@ -265,6 +286,33 @@ class AcademicRepository:
         with self.connection(True) as db:
             self.period(db, scope, owner, period_id)
             self.write_in(db, scope, owner, period_id, body)
+        return self.snapshot(scope, owner, period_id)
+
+    def save_calendar(self, scope, owner, period_id, body):
+        if body.calendar.published_version:
+            raise AcademicError(
+                422,
+                "publication_version",
+                "Publication versions are assigned by the scheduling service.",
+            )
+        with self.connection(True) as db:
+            period = self.period(db, scope, owner, period_id)
+            if period.revision != body.expected_revision:
+                raise AcademicError(
+                    409,
+                    "calendar_version_conflict",
+                    "Academic data changed; reload before saving calendar dates.",
+                )
+            db.execute(
+                "INSERT INTO academic_calendars VALUES (?,?,?,?) "
+                "ON CONFLICT(scope,owner,period_id) DO UPDATE SET payload=excluded.payload",
+                (scope, owner, period_id, body.calendar.model_dump_json()),
+            )
+            db.execute(
+                "UPDATE academic_periods SET revision=revision+1 "
+                "WHERE scope=? AND owner=? AND id=?",
+                (scope, owner, period_id),
+            )
         return self.snapshot(scope, owner, period_id)
 
     def write_in(self, db, scope, owner, period_id, body):

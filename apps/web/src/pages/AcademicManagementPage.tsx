@@ -7,6 +7,9 @@ import { academicLabel, academicPath, academicTabs } from '../lib/academic-label
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { AcademicRecordEditor } from './AcademicRecordEditor';
 import { ReadinessSummary } from './AcademicGenerationPage';
+import { AcademicFixtureImport } from './AcademicFixtureImport';
+import { periodLabel } from '../lib/workspace-context';
+import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 
 export function AcademicManagementPage({ initialKind = 'programs' }: { initialKind?: AcademicKind }) {
   const [search, setSearch] = useSearchParams();
@@ -62,8 +65,10 @@ function ManagementContent({ kind, periodId, onPeriod }: { kind: AcademicKind; p
   const visible = matching.slice(page * 10, page * 10 + 10);
   const editRecord = all.find(e => e.record.id === editing);
   return <div className="weekly-scheduler academic-management">
-    <p className="scheduling-boundary">Development-entered data · Persisted on the server · Not verified institutional records. The synthetic test scenario stays separate.</p>
-    <section className="workspace-card"><div className="academic-period-controls"><label>Academic period<select value={periodId} disabled={busy} onChange={e => onPeriod(e.target.value)}><option value="">Choose a period</option>{periods.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}</select></label><Button variant="secondary" disabled={busy} onClick={() => setCreateOpen(v => !v)}>New Academic Period</Button></div>
+    <details className="calendar-source"><summary>Data source · Academic records</summary><p>Development-entered data · Persisted on the server · Not verified institutional records. Synthetic scheduling assumptions remain separate from the provisional room directory.</p></details>
+    <AcademicFixtureImport />
+    {snapshot && <AcademicCalendarEditor key={snapshot.period.revision} snapshot={snapshot} onSaved={saved=>{setSnapshot(saved);setChecked(null);setNotice('Academic calendar saved. Recheck scheduling readiness before generation.');}}/>}
+    <section className="workspace-card"><div className="academic-period-controls"><label>Academic period<select value={periodId} disabled={busy} onChange={e => onPeriod(e.target.value)}><option value="">Choose a period</option>{periods.map(p => <option value={p.id} key={p.id}>{periodLabel(p)}</option>)}</select></label><Button variant="secondary" disabled={busy} onClick={() => setCreateOpen(v => !v)}>New Academic Period</Button></div>
       {loading && <p role="status">Loading academic records…</p>}
       {(createOpen || (!loading && !error && !periods.length)) && <form className="academic-create-period" onSubmit={create}>
         <h2>Create academic period</h2><label>Academic period title<input required maxLength={160} value={title} disabled={busy} onChange={e => setTitle(e.target.value)}/></label>
@@ -75,7 +80,7 @@ function ManagementContent({ kind, periodId, onPeriod }: { kind: AcademicKind; p
     {error && <div className="scheduler-error" role="alert"><p>{error}</p><Button variant="secondary" onClick={() => { setError(''); setLoading(true); setRetry(n => n + 1); }}>Reload academic data</Button></div>}
     {snapshot && <>
       <nav className="academic-tabs" aria-label="Academic data categories">{academicTabs.map(t => <Link key={t.kind} to={academicPath(t.kind, periodId)} aria-current={kind === t.kind ? 'page' : undefined}>{t.label}</Link>)}</nav>
-      <div className="academic-review-actions"><p>{snapshot.period.title} · Source revision {snapshot.period.revision}</p><div className="draft-actions"><Button variant="secondary" disabled={busy} onClick={readiness}>{busy ? 'Checking inputs…' : 'Validate Readiness'}</Button><Link className="text-action" to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(periodId)}`}>Generate from this period</Link></div></div>
+      <div className="academic-review-actions"><p>{periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}</p><div className="draft-actions"><Button variant="secondary" disabled={busy} onClick={readiness}>{busy ? 'Checking inputs…' : 'Validate Readiness'}</Button><Link className="button button--secondary" to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(periodId)}`}>Generate from this period</Link></div></div>
       {checked && <ReadinessSummary checked={checked}/>}
       {editing !== null ? <AcademicRecordEditor key={`${periodId}:${kind}:${editing}`} kind={kind} snapshot={snapshot} existing={editRecord} onCancel={() => setEditing(null)} onReload={() => { setEditing(null); setSnapshot(null); setLoading(true); setError(''); setRetry(n => n + 1); }} onSaved={next => { setSnapshot(next); setEditing(null); setChecked(null); setNotice('Academic record saved. Existing drafts are unchanged.'); }}/>
         : <section className="academic-records" aria-label={`${current.label} records`}>

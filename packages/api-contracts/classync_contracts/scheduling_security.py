@@ -17,6 +17,13 @@ def require_sandbox(settings):
 
 
 def require_administrator(request: Request, settings):
+    claims = require_identity(request, settings)
+    if claims.get("role") != "administrator":
+        raise HTTPException(403, "Administrator authorization is required")
+    return claims
+
+
+def require_identity(request: Request, settings):
     header = request.headers.get("Authorization", "")
     if not header.startswith("Bearer "):
         raise HTTPException(401, "A verified Administrator token is required")
@@ -25,6 +32,6 @@ def require_administrator(request: Request, settings):
         claims = auth.verify_id_token(header.removeprefix("Bearer "), check_revoked=True)
     except Exception as error:
         raise HTTPException(401, "Invalid authentication token") from error
-    if claims.get("role") != "administrator":
-        raise HTTPException(403, "Administrator authorization is required")
+    if not claims.get("uid") or claims.get("role") not in {"administrator", "teacher", "student"}:
+        raise HTTPException(403, "A verified role and identity are required")
     return claims

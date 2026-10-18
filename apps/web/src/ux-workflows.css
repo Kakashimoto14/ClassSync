@@ -1,0 +1,382 @@
+.ux-calendar {
+  gap: 18px;
+}
+.ux-context-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.ux-context-bar > span {
+  overflow-wrap: anywhere;
+  flex: 1;
+  min-width: 130px;
+}
+.ux-context-settings > summary {
+  cursor: pointer;
+  color: var(--primary);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  border: 1px solid var(--control-border, #c9cdd4);
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: var(--surface);
+}
+.ux-context-settings[open] {
+  flex-basis: 100%;
+}
+.ux-context-controls {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 12px;
+}
+.ux-next-class {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--primary);
+  border-radius: 18px;
+  background: var(--surface);
+  display: grid;
+  gap: 10px;
+}
+.ux-next-class h2 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.25;
+}
+.ux-next-class p {
+  margin: 0;
+  font-size: 14px;
+}
+.ux-next-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+.ux-next-caption strong {
+  color: var(--primary);
+}
+.ux-next-room {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding-top: 6px;
+}
+.ux-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ux-section-heading h2 {
+  font-size: 17px;
+}
+.ux-agenda {
+  display: grid;
+  gap: 10px;
+}
+.ux-agenda-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 16px;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--ink);
+}
+.ux-agenda-row > span {
+  display: grid;
+  gap: 5px;
+  font-size: 13px;
+}
+.ux-agenda-row small,
+.ux-agenda-row span span {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.ux-agenda-row strong {
+  font-size: 14px;
+}
+.ux-update {
+  font-size: 12px;
+  color: var(--primary);
+}
+.ux-week-navigation {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 4px;
+  align-items: center;
+}
+.ux-week-navigation .button {
+  padding: 4px;
+  min-width: 32px;
+}
+.ux-week-navigation .calendar-week-strip {
+  display: grid;
+  gap: 3px;
+}
+.ux-week-navigation .calendar-week-strip button {
+  min-width: 0;
+  font-size: 11px;
+  min-height: 54px;
+  border-radius: 9px;
+}
+.ux-request-link {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.ux-request-link h2 {
+  font-size: 17px;
+}
+.ux-request-link p {
+  font-size: 12px;
+}
+.ux-calendar .calendar-time-block {
+  text-align: left;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  color: var(--ink);
+  border-radius: 4px;
+}
+.ux-admin-home,
+.ux-generation-flow {
+  display: grid;
+  gap: 20px;
+  max-width: 1150px;
+}
+.ux-admin-home h1 {
+  font-size: clamp(26px, 4vw, 38px);
+  margin-bottom: 12px;
+}
+.ux-admin-primary {
+  display: grid;
+  gap: 14px;
+  border-top: 3px solid var(--primary);
+}
+.ux-admin-primary .button {
+  justify-self: start;
+}
+.ux-admin-links {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+}
+.ux-admin-links a {
+  display: grid;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+}
+.ux-admin-links span {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.ux-steps {
+  display: flex;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+  counter-reset: steps;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.ux-steps li {
+  counter-increment: steps;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+  white-space: normal;
+}
+.ux-steps li::before {
+  content: counter(steps);
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.ux-engine-note {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.ux-generation-setup {
+  display: grid;
+  gap: 18px;
+}
+.ux-scope-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.ux-scope-stats > span {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  background: var(--canvas, #f7f8fa);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.ux-scope-stats strong {
+  font-size: 20px;
+}
+.ux-fix-list {
+  padding-left: 16px;
+  font-size: 13px;
+}
+.ux-readiness details,
+.ux-validation > p {
+  font-size: 12px;
+}
+.ux-timetable-filters summary,
+.ux-generation-flow summary,
+.ux-scheduled-rooms > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  font-size: 13px;
+}
+.ux-scheduled-rooms .workspace-card {
+  padding: 12px;
+}
+.ux-validation {
+  display: grid;
+  gap: 12px;
+}
+.ux-validation li {
+  border-left: 3px solid var(--primary);
+  padding: 12px;
+}
+.ux-validation li a {
+  display: block;
+  margin-top: 8px;
+}
+.readiness-issues {
+  display: grid;
+  gap: 12px;
+  scroll-margin-top: 100px;
+}
+.readiness-issues h3 {
+  font-size: 15px;
+}
+.readiness-issue-group {
+  border: 1px solid var(--line);
+  border-left: 3px solid #ad791f;
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+.readiness-issue-group > div {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.readiness-issue-group h4 {
+  font-size: 14px;
+}
+.readiness-issue-group > div span {
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+.readiness-issue-group p,
+.readiness-resolve p {
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.6;
+}
+.readiness-issue-group .button {
+  justify-self: start;
+}
+.readiness-issue-group summary,
+.readiness-notes summary {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.readiness-issue-group li {
+  margin: 12px 0;
+}
+.readiness-resolve {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .ux-scope-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ux-context-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ux-context-controls > details {
+    grid-column: 1/-1;
+  }
+  .ux-next-class {
+    padding: 28px;
+  }
+}
+@media (max-width: 767px) {
+  .ux-generation-setup .ux-scope-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .ux-generation-setup .ux-scope-stats > span {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+  .ux-steps li {
+    flex: 1 1 0;
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 4px;
+    font-size: 12px;
+    overflow-wrap: normal;
+  }
+  .ux-calendar .calendar-toolbar h2 {
+    font-size: 17px;
+  }
+  .ux-calendar .calendar-toolbar {
+    gap: 6px;
+  }
+  .ux-calendar .calendar-toolbar .button {
+    padding: 10px;
+  }
+  .ux-steps {
+    font-size: 10px;
+  }
+  .scheduler-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ux-generator .workspace-card {
+    padding: 16px;
+  }
+  .ux-generator .weekly-grid {
+    grid-template-columns: 1fr;
+  }
+}
