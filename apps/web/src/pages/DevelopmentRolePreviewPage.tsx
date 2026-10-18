@@ -39,7 +39,7 @@ export function DevelopmentRolePreviewPage() {
     navigate(demoDestination(selectedRole, requestedPath), { replace: true });
   };
   return (
-    <main className="system-state-page">
+    <main className="system-state-page role-preview-page">
       <section className="workspace-card role-preview-card">
         <ClassSyncLogo />
 
@@ -76,7 +76,7 @@ export function DevelopmentRolePreviewPage() {
           </p>
         </details>
         <Link className="text-action" to="/auth/login">
-          Return to sign in
+          Back to welcome
         </Link>
       </section>
     </main>
