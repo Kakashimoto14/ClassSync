@@ -7,6 +7,9 @@ import { Link } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { RoomDiscoveryPage, RoomDetailPage } from './RoomDiscoveryPages';
 import { PreviewBuildingDirectory, PreviewBuildingDetail } from './PreviewBuildingViews';
+import { SchedulingSourcePage } from './AcademicGenerationPage';
+import { AcademicManagementPage } from './AcademicManagementPage';
+import { SavedDraftsPage, SavedDraftDetailPage } from './SchedulingDraftPages';
 import { PreviewCalendarView } from './PreviewCalendarView';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
@@ -18,9 +21,13 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
   if (definition.kind === 'rooms') return <AppShell><RoomDiscoveryPage key={definition.id} definition={definition}/></AppShell>;
   if (definition.kind === 'room-detail') return <AppShell><RoomDetailPage role={definition.role}/></AppShell>;
   const compactHeading = ['schedule', 'calendar', 'notifications', 'buildings', 'building-detail'].includes(definition.kind);
-  return <AppShell><div className="page-heading"><div>{!compactHeading && <p className="eyebrow">{definition.navigationGroup ?? (definition.role === 'administrator' ? 'Administrator' : definition.role)}</p>}<h1>{definition.title}</h1>{!compactHeading && <p>{definition.description}</p>}</div>{definition.kind === 'schedule' && definition.role === 'administrator' && <Link className="button" to="/admin/schedule-manager/create">Create schedule</Link>}</div>
+  return <AppShell><div className="page-heading"><div>{!compactHeading && <p className="eyebrow">{definition.navigationGroup ?? (definition.role === 'administrator' ? 'Administrator' : definition.role)}</p>}<h1>{definition.title}</h1>{!compactHeading && <p>{definition.description}</p>}</div>{definition.kind === 'schedule' && definition.role === 'administrator' && <Link className="button" to="/admin/schedule-manager/create">Generate Weekly Schedule</Link>}</div>
     {definition.kind === 'schedule' && <PreviewScheduleView role={definition.role}/>}
     {definition.kind === 'schedule-create' && <CreateScheduleScreen/>}
+    {definition.kind === 'academic-manage' && <AcademicManagementPage initialKind={definition.academicKind}/>}
+    {definition.kind === 'schedule' && definition.role === 'administrator' && <div className="draft-actions"><Link className="text-action" to="/admin/schedule-manager/drafts">Saved Drafts</Link><Link className="text-action" to="/admin/academic">Manage Academic Data</Link></div>}
+    {definition.kind === 'schedule-drafts' && <SavedDraftsPage/>}
+    {definition.kind === 'schedule-draft-detail' && <SavedDraftDetailPage/>}
     {definition.kind === 'calendar' && <PreviewCalendarView role={definition.role}/>}
     {definition.kind === 'conflicts' && <ConflictScreen/>}
     {definition.kind === 'conflict-detail' && <ConflictDetailScreen/>}
@@ -41,7 +48,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
   </AppShell>;
 }
 
-function CreateScheduleScreen() { return <form className="workspace-card request-form" onSubmit={event => event.preventDefault()}><h2>Class information</h2><div className="form-grid"><label>Subject<select defaultValue=""><option value="" disabled>Select a subject</option><option>Database Management Systems</option></select></label><label>Section<select defaultValue=""><option value="" disabled>Select a section</option><option>BSIT 2A</option></select></label><label>Teacher<select defaultValue=""><option value="" disabled>Select a teacher</option><option>Prof. Maria Santos</option></select></label><label>Day<input type="text" defaultValue="Tuesday"/></label><label>Start time<input type="time" defaultValue="10:00"/></label><label>End time<input type="time" defaultValue="11:30"/></label><label>Classroom<select defaultValue=""><option value="" disabled>Select a room</option><option>SCI-218</option></select></label></div><section className="validation-checks"><h3>Before publishing</h3><StatusBadge tone="info">Teacher availability</StatusBadge><StatusBadge tone="info">Section availability</StatusBadge><StatusBadge tone="info">Room and capacity</StatusBadge><StatusBadge tone="info">Operating hours</StatusBadge></section><Alert tone="info" title="Server validation required">A schedule cannot be validated or published until the scheduling service checks for conflicts and capacity.</Alert><div className="inline-actions"><Link className="button button--secondary" to="/admin/schedule-manager">Cancel</Link><Button type="button" disabled>Save draft</Button></div></form>; }
+function CreateScheduleScreen() { return <SchedulingSourcePage/>; }
 
 function ConflictScreen() { return <PreviewConflictView/>; }
 

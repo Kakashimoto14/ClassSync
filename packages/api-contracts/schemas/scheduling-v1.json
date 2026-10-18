@@ -1,0 +1,7548 @@
+{
+  "GenerationInput": {
+    "$defs": {
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "Offering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_name": {
+            "minLength": 1,
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "eligible_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Teacher Ids",
+            "type": "array"
+          },
+          "eligible_room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Room Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "maximum": 10080,
+            "title": "Required Weekly Minutes",
+            "type": "integer"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "subject_name",
+          "section_id"
+        ],
+        "title": "Offering",
+        "type": "object"
+      },
+      "Program": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "Program",
+        "type": "object"
+      },
+      "Room": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "enum": [
+              "synthetic",
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building",
+          "source"
+        ],
+        "title": "Room",
+        "type": "object"
+      },
+      "Section": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "program_id"
+        ],
+        "title": "Section",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Teacher": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Teacher",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "contract_version": {
+        "const": "v1",
+        "default": "v1",
+        "title": "Contract Version",
+        "type": "string"
+      },
+      "period_id": {
+        "maxLength": 120,
+        "minLength": 1,
+        "title": "Period Id",
+        "type": "string"
+      },
+      "data_version": {
+        "maxLength": 120,
+        "minLength": 1,
+        "title": "Data Version",
+        "type": "string"
+      },
+      "scope_description": {
+        "maxLength": 500,
+        "minLength": 1,
+        "title": "Scope Description",
+        "type": "string"
+      },
+      "all_intended_offerings_supplied": {
+        "default": false,
+        "title": "All Intended Offerings Supplied",
+        "type": "boolean"
+      },
+      "synthetic": {
+        "default": false,
+        "title": "Synthetic",
+        "type": "boolean"
+      },
+      "operating_windows": {
+        "items": {
+          "$ref": "#/$defs/Window"
+        },
+        "maxItems": 70,
+        "title": "Operating Windows",
+        "type": "array"
+      },
+      "transition_buffer_minutes": {
+        "default": 0,
+        "maximum": 120,
+        "minimum": 0,
+        "multipleOf": 30,
+        "title": "Transition Buffer Minutes",
+        "type": "integer"
+      },
+      "programs": {
+        "items": {
+          "$ref": "#/$defs/Program"
+        },
+        "maxItems": 50,
+        "title": "Programs",
+        "type": "array"
+      },
+      "sections": {
+        "items": {
+          "$ref": "#/$defs/Section"
+        },
+        "maxItems": 500,
+        "title": "Sections",
+        "type": "array"
+      },
+      "teachers": {
+        "items": {
+          "$ref": "#/$defs/Teacher"
+        },
+        "maxItems": 500,
+        "title": "Teachers",
+        "type": "array"
+      },
+      "rooms": {
+        "items": {
+          "$ref": "#/$defs/Room"
+        },
+        "maxItems": 200,
+        "title": "Rooms",
+        "type": "array"
+      },
+      "offerings": {
+        "items": {
+          "$ref": "#/$defs/Offering"
+        },
+        "maxItems": 1000,
+        "title": "Offerings",
+        "type": "array"
+      },
+      "enrollments": {
+        "items": {
+          "$ref": "#/$defs/Enrollment"
+        },
+        "maxItems": 10000,
+        "title": "Enrollments",
+        "type": "array"
+      },
+      "locked_assignments": {
+        "items": {
+          "$ref": "#/$defs/Assignment"
+        },
+        "maxItems": 7000,
+        "title": "Locked Assignments",
+        "type": "array"
+      },
+      "previous_assignments": {
+        "items": {
+          "$ref": "#/$defs/Assignment"
+        },
+        "maxItems": 7000,
+        "title": "Previous Assignments",
+        "type": "array"
+      },
+      "options": {
+        "$ref": "#/$defs/SolverOptions"
+      }
+    },
+    "required": [
+      "period_id",
+      "data_version",
+      "scope_description"
+    ],
+    "title": "GenerationInput",
+    "type": "object"
+  },
+  "GenerationResult": {
+    "$defs": {
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Coverage": {
+        "additionalProperties": false,
+        "properties": {
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "required_minutes": {
+            "title": "Required Minutes",
+            "type": "integer"
+          },
+          "allocated_minutes": {
+            "title": "Allocated Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offering_id",
+          "required_minutes",
+          "allocated_minutes"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "Diagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "offering_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offering Id"
+          },
+          "assignment_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assignment Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Diagnostic",
+        "type": "object"
+      },
+      "RunMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "solver": {
+            "default": "OR-Tools CP-SAT",
+            "title": "Solver",
+            "type": "string"
+          },
+          "solver_version": {
+            "title": "Solver Version",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "wall_time_seconds": {
+            "title": "Wall Time Seconds",
+            "type": "number"
+          },
+          "time_limit_seconds": {
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "objective": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Objective"
+          },
+          "best_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Best Bound"
+          }
+        },
+        "required": [
+          "solver_version",
+          "seed",
+          "wall_time_seconds",
+          "time_limit_seconds"
+        ],
+        "title": "RunMetadata",
+        "type": "object"
+      },
+      "ValidationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          },
+          "hard_conflict_count": {
+            "title": "Hard Conflict Count",
+            "type": "integer"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/$defs/Diagnostic"
+            },
+            "title": "Conflicts",
+            "type": "array"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "title": "Coverage",
+            "type": "array"
+          }
+        },
+        "required": [
+          "valid",
+          "hard_conflict_count",
+          "conflicts",
+          "coverage"
+        ],
+        "title": "ValidationResult",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "contract_version": {
+        "const": "v1",
+        "default": "v1",
+        "title": "Contract Version",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "period_id": {
+        "title": "Period Id",
+        "type": "string"
+      },
+      "input_hash": {
+        "title": "Input Hash",
+        "type": "string"
+      },
+      "data_version": {
+        "title": "Data Version",
+        "type": "string"
+      },
+      "solver_status": {
+        "enum": [
+          "optimal",
+          "feasible",
+          "infeasible",
+          "invalid_input",
+          "invalid_model",
+          "unknown",
+          "validation_failed"
+        ],
+        "title": "Solver Status",
+        "type": "string"
+      },
+      "result_kind": {
+        "const": "generated_preview",
+        "default": "generated_preview",
+        "title": "Result Kind",
+        "type": "string"
+      },
+      "persisted": {
+        "const": false,
+        "default": false,
+        "title": "Persisted",
+        "type": "boolean"
+      },
+      "assignments": {
+        "items": {
+          "$ref": "#/$defs/Assignment"
+        },
+        "title": "Assignments",
+        "type": "array"
+      },
+      "total_offerings_requested": {
+        "title": "Total Offerings Requested",
+        "type": "integer"
+      },
+      "total_offerings_scheduled": {
+        "title": "Total Offerings Scheduled",
+        "type": "integer"
+      },
+      "coverage": {
+        "items": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "title": "Coverage",
+        "type": "array"
+      },
+      "hard_conflict_count": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Hard Conflict Count"
+      },
+      "diagnostics": {
+        "items": {
+          "$ref": "#/$defs/Diagnostic"
+        },
+        "title": "Diagnostics",
+        "type": "array"
+      },
+      "validation": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ValidationResult"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "metadata": {
+        "$ref": "#/$defs/RunMetadata"
+      }
+    },
+    "required": [
+      "run_id",
+      "period_id",
+      "input_hash",
+      "data_version",
+      "solver_status",
+      "assignments",
+      "total_offerings_requested",
+      "total_offerings_scheduled",
+      "coverage",
+      "hard_conflict_count",
+      "diagnostics",
+      "validation",
+      "metadata"
+    ],
+    "title": "GenerationResult",
+    "type": "object"
+  },
+  "ReadinessResult": {
+    "$defs": {
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Diagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "offering_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offering Id"
+          },
+          "assignment_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assignment Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Diagnostic",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "GenerationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "period_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Period Id",
+            "type": "string"
+          },
+          "data_version": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Data Version",
+            "type": "string"
+          },
+          "scope_description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Scope Description",
+            "type": "string"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/$defs/Program"
+            },
+            "maxItems": 50,
+            "title": "Programs",
+            "type": "array"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/$defs/Section"
+            },
+            "maxItems": 500,
+            "title": "Sections",
+            "type": "array"
+          },
+          "teachers": {
+            "items": {
+              "$ref": "#/$defs/Teacher"
+            },
+            "maxItems": 500,
+            "title": "Teachers",
+            "type": "array"
+          },
+          "rooms": {
+            "items": {
+              "$ref": "#/$defs/Room"
+            },
+            "maxItems": 200,
+            "title": "Rooms",
+            "type": "array"
+          },
+          "offerings": {
+            "items": {
+              "$ref": "#/$defs/Offering"
+            },
+            "maxItems": 1000,
+            "title": "Offerings",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "maxItems": 10000,
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "previous_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Previous Assignments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          }
+        },
+        "required": [
+          "period_id",
+          "data_version",
+          "scope_description"
+        ],
+        "title": "GenerationInput",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "Offering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_name": {
+            "minLength": 1,
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "eligible_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Teacher Ids",
+            "type": "array"
+          },
+          "eligible_room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Room Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "maximum": 10080,
+            "title": "Required Weekly Minutes",
+            "type": "integer"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "subject_name",
+          "section_id"
+        ],
+        "title": "Offering",
+        "type": "object"
+      },
+      "Program": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "Program",
+        "type": "object"
+      },
+      "Room": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "enum": [
+              "synthetic",
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building",
+          "source"
+        ],
+        "title": "Room",
+        "type": "object"
+      },
+      "Section": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "program_id"
+        ],
+        "title": "Section",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Teacher": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Teacher",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "inputs": {
+        "$ref": "#/$defs/GenerationInput"
+      },
+      "diagnostics": {
+        "items": {
+          "$ref": "#/$defs/Diagnostic"
+        },
+        "title": "Diagnostics",
+        "type": "array"
+      }
+    },
+    "required": [
+      "inputs",
+      "diagnostics"
+    ],
+    "title": "ReadinessResult",
+    "type": "object"
+  },
+  "ValidationInput": {
+    "$defs": {
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "GenerationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "period_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Period Id",
+            "type": "string"
+          },
+          "data_version": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Data Version",
+            "type": "string"
+          },
+          "scope_description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Scope Description",
+            "type": "string"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/$defs/Program"
+            },
+            "maxItems": 50,
+            "title": "Programs",
+            "type": "array"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/$defs/Section"
+            },
+            "maxItems": 500,
+            "title": "Sections",
+            "type": "array"
+          },
+          "teachers": {
+            "items": {
+              "$ref": "#/$defs/Teacher"
+            },
+            "maxItems": 500,
+            "title": "Teachers",
+            "type": "array"
+          },
+          "rooms": {
+            "items": {
+              "$ref": "#/$defs/Room"
+            },
+            "maxItems": 200,
+            "title": "Rooms",
+            "type": "array"
+          },
+          "offerings": {
+            "items": {
+              "$ref": "#/$defs/Offering"
+            },
+            "maxItems": 1000,
+            "title": "Offerings",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "maxItems": 10000,
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "previous_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Previous Assignments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          }
+        },
+        "required": [
+          "period_id",
+          "data_version",
+          "scope_description"
+        ],
+        "title": "GenerationInput",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "Offering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_name": {
+            "minLength": 1,
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "eligible_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Teacher Ids",
+            "type": "array"
+          },
+          "eligible_room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Room Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "maximum": 10080,
+            "title": "Required Weekly Minutes",
+            "type": "integer"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "subject_name",
+          "section_id"
+        ],
+        "title": "Offering",
+        "type": "object"
+      },
+      "Program": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "Program",
+        "type": "object"
+      },
+      "Room": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "enum": [
+              "synthetic",
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building",
+          "source"
+        ],
+        "title": "Room",
+        "type": "object"
+      },
+      "Section": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "program_id"
+        ],
+        "title": "Section",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Teacher": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Teacher",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "inputs": {
+        "$ref": "#/$defs/GenerationInput"
+      },
+      "assignments": {
+        "items": {
+          "$ref": "#/$defs/Assignment"
+        },
+        "maxItems": 7000,
+        "title": "Assignments",
+        "type": "array"
+      }
+    },
+    "required": [
+      "inputs",
+      "assignments"
+    ],
+    "title": "ValidationInput",
+    "type": "object"
+  },
+  "ValidationResult": {
+    "$defs": {
+      "Coverage": {
+        "additionalProperties": false,
+        "properties": {
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "required_minutes": {
+            "title": "Required Minutes",
+            "type": "integer"
+          },
+          "allocated_minutes": {
+            "title": "Allocated Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offering_id",
+          "required_minutes",
+          "allocated_minutes"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "Diagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "offering_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offering Id"
+          },
+          "assignment_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assignment Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Diagnostic",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "valid": {
+        "title": "Valid",
+        "type": "boolean"
+      },
+      "hard_conflict_count": {
+        "title": "Hard Conflict Count",
+        "type": "integer"
+      },
+      "conflicts": {
+        "items": {
+          "$ref": "#/$defs/Diagnostic"
+        },
+        "title": "Conflicts",
+        "type": "array"
+      },
+      "coverage": {
+        "items": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "title": "Coverage",
+        "type": "array"
+      }
+    },
+    "required": [
+      "valid",
+      "hard_conflict_count",
+      "conflicts",
+      "coverage"
+    ],
+    "title": "ValidationResult",
+    "type": "object"
+  },
+  "SaveDraftRequest": {
+    "additionalProperties": false,
+    "properties": {
+      "run_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Run Id",
+        "type": "string"
+      },
+      "input_hash": {
+        "pattern": "^[a-f0-9]{64}$",
+        "title": "Input Hash",
+        "type": "string"
+      },
+      "title": {
+        "maxLength": 160,
+        "minLength": 1,
+        "title": "Title",
+        "type": "string"
+      },
+      "idempotency_key": {
+        "maxLength": 100,
+        "minLength": 8,
+        "title": "Idempotency Key",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id",
+      "input_hash",
+      "title",
+      "idempotency_key"
+    ],
+    "title": "SaveDraftRequest",
+    "type": "object"
+  },
+  "DraftDetail": {
+    "$defs": {
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Coverage": {
+        "additionalProperties": false,
+        "properties": {
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "required_minutes": {
+            "title": "Required Minutes",
+            "type": "integer"
+          },
+          "allocated_minutes": {
+            "title": "Allocated Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offering_id",
+          "required_minutes",
+          "allocated_minutes"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "Diagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "offering_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offering Id"
+          },
+          "assignment_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assignment Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Diagnostic",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "GenerationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "period_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Period Id",
+            "type": "string"
+          },
+          "data_version": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Data Version",
+            "type": "string"
+          },
+          "scope_description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Scope Description",
+            "type": "string"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/$defs/Program"
+            },
+            "maxItems": 50,
+            "title": "Programs",
+            "type": "array"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/$defs/Section"
+            },
+            "maxItems": 500,
+            "title": "Sections",
+            "type": "array"
+          },
+          "teachers": {
+            "items": {
+              "$ref": "#/$defs/Teacher"
+            },
+            "maxItems": 500,
+            "title": "Teachers",
+            "type": "array"
+          },
+          "rooms": {
+            "items": {
+              "$ref": "#/$defs/Room"
+            },
+            "maxItems": 200,
+            "title": "Rooms",
+            "type": "array"
+          },
+          "offerings": {
+            "items": {
+              "$ref": "#/$defs/Offering"
+            },
+            "maxItems": 1000,
+            "title": "Offerings",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "maxItems": 10000,
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "previous_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Previous Assignments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          }
+        },
+        "required": [
+          "period_id",
+          "data_version",
+          "scope_description"
+        ],
+        "title": "GenerationInput",
+        "type": "object"
+      },
+      "GenerationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "period_id": {
+            "title": "Period Id",
+            "type": "string"
+          },
+          "input_hash": {
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "data_version": {
+            "title": "Data Version",
+            "type": "string"
+          },
+          "solver_status": {
+            "enum": [
+              "optimal",
+              "feasible",
+              "infeasible",
+              "invalid_input",
+              "invalid_model",
+              "unknown",
+              "validation_failed"
+            ],
+            "title": "Solver Status",
+            "type": "string"
+          },
+          "result_kind": {
+            "const": "generated_preview",
+            "default": "generated_preview",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "persisted": {
+            "const": false,
+            "default": false,
+            "title": "Persisted",
+            "type": "boolean"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "title": "Assignments",
+            "type": "array"
+          },
+          "total_offerings_requested": {
+            "title": "Total Offerings Requested",
+            "type": "integer"
+          },
+          "total_offerings_scheduled": {
+            "title": "Total Offerings Scheduled",
+            "type": "integer"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "title": "Coverage",
+            "type": "array"
+          },
+          "hard_conflict_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hard Conflict Count"
+          },
+          "diagnostics": {
+            "items": {
+              "$ref": "#/$defs/Diagnostic"
+            },
+            "title": "Diagnostics",
+            "type": "array"
+          },
+          "validation": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValidationResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "$ref": "#/$defs/RunMetadata"
+          }
+        },
+        "required": [
+          "run_id",
+          "period_id",
+          "input_hash",
+          "data_version",
+          "solver_status",
+          "assignments",
+          "total_offerings_requested",
+          "total_offerings_scheduled",
+          "coverage",
+          "hard_conflict_count",
+          "diagnostics",
+          "validation",
+          "metadata"
+        ],
+        "title": "GenerationResult",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "Offering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_name": {
+            "minLength": 1,
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "eligible_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Teacher Ids",
+            "type": "array"
+          },
+          "eligible_room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Room Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "maximum": 10080,
+            "title": "Required Weekly Minutes",
+            "type": "integer"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "subject_name",
+          "section_id"
+        ],
+        "title": "Offering",
+        "type": "object"
+      },
+      "Program": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "Program",
+        "type": "object"
+      },
+      "Room": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "enum": [
+              "synthetic",
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building",
+          "source"
+        ],
+        "title": "Room",
+        "type": "object"
+      },
+      "RunMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "solver": {
+            "default": "OR-Tools CP-SAT",
+            "title": "Solver",
+            "type": "string"
+          },
+          "solver_version": {
+            "title": "Solver Version",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "wall_time_seconds": {
+            "title": "Wall Time Seconds",
+            "type": "number"
+          },
+          "time_limit_seconds": {
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "objective": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Objective"
+          },
+          "best_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Best Bound"
+          }
+        },
+        "required": [
+          "solver_version",
+          "seed",
+          "wall_time_seconds",
+          "time_limit_seconds"
+        ],
+        "title": "RunMetadata",
+        "type": "object"
+      },
+      "Section": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "program_id"
+        ],
+        "title": "Section",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Teacher": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Teacher",
+        "type": "object"
+      },
+      "ValidationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          },
+          "hard_conflict_count": {
+            "title": "Hard Conflict Count",
+            "type": "integer"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/$defs/Diagnostic"
+            },
+            "title": "Conflicts",
+            "type": "array"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/$defs/Coverage"
+            },
+            "title": "Coverage",
+            "type": "array"
+          }
+        },
+        "required": [
+          "valid",
+          "hard_conflict_count",
+          "conflicts",
+          "coverage"
+        ],
+        "title": "ValidationResult",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "schema_version": {
+        "const": 1,
+        "default": 1,
+        "title": "Schema Version",
+        "type": "integer"
+      },
+      "id": {
+        "title": "Id",
+        "type": "string"
+      },
+      "title": {
+        "title": "Title",
+        "type": "string"
+      },
+      "period_id": {
+        "title": "Period Id",
+        "type": "string"
+      },
+      "created_at": {
+        "title": "Created At",
+        "type": "string"
+      },
+      "creator": {
+        "title": "Creator",
+        "type": "string"
+      },
+      "status": {
+        "const": "draft",
+        "default": "draft",
+        "title": "Status",
+        "type": "string"
+      },
+      "published": {
+        "const": false,
+        "default": false,
+        "title": "Published",
+        "type": "boolean"
+      },
+      "source": {
+        "enum": [
+          "synthetic-preview",
+          "development-entered",
+          "institutional"
+        ],
+        "title": "Source",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "input_hash": {
+        "title": "Input Hash",
+        "type": "string"
+      },
+      "data_version": {
+        "title": "Data Version",
+        "type": "string"
+      },
+      "solver_status": {
+        "enum": [
+          "feasible",
+          "optimal"
+        ],
+        "title": "Solver Status",
+        "type": "string"
+      },
+      "session_count": {
+        "title": "Session Count",
+        "type": "integer"
+      },
+      "offerings_requested": {
+        "title": "Offerings Requested",
+        "type": "integer"
+      },
+      "offerings_scheduled": {
+        "title": "Offerings Scheduled",
+        "type": "integer"
+      },
+      "required_minutes": {
+        "title": "Required Minutes",
+        "type": "integer"
+      },
+      "allocated_minutes": {
+        "title": "Allocated Minutes",
+        "type": "integer"
+      },
+      "hard_conflict_count": {
+        "const": 0,
+        "default": 0,
+        "title": "Hard Conflict Count",
+        "type": "integer"
+      },
+      "validated": {
+        "const": true,
+        "default": true,
+        "title": "Validated",
+        "type": "boolean"
+      },
+      "input_snapshot": {
+        "$ref": "#/$defs/GenerationInput"
+      },
+      "generation_result": {
+        "$ref": "#/$defs/GenerationResult"
+      },
+      "validation": {
+        "$ref": "#/$defs/ValidationResult"
+      }
+    },
+    "required": [
+      "id",
+      "title",
+      "period_id",
+      "created_at",
+      "creator",
+      "source",
+      "run_id",
+      "input_hash",
+      "data_version",
+      "solver_status",
+      "session_count",
+      "offerings_requested",
+      "offerings_scheduled",
+      "required_minutes",
+      "allocated_minutes",
+      "input_snapshot",
+      "generation_result",
+      "validation"
+    ],
+    "title": "DraftDetail",
+    "type": "object"
+  },
+  "DraftList": {
+    "$defs": {
+      "DraftSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "period_id": {
+            "title": "Period Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "creator": {
+            "title": "Creator",
+            "type": "string"
+          },
+          "status": {
+            "const": "draft",
+            "default": "draft",
+            "title": "Status",
+            "type": "string"
+          },
+          "published": {
+            "const": false,
+            "default": false,
+            "title": "Published",
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "synthetic-preview",
+              "development-entered",
+              "institutional"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "input_hash": {
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "data_version": {
+            "title": "Data Version",
+            "type": "string"
+          },
+          "solver_status": {
+            "enum": [
+              "feasible",
+              "optimal"
+            ],
+            "title": "Solver Status",
+            "type": "string"
+          },
+          "session_count": {
+            "title": "Session Count",
+            "type": "integer"
+          },
+          "offerings_requested": {
+            "title": "Offerings Requested",
+            "type": "integer"
+          },
+          "offerings_scheduled": {
+            "title": "Offerings Scheduled",
+            "type": "integer"
+          },
+          "required_minutes": {
+            "title": "Required Minutes",
+            "type": "integer"
+          },
+          "allocated_minutes": {
+            "title": "Allocated Minutes",
+            "type": "integer"
+          },
+          "hard_conflict_count": {
+            "const": 0,
+            "default": 0,
+            "title": "Hard Conflict Count",
+            "type": "integer"
+          },
+          "validated": {
+            "const": true,
+            "default": true,
+            "title": "Validated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "period_id",
+          "created_at",
+          "creator",
+          "source",
+          "run_id",
+          "input_hash",
+          "data_version",
+          "solver_status",
+          "session_count",
+          "offerings_requested",
+          "offerings_scheduled",
+          "required_minutes",
+          "allocated_minutes"
+        ],
+        "title": "DraftSummary",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "drafts": {
+        "items": {
+          "$ref": "#/$defs/DraftSummary"
+        },
+        "title": "Drafts",
+        "type": "array"
+      },
+      "limit": {
+        "title": "Limit",
+        "type": "integer"
+      },
+      "offset": {
+        "title": "Offset",
+        "type": "integer"
+      },
+      "has_more": {
+        "title": "Has More",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "drafts",
+      "limit",
+      "offset",
+      "has_more"
+    ],
+    "title": "DraftList",
+    "type": "object"
+  },
+  "AcademicSnapshot": {
+    "$defs": {
+      "AcademicConstraints": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "constraints",
+            "default": "constraints",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "const": "rules",
+            "default": "rules",
+            "title": "Id",
+            "type": "string"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          }
+        },
+        "title": "AcademicConstraints",
+        "type": "object"
+      },
+      "AcademicFaculty": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          },
+          "kind": {
+            "const": "faculty",
+            "default": "faculty",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "subject_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subject Ids",
+            "type": "array"
+          },
+          "institutional_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Institutional Id"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "AcademicFaculty",
+        "type": "object"
+      },
+      "AcademicOffering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "kind": {
+            "const": "offerings",
+            "default": "offerings",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Teacher Ids",
+            "type": "array"
+          },
+          "room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Room Ids",
+            "type": "array"
+          },
+          "weekly_minutes_override": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 10080,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Minutes Override"
+          },
+          "patterns_override": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/SessionPattern"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Patterns Override"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "subject_id",
+          "section_id"
+        ],
+        "title": "AcademicOffering",
+        "type": "object"
+      },
+      "AcademicPeriod": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "development-entered",
+              "institutional"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "created_at",
+          "source"
+        ],
+        "title": "AcademicPeriod",
+        "type": "object"
+      },
+      "AcademicProgram": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          },
+          "kind": {
+            "const": "programs",
+            "default": "programs",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "AcademicProgram",
+        "type": "object"
+      },
+      "AcademicResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "default": "administrator-supplied",
+            "enum": [
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          },
+          "kind": {
+            "const": "resources",
+            "default": "resources",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "verification_note": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Verification Note",
+            "type": "string"
+          },
+          "alias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Alias"
+          },
+          "alias_unconfirmed": {
+            "default": false,
+            "title": "Alias Unconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building"
+        ],
+        "title": "AcademicResource",
+        "type": "object"
+      },
+      "AcademicSection": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "kind": {
+            "const": "sections",
+            "default": "sections",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "period_id": {
+            "title": "Period Id",
+            "type": "string"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Population"
+          },
+          "population_verified": {
+            "default": false,
+            "title": "Population Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "program_id",
+          "period_id"
+        ],
+        "title": "AcademicSection",
+        "type": "object"
+      },
+      "AcademicSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "kind": {
+            "const": "subjects",
+            "default": "subjects",
+            "title": "Kind",
+            "type": "string"
+          },
+          "code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "program_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Program Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 10080,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 180,
+            "title": "Required Weekly Minutes"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "AcademicSubject",
+        "type": "object"
+      },
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "RecordEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          },
+          "updated_by": {
+            "title": "Updated By",
+            "type": "string"
+          },
+          "record": {
+            "discriminator": {
+              "mapping": {
+                "constraints": "#/$defs/AcademicConstraints",
+                "faculty": "#/$defs/AcademicFaculty",
+                "offerings": "#/$defs/AcademicOffering",
+                "programs": "#/$defs/AcademicProgram",
+                "resources": "#/$defs/AcademicResource",
+                "sections": "#/$defs/AcademicSection",
+                "subjects": "#/$defs/AcademicSubject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AcademicProgram"
+              },
+              {
+                "$ref": "#/$defs/AcademicSubject"
+              },
+              {
+                "$ref": "#/$defs/AcademicSection"
+              },
+              {
+                "$ref": "#/$defs/AcademicFaculty"
+              },
+              {
+                "$ref": "#/$defs/AcademicResource"
+              },
+              {
+                "$ref": "#/$defs/AcademicOffering"
+              },
+              {
+                "$ref": "#/$defs/AcademicConstraints"
+              }
+            ],
+            "title": "Record"
+          }
+        },
+        "required": [
+          "revision",
+          "updated_at",
+          "updated_by",
+          "record"
+        ],
+        "title": "RecordEnvelope",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "contract_version": {
+        "const": "v1",
+        "default": "v1",
+        "title": "Contract Version",
+        "type": "string"
+      },
+      "period": {
+        "$ref": "#/$defs/AcademicPeriod"
+      },
+      "records": {
+        "items": {
+          "$ref": "#/$defs/RecordEnvelope"
+        },
+        "title": "Records",
+        "type": "array"
+      }
+    },
+    "required": [
+      "period",
+      "records"
+    ],
+    "title": "AcademicSnapshot",
+    "type": "object"
+  },
+  "AcademicReadiness": {
+    "$defs": {
+      "AcademicPeriod": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "development-entered",
+              "institutional"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "created_at",
+          "source"
+        ],
+        "title": "AcademicPeriod",
+        "type": "object"
+      },
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "GenerationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "period_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Period Id",
+            "type": "string"
+          },
+          "data_version": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Data Version",
+            "type": "string"
+          },
+          "scope_description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Scope Description",
+            "type": "string"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/$defs/Program"
+            },
+            "maxItems": 50,
+            "title": "Programs",
+            "type": "array"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/$defs/Section"
+            },
+            "maxItems": 500,
+            "title": "Sections",
+            "type": "array"
+          },
+          "teachers": {
+            "items": {
+              "$ref": "#/$defs/Teacher"
+            },
+            "maxItems": 500,
+            "title": "Teachers",
+            "type": "array"
+          },
+          "rooms": {
+            "items": {
+              "$ref": "#/$defs/Room"
+            },
+            "maxItems": 200,
+            "title": "Rooms",
+            "type": "array"
+          },
+          "offerings": {
+            "items": {
+              "$ref": "#/$defs/Offering"
+            },
+            "maxItems": 1000,
+            "title": "Offerings",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "maxItems": 10000,
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "previous_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "maxItems": 7000,
+            "title": "Previous Assignments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          }
+        },
+        "required": [
+          "period_id",
+          "data_version",
+          "scope_description"
+        ],
+        "title": "GenerationInput",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "Offering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_name": {
+            "minLength": 1,
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "eligible_teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Teacher Ids",
+            "type": "array"
+          },
+          "eligible_room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Room Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "maximum": 10080,
+            "title": "Required Weekly Minutes",
+            "type": "integer"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "subject_name",
+          "section_id"
+        ],
+        "title": "Offering",
+        "type": "object"
+      },
+      "Program": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "Program",
+        "type": "object"
+      },
+      "ReadinessIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "severity": {
+            "enum": [
+              "blocking",
+              "warning"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Record Id"
+          }
+        },
+        "required": [
+          "severity",
+          "code",
+          "message"
+        ],
+        "title": "ReadinessIssue",
+        "type": "object"
+      },
+      "Room": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "enum": [
+              "synthetic",
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building",
+          "source"
+        ],
+        "title": "Room",
+        "type": "object"
+      },
+      "Section": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "program_id"
+        ],
+        "title": "Section",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Teacher": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Teacher",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "period": {
+        "$ref": "#/$defs/AcademicPeriod"
+      },
+      "issues": {
+        "items": {
+          "$ref": "#/$defs/ReadinessIssue"
+        },
+        "title": "Issues",
+        "type": "array"
+      },
+      "ready": {
+        "title": "Ready",
+        "type": "boolean"
+      },
+      "programs": {
+        "title": "Programs",
+        "type": "integer"
+      },
+      "subjects": {
+        "title": "Subjects",
+        "type": "integer"
+      },
+      "sections": {
+        "title": "Sections",
+        "type": "integer"
+      },
+      "faculty": {
+        "title": "Faculty",
+        "type": "integer"
+      },
+      "offerings": {
+        "title": "Offerings",
+        "type": "integer"
+      },
+      "eligible_resources": {
+        "title": "Eligible Resources",
+        "type": "integer"
+      },
+      "inputs": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/GenerationInput"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "required": [
+      "period",
+      "issues",
+      "ready",
+      "programs",
+      "subjects",
+      "sections",
+      "faculty",
+      "offerings",
+      "eligible_resources",
+      "inputs"
+    ],
+    "title": "AcademicReadiness",
+    "type": "object"
+  },
+  "AcademicGenerationRequest": {
+    "additionalProperties": false,
+    "properties": {
+      "expected_revision": {
+        "minimum": 1,
+        "title": "Expected Revision",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "expected_revision"
+    ],
+    "title": "AcademicGenerationRequest",
+    "type": "object"
+  },
+  "AcademicPeriodList": {
+    "$defs": {
+      "AcademicPeriod": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "development-entered",
+              "institutional"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "created_at",
+          "source"
+        ],
+        "title": "AcademicPeriod",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "periods": {
+        "items": {
+          "$ref": "#/$defs/AcademicPeriod"
+        },
+        "title": "Periods",
+        "type": "array"
+      }
+    },
+    "required": [
+      "periods"
+    ],
+    "title": "AcademicPeriodList",
+    "type": "object"
+  },
+  "PeriodCreate": {
+    "additionalProperties": false,
+    "properties": {
+      "title": {
+        "maxLength": 160,
+        "minLength": 1,
+        "title": "Title",
+        "type": "string"
+      },
+      "include_cdm_catalog": {
+        "default": true,
+        "title": "Include Cdm Catalog",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "title"
+    ],
+    "title": "PeriodCreate",
+    "type": "object"
+  },
+  "RecordWrite": {
+    "$defs": {
+      "AcademicConstraints": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "constraints",
+            "default": "constraints",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "const": "rules",
+            "default": "rules",
+            "title": "Id",
+            "type": "string"
+          },
+          "operating_windows": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "maxItems": 70,
+            "title": "Operating Windows",
+            "type": "array"
+          },
+          "transition_buffer_minutes": {
+            "default": 0,
+            "maximum": 120,
+            "minimum": 0,
+            "multipleOf": 30,
+            "title": "Transition Buffer Minutes",
+            "type": "integer"
+          },
+          "locked_assignments": {
+            "items": {
+              "$ref": "#/$defs/Assignment"
+            },
+            "title": "Locked Assignments",
+            "type": "array"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/$defs/Enrollment"
+            },
+            "title": "Enrollments",
+            "type": "array"
+          },
+          "options": {
+            "$ref": "#/$defs/SolverOptions"
+          },
+          "all_intended_offerings_supplied": {
+            "default": false,
+            "title": "All Intended Offerings Supplied",
+            "type": "boolean"
+          }
+        },
+        "title": "AcademicConstraints",
+        "type": "object"
+      },
+      "AcademicFaculty": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "max_weekly_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Weekly Minutes"
+          },
+          "max_daily_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Minutes"
+          },
+          "kind": {
+            "const": "faculty",
+            "default": "faculty",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "subject_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subject Ids",
+            "type": "array"
+          },
+          "institutional_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Institutional Id"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "AcademicFaculty",
+        "type": "object"
+      },
+      "AcademicOffering": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "kind": {
+            "const": "offerings",
+            "default": "offerings",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "teacher_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Teacher Ids",
+            "type": "array"
+          },
+          "room_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Room Ids",
+            "type": "array"
+          },
+          "weekly_minutes_override": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 10080,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Minutes Override"
+          },
+          "patterns_override": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/SessionPattern"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Patterns Override"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          },
+          "allowed_buildings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Buildings"
+          }
+        },
+        "required": [
+          "subject_id",
+          "section_id"
+        ],
+        "title": "AcademicOffering",
+        "type": "object"
+      },
+      "AcademicProgram": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "acronym": {
+            "minLength": 1,
+            "title": "Acronym",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "institute": {
+            "title": "Institute",
+            "type": "string"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "array"
+          },
+          "section_policy": {
+            "default": "degree",
+            "enum": [
+              "degree",
+              "custom"
+            ],
+            "title": "Section Policy",
+            "type": "string"
+          },
+          "allowed_year_levels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Year Levels"
+          },
+          "kind": {
+            "const": "programs",
+            "default": "programs",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "acronym",
+          "name",
+          "institute"
+        ],
+        "title": "AcademicProgram",
+        "type": "object"
+      },
+      "AcademicResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "building": {
+            "title": "Building",
+            "type": "string"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Floor"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location"
+          },
+          "source": {
+            "default": "administrator-supplied",
+            "enum": [
+              "cdm-provisional",
+              "administrator-supplied"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "schedulable": {
+            "default": false,
+            "title": "Schedulable",
+            "type": "boolean"
+          },
+          "condition": {
+            "default": "unknown",
+            "enum": [
+              "unknown",
+              "operational",
+              "maintenance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Type"
+          },
+          "type_verified": {
+            "default": false,
+            "title": "Type Verified",
+            "type": "boolean"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
+          "capacity_verified": {
+            "default": false,
+            "title": "Capacity Verified",
+            "type": "boolean"
+          },
+          "equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Equipment",
+            "type": "array"
+          },
+          "equipment_verified": {
+            "default": false,
+            "title": "Equipment Verified",
+            "type": "boolean"
+          },
+          "allowed_program_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Program Ids"
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/$defs/Window"
+            },
+            "title": "Blocked",
+            "type": "array"
+          },
+          "kind": {
+            "const": "resources",
+            "default": "resources",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "verification_note": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Verification Note",
+            "type": "string"
+          },
+          "alias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Alias"
+          },
+          "alias_unconfirmed": {
+            "default": false,
+            "title": "Alias Unconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "building"
+        ],
+        "title": "AcademicResource",
+        "type": "object"
+      },
+      "AcademicSection": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "program_id": {
+            "title": "Program Id",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "section_letter": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{1,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section Letter"
+          },
+          "custom_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Custom Label"
+          },
+          "preferred_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Preferred Days",
+            "type": "array"
+          },
+          "kind": {
+            "const": "sections",
+            "default": "sections",
+            "title": "Kind",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "period_id": {
+            "title": "Period Id",
+            "type": "string"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Population"
+          },
+          "population_verified": {
+            "default": false,
+            "title": "Population Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "program_id",
+          "period_id"
+        ],
+        "title": "AcademicSection",
+        "type": "object"
+      },
+      "AcademicSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "kind": {
+            "const": "subjects",
+            "default": "subjects",
+            "title": "Kind",
+            "type": "string"
+          },
+          "code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "program_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Program Ids",
+            "type": "array"
+          },
+          "required_weekly_minutes": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 10080,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 180,
+            "title": "Required Weekly Minutes"
+          },
+          "patterns": {
+            "items": {
+              "$ref": "#/$defs/SessionPattern"
+            },
+            "maxItems": 5,
+            "title": "Patterns",
+            "type": "array"
+          },
+          "required_room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Required Room Type"
+          },
+          "required_equipment": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Equipment",
+            "type": "array"
+          },
+          "minimum_capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Minimum Capacity"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "AcademicSubject",
+        "type": "object"
+      },
+      "Assignment": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "offering_id": {
+            "title": "Offering Id",
+            "type": "string"
+          },
+          "day": {
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          },
+          "room_id": {
+            "title": "Room Id",
+            "type": "string"
+          },
+          "teacher_id": {
+            "title": "Teacher Id",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "offering_id",
+          "day",
+          "start",
+          "end",
+          "room_id",
+          "teacher_id",
+          "section_id",
+          "subject_id"
+        ],
+        "title": "Assignment",
+        "type": "object"
+      },
+      "Enrollment": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "minLength": 1,
+            "title": "Student Id",
+            "type": "string"
+          },
+          "offering_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Offering Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "student_id",
+          "offering_ids"
+        ],
+        "title": "Enrollment",
+        "type": "object"
+      },
+      "ObjectiveWeights": {
+        "additionalProperties": false,
+        "properties": {
+          "idle_gaps": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Idle Gaps",
+            "type": "integer"
+          },
+          "daily_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Balance",
+            "type": "integer"
+          },
+          "preferences": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Preferences",
+            "type": "integer"
+          },
+          "building_changes": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Building Changes",
+            "type": "integer"
+          },
+          "disruption": {
+            "default": 5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Disruption",
+            "type": "integer"
+          },
+          "room_balance": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Room Balance",
+            "type": "integer"
+          }
+        },
+        "title": "ObjectiveWeights",
+        "type": "object"
+      },
+      "SessionPattern": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "durations": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Durations",
+            "type": "array"
+          },
+          "distinct_days": {
+            "default": true,
+            "title": "Distinct Days",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "durations"
+        ],
+        "title": "SessionPattern",
+        "type": "object"
+      },
+      "SolverOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "time_limit_seconds": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "maximum": 30,
+            "title": "Time Limit Seconds",
+            "type": "number"
+          },
+          "seed": {
+            "default": 42,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/$defs/ObjectiveWeights"
+          }
+        },
+        "title": "SolverOptions",
+        "type": "object"
+      },
+      "Window": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Monday=0 through Sunday=6",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Day",
+            "type": "integer"
+          },
+          "start": {
+            "exclusiveMaximum": 1440,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "exclusiveMinimum": 0,
+            "maximum": 1440,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "start",
+          "end"
+        ],
+        "title": "Window",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "expected_revision": {
+        "minimum": 0,
+        "title": "Expected Revision",
+        "type": "integer"
+      },
+      "record": {
+        "discriminator": {
+          "mapping": {
+            "constraints": "#/$defs/AcademicConstraints",
+            "faculty": "#/$defs/AcademicFaculty",
+            "offerings": "#/$defs/AcademicOffering",
+            "programs": "#/$defs/AcademicProgram",
+            "resources": "#/$defs/AcademicResource",
+            "sections": "#/$defs/AcademicSection",
+            "subjects": "#/$defs/AcademicSubject"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/AcademicProgram"
+          },
+          {
+            "$ref": "#/$defs/AcademicSubject"
+          },
+          {
+            "$ref": "#/$defs/AcademicSection"
+          },
+          {
+            "$ref": "#/$defs/AcademicFaculty"
+          },
+          {
+            "$ref": "#/$defs/AcademicResource"
+          },
+          {
+            "$ref": "#/$defs/AcademicOffering"
+          },
+          {
+            "$ref": "#/$defs/AcademicConstraints"
+          }
+        ],
+        "title": "Record"
+      }
+    },
+    "required": [
+      "expected_revision",
+      "record"
+    ],
+    "title": "RecordWrite",
+    "type": "object"
+  }
+}

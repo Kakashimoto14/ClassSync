@@ -1,0 +1,32 @@
+/* S2B: focused period-specific entry, reusing Soft Rouge tokens. */
+.academic-management fieldset,
+.academic-record-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.academic-form-fields, .academic-record-form, .academic-create-period { display: grid; gap: 20px; min-width: 0; }
+.academic-period-controls, .academic-list-toolbar, .academic-review-actions { display: grid; gap: 12px; align-items: end; }
+.academic-records, .academic-record-list { display: grid; gap: 12px; min-width: 0; }
+.academic-record-list { list-style: none; padding: 0; margin: 0; }
+.academic-record-row { display: grid; gap: 12px; min-width: 0; }
+.academic-record-row h2 { font-size: 1rem; overflow-wrap: anywhere; }
+.academic-record-row p { margin-top: 6px; color: var(--ink-soft); }
+.academic-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.academic-tabs a { padding: 10px 12px; min-height: 44px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink); background: var(--surface); font-size: .875rem; }
+.academic-tabs a[aria-current="page"] { color: var(--primary); background: var(--primary-soft); border-color: var(--primary); font-weight: 600; }
+.academic-field-grid { display: grid; gap: 16px; }
+.weekly-scheduler .academic-checkbox { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: .875rem; }
+.academic-checkbox input { width: 20px; height: 20px; min-height: 20px; flex: 0 0 auto; accent-color: var(--primary); }
+.academic-windows, .academic-patterns { display: grid; gap: 12px; }
+.academic-windows legend, .academic-patterns legend, .academic-choice-options legend { font-weight: 600; margin-bottom: 10px; font-size: .9375rem; }
+.academic-window { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); }
+.academic-window > label:first-child { grid-column: 1 / -1; }
+.academic-window input { min-width: 0; width: 100%; }
+.academic-choices { border: 1px solid var(--line); border-radius: var(--radius); padding: 0 12px; }
+.academic-choice-options { max-height: 300px; overflow-y: auto; }
+.academic-field-error { color: var(--danger); font-size: .875rem; }
+.academic-record-form { scroll-margin-top: 100px; }
+@media (min-width: 768px) {
+ .academic-period-controls, .academic-list-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+ .academic-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .academic-record-row { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+ .academic-window { grid-template-columns: minmax(140px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr) auto; align-items: end; }
+ .academic-window > label:first-child { grid-column: auto; }
+}

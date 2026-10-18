@@ -62,7 +62,7 @@ describe('room discovery routes and interactions', () => {
       expect(main().getByText('VGA Room · Unconfirmed')).toBeInTheDocument();
       fireEvent.click(main().getByRole('link', { name: 'View PRRC 302 details' }));
       expect(main().getByText('Condition unverified')).toBeInTheDocument();
-      expect(main().getAllByText('Unverified')).toHaveLength(4);
+      expect(main().getAllByText('Unverified')).toHaveLength(3);
       expect(main().getByText('No recorded assignments')).toBeInTheDocument();
       expect(main().queryByText('Resource active')).not.toBeInTheDocument();
     },

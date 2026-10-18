@@ -5,6 +5,8 @@ build-backend = "setuptools.build_meta"
 name = "classync-api-contracts"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["pydantic>=2.10", "pydantic-settings>=2.7", "firebase-admin>=6.6"]
+dependencies = ["pydantic>=2.10", "pydantic-settings>=2.7", "firebase-admin>=6.6", "fastapi>=0.115,<1"]
 [tool.setuptools.packages.find]
 include = ["classync_contracts*"]
+[tool.setuptools.package-data]
+classync_contracts = ["catalogs/*.json"]
