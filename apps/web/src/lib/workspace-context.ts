@@ -30,6 +30,7 @@ export function readWorkspace(role: UserRole): WorkspaceContext {
       return empty();
     return {
       ...c,
+      view: ['day', 'week', 'month'].includes(c.view) ? c.view : 'week',
       date:
         /^\d{4}-\d{2}-\d{2}$/.test(c.date) && Number.isFinite(Date.parse(c.date))
           ? c.date

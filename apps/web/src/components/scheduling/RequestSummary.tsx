@@ -56,7 +56,7 @@ export function RequestSummary({
       )}
       {link && (
         <Link
-          className="text-action"
+          className="button button--secondary"
           to={`${rolePath(role, 'request-detail')}?id=${encodeURIComponent(request.id)}`}
           aria-label={`View request: ${assignment?.subject.name ?? request.id}`}
         >

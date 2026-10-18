@@ -84,7 +84,8 @@ describe('shared role schedule context', () => {
     await waitFor(() => expect(readWorkspace('student').identity).toBe('syn-bsit-3-A'));
     fireEvent.click(screen.getByRole('link', { name: 'Open Schedule' }));
     fireEvent.click(screen.getByRole('button', { name: `${calendarDateLabel(date)}, 1 classes` }));
-    const row = within(document.querySelector('.ux-agenda') as HTMLElement).getByRole('button', {
+    expect(screen.queryByText('No classes on this date.')).not.toBeInTheDocument();
+    const row = await within(document.querySelector('.ux-agenda') as HTMLElement).findByRole('button', {
       name: /09:00.*Synthetic computing/,
     });
     fireEvent.click(row);

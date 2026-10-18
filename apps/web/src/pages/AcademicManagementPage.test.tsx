@@ -231,11 +231,11 @@ describe('persisted academic data management', () => {
         <SchedulingSourcePage />
       </MemoryRouter>,
     );
-    await screen.findByText('1 blocking issues');
+    await screen.findByText('1 blocking issue');
     expect(screen.getByRole('button', { name: 'Generate Weekly Schedule' })).toBeDisabled();
     expect(screen.getAllByText('Assign an eligible instructor.')[0]).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Resolve Requirements' }));
-      expect(screen.getByRole('region', {name:'Requirements to resolve'})).toHaveFocus();
+    fireEvent.click(screen.getByRole('button', { name: 'Resolve Requirements' }));
+    expect(screen.getByRole('region', { name: 'Requirements to resolve' })).toHaveFocus();
     expect(screen.getByRole('link', { name: 'Review faculty availability' })).toHaveAttribute(
       'href',
       '/admin/teachers?period=period-a',

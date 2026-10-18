@@ -92,7 +92,7 @@ export function ConflictCenterPage() {
             assignments={draft.generation_result.assignments}
           />
           <Link
-            className="text-action"
+            className="button button--secondary"
             to={`/admin/schedule-manager/drafts/${draft.id}?source=academic`}
           >
             Review this saved draft

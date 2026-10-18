@@ -107,7 +107,9 @@ export function ReadinessSummary({ checked }: { checked: AcademicReadiness }) {
       <div className="ux-section-heading">
         <h2>Readiness</h2>
         <StatusBadge tone={checked.ready ? 'success' : 'warning'}>
-          {checked.ready ? 'Ready for generation' : `${blocking.length} blocking issues`}
+          {checked.ready
+            ? 'Ready for generation'
+            : `${blocking.length} blocking ${blocking.length === 1 ? 'issue' : 'issues'}`}
         </StatusBadge>
       </div>
       <div className="ux-scope-stats">

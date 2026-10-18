@@ -71,8 +71,8 @@ export function AcademicFixtureImport() {
       <summary>Sample Academic Scenario</summary>
       <form className="academic-create-period" onSubmit={submit}>
         <p>
-          Set up an isolated BSIT 3A demonstration with synthetic teachers, subjects and four
-          synthetic classroom candidates. No provisional CdM room is made eligible.
+          Start with BSIT 3A or customize the isolated scenario, using synthetic teachers, subjects
+          and four synthetic classroom candidates. No provisional CdM room is made eligible.
         </p>
         <details hidden={review}>
           <summary>Customize sample scenario</summary>
