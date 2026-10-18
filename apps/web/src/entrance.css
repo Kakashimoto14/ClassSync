@@ -1,0 +1,403 @@
+/* B1 entrance: isolated from workspace, scheduling, and academic styles. */
+.welcome-page {
+  min-height: 100svh;
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: var(--canvas);
+}
+.welcome-brand {
+  animation: entrance-arrive 360ms ease-out both;
+}
+.welcome-brand .classsync-logo {
+  gap: 5px;
+}
+.welcome-brand .classsync-logo__name {
+  font-size: 1.75rem;
+}
+.welcome-brand .classsync-logo__tagline {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+.welcome-story {
+  display: grid;
+  gap: 18px;
+}
+.welcome-copy {
+  animation: entrance-arrive 400ms 50ms ease-out both;
+}
+.welcome-copy h1 {
+  font-size: clamp(1.9rem, 7.4vw, 2.8rem);
+  line-height: 1.14;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+.welcome-copy h1 span {
+  color: var(--primary);
+}
+.welcome-copy p {
+  margin-top: 16px;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  max-width: 54ch;
+}
+.welcome-capabilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.welcome-capabilities li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.welcome-capabilities svg {
+  color: var(--primary);
+}
+.welcome-access {
+  min-width: 0;
+}
+.welcome-access-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+.welcome-access-icon {
+  display: none;
+}
+.welcome-access-card h2 {
+  font-size: 1.25rem;
+  letter-spacing: -0.035em;
+}
+.welcome-access-card .auth-card__title {
+  margin-bottom: 20px;
+}
+.welcome-access-card .auth-card__title p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.welcome-access-card .entrance-primary {
+  font-size: 0.9375rem;
+  min-height: 52px;
+  padding: 12px 16px;
+  justify-content: space-between;
+}
+.welcome-access-card .entrance-note {
+  font-size: 0.75rem;
+  margin: 12px 0 20px;
+}
+.welcome-access-card .university-access {
+  padding-top: 12px;
+}
+.welcome-access-card .university-access summary {
+  font-size: 0.8125rem;
+  min-height: 44px;
+}
+.welcome-access-card .university-access summary span {
+  display: inline;
+  margin-left: 8px;
+  font-size: 0.75rem;
+}
+.welcome-access-card .university-access > div > p {
+  font-size: 0.8125rem;
+  margin: 12px 0 16px;
+}
+.welcome-access-card form {
+  display: grid;
+  gap: 16px;
+}
+.welcome-switch {
+  margin: -8px 0 12px;
+}
+.entrance-timetable {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.entrance-timetable__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--line);
+}
+.entrance-timetable__heading svg {
+  color: var(--primary);
+}
+.entrance-timetable__heading > span {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 0.6875rem;
+}
+.entrance-timetable__grid {
+  display: grid;
+  grid-template-columns: 42px repeat(3, minmax(0, 1fr));
+}
+.timetable-day {
+  padding: 10px 4px;
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+  background: var(--canvas);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+.timetable-time {
+  font-size: 0.625rem;
+  color: var(--ink-soft);
+  padding: 13px 3px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.timetable-slot {
+  padding: 4px;
+  min-height: 58px;
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.timetable-class {
+  display: grid;
+  gap: 4px;
+  padding: 8px 5px;
+  border-left: 3px solid var(--primary);
+  border-radius: 4px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 0.6875rem;
+  animation: entrance-arrive 400ms 140ms ease-out both;
+}
+.timetable-class > span {
+  color: var(--ink-on-tint);
+  font-size: 0.625rem;
+}
+.timetable-class--neutral {
+  background: var(--canvas);
+  border-color: var(--ink-soft);
+  color: var(--ink);
+  animation-delay: 210ms;
+}
+.timetable-slot:last-child .timetable-class {
+  animation: none;
+}
+.entrance-timetable figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  justify-content: space-between;
+  padding: 12px 14px;
+  color: var(--ink-soft);
+  font-size: 0.6875rem;
+}
+.timetable-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--success);
+}
+/* Content is readable immediately; no opacity-zero resting state or input delay. */
+@keyframes entrance-arrive {
+  from {
+    opacity: 0.7;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (hover: hover) {
+  .welcome-access-card .entrance-primary:hover {
+    transform: translateY(-1px);
+  }
+}
+.welcome-access-card .entrance-primary:active {
+  transform: scale(0.99);
+}
+.role-preview-page {
+  min-height: 100svh;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.role-preview-page .role-preview-card {
+  width: 100%;
+  padding: 28px 24px;
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  gap: 18px;
+}
+.role-preview-page .role-preview-card > p {
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+.role-preview-page .role-option {
+  min-height: 84px;
+  border-color: var(--line);
+}
+.role-preview-page .role-option.button--primary {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--ink);
+}
+.role-preview-page .role-option.button--primary > svg {
+  color: var(--primary);
+}
+@media (min-width: 600px) and (max-width: 1023px) {
+  .welcome-page {
+    max-width: 680px;
+    margin-inline: auto;
+    padding: 40px;
+    gap: 28px;
+  }
+  .welcome-capabilities li {
+    font-size: 0.8125rem;
+  }
+  .timetable-class {
+    font-size: 0.75rem;
+  }
+  .timetable-class > span {
+    font-size: 0.625rem;
+  }
+}
+@media (min-width: 1024px) {
+  .welcome-page {
+    grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    column-gap: clamp(40px, 5vw, 88px);
+    row-gap: 32px;
+    padding: 48px clamp(40px, 5vw, 80px);
+    max-width: 1600px;
+    margin-inline: auto;
+    position: relative;
+  }
+  .welcome-page::before {
+    content: '';
+    position: absolute;
+    inset: 0 43% 0 0;
+    background: var(--surface);
+    z-index: -1;
+  }
+  .welcome-page {
+    isolation: isolate;
+  }
+  .welcome-brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .welcome-brand .classsync-logo__name {
+    font-size: 2rem;
+  }
+  .welcome-brand .classsync-logo__tagline {
+    font-size: 0.8125rem;
+  }
+  .welcome-story {
+    grid-column: 1;
+    grid-row: 2;
+    gap: 24px;
+  }
+  .welcome-copy h1 {
+    font-size: clamp(2.5rem, 3.55vw, 3.5rem);
+  }
+  .welcome-copy p {
+    font-size: 1rem;
+  }
+  .welcome-capabilities {
+    gap: 10px 18px;
+  }
+  .welcome-capabilities li {
+    font-size: 0.75rem;
+  }
+  .welcome-access {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: center;
+  }
+  .welcome-access-card {
+    padding: clamp(28px, 3vw, 44px);
+  }
+  .welcome-access-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    color: var(--primary);
+    background: var(--primary-soft);
+    margin-bottom: 28px;
+  }
+  .welcome-access-card h2 {
+    font-size: 1.75rem;
+  }
+  .welcome-access-card .auth-card__title p {
+    font-size: 1rem;
+  }
+  .welcome-access-card .entrance-note {
+    font-size: 0.8125rem;
+    margin-bottom: 28px;
+  }
+  .entrance-timetable {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .entrance-timetable__grid {
+    grid-template-columns: 60px repeat(3, minmax(0, 1fr));
+  }
+  .timetable-day {
+    font-size: 0.75rem;
+  }
+  .timetable-time {
+    font-size: 0.6875rem;
+    padding: 16px 8px;
+  }
+  .timetable-slot {
+    min-height: 66px;
+    padding: 5px;
+  }
+  .timetable-class {
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+  .timetable-class > span {
+    font-size: 0.625rem;
+  }
+  .entrance-timetable figcaption {
+    font-size: 0.6875rem;
+  }
+  .role-preview-page .role-preview-card {
+    padding: 40px;
+  }
+}
+@media (max-height: 650px) {
+  .welcome-page {
+    align-content: start;
+  }
+  .role-preview-page {
+    align-items: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-page *,
+  .role-preview-page * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .welcome-page .entrance-primary:hover,
+  .welcome-page .entrance-primary:active {
+    transform: none;
+  }
+}

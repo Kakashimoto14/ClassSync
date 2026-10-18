@@ -1,13 +1,16 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, CalendarDays, ShieldCheck, MapPin } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
-import { validateLogin, type LoginValidationErrors } from '../auth/access';
+import { demoDestination, validateLogin, type LoginValidationErrors } from '../auth/access';
 import { previewEnabled } from '../auth/preview-session';
+import { useDevelopmentRole } from '../auth/useDevelopmentRole';
+import { EntranceTimetable } from '../components/brand/EntranceTimetable';
 
 export function AuthPage() {
+  const { role } = useDevelopmentRole();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,34 +42,67 @@ export function AuthPage() {
   };
 
   return (
-    <div className="auth-page auth-entrance">
-      <aside className="auth-brand">
+    <main className="welcome-page">
+      <header className="welcome-brand">
         <ClassSyncLogo variant="full" size="large" />
-        <div className="auth-brand-copy">
-          <h2>
-            Smarter scheduling.
+      </header>
+      <section className="welcome-story" aria-labelledby="welcome-title">
+        <div className="welcome-copy">
+          <h1 id="welcome-title">
+            Smarter schedules.
             <br />
-            Fewer classroom conflicts.
-          </h2>
-          <p>Schedules, classrooms, and teaching updates in one place.</p>
+            <span>Better campus days.</span>
+          </h1>
+          <p>
+            Generate weekly timetables, check classroom conflicts, and find the rooms you need—all
+            in ClassSync.
+          </p>
         </div>
-      </aside>
-      <main className="auth-main">
-        <section className="auth-card" aria-labelledby="sign-in-title">
+        <ul className="welcome-capabilities" aria-label="ClassSync capabilities">
+          <li>
+            <CalendarDays size={17} aria-hidden="true" />
+            Automated Scheduling
+          </li>
+          <li>
+            <ShieldCheck size={17} aria-hidden="true" />
+            Conflict Detection
+          </li>
+          <li>
+            <MapPin size={17} aria-hidden="true" />
+            Classroom Discovery
+          </li>
+        </ul>
+      </section>
+      <section className="welcome-access" aria-labelledby="sign-in-title">
+        <div className="welcome-access-card">
+          <span className="welcome-access-icon" aria-hidden="true">
+            <ArrowRight size={24} />
+          </span>
           <div className="auth-card__title">
-            <h1 id="sign-in-title">Your campus, coordinated.</h1>
+            <h2 id="sign-in-title">{role ? 'Welcome back.' : 'Welcome to ClassSync'}</h2>
             <p>
               {previewEnabled
-                ? 'Find your schedule, classroom, and updates.'
-                : 'Access your university workspace.'}
+                ? role
+                  ? `Your ${role} preview is ready to continue.`
+                  : 'Choose a role and explore your campus workspace.'
+                : 'University access is not available yet.'}
             </p>
           </div>
           {previewEnabled && (
             <>
-              <Link className="button entrance-primary" to={demoHref}>
-                Explore ClassSync <ArrowRight size={18} aria-hidden="true" />
+              <Link
+                className="button entrance-primary"
+                to={role ? demoDestination(role, returnTo) : demoHref}
+              >
+                {role ? 'Continue to workspace' : 'Explore ClassSync'}{' '}
+                <ArrowRight size={18} aria-hidden="true" />
               </Link>
               <p className="entrance-note">Sample preview · You are not signed in.</p>
+              {role && (
+                <Link className="text-action welcome-switch" to={demoHref}>
+                  Choose another role
+                </Link>
+              )}
             </>
           )}
           <details className="university-access">
@@ -138,7 +174,7 @@ export function AuthPage() {
                   )}
                 </div>
                 <Button type="submit">
-                  Sign in <ArrowRight size={17} aria-hidden="true" />
+                  Check sign-in availability <ArrowRight size={17} aria-hidden="true" />
                 </Button>
                 {unavailable && (
                   <Alert tone="warning" title="Sign-in unavailable">
@@ -150,8 +186,9 @@ export function AuthPage() {
               </form>
             </div>
           </details>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+      <EntranceTimetable />
+    </main>
   );
 }
