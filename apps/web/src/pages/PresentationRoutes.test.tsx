@@ -45,22 +45,12 @@ function open(path: string, role: 'student' | 'administrator' = 'administrator')
 }
 
 describe('presentation journey integrity', () => {
-  it('opens the Student schedule with the dashboard assignments and cross-section records', () => {
+  it('opens the structured Student calendar without legacy published fixtures', async () => {
     open('/student/dashboard', 'student');
     fireEvent.click(screen.getByRole('link', { name: 'View my schedule' }));
-    const ids = [...screen.getByRole('main').querySelectorAll('[data-assignment-id]')].map((e) =>
-      e.getAttribute('data-assignment-id'),
-    );
-    expect(ids).toEqual(['occ-hci-mon', 'occ-database-mon', 'occ-web-mon', 'occ-database-tue']);
-    expect(screen.getAllByText(/BSCS 1B/)).toHaveLength(2);
-    expect(
-      screen.queryByText(/Room 301|Information Assurance|September 21/),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Export Schedule' })).toBeDisabled();
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search assignments' }), {
-      target: { value: 'SCI-218' },
-    });
-    expect(screen.getByRole('main').querySelectorAll('[data-assignment-id]')).toHaveLength(2);
+    expect(await screen.findByText('Change context')).toBeInTheDocument();
+    expect(screen.getByRole('main').querySelectorAll('[data-assignment-id]')).toHaveLength(0);
+    expect(screen.queryByText('Database Management Systems')).not.toBeInTheDocument();
   });
   it('keeps Student alerts consistent with the dashboard update and provides a working schedule action', () => {
     open('/student/notifications', 'student');

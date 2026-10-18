@@ -666,18 +666,25 @@ def test_readiness_reports_insufficient_eligible_workload(repo):
 def test_academic_v1_migration_preserves_records_and_rejects_future_schema(repo):
     snapshot = complete(repo)
     with repo.connection(True) as db:
-        before = [tuple(row) for row in db.execute(
-            "SELECT id, payload, checksum FROM academic_records ORDER BY kind, id"
-        )]
+        before = [
+            tuple(row)
+            for row in db.execute(
+                "SELECT id, payload, checksum FROM academic_records ORDER BY kind, id"
+            )
+        ]
         db.execute("DROP INDEX faculty_institutional_identity")
+        db.execute("DROP TABLE academic_calendars")
         db.execute("PRAGMA user_version=1")
     repo.migrate()
     repo.migrate()
     with repo.connection() as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 2
-        assert before == [tuple(row) for row in db.execute(
-            "SELECT id, payload, checksum FROM academic_records ORDER BY kind, id"
-        )]
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert before == [
+            tuple(row)
+            for row in db.execute(
+                "SELECT id, payload, checksum FROM academic_records ORDER BY kind, id"
+            )
+        ]
         assert not db.execute("PRAGMA foreign_key_check").fetchall()
     assert repo.snapshot("sandbox", "development-academic-sandbox", snapshot.period.id) == snapshot
     with repo.connection(True) as db:

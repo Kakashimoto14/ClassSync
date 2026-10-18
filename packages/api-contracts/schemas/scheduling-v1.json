@@ -4378,6 +4378,84 @@
   },
   "AcademicSnapshot": {
     "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
       "AcademicConstraints": {
         "additionalProperties": false,
         "properties": {
@@ -4690,6 +4768,17 @@
             ],
             "title": "Source",
             "type": "string"
+          },
+          "calendar": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AcademicCalendar"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -4821,7 +4910,8 @@
             "default": "administrator-supplied",
             "enum": [
               "cdm-provisional",
-              "administrator-supplied"
+              "administrator-supplied",
+              "synthetic"
             ],
             "title": "Source",
             "type": "string"
@@ -5093,6 +5183,46 @@
             "title": "Name",
             "type": "string"
           },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 4,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "enum": [
+                  "first",
+                  "second"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Semester"
+          },
+          "provenance": {
+            "default": "administrator-entered",
+            "enum": [
+              "synthetic",
+              "administrator-entered",
+              "source-supplied"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
           "program_ids": {
             "items": {
               "type": "string"
@@ -5222,6 +5352,85 @@
           "subject_id"
         ],
         "title": "Assignment",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
         "type": "object"
       },
       "Enrollment": {
@@ -5360,6 +5569,36 @@
         "title": "RecordEnvelope",
         "type": "object"
       },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
+        "type": "object"
+      },
       "SessionPattern": {
         "additionalProperties": false,
         "properties": {
@@ -5472,8 +5711,294 @@
     "title": "AcademicSnapshot",
     "type": "object"
   },
+  "CalendarWrite": {
+    "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
+        "type": "object"
+      },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "expected_revision": {
+        "minimum": 1,
+        "title": "Expected Revision",
+        "type": "integer"
+      },
+      "calendar": {
+        "$ref": "#/$defs/AcademicCalendar"
+      }
+    },
+    "required": [
+      "expected_revision",
+      "calendar"
+    ],
+    "title": "CalendarWrite",
+    "type": "object"
+  },
   "AcademicReadiness": {
     "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
       "AcademicPeriod": {
         "additionalProperties": false,
         "properties": {
@@ -5500,6 +6025,17 @@
             ],
             "title": "Source",
             "type": "string"
+          },
+          "calendar": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AcademicCalendar"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -5571,6 +6107,85 @@
           "subject_id"
         ],
         "title": "Assignment",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
         "type": "object"
       },
       "Enrollment": {
@@ -6206,6 +6821,36 @@
         "title": "Section",
         "type": "object"
       },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
+        "type": "object"
+      },
       "SessionPattern": {
         "additionalProperties": false,
         "properties": {
@@ -6396,6 +7041,18 @@
         "title": "Faculty",
         "type": "integer"
       },
+      "assigned_faculty": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Assigned Faculty"
+      },
       "offerings": {
         "title": "Offerings",
         "type": "integer"
@@ -6447,6 +7104,84 @@
   },
   "AcademicPeriodList": {
     "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
       "AcademicPeriod": {
         "additionalProperties": false,
         "properties": {
@@ -6473,6 +7208,17 @@
             ],
             "title": "Source",
             "type": "string"
+          },
+          "calendar": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AcademicCalendar"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -6483,6 +7229,115 @@
           "source"
         ],
         "title": "AcademicPeriod",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
+        "type": "object"
+      },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
         "type": "object"
       }
     },
@@ -6503,6 +7358,195 @@
     "type": "object"
   },
   "PeriodCreate": {
+    "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
+        "type": "object"
+      },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
+        "type": "object"
+      }
+    },
     "additionalProperties": false,
     "properties": {
       "title": {
@@ -6515,6 +7559,17 @@
         "default": true,
         "title": "Include Cdm Catalog",
         "type": "boolean"
+      },
+      "calendar": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AcademicCalendar"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
       }
     },
     "required": [
@@ -6930,7 +7985,8 @@
             "default": "administrator-supplied",
             "enum": [
               "cdm-provisional",
-              "administrator-supplied"
+              "administrator-supplied",
+              "synthetic"
             ],
             "title": "Source",
             "type": "string"
@@ -7200,6 +8256,46 @@
             "maxLength": 200,
             "minLength": 1,
             "title": "Name",
+            "type": "string"
+          },
+          "year_level": {
+            "anyOf": [
+              {
+                "maximum": 4,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year Level"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "enum": [
+                  "first",
+                  "second"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Semester"
+          },
+          "provenance": {
+            "default": "administrator-entered",
+            "enum": [
+              "synthetic",
+              "administrator-entered",
+              "source-supplied"
+            ],
+            "title": "Provenance",
             "type": "string"
           },
           "program_ids": {
@@ -7543,6 +8639,316 @@
       "record"
     ],
     "title": "RecordWrite",
+    "type": "object"
+  },
+  "PublicationCommand": {
+    "$defs": {
+      "AcademicCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year": {
+            "pattern": "^\\d{4}-\\d{4}$",
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "semester": {
+            "enum": [
+              "first",
+              "second"
+            ],
+            "title": "Semester",
+            "type": "string"
+          },
+          "effective_start": {
+            "format": "date",
+            "title": "Effective Start",
+            "type": "string"
+          },
+          "effective_end": {
+            "format": "date",
+            "title": "Effective End",
+            "type": "string"
+          },
+          "timezone": {
+            "const": "Asia/Manila",
+            "default": "Asia/Manila",
+            "title": "Timezone",
+            "type": "string"
+          },
+          "instructional_days": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Instructional Days",
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/$defs/SemesterPhase"
+            },
+            "maxItems": 2,
+            "title": "Phases",
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/$defs/CalendarException"
+            },
+            "maxItems": 400,
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published Version"
+          }
+        },
+        "required": [
+          "academic_year",
+          "semester",
+          "effective_start",
+          "effective_end"
+        ],
+        "title": "AcademicCalendar",
+        "type": "object"
+      },
+      "CalendarException": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "assignment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Assignment Id"
+          },
+          "cancelled": {
+            "default": true,
+            "title": "Cancelled",
+            "type": "boolean"
+          },
+          "moved_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Moved To"
+          },
+          "room_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Room Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "maximum": 1410,
+                "minimum": 0,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start"
+          }
+        },
+        "required": [
+          "date",
+          "reason"
+        ],
+        "title": "CalendarException",
+        "type": "object"
+      },
+      "SemesterPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "midterm",
+              "final"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "title": "Start",
+            "type": "string"
+          },
+          "end": {
+            "format": "date",
+            "title": "End",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "start",
+          "end"
+        ],
+        "title": "SemesterPhase",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "draft_id": {
+        "maxLength": 80,
+        "minLength": 1,
+        "title": "Draft Id",
+        "type": "string"
+      },
+      "source": {
+        "default": "administrator",
+        "enum": [
+          "administrator",
+          "academic-sandbox"
+        ],
+        "title": "Source",
+        "type": "string"
+      },
+      "dataset": {
+        "default": "institutional",
+        "enum": [
+          "institutional",
+          "synthetic"
+        ],
+        "title": "Dataset",
+        "type": "string"
+      },
+      "expected_version": {
+        "minimum": 0,
+        "title": "Expected Version",
+        "type": "integer"
+      },
+      "expected_academic_revision": {
+        "minimum": 1,
+        "title": "Expected Academic Revision",
+        "type": "integer"
+      },
+      "idempotency_key": {
+        "maxLength": 120,
+        "minLength": 8,
+        "title": "Idempotency Key",
+        "type": "string"
+      },
+      "calendar": {
+        "$ref": "#/$defs/AcademicCalendar"
+      }
+    },
+    "required": [
+      "draft_id",
+      "expected_version",
+      "expected_academic_revision",
+      "idempotency_key",
+      "calendar"
+    ],
+    "title": "PublicationCommand",
+    "type": "object"
+  },
+  "RoomRestriction": {
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "maxLength": 80,
+        "minLength": 1,
+        "title": "Id",
+        "type": "string"
+      },
+      "room_id": {
+        "maxLength": 80,
+        "minLength": 1,
+        "title": "Room Id",
+        "type": "string"
+      },
+      "dataset": {
+        "default": "institutional",
+        "enum": [
+          "institutional",
+          "synthetic"
+        ],
+        "title": "Dataset",
+        "type": "string"
+      },
+      "starts_at": {
+        "title": "Starts At",
+        "type": "string"
+      },
+      "ends_at": {
+        "title": "Ends At",
+        "type": "string"
+      },
+      "kind": {
+        "enum": [
+          "operational",
+          "reservation"
+        ],
+        "title": "Kind",
+        "type": "string"
+      },
+      "reason": {
+        "maxLength": 200,
+        "minLength": 1,
+        "title": "Reason",
+        "type": "string"
+      },
+      "expected_revision": {
+        "minimum": 0,
+        "title": "Expected Revision",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "room_id",
+      "starts_at",
+      "ends_at",
+      "kind",
+      "reason",
+      "expected_revision"
+    ],
+    "title": "RoomRestriction",
     "type": "object"
   }
 }

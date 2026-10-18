@@ -3,6 +3,7 @@ from pathlib import Path
 from classync_contracts.academic import (
     AcademicPeriodList,
     AcademicSnapshot,
+    CalendarWrite,
     PeriodCreate,
     RecordWrite,
 )
@@ -16,6 +17,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic_settings import SettingsConfigDict
 
+from .fixtures import FixtureRequest, import_fixture
 from .repository import AcademicError, AcademicRepository
 
 
@@ -49,6 +51,12 @@ def authorize(request, sandbox):
 
 
 app = FastAPI(title="ClassSync Academic Service", version="1.0.0")
+
+
+@app.post("/api/v1/academic/sandbox/fixtures", response_model=AcademicSnapshot)
+def seed_fixture(body: FixtureRequest, request: Request):
+    scope, owner = authorize(request, True)
+    return import_fixture(repository(), body, scope, owner)
 
 
 @app.exception_handler(AcademicError)
@@ -115,3 +123,15 @@ def sandbox_save(period_id: str, kind: str, record_id: str, body: RecordWrite, r
 def save(period_id: str, kind: str, record_id: str, body: RecordWrite, request: Request):
     scope, owner = authorize(request, False)
     return repository().save(scope, owner, period_id, kind, record_id, body)
+
+
+@app.put("/api/v1/academic/sandbox/periods/{period_id}/calendar")
+def sandbox_calendar_write(period_id: str, body: CalendarWrite, request: Request):
+    scope, owner = authorize(request, True)
+    return repository().save_calendar(scope, owner, period_id, body)
+
+
+@app.put("/api/v1/academic/periods/{period_id}/calendar")
+def calendar_write(period_id: str, body: CalendarWrite, request: Request):
+    scope, owner = authorize(request, False)
+    return repository().save_calendar(scope, owner, period_id, body)

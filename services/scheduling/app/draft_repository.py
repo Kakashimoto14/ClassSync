@@ -344,3 +344,40 @@ class DraftRepository:
             return DraftList(
                 drafts=summaries, limit=limit, offset=offset, has_more=len(rows) > limit
             )
+
+    def calendar_samples(self, scope, owner, *, limit=25, offset=0):
+        """Read-only discovery uses the same synthetic-data guard as review.
+
+        Entered/institutional snapshots stay out of the anonymous sample chooser.
+        Iterate rather than truncating the unfiltered list before applying eligibility.
+        """
+        allowed = []
+        seen = 0
+        with self.connection() as db:
+            rows = db.execute(
+                "SELECT * FROM scheduling_drafts WHERE scope=? AND owner=? "
+                "ORDER BY created_at DESC, id DESC",
+                (scope, owner),
+            )
+            for row in rows:
+                draft = self.detail(row)
+                if not calendar_review_allowed(draft):
+                    continue
+                if seen >= offset:
+                    allowed.append(
+                        DraftSummary.model_validate(
+                            draft.model_dump(include=set(DraftSummary.model_fields))
+                        )
+                    )
+                seen += 1
+                if len(allowed) > limit:
+                    break
+        return DraftList(
+            drafts=allowed[:limit], limit=limit, offset=offset, has_more=len(allowed) > limit
+        )
+
+
+def calendar_review_allowed(draft):
+    return draft.input_snapshot.synthetic and all(
+        r.source == "synthetic" for r in draft.input_snapshot.rooms
+    )

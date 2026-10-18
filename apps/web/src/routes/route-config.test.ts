@@ -5,8 +5,8 @@ describe('role aware route registry', () => {
   it('keeps saved draft details oriented in Saved Drafts and the mobile Schedule tab', () => {
     const path = '/admin/schedule-manager/drafts/596cd220-6451-414f-8460-a74abd3da359';
     expect(navigationOwner(path)).toBe('administrator.schedule-drafts');
-    expect(navigationOwner(path, true)).toBe('administrator.schedule-manager');
-    expect(navigationOwner('/admin/schedule-manager/drafts', true)).toBe('administrator.schedule-manager');
+    expect(navigationOwner(path, true)).toBe('administrator.ai-scheduling');
+    expect(navigationOwner('/admin/schedule-manager/drafts', true)).toBe('administrator.ai-scheduling');
     expect(navigationOwner('/student/schedule-manager/drafts/anything')).toBeUndefined();
   });
   it('assigns unique paths and identifiers', () => {

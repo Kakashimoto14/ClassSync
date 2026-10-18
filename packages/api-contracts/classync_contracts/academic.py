@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from pydantic import Field, model_validator
 
+from .calendar import AcademicCalendar
 from .scheduling import (
     Assignment,
     Contract,
@@ -34,6 +35,11 @@ class AcademicSubject(Identity):
     kind: Literal["subjects"] = "subjects"
     code: str = Field(min_length=1, max_length=80)
     name: str = Field(min_length=1, max_length=200)
+    year_level: int | None = Field(default=None, ge=1, le=4)
+    semester: Literal["first", "second"] | None = None
+    provenance: Literal["synthetic", "administrator-entered", "source-supplied"] = (
+        "administrator-entered"
+    )
     program_ids: list[str] = Field(default_factory=list)
     required_weekly_minutes: int | None = Field(default=180, gt=0, le=10080, multiple_of=30)
     patterns: list[SessionPattern] = Field(
@@ -82,7 +88,9 @@ class AcademicFaculty(Teacher):
 class AcademicResource(Room):
     kind: Literal["resources"] = "resources"
     active: bool = True
-    source: Literal["cdm-provisional", "administrator-supplied"] = "administrator-supplied"
+    source: Literal["cdm-provisional", "administrator-supplied", "synthetic"] = (
+        "administrator-supplied"
+    )
     verification_note: str = Field(default="", max_length=1000)
     alias: str | None = None
     alias_unconfirmed: bool = False
@@ -148,6 +156,11 @@ class RecordWrite(Contract):
     record: AcademicRecord
 
 
+class CalendarWrite(Contract):
+    expected_revision: int = Field(ge=1)
+    calendar: AcademicCalendar
+
+
 class RecordEnvelope(Contract):
     revision: int
     updated_at: str
@@ -158,6 +171,7 @@ class RecordEnvelope(Contract):
 class PeriodCreate(Contract):
     title: str = Field(min_length=1, max_length=160)
     include_cdm_catalog: bool = True
+    calendar: AcademicCalendar | None = None
 
     @model_validator(mode="after")
     def meaningful_title(self):
@@ -173,6 +187,7 @@ class AcademicPeriod(Contract):
     revision: int
     created_at: str
     source: Literal["development-entered", "institutional"]
+    calendar: AcademicCalendar | None = None
 
 
 class AcademicPeriodList(Contract):
@@ -200,6 +215,7 @@ class AcademicReadiness(Contract):
     subjects: int
     sections: int
     faculty: int
+    assigned_faculty: int | None = None
     offerings: int
     eligible_resources: int
     inputs: GenerationInput | None

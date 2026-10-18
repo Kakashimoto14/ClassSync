@@ -8,9 +8,11 @@ from classync_contracts.academic import (
     AcademicPeriodList,
     AcademicReadiness,
     AcademicSnapshot,
+    CalendarWrite,
     PeriodCreate,
     RecordWrite,
 )
+from classync_contracts.publication import PublicationCommand, RoomRestriction
 from classync_contracts.scheduling import (
     DraftDetail,
     DraftList,
@@ -71,11 +73,15 @@ if __name__ == "__main__":
         DraftDetail,
         DraftList,
         AcademicSnapshot,
+    CalendarWrite,
         AcademicReadiness,
         AcademicGenerationRequest,
         AcademicPeriodList,
         PeriodCreate,
         RecordWrite,
+        CalendarWrite,
+        PublicationCommand,
+        RoomRestriction,
     ):
         schema = model.model_json_schema()
         definitions.update(schema.pop("$defs", {}))

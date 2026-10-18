@@ -324,3 +324,52 @@ def test_protected_owner_isolation_and_sandbox_gating(api, monkeypatch):
     for config in (gateway.settings, main.settings):
         monkeypatch.setattr(config, "classsync_env", "production")
     assert api.get(prefix + "/sandbox/drafts").status_code == 403
+
+
+def test_calendar_discovery_excludes_entered_and_other_owner_drafts(api, repo, monkeypatch):
+    monkeypatch.setattr(main, "repository", lambda: repo)
+    allowed = []
+    for index, (synthetic, owner) in enumerate(
+        [
+            (True, "development-academic-sandbox"),
+            (False, "development-academic-sandbox"),
+            (True, "other-owner"),
+            (True, "development-academic-sandbox"),
+        ]
+    ):
+        inputs = tiny()
+        inputs.period_id = f"review-test-{index}"
+        inputs.synthetic = synthetic
+        if not synthetic:
+            inputs.rooms[0].source = "administrator-supplied"
+        result = generate_week(inputs)
+        repo.remember_run(inputs, result, "academic-sandbox", owner)
+        saved, _ = repo.save(
+            SaveDraftRequest(
+                run_id=result.run_id,
+                input_hash=result.input_hash,
+                title=f"Review {index}",
+                idempotency_key=f"review-key-{index}",
+            ),
+            "academic-sandbox",
+            owner,
+        )
+        if synthetic and owner == "development-academic-sandbox":
+            allowed.append(saved.id)
+        elif not synthetic:
+            blocked = saved.id
+    endpoint = "/api/v1/scheduling/sandbox/calendar-samples"
+    response = api.get(endpoint + "?limit=1")
+    assert response.status_code == 200, response.text
+    first = response.json()["data"]
+    second = api.get(endpoint + "?limit=1&offset=1").json()["data"]
+    assert first["has_more"] and not second["has_more"]
+    assert {first["drafts"][0]["id"], second["drafts"][0]["id"]} == set(allowed)
+    assert "input_snapshot" not in first["drafts"][0]
+    denied = api.get(
+        f"/api/v1/scheduling/sandbox/calendar/{blocked}?start=2026-10-01&end=2026-10-31"
+    )
+    assert denied.status_code == 403
+    assert api.post(endpoint).status_code == 404
+    monkeypatch.setattr(gateway.settings, "classsync_env", "production")
+    assert api.get(endpoint).status_code == 403

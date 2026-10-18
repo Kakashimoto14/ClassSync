@@ -133,6 +133,7 @@ async def scheduling_proxy(operation: str, request: Request, sandbox: bool):
     )
     if (
         not academic_operation
+        and not (sandbox and request.method == "GET" and operation == "calendar-samples")
         and operation not in allowed
         and not (request.method == "GET" and operation.startswith("drafts/"))
     ):
@@ -222,6 +223,19 @@ async def sandbox_academic_periods(request: Request):
     return await academic_proxy("periods", request, True)
 
 
+@app.post("/api/v1/academic/sandbox/fixtures")
+async def academic_fixture(request: Request):
+    return await academic_proxy("fixtures", request, True)
+
+
+@app.get("/api/v1/scheduling/sandbox/calendar/{draft_id}")
+async def calendar_review(draft_id: UUID, request: Request):
+    require_sandbox(settings)
+    return await service_proxy(
+        "scheduling", f"/api/v1/scheduling/sandbox/calendar/{draft_id}", request
+    )
+
+
 @app.api_route("/api/v1/academic/periods", methods=["GET", "POST"])
 async def academic_periods(request: Request):
     return await academic_proxy("periods", request, False)
@@ -285,3 +299,66 @@ async def sandbox_academic_drafts(request: Request):
 @app.get("/api/v1/scheduling/sandbox/academic/drafts/{draft_id}")
 async def sandbox_academic_draft(draft_id: UUID, request: Request):
     return await scheduling_proxy(f"academic/drafts/{draft_id}", request, True)
+
+
+# Timetable publication is independent from the legacy Administrator-only proxy.
+# Each service verifies the token; preview reads are gated at both boundaries.
+@app.api_route("/api/v1/timetables/{operation:path}", methods=["GET", "POST", "PUT"])
+async def timetable_proxy(operation: str, request: Request):
+    from classync_contracts.scheduling_security import require_identity
+    from fastapi.responses import StreamingResponse
+
+    if operation.startswith("sandbox/"):
+        require_sandbox(settings)
+        if request.method != "GET":
+            raise HTTPException(404, "No anonymous publication operation exists")
+    else:
+        require_identity(request, settings)
+        if request.method != "GET" or operation.startswith("history/"):
+            require_administrator(request, settings)
+    if "/events/" not in "/" + operation:
+        return await service_proxy("scheduling", "/api/v1/timetables/" + operation, request)
+    client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None))
+    try:
+        upstream = await client.send(
+            client.build_request(
+                "GET",
+                settings.scheduling_service_url + "/api/v1/timetables/" + operation,
+                params=request.query_params,
+                headers={"Authorization": request.headers.get("Authorization", "")},
+            ),
+            stream=True,
+        )
+    except httpx.HTTPError as error:
+        await client.aclose()
+        raise HTTPException(503, "Timetable update service unavailable; reconnect later") from error
+    if upstream.is_error:
+        await upstream.aclose()
+        await client.aclose()
+        raise HTTPException(upstream.status_code, "Timetable stream is not authorized or available")
+
+    async def relay():
+        try:
+            async for chunk in upstream.aiter_bytes():
+                if await request.is_disconnected():
+                    break
+                yield chunk
+        finally:
+            await upstream.aclose()
+            await client.aclose()
+
+    return StreamingResponse(
+        relay(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.put("/api/v1/academic/sandbox/periods/{period_id}/calendar")
+async def sandbox_calendar_write(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/calendar", request, True)
+
+
+@app.put("/api/v1/academic/periods/{period_id}/calendar")
+async def calendar_write(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/calendar", request, False)

@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/router';
 import './styles.css';
 import './entrance.css';
+import './calendar.css';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -17,3 +18,5 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+import './ux-workflows.css';
+import './class-session.css';

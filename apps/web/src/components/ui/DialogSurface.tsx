@@ -7,10 +7,11 @@ type Props = {
   onClose: () => void;
   children: ReactNode;
   variant: 'modal' | 'drawer';
+  className?: string;
 };
 
 /** Shared modal lifecycle for both surfaces: focus, inert background and scroll ownership. */
-export function DialogSurface({ title, onClose, children, variant }: Props) {
+export function DialogSurface({ title, onClose, children, variant, className = '' }: Props) {
   const titleId = useId();
   const dialog = useRef<HTMLElement>(null);
   const close = useRef<HTMLButtonElement>(null);
@@ -78,7 +79,7 @@ export function DialogSurface({ title, onClose, children, variant }: Props) {
 
   return createPortal(
     <div
-      className={'overlay' + (variant === 'drawer' ? ' drawer-overlay' : '')}
+      className={'overlay' + (variant === 'drawer' ? ' drawer-overlay' : '') + ' ' + className}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}

@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 from threading import BoundedSemaphore
 
@@ -29,8 +30,10 @@ from pydantic_settings import SettingsConfigDict
 
 from .academic_input import academic_readiness
 from .catalog import catalogs, synthetic_scenario
-from .draft_repository import DraftError, DraftRepository
+from .draft_repository import DraftError, DraftRepository, calendar_review_allowed
 from .engine import generate_week
+from .occurrences import occurrences
+from .publication_api import router as publication_router
 from .readiness import readiness
 from .validation import validate_timetable
 
@@ -47,6 +50,42 @@ settings = Settings()
 generation_slot = BoundedSemaphore(1)
 
 app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0")
+app.include_router(publication_router)
+
+
+@app.get("/api/v1/scheduling/sandbox/calendar-samples", response_model=DraftList)
+def calendar_samples(
+    request: Request, limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0)
+):
+    scope, owner = academic_scope(request, True)
+    return repository().calendar_samples(scope, owner, limit=limit, offset=offset)
+
+
+@app.get("/api/v1/scheduling/sandbox/calendar/{draft_id}")
+def review_calendar(draft_id: str, request: Request, start: date, end: date):
+    scope, owner = academic_scope(request, True)
+    draft = repository().get(draft_id, scope, owner)
+    if not calendar_review_allowed(draft):
+        raise HTTPException(
+            403, "Only explicitly synthetic saved schedules have anonymous calendar review"
+        )
+    snapshot = persisted_academic_snapshot(draft.period_id, request, True)
+    if snapshot.period.calendar is None:
+        raise HTTPException(422, "This academic period needs effective calendar dates")
+    return {
+        "version": draft.id,
+        "status": "unpublished-review",
+        "calendar": snapshot.period.calendar.model_dump(mode="json"),
+        "sections": [s.model_dump() for s in draft.input_snapshot.sections],
+        "teachers": [t.model_dump() for t in draft.input_snapshot.teachers],
+        "occurrences": occurrences(
+            draft.input_snapshot,
+            draft.generation_result.assignments,
+            snapshot.period.calendar,
+            start,
+            end,
+        ),
+    }
 
 
 @app.exception_handler(DraftError)

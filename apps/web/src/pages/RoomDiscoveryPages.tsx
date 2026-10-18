@@ -19,6 +19,9 @@ import {
 } from '../lib/room-discovery';
 import { rolePath, routesByPath, type RouteDefinition } from '../routes/route-config';
 import type { UserRole } from '../types/ui';
+import { ScheduledRooms } from './ScheduledRooms';
+import { schedulingSandboxEnabled } from '../lib/scheduling-api';
+import { PublishedRoomAvailability } from './PublishedRoomAvailability';
 
 const rooms = roomCatalog(schedulePreview);
 
@@ -62,6 +65,7 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
   }
   return (
     <div className="room-discovery">
+      <ScheduledRooms role={definition.role} />
       <div className="page-heading">
         <div>
           <h1>{definition.title}</h1>
@@ -86,36 +90,14 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
         </Link>
       </div>
       {availability && (
-        <section className="discovery-availability" aria-labelledby="availability-heading">
-          <h2 id="availability-heading">Time-based availability unavailable</h2>
-          <p id="availability-limit">
-            Filter recorded resources below. Complete schedules and rules are not connected; free
-            time and suitability remain unverified.
-          </p>
-          <details className="discovery-time-criteria">
-            <summary>Time criteria · Unavailable</summary>
-            <fieldset
-              disabled
-              aria-label="Requested interval"
-              aria-describedby="availability-limit"
-            >
-              <div className="discovery-time-fields">
-                <label>
-                  Date
-                  <input type="date" />
-                </label>
-                <label>
-                  Start time
-                  <input type="time" />
-                </label>
-                <label>
-                  End time
-                  <input type="time" />
-                </label>
-              </div>
-            </fieldset>
-          </details>
-        </section>
+        <PublishedRoomAvailability
+          rooms={inventoryRooms.map((r) => ({ id: r.id, name: r.name }))}
+        />
+      )}
+      {availability && (
+        <p className="muted">
+          Time-based occupancy is separate from unverified capacity and equipment suitability.
+        </p>
       )}
       <RoomFilters
         rooms={inventoryRooms}
@@ -184,6 +166,16 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
 }
 
 export function RoomDetailPage({ role }: { role: UserRole }) {
+  const [query] = useSearchParams();
+  if (
+    schedulingSandboxEnabled &&
+    query.getAll('id').length === 1 &&
+    query.get('id')?.startsWith('synthetic-room-')
+  )
+    return <ScheduledRooms role={role} roomId={query.get('id')!} />;
+  return <InventoryRoomDetailPage role={role} />;
+}
+function InventoryRoomDetailPage({ role }: { role: UserRole }) {
   const [params] = useSearchParams();
   const location = useLocation();
   const room = params.getAll('id').length === 1 ? roomById(rooms, params.get('id')) : undefined;

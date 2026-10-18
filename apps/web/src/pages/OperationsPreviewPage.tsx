@@ -1,9 +1,7 @@
 import { useDevelopmentRole } from '../auth/useDevelopmentRole';
 import { AppShell } from '../components/layout/AppShell';
-import { schedulePreview } from '../data/schedule-preview';
-import { StudentDashboard } from './dashboards/StudentDashboard';
-import { TeacherDashboard } from './dashboards/TeacherDashboard';
-import { AdministratorDashboard } from './dashboards/AdministratorDashboard';
+import { AdminSchedulingHome } from './AdminSchedulingHome';
+import { StructuredCalendarPage } from './StructuredCalendarPage';
 
 export function OperationsPreviewPage() {
   const { role } = useDevelopmentRole();
@@ -11,9 +9,9 @@ export function OperationsPreviewPage() {
   return (
     <AppShell>
       <div className="dashboard">
-        {role === 'student' && <StudentDashboard data={schedulePreview} />}
-        {role === 'teacher' && <TeacherDashboard data={schedulePreview} />}
-        {role === 'administrator' && <AdministratorDashboard data={schedulePreview} />}
+        {role === 'student' && <StructuredCalendarPage role={role} dashboard />}
+        {role === 'teacher' && <StructuredCalendarPage role={role} dashboard />}
+        {role === 'administrator' && <AdminSchedulingHome />}
       </div>
     </AppShell>
   );
