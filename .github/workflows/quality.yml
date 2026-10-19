@@ -6,12 +6,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
+        with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:web
       - run: npm run build
+      - name: Build the read-only public presentation without cloud credentials
+        run: npm run build:presentation
+      - name: Check release source and presentation mode
+        run: node -e "const r=require('./apps/web/dist/release.json'); if(r.mode!=='read-only-presentation'||r.sampleVersion!=='classsync-presentation-v1'||r.commit!==process.env.GITHUB_SHA) throw new Error('Unexpected presentation release metadata');"
   python:
     runs-on: ubuntu-latest
     steps:

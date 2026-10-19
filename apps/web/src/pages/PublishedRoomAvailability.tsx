@@ -3,6 +3,7 @@ import { timetableRequest } from '../lib/publication-api';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { Button } from '../components/ui/Button';
 import { readWorkspace } from '../lib/workspace-context';
+import { presentationOnlyBuild } from '../lib/presentation-sample';
 import type { UserRole } from '../types/ui';
 import { manilaToday } from '../lib/calendar-model';
 export function PublishedRoomAvailability({
@@ -18,6 +19,13 @@ export function PublishedRoomAvailability({
   const [end, setEnd] = useState('10:00');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  if (presentationOnlyBuild || readWorkspace(role).mode === 'presentation')
+    return (
+      <p className="workspace-card">
+        Read-only presentation · Live room occupancy is unavailable. Sample class locations do not
+        establish current availability or suitability.
+      </p>
+    );
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);

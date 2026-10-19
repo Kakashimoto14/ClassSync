@@ -1,3 +1,4 @@
+import { facultyDisplayName } from '../../lib/presentation-sample';
 import { sessionRoomPath } from '../../lib/session-room';
 import { Link } from 'react-router-dom';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
@@ -11,12 +12,14 @@ export function ClassSessionDetails({
   role,
   sample,
   published,
+  presentation = false,
   onClose,
 }: {
   session: CalendarOccurrence;
   role: UserRole;
   sample: boolean;
   published: boolean;
+  presentation?: boolean;
   onClose: () => void;
 }) {
   const roomPath = sessionRoomPath(role, session.room.id);
@@ -32,8 +35,12 @@ export function ClassSessionDetails({
         <div className="class-session-meta">
           <span>{session.subject.code}</span>
           <span className="session-source">
-            {sample ? 'Sample · ' : ''}
-            {published ? 'Published' : 'Unpublished review'}
+            {sample && !presentation ? 'Sample · ' : ''}
+            {presentation
+              ? 'Read-only presentation'
+              : published
+                ? 'Published'
+                : 'Unpublished review'}
           </span>
         </div>
         <section className="class-session-section" aria-label="Class time">
@@ -61,7 +68,7 @@ export function ClassSessionDetails({
         <dl className="class-session-facts">
           <div>
             <dt>Professor</dt>
-            <dd>{session.teacher.name}</dd>
+            <dd>{facultyDisplayName(session.teacher.name)}</dd>
           </div>
           <div>
             <dt>Section</dt>

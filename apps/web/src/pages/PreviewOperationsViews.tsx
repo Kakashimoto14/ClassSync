@@ -115,7 +115,7 @@ export function PreviewRequestsView({
   const requests = selectRequests(
     schedulePreview,
     role === 'teacher' ? previewProfiles.teacher.id : undefined,
-  );
+  ).slice().sort((a,b)=>Number(b.status==='pending')-Number(a.status==='pending'));
   const id = params.get('id');
   const selected = id ? requests.find((item) => item.id === id) : requests[0];
   const shown = detail ? (selected ? [selected] : []) : requests;

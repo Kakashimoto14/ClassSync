@@ -6,6 +6,8 @@ import type { UserRole } from '../types/ui';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { demoDestination } from '../auth/access';
 import { previewEnabled } from '../auth/preview-session';
+import { presentationOnlyBuild } from '../lib/presentation-sample';
+import { readWorkspace, rememberWorkspace } from '../lib/workspace-context';
 import { dashboardPath } from '../routes/route-config';
 
 export function DevelopmentRolePreviewPage() {
@@ -36,6 +38,13 @@ export function DevelopmentRolePreviewPage() {
   if (!previewEnabled) return <Navigate to="/auth/login" replace />;
   const openDemo = (selectedRole: UserRole) => {
     startDemo(selectedRole);
+    if (presentationOnlyBuild)
+      rememberWorkspace(selectedRole, {
+        ...readWorkspace(selectedRole),
+        mode: 'presentation',
+        identity: '',
+        draft: '',
+      });
     navigate(demoDestination(selectedRole, requestedPath), { replace: true });
   };
   return (
@@ -44,7 +53,11 @@ export function DevelopmentRolePreviewPage() {
         <ClassSyncLogo />
 
         <h1>Choose your workspace</h1>
-        <p>Choose a role to explore sample schedules and CDM spaces.</p>
+        <p>
+          {presentationOnlyBuild
+            ? 'Read-only presentation sample · version 1. No live synchronization, generation, saving or publishing.'
+            : 'Choose a role to explore sample schedules and CDM spaces.'}
+        </p>
         {role && (
           <Link className="text-action" to={dashboardPath(role)}>
             Continue {role} preview

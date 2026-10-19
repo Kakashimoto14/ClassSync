@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { TeacherRequestOverview } from '../components/scheduling/TeacherRequestOverview';
 import { Button } from '../components/ui/Button';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
 import {
@@ -12,6 +13,11 @@ import {
 } from '../lib/calendar-model';
 import { sessionRoomPath } from '../lib/session-room';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
+import {
+  facultyDisplayName,
+  presentationEnabled,
+  presentationOnlyBuild,
+} from '../lib/presentation-sample';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { periodLabel } from '../lib/workspace-context';
 import type { UserRole } from '../types/ui';
@@ -27,6 +33,8 @@ export function RoleScheduleWorkspace({
   const { context, change, data, records, date, loading, error } = w;
   const [expanded, setExpanded] = useState(false);
   const view = context.view ?? 'week';
+  const isPresentation = context.mode === 'presentation';
+  const isSample = schedulingSandboxEnabled || isPresentation;
   const settings = useRef<HTMLDetailsElement>(null);
   const [selected, setSelected] = useState<CalendarOccurrence | null>(null);
   const [now, setNow] = useState(Date.now);
@@ -61,12 +69,16 @@ export function RoleScheduleWorkspace({
     ) * 60;
   const section = data?.sections.find((s) => s.id === context.identity);
   const scopeLabel =
-    role === 'teacher'
-      ? data?.teachers.find((t) => t.id === context.identity)?.name
-      : (section?.custom_label ??
-        (section
-          ? `${section.program_id.toUpperCase()} ${section.year_level ?? ''}${section.section_letter ?? ''}`
-          : 'Choose a sample'));
+    role === 'administrator'
+      ? 'Campus timetable'
+      : role === 'teacher'
+        ? facultyDisplayName(
+            data?.teachers.find((t) => t.id === context.identity)?.name ?? 'Choose teacher',
+          )
+        : (section?.custom_label ??
+          (section
+            ? `${section.program_id.toUpperCase()} ${section.year_level ?? ''}${section.section_letter ?? ''}`
+            : 'Choose a sample'));
   function move(delta: number) {
     const d = new Date(first + 'T00:00:00Z');
     d.setUTCMonth(d.getUTCMonth() + delta);
@@ -92,17 +104,19 @@ export function RoleScheduleWorkspace({
       )}
       <div className="ux-context-bar">
         <span>
-          {schedulingSandboxEnabled
-            ? context.mode === 'review'
-              ? `Sample · ${scopeLabel ?? 'Choose identity'} · Unpublished`
-              : `Sample · ${role === 'administrator' ? 'Campus timetable' : (scopeLabel ?? 'Loading identity')}`
-            : 'University timetable'}
+          {isPresentation
+            ? `Read-only sample · ${scopeLabel ?? 'Loading'} · v1`
+            : schedulingSandboxEnabled
+              ? context.mode === 'review'
+                ? `Sample · ${scopeLabel ?? 'Choose identity'} · Unpublished`
+                : `Sample · ${role === 'administrator' ? 'Campus timetable' : (scopeLabel ?? 'Loading identity')}`
+              : 'University timetable'}
           {loading ? ' · Loading…' : ''}
         </span>
         <details className="ux-context-settings" ref={settings}>
           <summary>Change context</summary>
           <div className="ux-context-controls">
-            {context.mode === 'published' && (
+            {context.mode !== 'review' && (
               <label>
                 Academic period
                 <select
@@ -118,7 +132,7 @@ export function RoleScheduleWorkspace({
                 </select>
               </label>
             )}
-            {schedulingSandboxEnabled && role !== 'administrator' && data && (
+            {isSample && role !== 'administrator' && data && (
               <label>
                 {role === 'teacher' ? 'Mock teacher' : 'Mock section'}
                 <select
@@ -140,21 +154,36 @@ export function RoleScheduleWorkspace({
                 </select>
               </label>
             )}
-            {schedulingSandboxEnabled && (
+            {(schedulingSandboxEnabled || presentationEnabled) && (
               <details>
                 <summary>Data source details</summary>
                 <p>
-                  Local sample identities only. University records require verified identity.
+                  {isPresentation
+                    ? 'Versioned synthetic presentation, October–December 2026. No live synchronization or backend writes.'
+                    : 'Local sample identities only. University records require verified identity.'}{' '}
                   Asia/Manila.
                 </p>
                 <label>
                   Schedule source
                   <select
                     value={context.mode}
-                    onChange={(e) => change({ mode: e.target.value as 'published' | 'review' })}
+                    onChange={(e) =>
+                      change({
+                        mode: e.target.value as 'published' | 'review' | 'presentation',
+                        identity: '',
+                        draft: '',
+                      })
+                    }
                   >
-                    <option value="published">Published timetables</option>
-                    <option value="review">Unpublished generated review</option>
+                    {!presentationOnlyBuild && (
+                      <option value="published">Published timetables</option>
+                    )}
+                    {schedulingSandboxEnabled && (
+                      <option value="review">Unpublished generated review</option>
+                    )}
+                    {presentationEnabled && (
+                      <option value="presentation">Read-only presentation sample v1</option>
+                    )}
                   </select>
                 </label>
                 {context.mode === 'review' && (
@@ -195,12 +224,19 @@ export function RoleScheduleWorkspace({
               : w.errorStatus === 404
                 ? 'That saved sample is unavailable. Choose another sample.'
                 : w.errorStatus === 422
-                  ? 'This sample needs valid academic calendar dates. Ask the Administrator to review its academic setup.'
+                  ? isPresentation
+                    ? 'Choose an identity included in this presentation sample.'
+                    : 'This sample needs valid academic calendar dates. Ask the Administrator to review its academic setup.'
                   : 'The timetable service is unavailable. Check the connection, then retry.'}
           </p>
           <Button variant="secondary" onClick={w.retry}>
             Retry
           </Button>
+          {isPresentation && (
+            <Button variant="secondary" onClick={() => change({ identity: '' })}>
+              Reset sample identity
+            </Button>
+          )}
           {schedulingSandboxEnabled && (
             <Button
               variant="secondary"
@@ -214,6 +250,14 @@ export function RoleScheduleWorkspace({
               Change sample
             </Button>
           )}
+          {presentationEnabled && !isPresentation && (
+            <Button
+              variant="secondary"
+              onClick={() => change({ mode: 'presentation', identity: '', draft: '' })}
+            >
+              Open read-only presentation
+            </Button>
+          )}
           <details className="ux-error-details">
             <summary>Technical details</summary>
             <p>{error}</p>
@@ -223,6 +267,14 @@ export function RoleScheduleWorkspace({
       {loading && !data && <p role="status">Loading your timetable…</p>}
       {!loading && !error && (unpublished || !data) && (
         <div className="workspace-card ux-empty">
+          {presentationEnabled && !isPresentation && (
+            <Button
+              variant="secondary"
+              onClick={() => change({ mode: 'presentation', identity: '', draft: '' })}
+            >
+              Open read-only presentation
+            </Button>
+          )}
           <h2>
             {unpublished
               ? 'No timetable published yet'
@@ -296,7 +348,7 @@ export function RoleScheduleWorkspace({
             {next.room.floor ? ` · ${next.room.floor}` : ''}
           </p>
           <p className="muted">
-            {role === 'student' ? `${next.teacher.name} · ` : ''}
+            {role === 'student' ? `${facultyDisplayName(next.teacher.name)} · ` : ''}
             {next.section.name}
           </p>
           {next.changed && <span className="ux-update">Schedule changed</span>}
@@ -496,7 +548,7 @@ export function RoleScheduleWorkspace({
                   <strong>{o.subject.name}</strong>
                   <span>
                     {o.room.name}
-                    {!dashboard ? ` · ${o.teacher.name}` : ''}
+                    {!dashboard ? ` · ${facultyDisplayName(o.teacher.name)}` : ''}
                   </span>
                   {o.changed && <small className="ux-update">Schedule changed</small>}
                 </span>
@@ -514,23 +566,13 @@ export function RoleScheduleWorkspace({
           )}
         </section>
       )}
-      {role === 'teacher' && dashboard && (
-        <section className="ux-request-link">
-          <h2>Classroom requests</h2>
-          <p className="muted">
-            Request records are a separate demonstration source; live request submission is not
-            available.
-          </p>
-          <Link className="text-action" to="/teacher/change-requests">
-            Review requests and status
-          </Link>
-        </section>
-      )}
+      {role === 'teacher' && dashboard && <TeacherRequestOverview />}
       {currentSelection && (
         <ClassSessionDetails
           session={currentSelection}
           role={role}
-          sample={schedulingSandboxEnabled}
+          sample={isSample}
+          presentation={isPresentation}
           published={context.mode === 'published'}
           onClose={() => setSelected(null)}
         />

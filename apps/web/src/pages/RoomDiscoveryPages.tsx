@@ -20,6 +20,8 @@ import {
 import { rolePath, routesByPath, type RouteDefinition } from '../routes/route-config';
 import type { UserRole } from '../types/ui';
 import { ScheduledRooms } from './ScheduledRooms';
+import { presentationEnabled } from '../lib/presentation-sample';
+import { readWorkspace } from '../lib/workspace-context';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { PublishedRoomAvailability } from './PublishedRoomAvailability';
 
@@ -91,6 +93,7 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
       </div>
       {availability && (
         <PublishedRoomAvailability
+          role={definition.role}
           rooms={inventoryRooms.map((r) => ({ id: r.id, name: r.name }))}
         />
       )}
@@ -168,7 +171,7 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
 export function RoomDetailPage({ role }: { role: UserRole }) {
   const [query] = useSearchParams();
   if (
-    schedulingSandboxEnabled &&
+    (schedulingSandboxEnabled || (presentationEnabled && readWorkspace(role).mode === 'presentation')) &&
     query.getAll('id').length === 1 &&
     query.get('id')?.startsWith('synthetic-room-')
   )

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build:presentation",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/auth/:path*", "destination": "/index.html" },
+    { "source": "/dev/role-preview", "destination": "/index.html" },
+    { "source": "/forbidden", "destination": "/index.html" },
+    { "source": "/student/:path*", "destination": "/index.html" },
+    { "source": "/teacher/:path*", "destination": "/index.html" },
+    { "source": "/admin/:path*", "destination": "/index.html" }
+  ]
+}
