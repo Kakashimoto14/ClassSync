@@ -1,6 +1,6 @@
 # Local development
 
-Prerequisites: Node 20+, Python 3.12+, and a Firebase project only when testing authenticated behavior.
+Prerequisites: Node 22.x, Python 3.12+, and a Firebase project only when testing authenticated behavior.
 
 ## One-command local workspace
 
@@ -88,3 +88,25 @@ synthetic example remains a separate development-only source. See
 [S2B details](scheduling/s2b-academic-data.md) for endpoints, source classifications,
 startup commands and limitations. Do not copy local QA records into institutional
 data or infer room suitability from the provisional catalog.
+
+## UX-06 read-only production presentation
+
+The connected local workspace above remains the canonical development workflow.
+For a reviewed public presentation artifact, explicitly build with both
+`VITE_ENABLE_ROLE_PREVIEW=true` and `VITE_ENABLE_PRESENTATION_SAMPLE=true`.
+Defaults remain false. The role chooser discloses the read-only sample before entry.
+It loads the versioned synthetic `classsync-presentation-v1` dataset, with no API,
+generation, save, publication or live synchronization. Dates cover October–December
+2026; outside that range an empty agenda is accurate. Local users can deliberately
+select this source in context settings; service errors never select it automatically.
+
+Ordinary production builds do not enable three-role preview. Production deployment
+requires owner approval. The staged root `vercel.json` assumes repository-root Root
+Directory and `apps/web/dist`; frontend route rewrites exclude `/api`. Actual Vercel
+settings must be checked before use. See [deployment decision](infrastructure/vercel-backend-deployment-plan.md)
+and [Firebase readiness](infrastructure/firebase-readiness.md). Firebase initialization
+does not supply a timetable API or grant backend Administrator authorization.
+
+For the R1 public release, use `npm run build:presentation` followed by
+`npm run preview:presentation` (strict port 5188). This produces and checks the
+explicit read-only artifact. See [R1 release settings and approval procedure](releases/r1-public-presentation.md).

@@ -9,6 +9,8 @@
   "scripts": {
     "dev:web": "npm run dev --workspace=@classync/web",
     "build": "npm run build --workspace=@classync/web",
+    "build:presentation": "node scripts/build-presentation.cjs",
+    "preview:presentation": "node scripts/preview-presentation.cjs",
     "lint": "npm run lint --workspace=@classync/web",
     "typecheck": "npm run typecheck --workspace=@classync/web",
     "test:web": "npm run test --workspace=@classync/web",
@@ -20,6 +22,6 @@
     "prettier": "^3.5.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   }
 }

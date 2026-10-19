@@ -234,9 +234,21 @@ function DraftListContent({
                 </div>
                 <div className="draft-actions">
                   <StatusBadge tone="neutral">Draft · Unpublished</StatusBadge>
-                  <StatusBadge tone="success">{`Validated · ${draft.hard_conflict_count} conflicts`}</StatusBadge>
+                  <StatusBadge tone={draft.validated ? 'success' : 'warning'}>
+                    {draft.validated
+                      ? `Validated · ${draft.hard_conflict_count} conflicts`
+                      : 'Validation unavailable'}
+                  </StatusBadge>
+                  <span className="source-label">
+                    {draft.source === 'development-entered'
+                      ? 'Local academic records'
+                      : draft.source === 'synthetic-preview'
+                        ? 'Synthetic engine sample'
+                        : 'Institutional'}{' '}
+                    · {draft.solver_status}
+                  </span>
                   <Link
-                    className="button secondary"
+                    className="button button--secondary"
                     to={draftPath(draft.id, source)}
                     aria-label={`Open Draft: ${draft.title}`}
                   >

@@ -10,6 +10,7 @@ import { IndependentValidation } from './TimetableValidation';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { Button } from '../components/ui/Button';
 export function ConflictCenterPage() {
+  const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Array<{ id: string; title: string }>>([]),
     [id, setId] = useState(''),
     [draft, setDraft] = useState<DraftDetail | null>(null),
@@ -18,6 +19,7 @@ export function ConflictCenterPage() {
   useEffect(() => {
     if (!schedulingSandboxEnabled) return;
     let ignore = false;
+    setLoading(true);
     listSchedulingDrafts(0, 'academic')
       .then((v) => {
         if (!ignore) {
@@ -27,6 +29,9 @@ export function ConflictCenterPage() {
       })
       .catch((e) => {
         if (!ignore) setError(e.message);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
       });
     return () => {
       ignore = true;
@@ -78,7 +83,8 @@ export function ConflictCenterPage() {
           <Button onClick={() => setRetry((n) => n + 1)}>Retry</Button>
         </div>
       )}
-      {!drafts.length && !error && (
+      {loading && <p role="status">Loading saved timetables…</p>}
+      {!loading && !drafts.length && !error && (
         <p>
           No academic drafts available. <Link to="/admin/ai-scheduling">Generate a timetable</Link>{' '}
           to begin.
@@ -97,11 +103,14 @@ export function ConflictCenterPage() {
           >
             Review this saved draft
           </Link>
-          <SchedulingTimetable
-            key={'grid' + draft.id}
-            input={draft.input_snapshot}
-            result={draft.generation_result}
-          />
+          <details>
+            <summary>Browse the saved timetable</summary>{' '}
+            <SchedulingTimetable
+              key={'grid' + draft.id}
+              input={draft.input_snapshot}
+              result={draft.generation_result}
+            />
+          </details>
         </>
       )}
       <details>

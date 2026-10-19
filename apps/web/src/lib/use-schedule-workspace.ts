@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { listCalendarSamples, loadSampleCalendar } from './sample-calendar-api';
 import { addDays, manilaToday, type CalendarData } from './calendar-model';
+import {
+  presentationEnabled,
+  presentationOnlyBuild,
+  presentationCalendar,
+  presentationData,
+  presentationVersion,
+} from './presentation-sample';
 import { schedulingSandboxEnabled } from './scheduling-api';
 import { subscribeTimetable, timetableRequest } from './publication-api';
 import {
@@ -17,16 +24,28 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   const [params, setParams] = useSearchParams();
   const [context, setContext] = useState<WorkspaceContext>(() => {
     const saved = readWorkspace(role);
+    // Reviewed build configuration selects this source, never an API-error fallback.
+    if (presentationOnlyBuild)
+      return {
+        ...saved,
+        mode: 'presentation',
+        period: presentationVersion,
+        draft: '',
+        identity: saved.mode === 'presentation' ? saved.identity : '',
+      };
     return {
       ...saved,
       period: params.get('period') ?? saved.period,
-      mode: !schedulingSandboxEnabled
-        ? 'published'
-        : params.get('review')
-          ? 'review'
-          : params.get('mode') === 'published'
+      mode:
+        presentationEnabled && saved.mode === 'presentation'
+          ? 'presentation'
+          : !schedulingSandboxEnabled
             ? 'published'
-            : saved.mode,
+            : params.get('review')
+              ? 'review'
+              : params.get('mode') === 'published'
+                ? 'published'
+                : saved.mode,
       draft: params.get('review') ?? saved.draft,
     };
   });
@@ -69,6 +88,8 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     teacher: role === 'teacher' ? identity : '',
   }).toString();
   function change(patch: Partial<WorkspaceContext>) {
+    if (presentationOnlyBuild)
+      patch = { ...patch, mode: 'presentation', period: presentationVersion, draft: '' };
     if (patch.draft)
       patch = {
         ...patch,
@@ -76,22 +97,21 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       };
     setContext((c) => ({ ...c, ...patch }));
     if (
-      patch.period !== undefined ||
-      patch.mode !== undefined ||
-      patch.draft !== undefined ||
-      patch.identity !== undefined
+      (['period', 'mode', 'draft', 'identity'] as const).some(
+        (key) => patch[key] !== undefined && patch[key] !== context[key],
+      )
     )
       setData(null);
     const next = new URLSearchParams(params);
     if (patch.period !== undefined) next.set('period', patch.period);
     if (patch.mode !== undefined) {
       next.set('mode', patch.mode);
-      if (patch.mode === 'published') next.delete('review');
+      if (patch.mode !== 'review') next.delete('review');
     }
-    if (patch.draft !== undefined) {
+    if (patch.draft) {
       next.set('review', patch.draft);
       next.set('mode', 'review');
-    }
+    } else if (patch.draft === '') next.delete('review');
     if (patch.period !== undefined || patch.mode !== undefined || patch.draft !== undefined)
       setParams(next, { replace: true });
     setNotice('');
@@ -104,33 +124,46 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     setLoading(true);
     setError('');
     const load =
-      mode === 'review' && schedulingSandboxEnabled
-        ? listCalendarSamples().then((p) => {
+      mode === 'presentation' && presentationEnabled
+        ? presentationData().then((p) => {
             if (!ignore) {
-              setDrafts(p);
-              if (draft && !p.some((d) => d.id === draft)) {
-                setError('That saved synthetic timetable is unavailable. Choose another sample.');
-                setErrorStatus(404);
-              }
-              setContext((c) => {
-                const available = p;
-                const selected = c.draft
-                  ? available?.find((d) => d.id === c.draft)
-                  : (available?.find((d) => d.period_id === c.period) ?? available?.[0]);
-                return {
-                  ...c,
-                  draft: selected?.id ?? c.draft,
-                  period: selected?.period_id ?? c.period,
-                };
-              });
+              setPeriods([
+                {
+                  id: presentationVersion,
+                  title: 'Read-only presentation',
+                  calendar: p.calendar.calendar,
+                },
+              ]);
+              setContext((c) => ({ ...c, period: presentationVersion }));
             }
           })
-        : timetableRequest<{ periods: WorkspacePeriod[] }>(prefix + 'periods').then((p) => {
-            if (!ignore) {
-              setPeriods(p.periods);
-              setContext((c) => ({ ...c, period: defaultPeriod(p.periods, c.period) }));
-            }
-          });
+        : mode === 'review' && schedulingSandboxEnabled
+          ? listCalendarSamples().then((p) => {
+              if (!ignore) {
+                setDrafts(p);
+                if (draft && !p.some((d) => d.id === draft)) {
+                  setError('That saved synthetic timetable is unavailable. Choose another sample.');
+                  setErrorStatus(404);
+                }
+                setContext((c) => {
+                  const available = p;
+                  const selected = c.draft
+                    ? available?.find((d) => d.id === c.draft)
+                    : (available?.find((d) => d.period_id === c.period) ?? available?.[0]);
+                  return {
+                    ...c,
+                    draft: selected?.id ?? c.draft,
+                    period: selected?.period_id ?? c.period,
+                  };
+                });
+              }
+            })
+          : timetableRequest<{ periods: WorkspacePeriod[] }>(prefix + 'periods').then((p) => {
+              if (!ignore) {
+                setPeriods(p.periods);
+                setContext((c) => ({ ...c, period: defaultPeriod(p.periods, c.period) }));
+              }
+            });
     load
       .catch((e) => {
         if (!ignore) {
@@ -159,17 +192,19 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     setLoading(true);
     setError('');
     const load =
-      mode === 'review' && schedulingSandboxEnabled
-        ? loadSampleCalendar(draft, query, controller.signal)
-        : timetableRequest<CalendarData>(
-            `${prefix}calendar/${encodeURIComponent(period)}?${query}`,
-            undefined,
-            controller.signal,
-          );
+      mode === 'presentation' && presentationEnabled
+        ? presentationCalendar(role, identity, start, end)
+        : mode === 'review' && schedulingSandboxEnabled
+          ? loadSampleCalendar(draft, query, controller.signal)
+          : timetableRequest<CalendarData>(
+              `${prefix}calendar/${encodeURIComponent(period)}?${query}`,
+              undefined,
+              controller.signal,
+            );
     load
       .then((value) => {
         if (controller.signal.aborted) return;
-        if (schedulingSandboxEnabled && role !== 'administrator') {
+        if ((schedulingSandboxEnabled || mode === 'presentation') && role !== 'administrator') {
           const choices = role === 'teacher' ? value.teachers : value.sections;
           if (!choices.some((c) => c.id === identity) && choices.length) {
             const choice =
@@ -207,7 +242,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   const records =
     data?.occurrences.filter(
       (o) =>
-        !schedulingSandboxEnabled ||
+        (!schedulingSandboxEnabled && mode !== 'presentation') ||
         role === 'administrator' ||
         (role === 'teacher' ? o.teacher.id === identity : o.section.id === identity),
     ) ?? [];

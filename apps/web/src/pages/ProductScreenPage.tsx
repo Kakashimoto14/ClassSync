@@ -1,3 +1,5 @@
+import { presentationOnlyBuild } from '../lib/presentation-sample';
+import { PresentationConflictSummary } from '../components/scheduling/PresentationConflictSummary';
 import { useState } from 'react';
 import { previewViewer, schedulePreview } from '../data/schedule-preview';
 import { selectAssignments } from '../lib/schedule-preview';
@@ -24,6 +26,37 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { rolePath, type RouteDefinition } from '../routes/route-config';
 
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
+  if (
+    presentationOnlyBuild &&
+    definition.role === 'administrator' &&
+    [
+      'schedule',
+      'schedule-create',
+      'academic-list',
+      'academic-detail',
+      'schedule-drafts',
+      'schedule-draft-detail',
+      'academic-manage',
+      'conflicts',
+      'conflict-detail',
+      'audit',
+    ].includes(definition.kind)
+  )
+    return (
+      <AppShell>
+        <section className="workspace-card">
+          <h1>Read-only presentation</h1>
+          {definition.kind === 'conflicts' && <PresentationConflictSummary />}
+          <p>
+            This tool needs the connected backend and verified Administrator access. Generation,
+            editing, validation, saving and publishing are unavailable in this presentation.
+          </p>
+          <Link className="button button--secondary" to="/admin/calendar">
+            Review sample timetable
+          </Link>
+        </section>
+      </AppShell>
+    );
   if (definition.kind === 'rooms')
     return (
       <AppShell>
@@ -37,6 +70,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       </AppShell>
     );
   const compactHeading = [
+    'reports',
     'schedule-create',
     'schedule',
     'calendar',
@@ -121,8 +155,12 @@ function CreateScheduleScreen() {
   return <SchedulingSourcePage />;
 }
 
-function ConflictScreen() { return <ConflictCenterPage />; }
-function ConflictDetailScreen() { return <ConflictCenterPage />; }
+function ConflictScreen() {
+  return <ConflictCenterPage />;
+}
+function ConflictDetailScreen() {
+  return <ConflictCenterPage />;
+}
 
 function RequestScreen({ role }: { role: RouteDefinition['role'] }) {
   return role === 'student' ? null : <PreviewRequestsView role={role} />;
@@ -314,37 +352,16 @@ function AcademicDetailScreen() {
 
 function ReportScreen({ utilization }: { utilization: boolean }) {
   return (
-    <section className="report-grid">
-      <article className="workspace-card">
-        <p className="eyebrow">{utilization ? 'Scheduled room usage' : 'Schedule health'}</p>
-        <h2>{utilization ? 'Room use by weekday' : 'Current academic period'}</h2>
-        <div className="bar-chart" aria-label="Representative report chart">
-          {[52, 72, 45, 81, 65].map((height, index) => (
-            <span style={{ height: `${height}%` }} key={index} />
-          ))}
-        </div>
-        <p className="muted">
-          Compare scheduled use across rooms and days to support allocation decisions.
-        </p>
-      </article>
-      <article className="state-card">
-        <FileBarChart />
-        <h2>Report filters</h2>
-        <label>
-          Date range
-          <input type="month" defaultValue="2026-09" disabled />
-        </label>
-        <label>
-          Building
-          <select defaultValue="all" disabled>
-            <option>All buildings</option>
-          </select>
-        </label>
-        <p className="muted">Report exports require connected academic data.</p>
-        <Button variant="secondary" disabled>
-          Export report
-        </Button>
-      </article>
+    <section className="workspace-card">
+      <FileBarChart aria-hidden="true" />
+      <h2>{utilization ? 'Room utilization reports' : 'Scheduling reports'} · Coming soon</h2>
+      <p>
+        Operational reports need connected, authorized academic and published timetable data. No
+        campus metrics are available here.
+      </p>
+      <Link className="button button--secondary" to="/admin/calendar">
+        Review timetable data
+      </Link>
     </section>
   );
 }

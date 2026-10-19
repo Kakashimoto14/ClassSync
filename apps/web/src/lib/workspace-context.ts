@@ -5,7 +5,7 @@ import { manilaToday } from './calendar-model';
 export interface WorkspaceContext {
   period: string;
   identity: string;
-  mode: 'published' | 'review';
+  mode: 'published' | 'review' | 'presentation';
   draft: string;
   date: string;
   view?: 'day' | 'week' | 'month';
@@ -24,7 +24,7 @@ export function readWorkspace(role: UserRole): WorkspaceContext {
     const c = value.context;
     if (
       !c ||
-      !['published', 'review'].includes(c.mode) ||
+      !['published', 'review', 'presentation'].includes(c.mode) ||
       ['period', 'identity', 'draft', 'date'].some((k) => typeof c[k] !== 'string')
     )
       return empty();

@@ -1,0 +1,175 @@
+/* Scoped workflow refinements; existing brand and destructive variants stay intact. */
+.weekly-scheduler summary,
+.ux-calendar summary,
+.preview-records summary,
+.admin-overview summary,
+.ux-request-link summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--ink);
+  list-style: none;
+  font-size: 13px;
+  font-weight: 550;
+  text-decoration: none;
+}
+.weekly-scheduler summary::after,
+.ux-calendar summary::after,
+.preview-records summary::after,
+.admin-overview summary::after,
+.ux-request-link summary::after {
+  content: '⌄';
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+details[open] > summary::after {
+  transform: rotate(180deg);
+}
+:is(.weekly-scheduler, .ux-calendar, .preview-records, .admin-overview, .ux-request-link)
+  summary::-webkit-details-marker {
+  display: none;
+}
+.weekly-scheduler .text-action,
+.preview-records .text-action,
+.admin-overview .text-action,
+.coming-soon-page .text-action,
+.draft-actions .text-action,
+.ux-calendar a:not(.button) {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.source-label {
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.admin-overview {
+  display: grid;
+  gap: 20px;
+  max-width: 1150px;
+}
+.admin-overview h1 {
+  font-size: clamp(25px, 3vw, 34px);
+}
+.admin-overview h2 {
+  font-size: 19px;
+}
+.admin-overview h3 {
+  font-size: 16px;
+}
+.admin-period-selector {
+  max-width: 680px;
+}
+.admin-overview-content {
+  display: grid;
+  gap: 16px;
+}
+.admin-next-step {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border-top: 3px solid var(--primary);
+}
+.admin-next-step .button {
+  justify-self: start;
+}
+.admin-overview .workspace-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.admin-status-list {
+  margin: 14px 0;
+}
+.admin-status-list > div {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.admin-status-list dt {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+.admin-status-list dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+.admin-activity {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.admin-activity h3 {
+  overflow-wrap: anywhere;
+}
+.admin-attention ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-attention li {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.admin-attention li .button {
+  justify-self: start;
+}
+.admin-tool-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ux-request-link {
+  display: grid;
+  gap: 12px;
+}
+.ux-request-link .request-summary {
+  margin: 0;
+}
+.ux-request-link > .button {
+  justify-self: start;
+}
+.sample-setup-review dl > div {
+  margin: 10px 0;
+}
+.sample-setup-review dt {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+.sample-setup-review dd {
+  margin: 0;
+}
+@media (min-width: 1024px) {
+  .admin-overview-content {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .admin-overview-content > .admin-next-step {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .admin-attention {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .admin-status {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .admin-activity {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}

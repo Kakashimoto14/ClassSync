@@ -19,7 +19,6 @@ import {
 import { SaveDraftPanel } from './SchedulingDraftPages';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { WeeklySchedulingPage } from './WeeklySchedulingPage';
-import { AcademicFixtureImport } from './AcademicFixtureImport';
 import { IndependentValidation } from './TimetableValidation';
 
 export function SchedulingSourcePage() {
@@ -389,7 +388,7 @@ function AcademicGenerationPage() {
           </Button>
         </div>
       )}
-      {!result && <AcademicFixtureImport />}
+      {!result && <Link className="button button--secondary" to="/admin/academic#sample-scenario">Set up a sample scenario</Link>}
       {result && (
         <section className="scheduler-result">
           <h2 ref={heading} tabIndex={-1}>

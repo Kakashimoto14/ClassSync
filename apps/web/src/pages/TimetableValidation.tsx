@@ -60,7 +60,19 @@ export function IndependentValidation({
                 {(c.assignment_ids ?? []).map((id) => {
                   const a = assignments.find((v) => v.id === id);
                   return a ? (
-                    <a key={id} href={'#assignment-' + encodeURIComponent(id)}>
+                    <a
+                      key={id}
+                      href={'#assignment-' + encodeURIComponent(id)}
+                      onClick={() => {
+                        const target = document.getElementById('assignment-' + id);
+                        const details = target?.closest('details');
+                        if (details) details.open = true;
+                        if (target) {
+                          target.tabIndex = -1;
+                          target.focus();
+                        }
+                      }}
+                    >
                       {input.offerings?.find((o) => o.id === a.offering_id)?.subject_name} ·{' '}
                       {input.rooms?.find((r) => r.id === a.room_id)?.name} ·{' '}
                       {input.teachers?.find((t) => t.id === a.teacher_id)?.name} ·{' '}
