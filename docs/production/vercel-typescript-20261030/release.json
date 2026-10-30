@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "mode": "read-only-presentation",
+  "appMode": "presentation",
+  "capabilityVersion": 1,
+  "sampleVersion": "classsync-presentation-v1",
+  "commit": "8f7004c1765338fd88fd24663c6b0c94d593986d",
+  "uncommittedChanges": true
+}

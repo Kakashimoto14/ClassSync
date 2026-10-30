@@ -47,3 +47,7 @@ Owner explicitly authorizes Student-scoped visual refinement of shared chrome, H
 ## 30 October 2026 — selected Claude redesign and bounded recovery approval
 
 Owner explicitly approves restoring institutional `Student · University` and demonstration `Student · Demo`, and exactly one run of the previously failing institutional Student route test. If that test passes, proceed directly with selected Claude design implementation across shell, Home, Schedule, Rooms and Alerts using current React providers and verified security/data boundaries. Capture phase screenshots, focused tests and final acceptance. No new Goal, further research, alternatives, backend rewrite, Teacher/Admin redesign, commit/push/deployment/production changes. A new persistent failure requires a new owner decision; prior attempt history remains intact.
+
+## 30 October 2026 — confirmed Vercel TypeScript correction authorization
+
+Owner explicitly authorizes the minimal StudentSchedule.test.tsx unsupported ByRoleOptions `exact` correction, inspection/correction of any other confirmed invalid role-query options, one affected test run, frontend typecheck/build/full npm test/security checks, read-only release metadata validation and data preservation. No unrelated UI changes or test assertion removals; no commit/push/deployment. This bounded request reopens the affected test validation only; broader Student visual acceptance remains separate.

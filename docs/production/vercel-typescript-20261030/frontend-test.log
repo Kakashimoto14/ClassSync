@@ -1,0 +1,754 @@
+
+> @classync/web@0.1.0 test
+> vitest run --pool=threads --reporter=verbose
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens the structured Student calendar without legacy published fixtures 852ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to student without implying verified resources 972ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > keeps Student alerts consistent with the dashboard update and provides a working schedule action 325ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to teacher without implying verified resources 616ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to administrator without implying verified resources 720ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'student' detail route 311ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only PRRC rooms and returns through the same building 1128ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'student' detail route 280ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'student' detail route 263ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'student' detail route 351ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only New Building rooms and returns through the same building 917ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'teacher' detail route 244ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only Court rooms and returns through the same building 880ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'teacher' detail route 362ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters  317ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=missing 214ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'teacher' detail route 297ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'teacher' detail route 344ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=Science+Building&building=Computing+Building 200ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'administrator' detail route 440ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the student-owned date and correct count 572ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'administrator' detail route 418ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the teacher-owned date and correct count 449ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the administrator-owned date and correct count 402ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'administrator' detail route 395ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'administrator' detail route 383ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > filters combined attributes, preserves filtered return, and resets 507ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > reports invalid capacity rather than matching everything 107ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /student/find-room 391ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /teacher/room-availability 401ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /admin/room-availability 504ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters  61ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=unknown 69ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id= 75ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=room-sci-218&id=room-eng-204 62ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows unknown resource metadata without inventing it 92ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows the actual administrator draft alongside published assignments 131ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > rejects cross-role detail access 8ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > retains the room ID when a refresh requires demo access again 6ms
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 1130ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 927ms
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 158ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 1444ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 103ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > discloses preview options and closes them with Escape without changing role 519ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > takes Teacher Rooms directly to the working resource directory 2ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > searches entry pages without offering record details that have no selection 496ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > focuses the destination and returns to its heading after navigation 194ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every student navigation and account link registered and role-owned 117ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every teacher navigation and account link registered and role-owned 132ms
+ ✓ src/pages/StudentSchedule.test.tsx > supports aligned month selection and month navigation across the year boundary 1724ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every administrator navigation and account link registered and role-owned 212ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > preserves the four Student mobile destinations and closes the secondary drawer after navigation 357ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps generation active and consolidates the calendar alias under Schedule 267ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > uses ordinary accessible links for destination search 364ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > resolves every navigation owner within the route role 12ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > creates a period with explicit catalog inclusion and keeps the selected period in its URL 865ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > submits a subject with explicit program ownership and only the selected weekly pattern 280ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > student keeps selection through navigation, back, forward, and refresh 1507ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > prevents duplicate save clicks and reports persistence failure without a false success 138ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > collects faculty availability and explicit workload limits without inventing time windows 401ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > blocks generation for missing inputs, differentiates warnings and uses saved-period revisions 109ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > uses the stored revision for generation and exposes stale-version recovery 103ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > teacher keeps selection through navigation, back, forward, and refresh 802ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > selects an existing period without setup, prevents duplicate runs and keeps unknown results unsaved 126ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > does not fetch academic data for a student preview 81ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > does not fetch academic data for a teacher preview 29ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > administrator keeps selection through navigation, back, forward, and refresh 1230ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > retains the selected role on forbidden navigation and recovers to its workspace 242ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > switches roles only through explicit selection and exit prevents history revival 411ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > preserves a valid direct link with query and hash after explicit matching selection 172ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > defaults to a published sample identity and retains context from Home to Schedule 1746ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > uses the chosen faculty identity and never exposes Administrator controls 195ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > shows a recoverable service failure without an empty agenda or invented classes 124ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > never requests a stale entered draft from anonymous review and provides sample recovery 73ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 517ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 55ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 29ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 34ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 57ms
+ ✓ src/pages/StudentHome.test.tsx > keeps IDs and term controls out of the primary Home interface 65ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 58ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 270ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 83ms
+ ✓ src/pages/StudentHome.test.tsx > opens a flagged schedule change with its current room instead of a sample announcement 172ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > opens the selected declined request, retains its assignment, and returns to the list 810ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > opens the same conflict and assignments shown by the Administrator dashboard 154ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > does not silently substitute another record for an unknown request ID 12ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > does not silently substitute another record for an unknown conflict ID 13ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > keeps teaching dates and rooms consistent, and filters actual records 175ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > uses owned assignments for requests without claiming room availability or sending 87ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > does not claim all attention is cleared when only conflicts are empty 367ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > supports an approved decision without counting it as pending 149ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > links only to registered teacher destinations 88ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > links only to registered administrator destinations 82ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > prioritizes pending requests over more recent decisions and uses stable detail identities 97ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher unavailable state 32ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher unpublished state 49ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher empty state 55ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher finished state 53ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > retains overlapping Teacher records without repeating them in the agenda 78ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > derives every metric from the full dataset, independently of the selected day 79ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > reports resource conditions without inferring time-window availability 66ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > distinguishes unavailable resources from an empty operational dataset 71ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > generates then saves a server run without submitting assignments or validation claims 658ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > prevents duplicate submissions and waits for confirmed persistence 42ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > shows storage errors and retries with the same idempotency key 64ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > lists and navigates to a saved unpublished draft 166ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > loads a direct link again after remount and filters persisted sessions 214ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > handles empty list and failed detail retrieval with recovery 102ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > never offers a save action for infeasible output 111ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > keeps student out of saved Administrator drafts without fetching data 68ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > keeps teacher out of saved Administrator drafts without fetching data 32ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid teacher session only to a role-owned destination 326ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid student session only to a role-owned destination 83ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid administrator session only to a role-owned destination 88ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > focuses the first invalid field and links its error 256ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > reveals the password accessibly and never simulates a successful connection 235ms
+ ✓ src/pages/R1Presentation.test.tsx > uses only the reviewed bundled source for stale sessions and hostile connected-source query parameters 431ms
+ ✓ src/pages/R1Presentation.test.tsx > recovers an invalid presentation identity deliberately without substituting private data 437ms
+ ✓ src/pages/R1Presentation.test.tsx > keeps the loaded agenda when selecting another date within the same sample month 474ms
+ ✓ src/pages/R1Presentation.test.tsx > reports only stored conflict validation at export without providing a live validator 67ms
+ ✓ src/pages/R1Presentation.test.tsx > does not offer live occupancy even before a returning role context is persisted 12ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > shows the next Student class once and keeps the later agenda role-owned 594ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > opens the Student schedule from the summary action 163ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > does not repeat in-progress or next assignments below the summary 126ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > retains the other simultaneous assignment instead of hiding an overlap 77ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student unavailable state and schedule escape path 48ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student unpublished state and schedule escape path 54ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student empty state and schedule escape path 34ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student finished state and schedule escape path 57ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > limits Teacher schedule, pending counts and links to that role 215ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > keeps administrator counts consistent with displayed attention and schedule records 214ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > does not interpret missing administrative data as zero conflicts 7ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > reviews a complete batch and prevents duplicate generation while the request is pending 1052ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > does not simulate success when the backend is unavailable 144ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > requires input edits to be applied and validated before running them 139ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > labels structured degree sections and custom TCP sections without parsing stable IDs 2ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/ai-scheduling read-only without API access 246ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/schedule-manager read-only without API access 43ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/schedule-manager/drafts read-only without API access 28ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/academic read-only without API access 35ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/conflicts read-only without API access 40ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > preserves the teacher presentation context on room availability 132ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > preserves the administrator presentation context on room availability 84ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > uses real readiness to lead with generation without claiming publication 585ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > leads blocked periods to requirements rather than a generation promise 148ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > keeps failed backend status recoverable without a fake ready state 76ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected student as an institutional identity 277ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected teacher as an institutional identity 51ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected administrator as an institutional identity 40ms
+ ✓ src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona 208ms
+ ✓ src/pages/AcademicFixtureImport.test.tsx > requires deliberate review and import, and never reports a rejected import as successful 461ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > restores focus to the signed-out status after an explicit sign-out 359ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > keeps the selected role button focused while access is checked and announced 90ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during denied 47ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during unavailable 32ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during offline 33ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads horizontal artwork without duplicate visible labels 213ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads full artwork without duplicate visible labels 45ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads symbol artwork without duplicate visible labels 27ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken horizontal image with accessible text 37ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken full image with accessible text 29ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken symbol image with accessible text 15ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > keeps decorative artwork inside a named home link accessible through the link 26ms
+ ✓ src/components/ui/Drawer.test.tsx > Drawer > focuses its close control and closes with Escape 329ms
+ ✓ src/components/ui/Drawer.test.tsx > Drawer > closes from the backdrop but not from drawer content 45ms
+ ✓ src/components/ui/Drawer.test.tsx > Drawer > contains keyboard focus, locks the background, and restores focus on close 98ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > shows the class, full time range and assigned location together 374ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > retains a date for the next assignment on another day 16ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > provides an honest unavailable state 17ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > provides an honest unpublished state 13ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > provides an honest no-classes state 12ms
+ ✓ src/components/scheduling/NextClassSummary.test.tsx > next class presentation > provides an honest finished state 8ms
+ ✓ src/pages/TimetableValidation.test.tsx > sends the exact snapshot and makes confirmed conflicts actionable 458ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not mount university identity in presentation mode 51ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not mount university identity in sandbox mode 6ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > cleans StrictMode observers, clears old data and never revives after unmount 134ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not attach an observer when asynchronous setup finishes after unmount 17ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationTarget":false} 6ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","presentationSample":"false","presentationTarget":true} 9ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationTarget":false} 2ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationSample":"true","presentationTarget":false} 3ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"true","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","rolePreview":"false","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationTarget":true} 5ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 5ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"serve","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationSample":"true","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","rolePreview":"false","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","presentationSample":"false","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"development","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"presentation","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"true","presentationTarget":true} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationTarget":false} 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"true","presentationTarget":true} 2ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"sandbox","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"true","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"true","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":false} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > {"command":"build","nodeEnv":"production","mode":"institutional","rolePreview":"false","presentationSample":"false","presentationTarget":true} 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects malformed flag  1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects malformed flag TRUE 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects malformed flag 1 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects malformed flag  false  1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects malformed flag yes 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects unknown mode  1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects unknown mode production 0ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects unknown mode dev 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > rejects unknown mode Presentation 1ms
+ ✓ src/config/app-mode.test.ts > operating mode exhaustive compatibility matrix > capabilities never describe preview identity as institutional authorization 1ms
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in presentation mode 58ms
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in sandbox mode 2ms
+ ✓ src/auth/university-session-driver.test.ts > preserves missing Firebase as unavailable without fake identity 3ms
+ ✓ src/auth/university-session-driver.test.ts > uses only current server membership with explicit safe request options 16ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP401/invalid_token to denied without provider error details 6ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/membership_denied to denied without provider error details 4ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/role_selection_required to role-required without provider error details 4ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP503/membership_unavailable to unavailable without provider error details 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base //attacker.invalid/api before SDK use 3ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base http://attacker.invalid/api before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base https://user:secret@example.invalid/api before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api?redirect=elsewhere before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api#fragment before SDK use 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base api/v1 before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects a backslash-normalized external origin on an HTTPS page 1ms
+ ✓ src/auth/university-session-driver.test.ts > does not send a token once its identity changes during token retrieval 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects stale identity after server response even before the observer callback 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects HTML fallback and wrong response UID 4ms
+ ✓ src/lib/use-schedule-workspace.test.tsx > retrieves the complete displayed week across a month boundary and clears old records after denial 217ms
+ ✓ src/config/api-boundaries.test.ts > presentation rejects all live clients before fetch 84ms
+ ✓ src/config/api-boundaries.test.ts > institutional rejects all live clients before fetch 8ms
+ ✓ src/config/api-boundaries.test.ts > ignores browser mode/role inputs when selecting operating capabilities 22ms
+ ✓ src/lib/publication-api.test.ts > accepts ordered server versions, ignores duplicates and refetches on resume 146ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > restores student without extending its lifetime 17ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > restores teacher without extending its lifetime 3ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > restores administrator without extending its lifetime 3ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: invalid json 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: null 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: {} 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: "student" 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: {"version":0,"role":"student","startedAt":1793364022278} 0ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: {"version":1,"role":"superuser","startedAt":1793364022279} 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: {"version":1,"role":"teacher","startedAt":1793450422279} 1ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > discards invalid state: {"version":1,"role":"student","startedAt":"today"} 0ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > keeps role selection and exit usable when storage is blocked 50ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > expires a mounted preview without extending it through navigation 19ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > disables restoration and role selection in an ordinary production build 4ms
+ ✓ src/auth/preview-session.test.tsx > bounded tab preview storage > requires an explicit demo build flag outside development 3ms
+ ✓ src/routes/RouteGuard.test.tsx > protected role routes > redirects an unsigned visitor to public sign in 104ms
+ ✓ src/routes/RouteGuard.test.tsx > protected role routes > redirects a demo role away from a route it does not own 14ms
+ ✓ src/lib/student-timetable-api.test.ts > times out a stalled token refresh before starting a request 32ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint publish before network 7ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint sandbox/periods before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint history/p before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint calendar/../publish before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint //external before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > requires identity and sends current role/token to the Gateway without credentials 29ms
+ ✓ src/lib/student-timetable-api.test.ts > retains server denial and never replaces it with data 3ms
+ ✓ src/lib/presentation-sample.test.ts > loads a deterministic versioned synthetic sample without network access or live changes 42ms
+ ✓ src/lib/presentation-sample.test.ts > never substitutes another identity and restricts teaching assignments to the selected sample teacher 11ms
+ ✓ src/lib/presentation-sample.test.ts > does not mutate the versioned source while browsing 8ms
+ ✓ src/auth/university-session.test.ts > current university session authority > observes signed-out then verifies identity without decoding tokens 19ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears membership before role verification and shows server role denial 7ms
+ ✓ src/auth/university-session.test.ts > current university session authority > cannot revive the previous UID after a later identity callback 8ms
+ ✓ src/auth/university-session.test.ts > current university session authority > blocks late authorization after offline, signout or disposal 5ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps logout failure cleared despite further SDK events or refresh 3ms
+ ✓ src/auth/university-session.test.ts > current university session authority > bounds stalled token/lookup work and ignores its late completion 15ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps offline events cleared until online revalidation succeeds 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears current authority on SDK observer failure 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > keeps only the authorized role record and rejects client role mismatch 2ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership null 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"another","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"","role":"student","student_id":"student-a","membership_revision":1} 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"superadmin","student_id":"student-a","membership_revision":1} 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","membership_revision":1} 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":0} 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1.1} 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":"1"} 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > selects a student across sections by assignment ID, without leaking other records 6ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > selects only the teaching assignments and requests owned by the teacher 3ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > treats missing data and broken assignment references as unavailable 1ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > derives next, today, and remaining from the same records 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > uses an end-exclusive boundary and distinguishes in-progress from next 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > distinguishes empty, finished, and unpublished schedules 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > does not call tomorrow’s class a class today 1ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > includes an overnight occurrence on each day until its exclusive end 3ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > retains overlapping records and uses a stable tie order without claiming clearance 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > derives administrator counts from actual attention and date-scoped records 2ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > excludes resolved issues and decisions from actionable counts 1ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > does not expose a request with conflicting teacher ownership 0ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > distinguishes missing resource data from an empty directory 1ms
+ ✓ src/lib/schedule-preview.test.ts > explicit, deterministic preview assignments > keeps all fixture references valid and gives each occurrence a stable unique ID 1ms
+ ✓ src/auth/access.test.tsx > authentication entry and demo access > validates required login credentials before any authentication attempt 11ms
+ ✓ src/auth/access.test.tsx > authentication entry and demo access > sends demo roles only to routes they own 4ms
+ ✓ src/auth/access.test.tsx > authentication entry and demo access > restores after a provider remount and clears storage on explicit exit 74ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > creates an RFC-style UTC calendar with stable caller-provided UIDs 11ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > derives a stable UID from an authorized assignment identifier 4ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > escapes special characters and folds long Unicode lines by UTF-8 bytes 3ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > rejects incomplete or impossible event times 4ms
+ ✓ src/lib/firebase-config.test.ts > keeps absent/incomplete configuration distinct without initializing a misleading app 8ms
+ ✓ src/lib/firebase-config.test.ts > reuses the existing registration across module reloads 14ms
+ ✓ src/lib/firebase-config.test.ts > does not initialize a second application on a project/app mismatch 1ms
+ ✓ src/lib/firebase-config.test.ts > keeps an SDK initialization failure non-fatal for the read-only presentation 7ms
+ ✓ src/lib/sample-calendar-api.test.ts > discovers only server-approved samples across pages without loading draft snapshots 33ms
+ ✓ src/lib/sample-calendar-api.test.ts > preserves permission failure status and distinguishes a network outage 13ms
+ ✓ src/lib/workspace-context.test.ts > live timetable connection status > announces interruption only for a loaded published timetable 9ms
+ ✓ src/lib/workspace-context.test.ts > live timetable connection status > does not imply live synchronization in presentation mode 1ms
+ ✓ src/lib/workspace-context.test.ts > live timetable connection status > does not imply live synchronization in review mode 1ms
+ ✓ src/lib/workspace-context.test.ts > isolates roles and expires context with the preview session 4ms
+ ✓ src/lib/workspace-context.test.ts > prefers an existing published scope but respects a valid explicit selection 3ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > keeps saved draft details oriented in Saved Drafts and the mobile Schedule tab 8ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > assigns unique paths and identifiers 11ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > keeps personal schedule routes separate from schedule management 1ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > provides dashboard routes for exactly the initial roles 1ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > only puts role owned routes in each role navigation 4ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > keeps administrator schedule creation out of student and teacher route sets 1ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > registers planned features only for their authorized roles 1ms
+ ✓ src/routes/route-config.test.ts > role aware route registry > keeps student mobile navigation to its four primary destinations 7ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > resolves every assignment identity without fabricating missing metadata 9ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > combines actual fields and includes the capacity boundary 3ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > orders recorded assignments and restricts draft visibility 1ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned student details and preserves IDs through demo access 3ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned teacher details and preserves IDs through demo access 1ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned administrator details and preserves IDs through demo access 1ms
+ ✓ src/data/cdm-room-inventory.test.ts > user-supplied provisional CDM inventory > includes exactly the supplied spaces and no inferred PRRC gaps 9ms
+ ✓ src/data/cdm-room-inventory.test.ts > user-supplied provisional CDM inventory > keeps source provenance and excludes unknown resource requirements from matches 3ms
+ ✓ src/lib/student-presentation.test.ts > selects ongoing, adjacent next, afternoon and tomorrow with a controlled Manila clock 8ms
+ ✓ src/lib/student-presentation.test.ts > formats readable times without changing the Manila instant 2ms
+ ✓ src/lib/student-presentation.test.ts > does not polish internal identifiers into fabricated academic names 4ms
+
+ Test Files  45 passed (45)
+      Tests  741 passed (741)
+   Start at  20:37:27
+   Duration  207.14s (transform 5.33s, setup 39.31s, import 173.60s, tests 49.28s, environment 120.80s)
+

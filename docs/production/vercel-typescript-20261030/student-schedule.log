@@ -1,0 +1,19 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentSchedule.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 2208ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 1126ms
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 152ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 1482ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 153ms
+ ✓ src/pages/StudentSchedule.test.tsx > supports aligned month selection and month navigation across the year boundary 1860ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  20:34:21
+   Duration  38.77s (transform 2.62s, setup 3.68s, import 17.11s, tests 6.99s, environment 8.22s)
+
