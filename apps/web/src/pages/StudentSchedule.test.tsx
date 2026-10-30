@@ -127,7 +127,7 @@ it('does not render a calendar or empty-success state when the backend is unavai
 it('supports aligned month selection and month navigation across the year boundary', async () => {
   show();
   await waitFor(() => expect(document.querySelectorAll('.ux-agenda-row')).toHaveLength(3));
-  fireEvent.click(screen.getByRole('button', { name: 'Month', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'Month' }));
   const month = screen.getByRole('navigation', { name: 'Month dates' });
   expect(within(month).getAllByRole('button')).toHaveLength(31);
   expect(month.children[10]).toHaveAttribute('aria-label', 'Thu, Oct 1, 1 classes');

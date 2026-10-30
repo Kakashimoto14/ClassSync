@@ -1,0 +1,45 @@
+{
+  "status": "PASS local TypeScript build correction",
+  "source": "apps/web/src/pages/StudentSchedule.test.tsx",
+  "source_sha256": "17ad41020bc7e0d593adfec9fa235051df0383fbb9c2bdbf91d927aec7db2728",
+  "invalid_exact_options_found": 1,
+  "invalid_exact_options_corrected": 1,
+  "affected_tests_passed": 6,
+  "full_frontend_tests_passed": 741,
+  "frontend_test_files": 45,
+  "frontend_seconds": 207.14,
+  "full_test_command": "npm run test --workspace=@classync/web -- --pool=threads --reporter=verbose",
+  "root_test_script": "not defined; existing web workspace test used",
+  "gates": [
+    {
+      "command": "npm run typecheck",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run build",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run test:security",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run build:presentation",
+      "exit_code": 0
+    }
+  ],
+  "security_tests_passed": 17,
+  "npm_audit_findings": 0,
+  "release": {
+    "schemaVersion": 1,
+    "mode": "read-only-presentation",
+    "appMode": "presentation",
+    "capabilityVersion": 1,
+    "sampleVersion": "classsync-presentation-v1",
+    "commit": "8f7004c1765338fd88fd24663c6b0c94d593986d",
+    "uncommittedChanges": true
+  },
+  "preservation_matches": 64,
+  "remote_deployment": "not verified",
+  "commit_push_deploy_performed": false
+}
