@@ -1,0 +1,131 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-2a8095410fbf43e193e4f6c81456a9ce",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-2a8095410fbf43e193e4f6c81456a9ce/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-2a8095410fbf43e193e4f6c81456a9ce^\\data^\" -l logfile start",
+  "port": 50186,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-2a8095410fbf43e193e4f6c81456a9ce/data",
+    "user": "classsync_qa_9d786eb4364242de96a1d9a72f5cf771",
+    "port": 50186,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "migration": "0011_publication_policy_cycle",
+    "archive_sha256": "907088f04809e7f8897bb2f28327a4174f19073d8c887e38cd97b6e0cac9aa25",
+    "toc_sha256": "ed5bda6be386305a35ea7063d1ed1b65d93528309ee232977404e715e2b065ae",
+    "source_fingerprint": {
+      "data_sha256": "186c7097a09b2787e739b8fddff527429d3109ca9eea99702a6c4188bff7bfb6",
+      "sequence": [
+        2,
+        true
+      ],
+      "catalog_parts": {
+        "migration": "2562f1d34c3722043f64a0d3f847ab432b5ba17c0bfd32600b76d673c0798c05",
+        "schemas": "267491481d30fcc7bc76352363e1f85bfaa158ef04a1dcd973cdb9618065a3bd",
+        "schema_acl": "648029919a97af4f4ced5afe9ee63b30ece728eef3f23a856cdd615bea637679",
+        "columns": "db96b7b6f9b38af57209b704a1e4bc366a1d661cedecec3c8a0963f2d4a626a9",
+        "constraints": "390e796f7a0d4ac9213607e6bbc78ec1cbe8bb312526ee7a33469558d3b31c72",
+        "tables": "397e8bf5546bda87f28db9f288101df6c1ab88a9c77ee96c30c8e20877ee7b5f",
+        "indexes": "ab0aee22818fd20eaa81c240a78a338ac7c71cfabc63ec206a31ba1444454e2e",
+        "table_acl": "b038db9e60200caef38fbb64b46a55d420514c4625a5711384804ce1e4ba61e3",
+        "column_acl": "4ba2e45a3b756cb2da158509e4fcc4fa83eb997b40d2abadd58a8b06ecfc649c",
+        "functions": "fefd9e9b7d3697a5c93d53f23397aa155cc545a85edb541332474edbe9eb3667",
+        "function_acl": "7d1743d075d4c3a58bbb439c925da82ed246224074a5fbc5f9a01f7d938dfdbd",
+        "triggers": "68347717be671afaa3554d48c50bd4430f0c98d01f637aee675693f66d74c176",
+        "policies": "25927d6c0ff360bdcd01ce2230af7907b2a624111c9e6eed7c4ce8c4695da8f2",
+        "default_acl": "39509de43bceda9355151769e4fd5c1fc3c31339230ce75ff102671b4822c32e",
+        "version_capacity": "4bee48e2cd4df29ae3c601ab01a63c9edb817267e2f460e35184fd6752bfaee0",
+        "sequences": "645b8b6b62e513a037d1a13d03dafe1db5fe41b2bfd0f98d46f460cadead98f2",
+        "sequence_acl": "63c9f9cccb85f1c134b097e3fcf9361dbfb33e539061e92c92046e24e0ccfd93"
+      },
+      "rows": {
+        "classsync_identity.tenants": 2,
+        "classsync_identity.people": 3,
+        "classsync_identity.students": 4,
+        "classsync_identity.faculty": 3,
+        "classsync_identity.memberships": 8,
+        "classsync_identity.membership_audit": 9,
+        "classsync_academic.period_metadata": 2,
+        "classsync_academic.records": 82,
+        "classsync_academic.record_references": 36,
+        "classsync_academic.calendars": 1,
+        "classsync_scheduling.solver_runs": 1,
+        "classsync_scheduling.drafts": 1,
+        "classsync_scheduling.published_versions": 2,
+        "classsync_scheduling.publication_heads": 1,
+        "classsync_scheduling.room_restrictions": 1,
+        "classsync_scheduling.restriction_audit": 1,
+        "classsync_scheduling.legacy_publication_archive": 1
+      }
+    },
+    "restored_fingerprint": {
+      "data_sha256": "186c7097a09b2787e739b8fddff527429d3109ca9eea99702a6c4188bff7bfb6",
+      "sequence": [
+        2,
+        true
+      ],
+      "catalog_parts": {
+        "migration": "2562f1d34c3722043f64a0d3f847ab432b5ba17c0bfd32600b76d673c0798c05",
+        "schemas": "267491481d30fcc7bc76352363e1f85bfaa158ef04a1dcd973cdb9618065a3bd",
+        "schema_acl": "648029919a97af4f4ced5afe9ee63b30ece728eef3f23a856cdd615bea637679",
+        "columns": "db96b7b6f9b38af57209b704a1e4bc366a1d661cedecec3c8a0963f2d4a626a9",
+        "constraints": "390e796f7a0d4ac9213607e6bbc78ec1cbe8bb312526ee7a33469558d3b31c72",
+        "tables": "397e8bf5546bda87f28db9f288101df6c1ab88a9c77ee96c30c8e20877ee7b5f",
+        "indexes": "ab0aee22818fd20eaa81c240a78a338ac7c71cfabc63ec206a31ba1444454e2e",
+        "table_acl": "b038db9e60200caef38fbb64b46a55d420514c4625a5711384804ce1e4ba61e3",
+        "column_acl": "4ba2e45a3b756cb2da158509e4fcc4fa83eb997b40d2abadd58a8b06ecfc649c",
+        "functions": "fefd9e9b7d3697a5c93d53f23397aa155cc545a85edb541332474edbe9eb3667",
+        "function_acl": "7d1743d075d4c3a58bbb439c925da82ed246224074a5fbc5f9a01f7d938dfdbd",
+        "triggers": "68347717be671afaa3554d48c50bd4430f0c98d01f637aee675693f66d74c176",
+        "policies": "25927d6c0ff360bdcd01ce2230af7907b2a624111c9e6eed7c4ce8c4695da8f2",
+        "default_acl": "39509de43bceda9355151769e4fd5c1fc3c31339230ce75ff102671b4822c32e",
+        "version_capacity": "4bee48e2cd4df29ae3c601ab01a63c9edb817267e2f460e35184fd6752bfaee0",
+        "sequences": "645b8b6b62e513a037d1a13d03dafe1db5fe41b2bfd0f98d46f460cadead98f2",
+        "sequence_acl": "63c9f9cccb85f1c134b097e3fcf9361dbfb33e539061e92c92046e24e0ccfd93"
+      },
+      "rows": {
+        "classsync_identity.tenants": 2,
+        "classsync_identity.people": 3,
+        "classsync_identity.students": 4,
+        "classsync_identity.faculty": 3,
+        "classsync_identity.memberships": 8,
+        "classsync_identity.membership_audit": 9,
+        "classsync_academic.period_metadata": 2,
+        "classsync_academic.records": 82,
+        "classsync_academic.record_references": 36,
+        "classsync_academic.calendars": 1,
+        "classsync_scheduling.solver_runs": 1,
+        "classsync_scheduling.drafts": 1,
+        "classsync_scheduling.published_versions": 2,
+        "classsync_scheduling.publication_heads": 1,
+        "classsync_scheduling.room_restrictions": 1,
+        "classsync_scheduling.restriction_audit": 1,
+        "classsync_scheduling.legacy_publication_archive": 1
+      }
+    },
+    "legacy_source_evidence": {
+      "generated_sqlite_source_fingerprint": "842f2f6249c79555c8f0a05e06aa7750e5cf917c350e4ea98c0bf49cdff2ee87",
+      "opaque_request_hash_and_payload_preserved": true,
+      "archive_not_active_publication": true,
+      "exact_replay_idempotent": true,
+      "conflicting_key_atomic_rollback": true,
+      "nonempty_archive_downgrade_denied": true
+    },
+    "legacy_current": false,
+    "legacy_replayable": false,
+    "complete_content_catalog_sequence_equal": true,
+    "exact_history_and_receipt": true,
+    "role_calendars_context_denials_private_draft": true,
+    "archive_hash_payload_mapping_and_exact_retry": true,
+    "restored_immutability_acl_and_reconnect": true,
+    "source_and_restore_unchanged": true,
+    "restored_database": "classsync_restore_e922d5f306ba414f90d52d317166a26f",
+    "same_cluster_generated_only": true,
+    "cross_host_disaster_recovery": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

@@ -1,0 +1,66 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-4fb2da86d2274bcb84f19f369903fccf",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-4fb2da86d2274bcb84f19f369903fccf/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-4fb2da86d2274bcb84f19f369903fccf^\\data^\" -l logfile start",
+  "port": 62884,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-4fb2da86d2274bcb84f19f369903fccf/data",
+    "user": "classsync_qa_d4edc88c01434d2bb6002be4b83ee893",
+    "port": 62884,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "foundation": {
+      "transactional_migration_rollback": true,
+      "upgrade_downgrade_upgrade": true,
+      "constraint_cases": [
+        "duplicate identity",
+        "missing person",
+        "cross tenant student",
+        "mismatched person",
+        "unknown grant",
+        "empty grants",
+        "duplicate grants",
+        "null grant",
+        "invalid state",
+        "nonpositive revision",
+        "missing student binding",
+        "missing faculty binding",
+        "blank uid"
+      ],
+      "force_rls_all_tables": true,
+      "tenant_uid_project_isolation": true,
+      "record_binding": true,
+      "fresh_revocation": true,
+      "runtime_authority_writes_denied": true,
+      "database_failure_unavailable": true,
+      "second_uid_administrator": true,
+      "pooled_context_reset": true
+    },
+    "create_list_connection_restart": true,
+    "typed_denied_cases": [
+      "student-teacher",
+      "missing-uid",
+      "wrong-tenant",
+      "wrong-project"
+    ],
+    "direct_sql_rls": true,
+    "rollback_and_constraints": [
+      "duplicate",
+      "blank-title",
+      "long-title",
+      "bad-revision",
+      "blank-id",
+      "missing-owner"
+    ],
+    "revocation_reactivation": true,
+    "database_outage_recovery": true,
+    "upgrade_downgrade_upgrade": true,
+    "complete_academic_repository": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

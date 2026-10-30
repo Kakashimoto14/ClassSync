@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import type { AcademicSnapshot } from '../lib/academic-api';
 import { Button } from '../components/ui/Button';
 import { env } from '../lib/env';
+import { liveFetch } from '../config/runtime-config';
 import { addDays } from '../lib/calendar-model';
 export function AcademicCalendarEditor({
   snapshot,
@@ -24,7 +25,7 @@ export function AcademicCalendarEditor({
     setBusy(true);
     setError('');
     try {
-      const r = await fetch(
+      const r = await liveFetch(
         `${env.apiBaseUrl}/academic/sandbox/periods/${snapshot.period.id}/calendar`,
         {
           method: 'PUT',

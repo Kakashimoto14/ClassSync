@@ -1,0 +1,26 @@
+{
+  "origin": "http://127.0.0.1:61356",
+  "mode": "read-only-presentation",
+  "widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "noOverflow": true,
+  "calendarWidths": [
+    360,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "errors": [],
+  "apiRequests": [],
+  "keyboardDetails": true,
+  "roomNavigation": true,
+  "deepRefresh": true,
+  "nativeZoom": "not run in this presentation pass",
+  "connectedAcceptance": false
+}

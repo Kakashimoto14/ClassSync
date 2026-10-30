@@ -1,0 +1,49 @@
+{
+  "phase": "rooms-alerts",
+  "screenshots": [
+    {
+      "scene": "room-detail",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-room-detail-390.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-schedule-rooms-390.png"
+    },
+    {
+      "scene": "directory",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-directory-390.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-alerts-390.png"
+    },
+    {
+      "scene": "room-detail",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-room-detail-1440.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-schedule-rooms-1440.png"
+    },
+    {
+      "scene": "directory",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-directory-1440.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356897550-rooms-alerts-alerts-1440.png"
+    }
+  ],
+  "errors": [],
+  "api": [],
+  "clock": "2026-10-30T08:15:00+08:00",
+  "pass": true
+}

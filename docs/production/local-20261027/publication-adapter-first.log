@@ -1,0 +1,42 @@
+................................FF...................................    [100%]
+================================== FAILURES ===================================
+____________ test_client_cannot_assign_publication_version[False] _____________
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001EE3C1D79E0>
+prohibit_transaction = None, commit = False
+
+    @pytest.mark.parametrize("commit", [False, True])
+    def test_client_cannot_assign_publication_version(repository, prohibit_transaction, commit):
+        body = command()
+        body.calendar.published_version = "client-forged-version"
+        with pytest.raises(DraftError) as denied:
+            repository.publish(body, commit=commit)
+>       assert (denied.value.status, denied.value.code) == (422, "client_version")
+E       AssertionError: assert (422, 'publication_command') == (422, 'client_version')
+E         
+E         At index 1 diff: 'publication_command' != 'client_version'
+E         Use -v to get more diff
+
+services\scheduling\tests\test_postgres_publication_boundary.py:138: AssertionError
+_____________ test_client_cannot_assign_publication_version[True] _____________
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001EE3C1D7530>
+prohibit_transaction = None, commit = True
+
+    @pytest.mark.parametrize("commit", [False, True])
+    def test_client_cannot_assign_publication_version(repository, prohibit_transaction, commit):
+        body = command()
+        body.calendar.published_version = "client-forged-version"
+        with pytest.raises(DraftError) as denied:
+            repository.publish(body, commit=commit)
+>       assert (denied.value.status, denied.value.code) == (422, "client_version")
+E       AssertionError: assert (422, 'publication_command') == (422, 'client_version')
+E         
+E         At index 1 diff: 'publication_command' != 'client_version'
+E         Use -v to get more diff
+
+services\scheduling\tests\test_postgres_publication_boundary.py:138: AssertionError
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_client_cannot_assign_publication_version[False]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_client_cannot_assign_publication_version[True]
+2 failed, 67 passed in 2.64s

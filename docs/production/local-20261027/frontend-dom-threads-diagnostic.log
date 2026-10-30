@@ -1,0 +1,16 @@
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads horizontal artwork without duplicate visible labels 303ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads full artwork without duplicate visible labels 38ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads symbol artwork without duplicate visible labels 33ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken horizontal image with accessible text 38ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken full image with accessible text 31ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken symbol image with accessible text 23ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > keeps decorative artwork inside a named home link accessible through the link 37ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  04:57:51
+   Duration  7.38s (transform 269ms, setup 1.08s, import 188ms, tests 511ms, environment 4.65s)
+

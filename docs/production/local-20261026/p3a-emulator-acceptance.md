@@ -1,0 +1,7 @@
+# P3a Auth Emulator local slice - acceptance before implementation
+
+Use pinned official Firebase CLI15.34.1 in a new disposable tools directory, demo-only project, Auth only, loopback random owned ports, no login/credentials, UI disabled, no import/export or live service. Inspect CLI audit before running. Stop only owned processes on every outcome. Node22.23.1 satisfies CLI declared engines. Official reference: https://firebase.google.com/docs/emulator-suite/connect_auth .
+
+Firebase emulator JWTs have no signature. Current parser rejects them. Add the smallest parser allowance only when the explicit test environment, test-adapter flag and EMULATOR verifier trust all agree. All ordinary/Firebase/TEST paths continue requiring a signature. Verify denial with each flag absent and production/development settings before changing parsing. No runtime emulator verifier or automatic environmental mode switch.
+
+Test-only helper must require demo project, owned loopback endpoint and explicit emulator environment, use AnonymousCredentials and a named SDK app, restore/delete on setup or execution failure, verify check_revoked, and never read production credentials. Exercise actual local emulator token lifecycle and current PostgreSQL membership with real Gateway HTTP composition; unknown UID/forged grants/disabled/revoked/outage must fail. Same unsigned token must not authorize institutional configuration. No browser/institutional acceptance inferred from ASGI checks. Phase remains PARTIAL until broader lifecycle/provider/browser gates pass.

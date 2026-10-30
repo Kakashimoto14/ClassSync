@@ -1,0 +1,38 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 65%]
+........................................................................ [ 81%]
+.....................F.................................................. [ 97%]
+.........                                                                [100%]
+================================== FAILURES ===================================
+_______ test_complete_multi_program_batch_and_independent_minutes_check _______
+
+    def test_complete_multi_program_batch_and_independent_minutes_check():
+        inputs = synthetic_scenario()
+        inputs.options.time_limit_seconds = 8.0
+>       result = solve(inputs)
+                 ^^^^^^^^^^^^^
+
+services\scheduling\tests\test_engine.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+inputs = GenerationInput(contract_version='v1', period_id='synthetic-week', data_version='synthetic-v1', scope_description='Syn...ights=ObjectiveWeights(idle_gaps=2, daily_balance=1, preferences=3, building_changes=2, disruption=5, room_balance=1)))
+
+    def solve(inputs):
+        result = generate_week(inputs)
+>       assert result.solver_status in {"optimal", "feasible"}, result.model_dump()
+E       AssertionError: {'assignments': [], 'contract_version': 'v1', 'coverage': [{'allocated_minutes': 0, 'offering_id': 'synthetic-offering...utes': 0, 'offering_id': 'synthetic-offering-1-2', 'required_minutes': 180}, ...], 'data_version': 'synthetic-v1', ...}
+E       assert 'unknown' in {'feasible', 'optimal'}
+E        +  where 'unknown' = GenerationResult(contract_version='v1', run_id='bf04c28b-c366-40eb-8789-b33e709f4ece', period_id='synthetic-week', inp...ver_version='9.15.6755', seed=42, wall_time_seconds=4.619228, time_limit_seconds=8.0, objective=None, best_bound=None)).solver_status
+
+services\scheduling\tests\test_engine.py:38: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_engine.py::test_complete_multi_program_batch_and_independent_minutes_check
+1 failed, 440 passed, 1 warning in 121.33s (0:02:01)

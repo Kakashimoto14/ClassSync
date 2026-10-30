@@ -1,0 +1,438 @@
+/* Selected Claude Student redesign. Scoped to preserve Teacher/Admin workspaces. */
+.student-shell {
+  --canvas: #faf9f5;
+  --surface: #fff;
+  --ink: #1c1b22;
+  --ink-soft: #5f6472;
+  --primary: #8a2b45;
+  --primary-hover: #7a2540;
+  --primary-soft: #f8e9ed;
+  --line: #e6e8ec;
+  --sidebar-width: 248px;
+  --header-height: 64px;
+}
+.student-shell .workspace,
+.student-shell .main-content {
+  background: var(--canvas);
+}
+.student-shell .sidebar {
+  background: #fff;
+  border-right: 1px solid var(--line);
+}
+.student-shell .nav-item--active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+.student-shell .student-header-location {
+  display: none;
+}
+.student-shell .topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.student-shell .semester {
+  margin-left: auto;
+}
+.student-shell .preview-indicator summary {
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 8px 12px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.student-shell .global-search {
+  margin-left: 0;
+}
+.student-shell .bottom-nav {
+  box-shadow: none;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.student-shell .bottom-nav a {
+  font-size: 12px;
+  min-height: 48px;
+  border-radius: 12px;
+}
+.student-shell .bottom-nav--active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+@media (min-width: 1024px) {
+  .student-shell .sidebar {
+    padding: 20px 14px;
+  }
+  .student-shell .brand {
+    padding: 0 10px;
+    margin-bottom: 20px;
+  }
+  .student-shell .topbar {
+    padding: 10px 28px;
+    gap: 16px;
+  }
+  .student-shell .semester {
+    margin-right: auto;
+    margin-left: 0;
+  }
+  .student-shell .main-content {
+    padding: 28px 32px 48px;
+  }
+}
+@media (max-width: 600px) {
+  .student-shell .topbar {
+    padding: 8px 12px;
+    min-height: 60px;
+  }
+  .student-shell .mobile-brand {
+    margin-inline: auto;
+  }
+  .student-shell .topbar-start {
+    flex: 1;
+  }
+  .student-shell .preview-indicator summary {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .student-shell .main-content {
+    padding: 16px 16px calc(104px + env(safe-area-inset-bottom));
+  }
+}
+.student-shell .student-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.student-shell .student-page-context {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 5px;
+}
+.student-shell .student-page-header h1 {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+.student-shell .student-next {
+  border: 1px solid #ebc9d3;
+  border-radius: 20px;
+  background: #f8e9ed;
+  padding: 20px;
+}
+.student-shell .student-next .student-section-heading h2 {
+  display: inline-flex;
+  background: white;
+  border-radius: 99px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #7a2540;
+}
+.student-shell .student-next h3 {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 14px 0 12px;
+}
+.student-shell .student-next-time {
+  font-size: 18px;
+}
+.student-shell .student-next-location {
+  margin-top: 12px;
+}
+.student-shell .student-room-action {
+  border-radius: 12px;
+  font-weight: 600;
+}
+.student-shell .student-panel {
+  border-radius: 16px;
+  box-shadow: none;
+}
+.student-shell .student-agenda-row {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+  gap: 14px;
+  margin-top: 10px;
+}
+.student-shell .student-agenda-row.is-current {
+  border-left: 3px solid var(--primary);
+  padding-left: 12px;
+}
+.student-shell .student-agenda-row strong {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.student-shell .student-agenda-row small {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+.student-shell .student-agenda-time {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+.student-shell .student-home-primary > .student-panel {
+  padding: 16px;
+}
+.student-shell .student-home-secondary .student-panel {
+  padding: 16px;
+}
+.student-shell .student-week-strip a {
+  border-radius: 12px;
+  min-height: 74px;
+}
+@media (max-width: 600px) {
+  .student-shell .student-page-header h1 {
+    font-size: 26px;
+  }
+  .student-shell .student-page-action {
+    display: none;
+  }
+  .student-shell .student-page-header {
+    margin: 0 4px 18px;
+  }
+  .student-shell .student-next {
+    padding: 20px;
+  }
+  .student-shell .student-next h3 {
+    font-size: 23px;
+  }
+  .student-shell .student-home-primary > .student-panel {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+  .student-shell .student-section-heading {
+    margin: 4px 4px 10px;
+  }
+  .student-shell .student-week-strip {
+    gap: 5px;
+  }
+  .student-shell .student-week-strip a {
+    padding: 8px 2px;
+    background: white;
+  }
+}
+.student-shell .student-view-tabs {
+  display: flex;
+  border-radius: 12px;
+  background: #e7e9ed;
+  padding: 4px;
+  gap: 4px;
+  max-width: 380px;
+}
+.student-shell .student-view-tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  min-height: 40px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3a3f4b;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.student-shell .student-view-tabs [aria-pressed='true'] {
+  background: #fff;
+  color: #8a2b45;
+  box-shadow: 0 1px 3px #00000012;
+}
+.student-shell .student-calendar-toolbar {
+  gap: 8px;
+}
+.student-shell .student-calendar-toolbar > div {
+  gap: 8px;
+}
+.student-shell .student-calendar-desktop {
+  border-radius: 16px;
+}
+.student-shell .student-calendar-head {
+  background: #fff;
+}
+.student-shell .student-calendar-event {
+  background: #f8e9ed;
+  border: 1px solid #ebc9d3;
+  border-left: 3px solid #8a2b45;
+  border-radius: 8px;
+}
+.student-shell .student-calendar-agenda {
+  padding: 16px;
+  border-radius: 16px;
+}
+.student-shell .student-calendar-agenda .student-agenda-row {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: 12px;
+  margin-top: 10px;
+  background: #fff;
+}
+.student-shell .student-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  background: white;
+  border: 1px solid var(--line);
+  padding: 12px;
+  border-radius: 16px;
+}
+.student-shell .student-month-label {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 8px 0;
+}
+.student-shell .student-month-grid button {
+  border: 0;
+  min-height: 52px;
+  background: transparent;
+  position: relative;
+  display: grid;
+  place-content: center;
+  font-size: 14px;
+}
+.student-shell .student-month-grid [aria-pressed='true'] {
+  background: var(--primary);
+  color: white;
+}
+.student-shell .student-month-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 4px auto 0;
+}
+@media (max-width: 600px) {
+  .student-shell .student-view-tabs {
+    max-width: none;
+  }
+  .student-shell .student-calendar-toolbar strong {
+    font-size: 13px;
+  }
+  .student-shell .student-calendar-agenda {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+  .student-shell .student-calendar-agenda .student-agenda-row {
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .student-shell .student-calendar-agenda .student-agenda-time {
+    white-space: normal;
+    line-height: 1.5;
+  }
+  .student-shell .student-schedule-options {
+    order: 0;
+  }
+}
+.student-shell .student-alerts-panel {
+  max-width: 640px;
+  margin: 20px auto;
+  padding: 28px;
+  text-align: center;
+}
+.student-shell .student-alert-symbol {
+  box-sizing: content-box;
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 16px;
+  border-radius: 50%;
+  margin-bottom: 14px;
+}
+.student-shell .student-room-search {
+  background: white;
+  border: 1px solid var(--line);
+  padding: 14px;
+  border-radius: 14px;
+  max-width: 100%;
+}
+.student-shell .student-room-search input {
+  border: 0;
+  background: var(--canvas);
+  font-size: 14px;
+}
+.student-shell .student-room-grid {
+  gap: 12px;
+}
+.student-shell .student-room-grid > article {
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: none;
+}
+.student-shell .student-room-grid > article > svg {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 10px;
+  box-sizing: content-box;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.student-shell .student-room-grid > article h2 {
+  font-size: 20px;
+}
+.student-shell .student-room-grid.is-room-detail {
+  max-width: 760px;
+  margin: auto;
+  grid-template-columns: minmax(0, 1fr);
+}
+.student-shell .student-room-classes {
+  border-top: 1px solid var(--line);
+  margin-top: 20px;
+  padding-top: 16px;
+}
+.student-shell .discovery-room-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+  padding: 18px;
+}
+.student-shell .discovery-room-card h2 {
+  font-size: 18px;
+}
+.student-shell .discovery-results {
+  gap: 12px;
+}
+.student-shell .discovery-filters {
+  border-radius: 14px;
+  box-shadow: none;
+}
+@media (max-width: 600px) {
+  .student-shell .student-calendar-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .student-shell .student-calendar-toolbar > div {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 4px;
+  }
+  .student-shell .student-calendar-toolbar > div button {
+    width: 44px;
+    padding: 8px;
+  }
+  .student-shell .student-calendar-toolbar strong {
+    min-width: 0;
+    font-size: 12px;
+    text-align: center;
+  }
+  .student-shell .student-calendar-toolbar > button {
+    padding: 8px 12px;
+  }
+  .student-shell .student-alerts-panel {
+    margin: 0;
+    padding: 24px 18px;
+  }
+  .student-shell .student-calendar-event .student-agenda-time {
+    white-space: normal;
+  }
+}

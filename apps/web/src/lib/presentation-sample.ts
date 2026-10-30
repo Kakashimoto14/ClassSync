@@ -1,12 +1,12 @@
 import type { CalendarData } from './calendar-model';
 import type { UserRole } from '../types/ui';
+import { appMode } from '../config/runtime-config';
 
-export const presentationEnabled =
-  import.meta.env.DEV || import.meta.env.VITE_ENABLE_PRESENTATION_SAMPLE === 'true';
-export const presentationOnlyBuild =
-  import.meta.env.PROD && import.meta.env.VITE_ENABLE_PRESENTATION_SAMPLE === 'true';
+export const presentationEnabled = appMode !== 'institutional';
+export const presentationOnlyBuild = appMode === 'presentation';
 export const presentationVersion = 'classsync-presentation-v1';
 export async function presentationData() {
+  if (!presentationEnabled) throw new Error('Presentation data is unavailable in institutional mode.');
   return structuredClone((await import('../data/presentation-timetable.v1.json')).default);
 }
 export async function presentationCalendar(

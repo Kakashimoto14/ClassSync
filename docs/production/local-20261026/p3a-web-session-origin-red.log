@@ -1,0 +1,59 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/auth/university-session-driver.test.ts
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in presentation mode 521ms
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in sandbox mode 6ms
+ ✓ src/auth/university-session-driver.test.ts > preserves missing Firebase as unavailable without fake identity 12ms
+ ✓ src/auth/university-session-driver.test.ts > uses only current server membership with explicit safe request options 107ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP401/invalid_token to denied without provider error details 39ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/membership_denied to denied without provider error details 20ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/role_selection_required to role-required without provider error details 20ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP503/membership_unavailable to unavailable without provider error details 32ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base //attacker.invalid/api before SDK use 18ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base http://attacker.invalid/api before SDK use 9ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base https://user:secret@example.invalid/api before SDK use 7ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api?redirect=elsewhere before SDK use 5ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api#fragment before SDK use 8ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base api/v1 before SDK use 6ms
+ × src/auth/university-session-driver.test.ts > rejects a backslash-normalized external origin on an HTTPS page 132ms
+   → promise resolved "{ observe: [Function observe], …(2) }" instead of rejecting
+ ✓ src/auth/university-session-driver.test.ts > does not send a token once its identity changes during token retrieval 8ms
+ ✓ src/auth/university-session-driver.test.ts > rejects stale identity after server response even before the observer callback 9ms
+ ✓ src/auth/university-session-driver.test.ts > rejects HTML fallback and wrong response UID 21ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  18:57:49
+   Duration  16.58s (transform 2.54s, setup 1.68s, import 1.88s, tests 1.03s, environment 2ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/auth/university-session-driver.test.ts > rejects a backslash-normalized external origin on an HTTPS page
+AssertionError: promise resolved "{ observe: [Function observe], …(2) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "lookup": [Function lookup],
++   "observe": [Function observe],
++   "signOut": [Function signOut],
+  }
+
+ ❯ src/auth/university-session-driver.test.ts:122:45
+    120|   vi.stubGlobal('window', { location: { origin: 'https://classsync.inv…
+    121|   sdk.base = String.raw`/\attacker.invalid/api`;
+    122|   await expect(loadUniversitySessionDriver()).rejects.toMatchObject({ …
+       |                                             ^
+    123|   expect(sdk.getAuth).not.toHaveBeenCalled();
+    124| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

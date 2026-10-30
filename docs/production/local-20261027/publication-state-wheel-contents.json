@@ -1,0 +1,23 @@
+{
+  "wheel": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-publication-state-wheel-final-78fa8bd4c30749dbb0be48a0f2031ef5\\wheels\\classync_persistence-0.1.0-py3-none-any.whl",
+  "sha256": "37c942912ba81a44a2caaf81aa7d68a52d3a5896754149984ef42383a93e650a",
+  "sourceFilesByteEqual": 15,
+  "files": [
+    "classync_persistence/__init__.py",
+    "classync_persistence/academic_periods.py",
+    "classync_persistence/configuration.py",
+    "classync_persistence/database.py",
+    "classync_persistence/membership_changes.py",
+    "classync_persistence/memberships.py",
+    "classync_persistence/migrations/env.py",
+    "classync_persistence/migrations/versions/0001_identity.py",
+    "classync_persistence/migrations/versions/0002_membership_revision.py",
+    "classync_persistence/migrations/versions/0003_membership_audit.py",
+    "classync_persistence/migrations/versions/0004_academic_period_metadata.py",
+    "classync_persistence/migrations/versions/0005_academic_records.py",
+    "classync_persistence/migrations/versions/0006_scheduling_drafts.py",
+    "classync_persistence/migrations/versions/0007_publication_state.py",
+    "classync_persistence/schema.py"
+  ],
+  "earlierWheelSuperseded": true
+}

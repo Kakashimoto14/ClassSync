@@ -1,0 +1,48 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.0.3, pluggy-1.7.0
+cachedir: C:\Users\lenovo\AppData\Local\Temp\classsync-p3a-web-exit-fc05aacc2a764daa9055366c2f952ff5\cache
+rootdir: C:\Projects\ClassSync
+configfile: pyproject.toml
+testpaths: services
+plugins: anyio-4.15.1
+collected 334 items
+
+services\academic\tests\test_academic.py ..............                  [  4%]
+services\academic\tests\test_health.py .                                 [  4%]
+services\gateway\tests\test_authorization_lifecycle.py ................. [  9%]
+.........                                                                [ 12%]
+services\gateway\tests\test_emulator_support.py .................        [ 17%]
+services\gateway\tests\test_health.py .                                  [ 17%]
+services\gateway\tests\test_identity_contracts.py ...................... [ 24%]
+........                                                                 [ 26%]
+services\gateway\tests\test_request_authorization.py ................... [ 32%]
+...........................................................              [ 50%]
+services\gateway\tests\test_timetable_stream.py .                        [ 50%]
+services\gateway\tests\test_token_verification.py ................       [ 55%]
+services\notification\tests\test_health.py .                             [ 55%]
+services\persistence\tests\test_database_boundary.py .............       [ 59%]
+services\persistence\tests\test_identity_boundary.py ......              [ 61%]
+services\persistence\tests\test_membership_audit_boundary.py ........    [ 63%]
+services\persistence\tests\test_membership_revision_boundary.py ........ [ 65%]
+.                                                                        [ 66%]
+services\persistence\tests\test_postgres_disposable.py ...........       [ 69%]
+services\persistence\tests\test_restore_boundary.py .......              [ 71%]
+services\persistence\tests\test_web_session_evidence.py .                [ 71%]
+services\scheduling\tests\test_api.py ...........                        [ 75%]
+services\scheduling\tests\test_calendar.py ....                          [ 76%]
+services\scheduling\tests\test_drafts.py .................               [ 81%]
+services\scheduling\tests\test_engine.py ....................            [ 87%]
+services\scheduling\tests\test_health.py .                               [ 87%]
+services\scheduling\tests\test_identity_stream.py ...                    [ 88%]
+services\scheduling\tests\test_institutional_projection.py ....          [ 89%]
+services\scheduling\tests\test_mode_boundaries.py ...............        [ 94%]
+services\scheduling\tests\test_publication.py .......                    [ 96%]
+services\scheduling\tests\test_security_audit.py ............            [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 334 passed, 1 warning in 80.46s (0:01:20) ==================

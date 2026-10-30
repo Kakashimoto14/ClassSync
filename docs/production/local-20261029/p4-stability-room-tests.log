@@ -1,0 +1,23 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx src/lib/use-schedule-workspace.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/lib/use-schedule-workspace.test.tsx > retrieves the complete displayed week across a month boundary and clears old records after denial 205ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 376ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 53ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 34ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 41ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 36ms
+ ✓ src/pages/StudentHome.test.tsx > keeps publication identifiers behind a disclosure and shows the full selected period title 49ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 62ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 208ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 90ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  03:01:15
+   Duration  11.48s (transform 1.55s, setup 1.87s, import 6.52s, tests 1.16s, environment 5.56s)
+

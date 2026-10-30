@@ -1,0 +1,39 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx src/pages/StudentSchedule.test.tsx src/components/layout/AppShell.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > discloses preview options and closes them with Escape without changing role 718ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > takes Teacher Rooms directly to the working resource directory 3ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > searches entry pages without offering record details that have no selection 680ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > focuses the destination and returns to its heading after navigation 304ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every student navigation and account link registered and role-owned 167ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every teacher navigation and account link registered and role-owned 188ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every administrator navigation and account link registered and role-owned 289ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > preserves the four Student mobile destinations and closes the secondary drawer after navigation 470ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps generation active and consolidates the calendar alias under Schedule 301ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > uses ordinary accessible links for destination search 475ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > resolves every navigation owner within the route role 15ms
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 1612ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 1284ms
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 289ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 1605ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 149ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 939ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 106ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 60ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 51ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 52ms
+ ✓ src/pages/StudentHome.test.tsx > keeps IDs and term controls out of the primary Home interface 116ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 83ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 323ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 111ms
+ ✓ src/pages/StudentHome.test.tsx > opens a flagged schedule change with its current room instead of a sample announcement 359ms
+
+ Test Files  3 passed (3)
+      Tests  26 passed (26)
+   Start at  10:38:53
+   Duration  36.21s (transform 3.40s, setup 4.67s, import 25.42s, tests 10.78s, environment 11.77s)
+

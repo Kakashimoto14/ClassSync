@@ -1,8 +1,8 @@
 import type { UserRole } from '../types/ui';
+import { appMode } from '../config/runtime-config';
 
 // This enables sample UI only. It never grants backend permissions.
-export const previewEnabled =
-  import.meta.env.DEV || import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
+export const previewEnabled = appMode !== 'institutional';
 export const previewSessionKey = 'classsync.preview.v1';
 export const previewSessionLifetime = 8 * 60 * 60 * 1000;
 export interface PreviewSession {

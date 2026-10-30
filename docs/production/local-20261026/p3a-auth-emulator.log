@@ -1,0 +1,5 @@
+C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-ca7a297a9d22468f87789a951366c2fb
+Owned Auth Emulator/PostgreSQL/Gateway qualification passed
+Actual owned Auth Emulator and disposable PostgreSQL stopped; qualification passed.

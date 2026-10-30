@@ -1,0 +1,48 @@
+Loaded isolated QA extension { id: 'dnnfpnpmlikpckbaeiomkplkfeaafehp' }
+Native zoom API 2
+Reflow bounds [
+  {
+    text: 'University access unavailableUniversity ',
+    left: 116,
+    right: 596,
+    width: 712
+  },
+  {
+    text: 'University access unavailable',
+    left: 202.46875,
+    right: 509.53125,
+    width: 712
+  },
+  {
+    text: 'University access is unavailable. Produc',
+    left: 149,
+    right: 563,
+    width: 712
+  },
+  {
+    text: 'Return to access',
+    left: 282.296875,
+    right: 429.703125,
+    width: 712
+  }
+]
+{
+  "nativeZoom": 2,
+  "before": {
+    "innerWidth": 1424,
+    "outerWidth": 1440,
+    "dpr": 1,
+    "visualScale": 1,
+    "cssZoom": "1"
+  },
+  "after": {
+    "innerWidth": 712,
+    "outerWidth": 1440,
+    "dpr": 2,
+    "visualScale": 1,
+    "cssZoom": "1"
+  },
+  "keyboard": true,
+  "noOverflow": true,
+  "method": "Temporary isolated Chrome extension tabs.setZoom/getZoom via CDP loadUnpacked; no user profile or application source changed"
+}

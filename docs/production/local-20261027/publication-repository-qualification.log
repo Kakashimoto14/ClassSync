@@ -1,0 +1,37 @@
+C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-b17276c8ce9445528020c456739580e5
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 92, in must_fail
+    operation()
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 584, in <lambda>
+    must_fail(lambda: repo.publish(updated_revision, commit=True),
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\services\scheduling\app\postgres_publication_repository.py", line 307, in publish
+    self.validate_academic_scope(command, draft, snapshot, checked)
+  File "C:\Projects\ClassSync\services\scheduling\app\publication_rules.py", line 37, in validate_academic_scope
+    raise DraftError(
+services.scheduling.app.draft_rules.DraftError: Saved draft does not match the current academic constraints. Generate a new revision.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 635, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 630, in main
+    write_new_evidence(args.output, qualify(args.bin, exercise))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 584, in exercise
+    must_fail(lambda: repo.publish(updated_revision, commit=True),
+  File "C:\Projects\ClassSync\scripts\postgres_publication_repository_qualification.py", line 94, in must_fail
+    require(error.code == code and (status is None or error.status == status),
+  File "C:\Projects\ClassSync\scripts\postgres_driver_qualification.py", line 17, in require
+    raise RuntimeError(description)
+RuntimeError: Wrong publication negative result: academic_input_changed

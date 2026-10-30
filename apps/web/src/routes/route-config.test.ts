@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { dashboardPath, mobileNavigationForRole, navigationForRole, navigationOwner, rolePath, routeDefinitions } from './route-config';
 

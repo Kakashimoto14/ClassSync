@@ -1,0 +1,698 @@
+.student-home {
+  max-width: 1240px;
+  margin-inline: auto;
+  min-width: 0;
+}
+.student-home-heading,
+.student-section-heading,
+.student-source {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.student-home-heading {
+  margin-bottom: 24px;
+  align-items: end;
+}
+.student-home-heading h1 {
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  letter-spacing: -0.045em;
+  margin: 6px 0;
+}
+.student-home-heading p {
+  color: var(--ink-soft);
+  margin: 0;
+}
+.student-source {
+  padding: 12px 0 20px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+.student-source > span {
+  max-width: 100%;
+}
+.student-source label {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 420px);
+}
+.student-source select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.875rem;
+}
+.student-period-title {
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.student-version {
+  margin-top: 6px;
+}
+.student-version p {
+  max-width: 360px;
+  overflow-wrap: anywhere;
+}
+.student-home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 24px;
+}
+.student-home-primary,
+.student-home-secondary {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  min-width: 0;
+}
+.student-panel,
+.student-next {
+  --ink-soft: var(--ink-on-tint);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.student-panel h2,
+.student-next h2 {
+  font-size: 1rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.student-panel > p {
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+.student-next {
+  background: var(--primary-soft);
+  border-color: #e9d5dd;
+}
+.student-section-heading {
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.student-section-heading > span,
+.student-section-heading > a {
+  font-size: 0.8rem;
+}
+.student-section-heading > a,
+.student-discovery a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.student-next-code {
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+.student-next h3 {
+  font-size: clamp(1.45rem, 2.7vw, 2rem);
+  margin: 0 0 12px;
+  letter-spacing: -0.035em;
+}
+.student-next h3 button {
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.student-next h3 svg {
+  flex-shrink: 0;
+}
+.student-next-time {
+  font-size: 1.35rem;
+  font-weight: 650;
+  margin: 0 0 14px;
+}
+.student-next-time small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin-top: 6px;
+  color: var(--ink-soft);
+}
+.student-next-location {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.student-next-location span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+.student-instructor {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+.student-agenda-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+.student-agenda-row > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.student-agenda-row svg {
+  flex-shrink: 0;
+  color: var(--ink-soft);
+}
+.student-agenda-row small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 5px;
+}
+.student-agenda-time {
+  font-size: 0.9rem;
+  font-weight: 650;
+  flex-shrink: 0;
+}
+.student-week {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.student-week > div {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  min-width: 0;
+}
+.student-week h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+.student-week .is-today h3 {
+  color: var(--primary);
+}
+.student-week button {
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  text-align: left;
+  padding: 10px;
+  width: 100%;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.student-week span,
+.student-week small {
+  display: block;
+  margin-top: 5px;
+}
+.student-week p,
+.student-week small {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+.student-empty-day {
+  padding-bottom: 0;
+}
+.student-empty-day p {
+  margin: 0 0 6px;
+}
+@media (min-width: 1101px) {
+  .student-next {
+    padding-block: 20px;
+  }
+  .student-next .student-section-heading {
+    margin-bottom: 10px;
+  }
+}
+.student-discovery > svg {
+  color: var(--primary);
+  margin-bottom: 14px;
+}
+.student-discovery small {
+  display: block;
+  margin-top: 20px;
+  color: var(--ink-soft);
+}
+.student-change {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 16px;
+  font-size: 0.85rem;
+}
+.student-room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 20px;
+}
+.student-loading div {
+  height: 45px;
+  background: var(--canvas);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+.student-notice {
+  background: var(--success-soft);
+  padding: 16px;
+  border-radius: 8px;
+}
+@media (max-width: 1100px) {
+  .student-home-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .student-home-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .student-home-heading {
+    flex-direction: column;
+    align-items: start;
+    gap: 18px;
+  }
+  .student-panel,
+  .student-next {
+    padding: 20px;
+  }
+  .student-home-grid,
+  .student-home-primary,
+  .student-home-secondary {
+    gap: 16px;
+  }
+  .student-home-secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .student-source label {
+    width: 100%;
+  }
+  .student-source select {
+    flex: 1;
+  }
+  .student-section-heading {
+    gap: 8px;
+  }
+}
+.student-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.student-week-strip a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 4px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.8rem;
+  min-height: 96px;
+}
+.student-week-strip strong {
+  font-size: 1.4rem;
+  letter-spacing: -0.04em;
+}
+.student-week-strip small {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+.student-week-strip [aria-current='date'] {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.student-week-strip .student-empty-day {
+  background: var(--canvas);
+}
+.student-room-action {
+  margin-top: 18px;
+}
+.student-room-search {
+  display: grid;
+  gap: 8px;
+  max-width: 440px;
+  font-weight: 600;
+}
+.student-room-search input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.student-next {
+  border-left: 4px solid var(--primary);
+}
+.student-next h3 {
+  font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+}
+.student-next-time {
+  font-size: 1.1rem;
+}
+.student-panel,
+.student-next {
+  padding: 20px;
+}
+.student-section-heading {
+  margin-bottom: 14px;
+}
+.student-source {
+  padding: 0 0 16px;
+  border: 0;
+}
+.student-home-heading {
+  margin-bottom: 12px;
+}
+@media (max-width: 600px) {
+  .student-week-strip {
+    gap: 4px;
+  }
+  .student-week-strip a {
+    padding: 10px 0;
+    min-height: 80px;
+    font-size: 0.7rem;
+  }
+  .student-week-strip small {
+    font-size: 0.6rem;
+  }
+  .student-week-strip strong {
+    font-size: 1.2rem;
+  }
+  .student-home-heading {
+    gap: 10px;
+  }
+  .student-agenda-row {
+    gap: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .student-week-strip small {
+    font-size: 0.8rem;
+  }
+  .student-week-strip .student-class-word {
+    display: none;
+  }
+}
+@media (min-width: 1101px) {
+  .student-next {
+    position: relative;
+  }
+  .student-next-location,
+  .student-instructor {
+    padding-right: 160px;
+  }
+  .student-room-action {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    margin: 0;
+  }
+}
+@media (max-width: 600px) {
+  .student-home-heading > a {
+    display: none;
+  }
+  .student-source {
+    gap: 6px;
+    flex-direction: column;
+    align-items: start;
+  }
+  .student-room-action {
+    width: 100%;
+    justify-content: center;
+  }
+}
+.student-agenda-row.is-current {
+  border-left: 3px solid var(--primary);
+  padding-left: 12px;
+}
+.student-agenda-row .student-current-note {
+  color: var(--primary);
+  font-weight: 600;
+}
+/* Campus Companion: Student-only refinements using the existing Soft Rouge tokens. */
+.student-header-location {
+  display: none;
+}
+.student-shell {
+  --sidebar-width: 232px;
+  --header-height: 60px;
+}
+.student-shell .topbar {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+.student-shell .student-home,
+.student-shell .room-discovery,
+.student-shell .notice-list {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.student-shell .student-home-heading {
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.student-shell .student-home-heading h1,
+.student-shell .page-heading h1 {
+  font-size: clamp(1.65rem, 2.4vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+.student-shell .student-source {
+  padding: 0 0 18px;
+  font-size: 0.8125rem;
+}
+.student-shell .student-home-grid {
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+}
+.student-shell .student-home-primary,
+.student-shell .student-home-secondary {
+  gap: 18px;
+}
+.student-shell .student-panel {
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgb(32 36 44 / 3%);
+}
+.student-shell .student-next {
+  border-radius: 14px;
+  padding: 20px 22px;
+  border-left-width: 4px;
+}
+.student-shell .student-next h3 {
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
+}
+.student-shell .student-panel h2,
+.student-shell .student-next h2 {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.student-shell .student-panel > p {
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+.student-shell .student-agenda-row {
+  padding-block: 14px;
+}
+.student-shell .student-week-strip a {
+  min-height: 82px;
+  border-radius: 10px;
+  padding: 10px 4px;
+}
+.student-shell .student-week-strip strong {
+  font-size: 1.2rem;
+}
+.student-shell .student-schedule {
+  gap: 16px;
+}
+.student-shell .student-schedule-options {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 0 14px;
+  max-width: 720px;
+}
+.student-shell .student-schedule-options summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--ink);
+}
+.student-shell .student-schedule-options summary::before {
+  content: '›';
+  font-size: 1.25rem;
+  margin-right: 10px;
+  color: var(--primary);
+}
+.student-shell .student-schedule-options[open] summary::before {
+  transform: rotate(90deg);
+}
+.student-shell .student-schedule-options label {
+  display: inline-grid;
+  vertical-align: top;
+  width: min(100%, 210px);
+  margin: 4px 12px 14px 0;
+  font-size: 0.8125rem;
+}
+.student-shell .student-schedule-options select {
+  width: 100%;
+  min-height: 44px;
+}
+.student-shell .student-calendar-event {
+  padding: 8px;
+  border-radius: 7px;
+}
+.student-shell .student-calendar-event strong {
+  font-size: 0.8rem;
+}
+.student-shell .student-calendar-hours span {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.student-shell .room-discovery .page-heading {
+  margin-bottom: 16px;
+}
+.student-shell .discovery-filters__search {
+  align-items: end;
+}
+.student-shell .discovery-room-card {
+  border-radius: 12px;
+  box-shadow: none;
+}
+.student-shell .notice-list {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.student-shell .notice-list article {
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+.student-shell .notice-list article:last-child {
+  border-bottom: 0;
+}
+@media (min-width: 1024px) {
+  .student-shell .sidebar {
+    padding: 18px 14px 14px;
+    overflow-y: auto;
+  }
+  .student-shell .brand {
+    margin-bottom: 16px;
+  }
+  .student-shell .sidebar-navigation {
+    gap: 4px;
+  }
+  .student-shell .nav-item {
+    min-height: 42px;
+    gap: 12px;
+  }
+  .student-shell .sidebar-user {
+    margin-top: auto;
+    padding-top: 12px;
+  }
+  .student-shell .topbar {
+    min-height: 60px;
+    padding: 8px 28px;
+    gap: 12px;
+  }
+  .student-shell .student-header-location {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    color: var(--ink-soft);
+  }
+  .student-shell .student-header-location strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .student-shell .global-search {
+    width: min(240px, 30%);
+  }
+  .student-shell .main-content {
+    padding: 28px 32px 48px;
+  }
+}
+@media (max-width: 1100px) {
+  .student-shell .student-home-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .student-shell .topbar {
+    min-height: 60px;
+  }
+  .student-shell .student-home-heading {
+    gap: 8px;
+  }
+  .student-shell .student-panel,
+  .student-shell .student-next {
+    padding: 18px;
+  }
+  .student-shell .student-home-grid,
+  .student-shell .student-home-primary,
+  .student-shell .student-home-secondary {
+    gap: 14px;
+  }
+  .student-shell .student-week-strip a {
+    min-height: 74px;
+  }
+  .student-shell .student-schedule-options label {
+    display: grid;
+    width: 100%;
+    margin: 4px 0 14px;
+  }
+  .student-shell .student-room-action {
+    min-height: 44px;
+  }
+}
+.student-shell .student-preview-tools {
+  border-top: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.student-shell .student-preview-tools summary {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+@media (min-width:601px) { .student-shell .student-schedule-options label:first-of-type {width:min(100%,300px);} }

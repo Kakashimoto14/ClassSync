@@ -1,0 +1,59 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_________ test_unmarked_cluster_is_rejected_before_engine_or_identity _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001AFB155D6D0>
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-86/test_unmarked_cluster_is_rejec0')
+
+    def test_unmarked_cluster_is_rejected_before_engine_or_identity(monkeypatch, tmp_path):
+>       module = importlib.import_module("scripts.postgres_publication_state_qualification")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\persistence\tests\test_publication_state_boundary.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'scripts.postgres_publication_state_qualification'
+import_ = <function _gcd_import at 0x000001AFABF480E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'scripts.postgres_publication_state_qualification'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+____________ test_existing_evidence_is_preserved_without_overwrite ____________
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-86/test_existing_evidence_is_pres0')
+
+    def test_existing_evidence_is_preserved_without_overwrite(tmp_path):
+>       module = importlib.import_module("scripts.postgres_publication_state_qualification")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\persistence\tests\test_publication_state_boundary.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'scripts.postgres_publication_state_qualification'
+import_ = <function _gcd_import at 0x000001AFABF480E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'scripts.postgres_publication_state_qualification'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED services/persistence/tests/test_publication_state_boundary.py::test_unmarked_cluster_is_rejected_before_engine_or_identity
+FAILED services/persistence/tests/test_publication_state_boundary.py::test_existing_evidence_is_preserved_without_overwrite
+2 failed in 0.59s

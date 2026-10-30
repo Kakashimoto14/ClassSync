@@ -1,0 +1,164 @@
+{
+  "status": "PASS",
+  "scope": "P4a/P4b bounded local; stop before P4c/P4d",
+  "timestamp": "2026-10-30T03:41:34.677554+08:00",
+  "head": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+  "frontend": {
+    "passed": 731,
+    "files": 43,
+    "seconds": 132.36
+  },
+  "affected_backend": 125,
+  "security_tests": 17,
+  "artifacts": 4,
+  "npm_findings": 0,
+  "python_exact_versions": 68,
+  "python_findings": 0,
+  "connected": {
+    "vite": "6.4.5",
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "native_zoom": 2,
+    "mobile_bottom_clearance": true,
+    "healthy_503s": 0,
+    "outage_503s": 3,
+    "service_counts": [
+      {
+        "service": "gateway",
+        "status": 200,
+        "phase": "healthy",
+        "count": 62
+      },
+      {
+        "service": "gateway",
+        "status": 403,
+        "phase": "healthy",
+        "count": 4
+      },
+      {
+        "service": "scheduling",
+        "status": 200,
+        "phase": "healthy",
+        "count": 49
+      },
+      {
+        "service": "gateway",
+        "status": 200,
+        "phase": "outage",
+        "count": 1
+      },
+      {
+        "service": "gateway",
+        "status": 503,
+        "phase": "outage",
+        "count": 3
+      },
+      {
+        "service": "scheduling",
+        "status": 403,
+        "phase": "healthy",
+        "count": 1
+      }
+    ],
+    "auth_stopped": true,
+    "pg_stopped": true,
+    "denied_outbound": 0
+  },
+  "originals": [
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+      "sha256": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+      "matches": true
+    },
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+      "sha256": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+      "matches": true
+    },
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+      "sha256": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+      "matches": true
+    }
+  ],
+  "p3b_backend_hashes_unchanged": 61,
+  "owned_pg_states": [
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-64d64ceb4f724ea19bc6a0562430f76d",
+      "status": 3,
+      "message": "pg_ctl: no server running"
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-9f1e188028a64edbbb78cd0dbfe43e51",
+      "status": 3,
+      "message": "pg_ctl: no server running"
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-ff0cd5a9dc994951a5e9be7ec47a9f26",
+      "status": 3,
+      "message": "pg_ctl: no server running"
+    }
+  ],
+  "source_sha256": {
+    "apps/web/src/pages/StudentHome.tsx": "0bbe7062d8784e6b8982e098b4de224b95d8b3c5392e8f32a09fc363558ac59a",
+    "apps/web/src/pages/student-home.css": "2b62a03957006157f9a00fb17508af9ad5f056d07f1527a495634096b7bc2ed4",
+    "apps/web/src/pages/StudentHome.test.tsx": "d4c29eac4b8bc3574263906a54373765dce5c907be808c96093a799fe26f72f8",
+    "apps/web/src/components/scheduling/ClassSessionDetails.tsx": "1a15b629c00678907586f46dd1ee391625a62494303fdec300e026c6d10a982b",
+    "apps/web/src/lib/use-schedule-workspace.ts": "acd66a791c1e823e67a28c1ef4c47b932c07d97d6ac2aa45e1a55f181460d365",
+    "apps/web/src/routes/RouteGuard.tsx": "df7977ad0cad9f8fdffd62ae3ba5d8a638eb40bb9c053e6bedc9e25ee94e2dff",
+    "scripts/postgres_student_experience_qualification.py": "9b34434a7e06c914fd1b4bb1dcee779bb82f7008d43004f47e7a35d7ab89ea63",
+    "scripts/student_experience_browser.cjs": "eba1ee2af5390cd72492a514d2d0c61954f666f000bfd340c47f72fbd4c96750",
+    "scripts/tests/dependency-security.test.cjs": "01711ad6c37cac0803c2fe959758458e3d8daa65abdadd9460f3e2ba05c6599d",
+    "package.json": "18945160e5e353f874a93c9ee89006088ea6faadf6d06feab7ceb901d40994f6",
+    "apps/web/package.json": "d6d2d39f4a85b44ce9f0115bae5d705fad07ecc655cb71659ef7837ef6b41429",
+    "package-lock.json": "2e23b813923670feb33d2ad103f343626fb6934f3abc2d17a542421020dd59ee",
+    "docs/autonomy/P4_STABILITY_EVIDENCE.md": "a65060d1637d0b932edc51ca09aa49c55d6d253ffd0f32bc0cb74552f54f98dd",
+    "docs/autonomy/P4_EVIDENCE.md": "a808fe8b53ab43d5c5d11c184d52c22e2510a09a38f3f65775fe24a26e3d0f3e",
+    "docs/autonomy/STATUS.md": "b6a220677252a28fa218de41e45b153bf1edfa59882ae363efa0ac695540503e",
+    "docs/autonomy/ROADMAP.md": "073f5a33d585f58c8574efaa5774117c3e289183e664e979b5508796305432b5",
+    "docs/autonomy/APPROVALS.md": "7a45a6185763f26d181dd230ae6c507c5326bc02c4ec5d343962b7226bce839d",
+    "docs/autonomy/P4_ACCEPTANCE.md": "6eeba6fe98df5a967682846769bd0a52d380cbb92d66a0820327f4f799e0c32e"
+  },
+  "evidence_sha256": {
+    "p4-stability-browser-09-patched.json": "5c98c0d5776f61fd275a97d9b3f526f24bbb177117d3976d168d50ede7ecb35a",
+    "p4-stability-browser-09-patched.log": "2d7f370f0b7460677045f5436afa3649e3ee1fd0dccab2a73e13cc954bbc1494",
+    "p4-stability-final-service-timeline.json": "941a8f0db37ad9b5471d52d526b1273eaa6a1a09aea1e8dde23defa4354eb916",
+    "p4-stability-final-web.log": "5ad6367aa91daa88ecc19909b59f087358eb4c89c97c9fa4c7936602df822bdf",
+    "p4-stability-backend.log": "79ba8c5cc3123aea360f4a62c98c5571fdc8bebc2f77547f673f0b86bd5dcc3f",
+    "p4-stability-final-security.log": "ad2ad08fc817fb71997273419d0f13d3fbeb25c742ac7d866aac10dc32b25eb1",
+    "p4-stability-final-lint.log": "e5ab5bc601eec75e869bbebd12f2a189ee848711c6c8964d7cc0997d33d15ecd",
+    "p4-stability-final-types.log": "d357b49ea72c09ef516a4b3f3ba525d00a1dbe324b6b2ca39c9d302752ac7199",
+    "p4-stability-final-build.log": "a605410941fbd5f9a7f6cea7ee2a29b3b11d148731ef6ce3d01e05ae4fa37934",
+    "p4-stability-final-presentation-build.log": "a7aae6d0e101fd0113c06a238fe79f7f4f154b6d0e62c12831ffacac69ab1de5",
+    "p4-stability-final-artifacts.log": "a8a9a19e35bbc15518132a96341425de6c5d5bf30d2e66d7bc262095049977cc",
+    "p4-stability-npm-audit-final.json": "78bc531f9225c319ea2147cce5cf99d201372edabf62604fe9f365d68ac3d337",
+    "p4-stability-python-audit.log": "a18250274d6a0fefe4d5f1dabdd3fac8deb9887435ab67331b80a4f6df56f42a",
+    "p4-stability-presentation-browser.json": "838883760018f4b3f23514b4d5b77f533adc70e5e08bc1f22039e8df8ff9579d"
+  },
+  "screenshots": {
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-after-360.png": "7e7a1525390f0bfad3972f686700ac021693c859d8578922d4ddf8163c5ba176",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-after-390.png": "cfe5021da0a71b4a57db008f5d7b8492b96c04f07842285f6aa290f2b4f87a56",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-after-768.png": "9e02e674f2b5c2f936b137e43bf2de380b4c1d03cec67483e6b427c7d8caf957",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-after-1024.png": "529d09b3448c68b45532dcb1ad967cdceb50ba2bef4c0a15b16db8fa059dd15f",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-after-1440.png": "042339d8f54ff99b016ba30cae29a8478b56fbb64332ef50bb175df4c40169df",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-offline.png": "1654afd46137ec60feada08f743bd80f16a951401e0e84df77c42a774c2a49bf",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-loading.png": "889e3ee82675e9295981b88eafaf234af8b9dc40d81ffa606cf98b1bfe2f6de6",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-unavailable.png": "f6621174e33f88ba623b952b38d7cf74329d0b3e0b5f9d6c9416b15f967ce9d5",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-denied.png": "4784fe8f0a3b2842e6feaf286441e4ba83b71197ae1c03c35d0da51b25f1c0ab",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-membership-revoked.png": "57a3b91cfa9433068d20ea6ad32ef98dd791810e5d96675b5b41d6509bedfe63",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-unassigned.png": "c3a0b0608853242fd864d8a97761313e701a1855bb8ee10d4a4792ff8aa22239",
+    "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-e387f44c1f6944989a9371f0dd7977b6-student-native-200.png": "c21a273b8f98304a88e68b217c523a3710b1d16d3db629844e6864c8375f9ebc"
+  },
+  "limitations": [
+    "generated local data only",
+    "Chrome coverage; no manual screen reader/physical notch/production acceptance",
+    "old individual503 origins and exact query strings not logged; PostgreSQL exhaustion confirmed",
+    "existing bundle/mixed Firebase import and audit hashing warnings"
+  ],
+  "independent_review": "one focused reviewer; actual-room-action finding fixed and unit/browser verified"
+}

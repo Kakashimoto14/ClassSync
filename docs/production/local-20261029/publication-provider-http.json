@@ -1,0 +1,117 @@
+{
+  "project": "demo-classsync-8e45e3d7ac3b",
+  "endpoint": "127.0.0.1:50289",
+  "toolsVersion": "15.34.1",
+  "authOnly": true,
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-33cf2701134b41c98c731c1ef67c2130",
+  "authStopped": true,
+  "deniedOutbound": 0,
+  "postgres": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-f3d7830be18145658c2149de72598762",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-f3d7830be18145658c2149de72598762/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-f3d7830be18145658c2149de72598762^\\data^\" -l logfile start",
+    "port": 50323,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-f3d7830be18145658c2149de72598762/data",
+      "user": "classsync_qa_dfffdb2046144c019f76017ad5e2fe1d",
+      "port": 50323,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "actual_auth_sdk_current_pg_http": true,
+      "review_publish_exact_replay": true,
+      "admin_student_teacher_calendars_periods": true,
+      "unassigned_unbound_wrong_role_revoked_denied": true,
+      "no_sqlite_fallback": true,
+      "owned_pool_and_lifecycle_cleanup": true,
+      "statuses": [
+        {
+          "method": "POST",
+          "path": "/review",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/publish",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/publish",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/periods",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/periods",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/periods",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/history/bfd4f1b2-3848-404a-9122-363e58995cdf",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/history/bfd4f1b2-3848-404a-9122-363e58995cdf",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/publish",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/calendar/bfd4f1b2-3848-404a-9122-363e58995cdf?start=2026-10-01&end=2026-10-31",
+          "status": 403
+        }
+      ],
+      "browser_tcp_acceptance": false,
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

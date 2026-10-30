@@ -1,7 +1,9 @@
 import { firebaseApp } from './firebase';
 import { env } from './env';
+import { requireLiveCapability } from '../config/runtime-config';
 
 export async function timetableHeaders(): Promise<Record<string, string>> {
+  requireLiveCapability();
   if (!firebaseApp) return {};
   const { getAuth } = await import('firebase/auth');
   const user = getAuth(firebaseApp).currentUser;
@@ -12,6 +14,7 @@ export async function timetableRequest<T>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
+  requireLiveCapability();
   const response = await fetch(`${env.apiBaseUrl}/timetables/${path}`, {
     method: body === undefined ? 'GET' : 'POST',
     headers: { 'Content-Type': 'application/json', ...(await timetableHeaders()) },
@@ -44,6 +47,7 @@ export function subscribeTimetable(
   onVersion: (sequence: number) => void,
   onConnection: (connected: boolean) => void,
 ) {
+  requireLiveCapability();
   const controller = new AbortController();
   let cursor = 0;
   let retry = 500;

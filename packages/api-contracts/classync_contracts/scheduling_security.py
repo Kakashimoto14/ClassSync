@@ -1,14 +1,17 @@
 """Scheduling privilege never comes from the browser's role-preview selection."""
 
 from fastapi import HTTPException, Request
-from firebase_admin import auth
 
-from .firebase import FirebaseSettings, initialize_firebase
+from .firebase import FirebaseSettings
+from .models import UserRole
+from .request_authorization import request_identity
 
 
 class SchedulingSecuritySettings(FirebaseSettings):
     classsync_env: str = "production"
     enable_scheduling_sandbox: bool = False
+    institutional_tenant_id: str | None = None
+    enable_test_identity_adapters: bool = False
 
 
 def require_sandbox(settings):
@@ -17,21 +20,8 @@ def require_sandbox(settings):
 
 
 def require_administrator(request: Request, settings):
-    claims = require_identity(request, settings)
-    if claims.get("role") != "administrator":
-        raise HTTPException(403, "Administrator authorization is required")
-    return claims
+    return request_identity(request, settings, UserRole.ADMINISTRATOR)
 
 
 def require_identity(request: Request, settings):
-    header = request.headers.get("Authorization", "")
-    if not header.startswith("Bearer "):
-        raise HTTPException(401, "A verified Administrator token is required")
-    try:
-        initialize_firebase(settings)
-        claims = auth.verify_id_token(header.removeprefix("Bearer "), check_revoked=True)
-    except Exception as error:
-        raise HTTPException(401, "Invalid authentication token") from error
-    if not claims.get("uid") or claims.get("role") not in {"administrator", "teacher", "student"}:
-        raise HTTPException(403, "A verified role and identity are required")
-    return claims
+    return request_identity(request, settings)

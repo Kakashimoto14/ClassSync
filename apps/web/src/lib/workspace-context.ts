@@ -10,6 +10,13 @@ export interface WorkspaceContext {
   date: string;
   view?: 'day' | 'week' | 'month';
 }
+export function shouldAnnounceConnectionLoss(
+  mode: WorkspaceContext['mode'],
+  connected: boolean,
+  hasLoadedTimetable: boolean,
+) {
+  return mode === 'published' && !connected && hasLoadedTimetable;
+}
 const empty = (): WorkspaceContext => ({
   period: '',
   identity: '',

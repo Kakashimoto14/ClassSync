@@ -1,0 +1,43 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx src/pages/StudentSchedule.test.tsx src/components/layout/AppShell.test.tsx src/config/institutional-routes.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > discloses preview options and closes them with Escape without changing role 519ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > takes Teacher Rooms directly to the working resource directory 3ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > searches entry pages without offering record details that have no selection 1175ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > focuses the destination and returns to its heading after navigation 271ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every student navigation and account link registered and role-owned 113ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every teacher navigation and account link registered and role-owned 142ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every administrator navigation and account link registered and role-owned 226ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > preserves the four Student mobile destinations and closes the secondary drawer after navigation 942ms
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 1926ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps generation active and consolidates the calendar alias under Schedule 405ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > uses ordinary accessible links for destination search 624ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > resolves every navigation owner within the route role 17ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 1341ms
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 134ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 1450ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 308ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 1162ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 72ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 56ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 55ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 49ms
+ ✓ src/pages/StudentHome.test.tsx > keeps IDs and term controls out of the primary Home interface 84ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 68ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 300ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 137ms
+ ✓ src/pages/StudentHome.test.tsx > opens a flagged schedule change with its current room instead of a sample announcement 241ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected student as an institutional identity 385ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected teacher as an institutional identity 61ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected administrator as an institutional identity 36ms
+ ✓ src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona 311ms
+
+ Test Files  4 passed (4)
+      Tests  30 passed (30)
+   Start at  18:41:54
+   Duration  38.05s (transform 4.25s, setup 3.87s, import 31.38s, tests 12.64s, environment 17.95s)
+

@@ -1,0 +1,15 @@
+# Scheduling migration and restore — independent local review
+
+27 October 2026. Base/current HEAD `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`.
+
+Before implementation, acceptance was recorded in `scheduling-migration-restore-acceptance.md`. A separate agent authored the restore qualifier and its 52 portable tests, then expanded the migration boundary tests to 63 cases. Root authored the migration qualifier, reviewed both implementations and ran the actual PostgreSQL drills. The independent security reviewer inspected both sources, tests and final actual evidence without running tests, solvers or servers. Review is not external certification.
+
+The reviewer found no remaining actionable source or evidence defect in these bounded slices. Migration reads only the new marked cluster's generated, fixed-name SQLite source, validates it before insertion and binds the runtime transaction to the owned PostgreSQL target. Actual evidence preserves three runs and one draft exactly, including raw payloads/checksums, UTC metadata and original save key. Interrupted imports and a separate fresh-cluster existing-key conflict roll back every inserted row while preserving unrelated current-owner and second-owner data. Current membership, owner/tenant/project, expiry, physical reconnect and replay checks passed.
+
+Restore comparison covers all 12 identity/academic/Scheduling tables and 14 canonical catalog categories, including constraints, indexes, triggers, RLS and privileges. Source and restored fingerprints match before functional checks. Four expected membership transitions are accounted for precisely; other raw rows and authority catalogs remain unchanged. Actual functional checks cover both active Administrator owners, wrong roles/tenant/project, immutable DML, checksum/metadata/cross-owner FK failures, expiry, replay, revocation/reactivation, permission outage/recovery and cleared connection context. Source, archive and TOC remain unchanged.
+
+The first actual restore run failed a test probe: truncating the referenced run table alone produced PostgreSQL dependency error `0A000` before the immutable trigger. Root corrected the probe to truncate both FK-connected tables in one statement, without `CASCADE`, still requiring exact trigger denial `42501`. The reviewer confirmed this isolates the intended guard. The fresh drill passed; the failed drill and its stopped-cluster evidence remain preserved.
+
+Evidence: `scheduling-migration-qualification.json`/`.log` (two stopped clusters), `scheduling-restore-reviewed.json`/`.log` (one stopped cluster), `scheduling-restore-qualification.log` (initial probe failure), `scheduling-migration-final-portable.log` (63 passed), and `scheduling-restore-portable-reviewed.log` (52 passed). Final full regression and preservation results are recorded separately in STATUS.
+
+These are generated-data, same-cluster local rehearsals. They neither migrate original databases nor prove cross-host disaster recovery, publication adaptation, institutional workflows or production readiness. No frontend changed and no new browser or manual screen-reader acceptance is claimed. Full P3b remains partial.

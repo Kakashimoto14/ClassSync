@@ -1,0 +1,1163 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentSchedule.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 700ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 501ms
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 82ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 692ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 72ms
+ × src/pages/StudentSchedule.test.tsx > supports aligned month selection and month navigation across the year boundary 587ms
+   → Unable to find an accessible element with the role "navigation" and name "Month dates"
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"student-page-header"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"student-page-context"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "My Schedule":
+  [36m<h1 />[39m
+
+  --------------------------------------------------
+  group:
+
+  Name "Calendar views":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Calendar views"[39m
+    [33mclass[39m=[32m"student-view-tabs"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"student-schedule-options"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"student-preview-tools"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Day":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+  [36m/>[39m
+
+  Name "Week":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+  [36m/>[39m
+
+  Name "Month":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+  [36m/>[39m
+
+  Name "Previous month":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Previous month"[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  Name "Next month":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Next month"[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  Name "Today":
+  [36m<button[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  Name "Open sample schedule":
+  [36m<button[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  Name "Use local published schedule":
+  [36m<button[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  Name "Choose saved sample":
+  [36m<button[39m
+    [33mclass[39m=[32m"button button--secondary "[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Academic period":
+  [36m<select />[39m
+
+  Name "Calendar view":
+  [36m<select />[39m
+
+  Name "Sample section":
+  [36m<select />[39m
+
+  Name "Saved sample":
+  [36m<select />[39m
+
+  --------------------------------------------------
+  option:
+
+  Name "AY 2026-2027 · 1st Semester — Sample":
+  [36m<option[39m
+    [33mvalue[39m=[32m"p"[39m
+  [36m/>[39m
+
+  Name "Week":
+  [36m<option[39m
+    [33mvalue[39m=[32m"week"[39m
+  [36m/>[39m
+
+  Name "Day":
+  [36m<option[39m
+    [33mvalue[39m=[32m"day"[39m
+  [36m/>[39m
+
+  Name "Month":
+  [36m<option[39m
+    [33mvalue[39m=[32m"month"[39m
+  [36m/>[39m
+
+  Name "BSIT 3A":
+  [36m<option[39m
+    [33mvalue[39m=[32m"syn-bsit-3-A"[39m
+  [36m/>[39m
+
+  Name "Choose a sample":
+  [36m<option[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  navigation:
+
+  Name "Select a day":
+  [36m<nav[39m
+    [33maria-label[39m=[32m"Select a day"[39m
+    [33mclass[39m=[32m"student-week-strip"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "Mon, Oct 26":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Mon, Oct 26"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-26"[39m
+  [36m/>[39m
+
+  Name "Tue, Oct 27":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Tue, Oct 27"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-27"[39m
+  [36m/>[39m
+
+  Name "Wed, Oct 28":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Wed, Oct 28"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-28"[39m
+  [36m/>[39m
+
+  Name "Thu, Oct 29":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Thu, Oct 29"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-29"[39m
+  [36m/>[39m
+
+  Name "Fri, Oct 30":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Fri, Oct 30"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-30"[39m
+  [36m/>[39m
+
+  Name "Sat, Oct 31":
+  [36m<a[39m
+    [33maria-label[39m=[32m"Sat, Oct 31"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-10-31"[39m
+  [36m/>[39m
+
+  Name "Sun, Nov 1":
+  [36m<a[39m
+    [33maria-current[39m=[32m"date"[39m
+    [33maria-label[39m=[32m"Sun, Nov 1"[39m
+    [33mhref[39m=[32m"?period=p&date=2026-11-01"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  [36m<p[39m
+    [33maria-busy[39m=[32m"true"[39m
+    [33mrole[39m=[32m"status"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33mclass[39m=[32m"student-schedule student-home"[39m
+      [33mdata-published-version[39m=[32m"classsync-presentation-v1"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"student-page-header"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"student-page-context"[39m
+          [36m>[39m
+            [0mAY 2026–2027 · 1st Semester[0m
+          [36m</p>[39m
+          [36m<h1>[39m
+            [0mMy Schedule[0m
+          [36m</h1>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Calendar views"[39m
+        [33mclass[39m=[32m"student-view-tabs"[39m
+        [33mrole[39m=[32m"group"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-pressed[39m=[32m"false"[39m
+        [36m>[39m
+          [0mDay[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-pressed[39m=[32m"false"[39m
+        [36m>[39m
+          [0mWeek[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-pressed[39m=[32m"true"[39m
+        [36m>[39m
+          [0mMonth[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"student-calendar-toolbar"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Previous month"[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-chevron-left"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"18"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"18"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m15 18-6-6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+          [36m<strong>[39m
+            [0mNovember 2026[0m
+          [36m</strong>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Next month"[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-chevron-right"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"18"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"18"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 18 6-6-6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"button button--secondary "[39m
+        [36m>[39m
+          [0mToday[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<details[39m
+        [33mclass[39m=[32m"student-schedule-options"[39m
+      [36m>[39m
+        [36m<summary>[39m
+          [0mSchedule options[0m
+        [36m</summary>[39m
+        [36m<label>[39m
+          [0mAcademic period[0m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"p"[39m
+            [36m>[39m
+              [0mAY 2026-2027 · 1st Semester — Sample[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<label>[39m
+          [0mCalendar view[0m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"week"[39m
+            [36m>[39m
+              [0mWeek[0m
+            [36m</option>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"day"[39m
+            [36m>[39m
+              [0mDay[0m
+            [36m</option>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"month"[39m
+            [36m>[39m
+              [0mMonth[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<details[39m
+          [33mclass[39m=[32m"student-preview-tools"[39m
+        [36m>[39m
+          [36m<summary>[39m
+            [0mPreview tools[0m
+          [36m</summary>[39m
+          [36m<label>[39m
+            [0mSample section[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"syn-bsit-3-A"[39m
+              [36m>[39m
+                [0mBSIT 3A[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mOpen sample schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mUse local published schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mChoose saved sample[0m
+          [36m</button>[39m
+          [36m<label>[39m
+            [0mSaved sample[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mChoose a sample[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+        [36m</details>[39m
+      [36m</details>[39m
+      [36m<nav[39m
+        [33maria-label[39m=[32m"Select a day"[39m
+        [33mclass[39m=[32m"student-week-strip"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Mon, Oct 26"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-26"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mMon[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m26[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m2[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Tue, Oct 27"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-27"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mTue[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m27[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m1[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Wed, Oct 28"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-28"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mWed[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m28[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m2[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Thu, Oct 29"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-29"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mThu[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m29[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m1[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Fri, Oct 30"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-30"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mFri[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m30[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m3[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Sat, Oct 31"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-10-31"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mSat[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m31[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m0[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"date"[39m
+          [33maria-label[39m=[32m"Sun, Nov 1"[39m
+          [33mhref[39m=[32m"?period=p&date=2026-11-01"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mSun[0m
+          [36m</span>[39m
+          [36m<strong>[39m
+            [0m1[0m
+          [36m</strong>[39m
+          [36m<small>[39m
+            [0m0[0m
+            [36m<span[39m
+              [33mclass[39m=[32m"student-class-word"[39m
+            [36m>[39m
+              [0m classes[0m
+            [36m</span>[39m
+          [36m</small>[39m
+        [36m</a>[39m
+      [36m</nav>[39m
+      [36m<p[39m
+        [33maria-busy[39m=[32m"true"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [0mLoading your schedule…[0m
+      [36m</p>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  18:43:17
+   Duration  12.54s (transform 1.09s, setup 734ms, import 4.51s, tests 2.64s, environment 3.10s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/StudentSchedule.test.tsx > supports aligned month selection and month navigation across the year boundary
+TestingLibraryElementError: Unable to find an accessible element with the role "navigation" and name "Month dates"
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  <header
+    class="student-page-header"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    class="student-page-context"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "My Schedule":
+  <h1 />
+
+  --------------------------------------------------
+  group:
+
+  Name "Calendar views":
+  <div
+    aria-label="Calendar views"
+    class="student-view-tabs"
+    role="group"
+  />
+
+  Name "":
+  <details
+    class="student-schedule-options"
+  />
+
+  Name "":
+  <details
+    class="student-preview-tools"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Day":
+  <button
+    aria-pressed="false"
+  />
+
+  Name "Week":
+  <button
+    aria-pressed="false"
+  />
+
+  Name "Month":
+  <button
+    aria-pressed="true"
+  />
+
+  Name "Previous month":
+  <button
+    aria-label="Previous month"
+    class="button button--secondary "
+  />
+
+  Name "Next month":
+  <button
+    aria-label="Next month"
+    class="button button--secondary "
+  />
+
+  Name "Today":
+  <button
+    class="button button--secondary "
+  />
+
+  Name "Open sample schedule":
+  <button
+    class="button button--secondary "
+  />
+
+  Name "Use local published schedule":
+  <button
+    class="button button--secondary "
+  />
+
+  Name "Choose saved sample":
+  <button
+    class="button button--secondary "
+  />
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Academic period":
+  <select />
+
+  Name "Calendar view":
+  <select />
+
+  Name "Sample section":
+  <select />
+
+  Name "Saved sample":
+  <select />
+
+  --------------------------------------------------
+  option:
+
+  Name "AY 2026-2027 · 1st Semester — Sample":
+  <option
+    value="p"
+  />
+
+  Name "Week":
+  <option
+    value="week"
+  />
+
+  Name "Day":
+  <option
+    value="day"
+  />
+
+  Name "Month":
+  <option
+    value="month"
+  />
+
+  Name "BSIT 3A":
+  <option
+    value="syn-bsit-3-A"
+  />
+
+  Name "Choose a sample":
+  <option
+    value=""
+  />
+
+  --------------------------------------------------
+  navigation:
+
+  Name "Select a day":
+  <nav
+    aria-label="Select a day"
+    class="student-week-strip"
+  />
+
+  --------------------------------------------------
+  link:
+
+  Name "Mon, Oct 26":
+  <a
+    aria-label="Mon, Oct 26"
+    href="?period=p&date=2026-10-26"
+  />
+
+  Name "Tue, Oct 27":
+  <a
+    aria-label="Tue, Oct 27"
+    href="?period=p&date=2026-10-27"
+  />
+
+  Name "Wed, Oct 28":
+  <a
+    aria-label="Wed, Oct 28"
+    href="?period=p&date=2026-10-28"
+  />
+
+  Name "Thu, Oct 29":
+  <a
+    aria-label="Thu, Oct 29"
+    href="?period=p&date=2026-10-29"
+  />
+
+  Name "Fri, Oct 30":
+  <a
+    aria-label="Fri, Oct 30"
+    href="?period=p&date=2026-10-30"
+  />
+
+  Name "Sat, Oct 31":
+  <a
+    aria-label="Sat, Oct 31"
+    href="?period=p&date=2026-10-31"
+  />
+
+  Name "Sun, Nov 1":
+  <a
+    aria-current="date"
+    aria-label="Sun, Nov 1"
+    href="?period=p&date=2026-11-01"
+  />
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  <p
+    aria-busy="true"
+    role="status"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div>
+    <section
+      class="student-schedule student-home"
+      data-published-version="classsync-presentation-v1"
+    >
+      <header
+        class="student-page-header"
+      >
+        <div>
+          <p
+            class="student-page-context"
+          >
+            AY 2026–2027 · 1st Semester
+          </p>
+          <h1>
+            My Schedule
+          </h1>
+        </div>
+      </header>
+      <div
+        aria-label="Calendar views"
+        class="student-view-tabs"
+        role="group"
+      >
+        <button
+          aria-pressed="false"
+        >
+          Day
+        </button>
+        <button
+          aria-pressed="false"
+        >
+          Week
+        </button>
+        <button
+          aria-pressed="true"
+        >
+          Month
+        </button>
+      </div>
+      <div
+        class="student-calendar-toolbar"
+      >
+        <div>
+          <button
+            aria-label="Previous month"
+            class="button button--secondary "
+          >
+            <svg
+              class="lucide lucide-chevron-left"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m15 18-6-6 6-6"
+              />
+            </svg>
+          </button>
+          <strong>
+            November 2026
+          </strong>
+          <button
+            aria-label="Next month"
+            class="button button--secondary "
+          >
+            <svg
+              class="lucide lucide-chevron-right"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m9 18 6-6-6-6"
+              />
+            </svg>
+          </button>
+        </div>
+        <button
+          class="button button--secondary "
+        >
+          Today
+        </button>
+      </div>
+      <details
+        class="student-schedule-options"
+      >
+        <summary>
+          Schedule options
+        </summary>
+        <label>
+          Academic period
+          <select>
+            <option
+              value="p"
+            >
+              AY 2026-2027 · 1st Semester — Sample
+            </option>
+          </select>
+        </label>
+        <label>
+          Calendar view
+          <select>
+            <option
+              value="week"
+            >
+              Week
+            </option>
+            <option
+              value="day"
+            >
+              Day
+            </option>
+            <option
+              value="month"
+            >
+              Month
+            </option>
+          </select>
+        </label>
+        <details
+          class="student-preview-tools"
+        >
+          <summary>
+            Preview tools
+          </summary>
+          <label>
+            Sample section
+            <select>
+              <option
+                value="syn-bsit-3-A"
+              >
+                BSIT 3A
+              </option>
+            </select>
+          </label>
+          <button
+            class="button button--secondary "
+          >
+            Open sample schedule
+          </button>
+          <button
+            class="button button--secondary "
+          >
+            Use local published schedule
+          </button>
+          <button
+            class="button button--secondary "
+          >
+            Choose saved sample
+          </button>
+          <label>
+            Saved sample
+            <select>
+              <option
+                value=""
+              >
+                Choose a sample
+              </option>
+            </select>
+          </label>
+        </details>
+      </details>
+      <nav
+        aria-label="Select a day"
+        class="student-week-strip"
+      >
+        <a
+          aria-label="Mon, Oct 26"
+          href="?period=p&date=2026-10-26"
+        >
+          <span>
+            Mon
+          </span>
+          <strong>
+            26
+          </strong>
+          <small>
+            2
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-label="Tue, Oct 27"
+          href="?period=p&date=2026-10-27"
+        >
+          <span>
+            Tue
+          </span>
+          <strong>
+            27
+          </strong>
+          <small>
+            1
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-label="Wed, Oct 28"
+          href="?period=p&date=2026-10-28"
+        >
+          <span>
+            Wed
+          </span>
+          <strong>
+            28
+          </strong>
+          <small>
+            2
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-label="Thu, Oct 29"
+          href="?period=p&date=2026-10-29"
+        >
+          <span>
+            Thu
+          </span>
+          <strong>
+            29
+          </strong>
+          <small>
+            1
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-label="Fri, Oct 30"
+          href="?period=p&date=2026-10-30"
+        >
+          <span>
+            Fri
+          </span>
+          <strong>
+            30
+          </strong>
+          <small>
+            3
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-label="Sat, Oct 31"
+          href="?period=p&date=2026-10-31"
+        >
+          <span>
+            Sat
+          </span>
+          <strong>
+            31
+          </strong>
+          <small>
+            0
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+        <a
+          aria-current="date"
+          aria-label="Sun, Nov 1"
+          href="?period=p&date=2026-11-01"
+        >
+          <span>
+            Sun
+          </span>
+          <strong>
+            1
+          </strong>
+          <small>
+            0
+            <span
+              class="student-class-word"
+            >
+               classes
+            </span>
+          </small>
+        </a>
+      </nav>
+      <p
+        aria-busy="true"
+        role="status"
+      >
+        Loading your schedule…
+      </p>
+    </section>
+  </div>
+</body>
+ ❯ Object.getElementError ../../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/StudentSchedule.test.tsx:135:24
+    133|   expect(month.children[10]).toHaveAttribute('aria-label','Thu, Oct 1,…
+    134|   fireEvent.click(screen.getByRole('button', {name:'Next month'}));
+    135|   expect(within(screen.getByRole('navigation', {name:'Month dates'})).…
+       |                        ^
+    136|   fireEvent.click(screen.getByRole('button', {name:'Next month'}));
+    137|   fireEvent.click(screen.getByRole('button', {name:'Next month'}));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

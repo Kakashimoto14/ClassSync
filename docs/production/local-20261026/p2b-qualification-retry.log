@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 186, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 180, in main
+    evidence = qualify(args.bin)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 108, in qualify
+    run("pg_ctl.exe", "-D", root / "data", "-l", root / "server.log", "-w", "-t", "20", "start")
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 77, in run
+    raise RuntimeError(f"{executable} failed: {result.stdout}\n{result.stderr}")
+RuntimeError: pg_ctl.exe failed: 
+pg_ctl: could not create restricted token: error code 87
+pg_ctl: could not start server: error code 3
+

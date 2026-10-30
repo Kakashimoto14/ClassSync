@@ -1,0 +1,194 @@
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+Diagnostic: 40 modules selected
+Queued: src/pages/RoomNavigation.test.tsx
+Collected: src/pages/RoomNavigation.test.tsx
+Started: src/pages/RoomNavigation.test.tsx
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to student without implying verified resources 1771ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to teacher without implying verified resources 849ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to administrator without implying verified resources 765ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'student' detail route 268ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'student' detail route 249ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'student' detail route 217ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'student' detail route 196ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'teacher' detail route 248ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'teacher' detail route 192ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'teacher' detail route 206ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'teacher' detail route 455ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'administrator' detail route 1155ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'administrator' detail route 1558ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'administrator' detail route 1265ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'administrator' detail route 1347ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > filters combined attributes, preserves filtered return, and resets 1824ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > reports invalid capacity rather than matching everything 373ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /student/find-room 1041ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /teacher/room-availability 1005ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /admin/room-availability 1448ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters  158ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=unknown 160ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id= 100ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=room-sci-218&id=room-eng-204 148ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows unknown resource metadata without inventing it 215ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows the actual administrator draft alongside published assignments 304ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > rejects cross-role detail access 12ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > retains the room ID when a refresh requires demo access again 16ms
+Queued: src/pages/PresentationRoutes.test.tsx
+Collected: src/pages/PresentationRoutes.test.tsx
+Started: src/pages/PresentationRoutes.test.tsx
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens the structured Student calendar without legacy published fixtures 2064ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > keeps Student alerts consistent with the dashboard update and provides a working schedule action 413ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only PRRC rooms and returns through the same building 2782ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only New Building rooms and returns through the same building 1681ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only Court rooms and returns through the same building 1280ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters  185ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=missing 185ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=Science+Building&building=Computing+Building 247ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the student-owned date and correct count 393ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the teacher-owned date and correct count 1096ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the administrator-owned date and correct count 1686ms
+Queued: src/routes/NavigationReliability.test.tsx
+Collected: src/routes/NavigationReliability.test.tsx
+Started: src/routes/NavigationReliability.test.tsx
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > student keeps selection through navigation, back, forward, and refresh 3503ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > teacher keeps selection through navigation, back, forward, and refresh 1977ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > administrator keeps selection through navigation, back, forward, and refresh 2183ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > retains the selected role on forbidden navigation and recovers to its workspace 264ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > switches roles only through explicit selection and exit prevents history revival 646ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > preserves a valid direct link with query and hash after explicit matching selection 143ms
+Queued: src/pages/dashboards/OperationsDashboards.test.tsx
+Collected: src/pages/dashboards/OperationsDashboards.test.tsx
+Started: src/pages/dashboards/OperationsDashboards.test.tsx
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > does not claim all attention is cleared when only conflicts are empty 697ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > supports an approved decision without counting it as pending 148ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > links only to registered teacher destinations 158ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > links only to registered administrator destinations 118ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > prioritizes pending requests over more recent decisions and uses stable detail identities 131ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher unavailable state 69ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher unpublished state 100ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher empty state 91ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > preserves Teacher finished state 200ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > retains overlapping Teacher records without repeating them in the agenda 301ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > derives every metric from the full dataset, independently of the selected day 232ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > reports resource conditions without inferring time-window availability 150ms
+ ✓ src/pages/dashboards/OperationsDashboards.test.tsx > UI-02 operations dashboards > distinguishes unavailable resources from an empty operational dataset 110ms
+Queued: src/pages/StructuredCalendarPage.test.tsx
+Collected: src/pages/StructuredCalendarPage.test.tsx
+Started: src/pages/StructuredCalendarPage.test.tsx
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > defaults to a published sample identity and retains context from Home to Schedule 2484ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > uses the chosen faculty identity and never exposes Administrator controls 225ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > shows a recoverable service failure without an empty agenda or invented classes 65ms
+ ✓ src/pages/StructuredCalendarPage.test.tsx > shared role schedule context > never requests a stale entered draft from anonymous review and provides sample recovery 83ms
+Queued: src/pages/SchedulingDraftPages.test.tsx
+Collected: src/pages/SchedulingDraftPages.test.tsx
+Started: src/pages/SchedulingDraftPages.test.tsx
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > generates then saves a server run without submitting assignments or validation claims 646ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > prevents duplicate submissions and waits for confirmed persistence 36ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > shows storage errors and retries with the same idempotency key 39ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > lists and navigates to a saved unpublished draft 102ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > loads a direct link again after remount and filters persisted sessions 163ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > handles empty list and failed detail retrieval with recovery 108ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > never offers a save action for infeasible output 113ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > keeps student out of saved Administrator drafts without fetching data 62ms
+ ✓ src/pages/SchedulingDraftPages.test.tsx > persistent scheduling draft workflow > keeps teacher out of saved Administrator drafts without fetching data 33ms
+Queued: src/components/layout/AppShell.test.tsx
+Collected: src/components/layout/AppShell.test.tsx
+Started: src/components/layout/AppShell.test.tsx
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > discloses preview options and closes them with Escape without changing role 331ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > takes Teacher Rooms directly to the working resource directory 1ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > searches entry pages without offering record details that have no selection 339ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > focuses the destination and returns to its heading after navigation 131ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every student navigation and account link registered and role-owned 71ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every teacher navigation and account link registered and role-owned 81ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every administrator navigation and account link registered and role-owned 132ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > preserves the four Student mobile destinations and closes the secondary drawer after navigation 237ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps generation active and consolidates the calendar alias under Schedule 159ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > uses ordinary accessible links for destination search 255ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > resolves every navigation owner within the route role 17ms
+Queued: src/pages/AcademicManagementPage.test.tsx
+Collected: src/pages/AcademicManagementPage.test.tsx
+Started: src/pages/AcademicManagementPage.test.tsx
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > creates a period with explicit catalog inclusion and keeps the selected period in its URL 1026ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > submits a subject with explicit program ownership and only the selected weekly pattern 585ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > prevents duplicate save clicks and reports persistence failure without a false success 102ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > collects faculty availability and explicit workload limits without inventing time windows 292ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > blocks generation for missing inputs, differentiates warnings and uses saved-period revisions 136ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > uses the stored revision for generation and exposes stale-version recovery 117ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > selects an existing period without setup, prevents duplicate runs and keeps unknown results unsaved 147ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > does not fetch academic data for a student preview 106ms
+ ✓ src/pages/AcademicManagementPage.test.tsx > persisted academic data management > does not fetch academic data for a teacher preview 29ms
+Queued: src/pages/dashboards/Dashboards.test.tsx
+Collected: src/pages/dashboards/Dashboards.test.tsx
+Started: src/pages/dashboards/Dashboards.test.tsx
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > shows the next Student class once and keeps the later agenda role-owned 474ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > opens the Student schedule from the summary action 162ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > does not repeat in-progress or next assignments below the summary 101ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > retains the other simultaneous assignment instead of hiding an overlap 65ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student unavailable state and schedule escape path 43ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student unpublished state and schedule escape path 39ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student empty state and schedule escape path 31ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > preserves the Student finished state and schedule escape path 61ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > limits Teacher schedule, pending counts and links to that role 194ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > keeps administrator counts consistent with displayed attention and schedule records 236ms
+ ✓ src/pages/dashboards/Dashboards.test.tsx > role-specific dashboard compositions > does not interpret missing administrative data as zero conflicts 10ms
+Queued: src/pages/AuthPage.test.tsx
+Collected: src/pages/AuthPage.test.tsx
+Started: src/pages/AuthPage.test.tsx
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid teacher session only to a role-owned destination 391ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid student session only to a role-owned destination 90ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > continues a valid administrator session only to a role-owned destination 104ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > focuses the first invalid field and links its error 372ms
+ ✓ src/pages/AuthPage.test.tsx > honest sign-in entry > reveals the password accessibly and never simulates a successful connection 367ms
+Queued: src/pages/WeeklySchedulingPage.test.tsx
+Collected: src/pages/WeeklySchedulingPage.test.tsx
+Started: src/pages/WeeklySchedulingPage.test.tsx
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > reviews a complete batch and prevents duplicate generation while the request is pending 735ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > does not simulate success when the backend is unavailable 169ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > requires input edits to be applied and validated before running them 158ms
+ ✓ src/pages/WeeklySchedulingPage.test.tsx > real scheduling workspace > labels structured degree sections and custom TCP sections without parsing stable IDs 1ms
+Queued: src/pages/PreviewOperationsViews.test.tsx
+Collected: src/pages/PreviewOperationsViews.test.tsx
+Started: src/pages/PreviewOperationsViews.test.tsx
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > opens the selected declined request, retains its assignment, and returns to the list 750ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > opens the same conflict and assignments shown by the Administrator dashboard 194ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > does not silently substitute another record for an unknown request ID 24ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > does not silently substitute another record for an unknown conflict ID 18ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > keeps teaching dates and rooms consistent, and filters actual records 314ms
+ ✓ src/pages/PreviewOperationsViews.test.tsx > dashboard destination consistency > uses owned assignments for requests without claiming room availability or sending 122ms
+Queued: src/pages/R1Presentation.test.tsx
+Collected: src/pages/R1Presentation.test.tsx
+Started: src/pages/R1Presentation.test.tsx
+ ✓ src/pages/R1Presentation.test.tsx > uses only the reviewed bundled source for stale sessions and hostile connected-source query parameters 262ms
+ ✓ src/pages/R1Presentation.test.tsx > recovers an invalid presentation identity deliberately without substituting private data 352ms
+ ✓ src/pages/R1Presentation.test.tsx > keeps the loaded agenda when selecting another date within the same sample month 340ms
+ ✓ src/pages/R1Presentation.test.tsx > reports only stored conflict validation at export without providing a live validator 52ms
+ ✓ src/pages/R1Presentation.test.tsx > does not offer live occupancy even before a returning role context is persisted 9ms
+Queued: src/components/brand/ClassSyncLogo.test.tsx
+Collected: src/components/brand/ClassSyncLogo.test.tsx
+Started: src/components/brand/ClassSyncLogo.test.tsx
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads horizontal artwork without duplicate visible labels 241ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads full artwork without duplicate visible labels 40ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > loads symbol artwork without duplicate visible labels 27ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken horizontal image with accessible text 37ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken full image with accessible text 25ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > replaces a broken symbol image with accessible text 25ms
+ ✓ src/components/brand/ClassSyncLogo.test.tsx > supplied provisional raster branding > keeps decorative artwork inside a named home link accessible through the link 29ms
+Queued: src/pages/PresentationReadOnlyRoutes.test.tsx
+Collected: src/pages/PresentationReadOnlyRoutes.test.tsx
+Started: src/pages/PresentationReadOnlyRoutes.test.tsx
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/ai-scheduling read-only without API access 189ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/schedule-manager read-only without API access 26ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/schedule-manager/drafts read-only without API access 23ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/academic read-only without API access 27ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > keeps the public presentation route /admin/conflicts read-only without API access 31ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > preserves the teacher presentation context on room availability 97ms
+ ✓ src/pages/PresentationReadOnlyRoutes.test.tsx > preserves the administrator presentation context on room availability 67ms
+Queued: src/pages/AdminSchedulingHome.test.tsx
+Collected: src/pages/AdminSchedulingHome.test.tsx
+Started: src/pages/AdminSchedulingHome.test.tsx
+ ✓ src/pages/AdminSchedulingHome.test.tsx > uses real readiness to lead with generation without claiming publication 463ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > leads blocked periods to requirements rather than a generation promise 116ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > keeps failed backend status recoverable without a fake ready state 90ms
+Queued: src/auth/UniversitySessionPanel.test.tsx
+Collected: src/auth/UniversitySessionPanel.test.tsx
+Started: src/auth/UniversitySessionPanel.test.tsx

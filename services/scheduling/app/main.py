@@ -1,6 +1,8 @@
+from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
 from threading import BoundedSemaphore
+from typing import Literal
 
 import httpx
 from classync_contracts.academic import (
@@ -8,7 +10,9 @@ from classync_contracts.academic import (
     AcademicReadiness,
     AcademicSnapshot,
 )
+from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.models import HealthResponse
+from classync_contracts.request_authorization import install_identity_errors
 from classync_contracts.scheduling import (
     DraftDetail,
     DraftList,
@@ -26,13 +30,16 @@ from classync_contracts.scheduling_security import (
 )
 from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
+from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from .academic_input import academic_readiness
+from .authorization import configured_scheduling
 from .catalog import catalogs, synthetic_scenario
 from .draft_repository import DraftError, DraftRepository, calendar_review_allowed
 from .engine import generate_week
 from .occurrences import occurrences
+from .provider import institutional_repository
 from .publication_api import router as publication_router
 from .readiness import readiness
 from .validation import validate_timetable
@@ -43,13 +50,27 @@ class Settings(SchedulingSecuritySettings):
         env_file=Path(__file__).resolve().parents[3] / ".env", extra="ignore"
     )
     scheduling_database_path: str = "var/scheduling.sqlite3"
+    scheduling_database_url: SecretStr | None = None
+    scheduling_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
     academic_service_url: str = "http://127.0.0.1:8001"
 
 
 settings = Settings()
 generation_slot = BoundedSemaphore(1)
 
-app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(application):
+    with configured_scheduling(application, settings):
+        yield
+
+
+def connected_repository(request, owner):
+    return institutional_repository(request, settings, owner, repository)
+
+
+app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0", lifespan=lifespan)
+install_identity_errors(app)
 app.include_router(publication_router)
 
 
@@ -92,6 +113,22 @@ def review_calendar(draft_id: str, request: Request, start: date, end: date):
 async def draft_error(_: Request, error: DraftError):
     return JSONResponse(
         status_code=error.status, content={"error": {"code": error.code, "message": str(error)}}
+    )
+
+
+@app.exception_handler(MembershipAuthorizationError)
+async def membership_error(_: Request, error: MembershipAuthorizationError):
+    unavailable = error.code == MembershipErrorCode.UNAVAILABLE
+    return JSONResponse(
+        status_code=503 if unavailable else 403,
+        content={
+            "error": {
+                "code": error.code.value,
+                "message": "University access is unavailable"
+                if unavailable
+                else "Current membership required",
+            }
+        },
     )
 
 
@@ -162,16 +199,21 @@ def production_readiness(inputs: GenerationInput, request: Request):
 @app.post("/api/v1/scheduling/generate", response_model=GenerationResult)
 def generate(inputs: GenerationInput, request: Request):
     scope, owner = authorize(request, False)
-    return execute(inputs, scope, owner)
+    return execute(inputs, scope, owner, storage=connected_repository(request, owner))
 
 
-def execute(inputs, scope, owner):
+def execute(inputs, scope, owner, *, storage=None):
+    if storage is None and scope not in {"sandbox", "academic-sandbox"}:
+        raise HTTPException(503, "Scheduling storage is unavailable")
     if not generation_slot.acquire(blocking=False):
         raise HTTPException(503, "A scheduling run is in progress. Try again when it completes.")
     try:
         result = generate_week(inputs)
         if result.solver_status in {"feasible", "optimal"}:
-            repository().remember_run(inputs, result, scope, owner)
+            if storage is None:
+                repository().remember_run(inputs, result, scope, owner)
+            else:
+                storage.remember_run(inputs, result)
         return result
     finally:
         generation_slot.release()
@@ -201,7 +243,7 @@ def save_sandbox_draft(body: SaveDraftRequest, request: Request, response: Respo
 @app.post("/api/v1/scheduling/drafts", response_model=DraftDetail)
 def save_draft(body: SaveDraftRequest, request: Request, response: Response):
     scope, owner = authorize(request, False)
-    draft, created = repository().save(body, scope, owner)
+    draft, created = connected_repository(request, owner).save(body)
     response.status_code = 201 if created else 200
     return draft
 
@@ -219,7 +261,7 @@ def list_drafts(
     request: Request, limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0)
 ):
     scope, owner = authorize(request, False)
-    return repository().list(scope, owner, limit=limit, offset=offset)
+    return connected_repository(request, owner).list(limit=limit, offset=offset)
 
 
 @app.get("/api/v1/scheduling/sandbox/drafts/{draft_id}", response_model=DraftDetail)
@@ -231,7 +273,7 @@ def get_sandbox_draft(draft_id: str, request: Request):
 @app.get("/api/v1/scheduling/drafts/{draft_id}", response_model=DraftDetail)
 def get_draft(draft_id: str, request: Request):
     scope, owner = authorize(request, False)
-    return repository().get(draft_id, scope, owner)
+    return connected_repository(request, owner).get(draft_id)
 
 
 def academic_scope(request, sandbox):
@@ -286,6 +328,7 @@ def protected_academic_readiness(period_id: str, request: Request):
 
 def generate_academic(period_id, body, request, sandbox):
     scope, owner = academic_scope(request, sandbox)
+    storage = None if sandbox else connected_repository(request, owner)
     snapshot = persisted_academic_snapshot(period_id, request, sandbox)
     if snapshot.period.revision != body.expected_revision:
         raise HTTPException(409, "Academic inputs changed. Recheck readiness before generation.")
@@ -294,7 +337,7 @@ def generate_academic(period_id, body, request, sandbox):
         raise HTTPException(
             422, {"code": "academic_not_ready", "issues": [i.model_dump() for i in checked.issues]}
         )
-    return execute(checked.inputs, scope, owner)
+    return execute(checked.inputs, scope, owner, storage=storage)
 
 
 @app.post(

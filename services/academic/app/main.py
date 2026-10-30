@@ -1,4 +1,6 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Literal
 
 from classync_contracts.academic import (
     AcademicPeriodList,
@@ -7,7 +9,9 @@ from classync_contracts.academic import (
     PeriodCreate,
     RecordWrite,
 )
+from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.models import HealthResponse
+from classync_contracts.request_authorization import install_identity_errors
 from classync_contracts.scheduling_security import (
     SchedulingSecuritySettings,
     require_administrator,
@@ -15,9 +19,12 @@ from classync_contracts.scheduling_security import (
 )
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
 
+from .authorization import configured_academic
 from .fixtures import FixtureRequest, import_fixture
+from .provider import institutional_repository
 from .repository import AcademicError, AcademicRepository
 
 
@@ -26,6 +33,8 @@ class Settings(SchedulingSecuritySettings):
         env_file=Path(__file__).resolve().parents[3] / ".env", extra="ignore"
     )
     academic_database_path: str = "var/academic.sqlite3"
+    academic_database_url: SecretStr | None = None
+    academic_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
 
 
 settings = Settings()
@@ -50,7 +59,18 @@ def authorize(request, sandbox):
     return "administrator", claims["uid"]
 
 
-app = FastAPI(title="ClassSync Academic Service", version="1.0.0")
+@asynccontextmanager
+async def lifespan(application):
+    with configured_academic(application, settings):
+        yield
+
+
+def connected_repository(request, owner):
+    return institutional_repository(request, settings, owner, repository)
+
+
+app = FastAPI(title="ClassSync Academic Service", version="1.0.0", lifespan=lifespan)
+install_identity_errors(app)
 
 
 @app.post("/api/v1/academic/sandbox/fixtures", response_model=AcademicSnapshot)
@@ -63,6 +83,22 @@ def seed_fixture(body: FixtureRequest, request: Request):
 async def academic_error(_: Request, error: AcademicError):
     return JSONResponse(
         status_code=error.status, content={"error": {"code": error.code, "message": str(error)}}
+    )
+
+
+@app.exception_handler(MembershipAuthorizationError)
+async def membership_error(_: Request, error: MembershipAuthorizationError):
+    unavailable = error.code == MembershipErrorCode.UNAVAILABLE
+    return JSONResponse(
+        status_code=503 if unavailable else 403,
+        content={
+            "error": {
+                "code": error.code.value,
+                "message": "University access is unavailable"
+                if unavailable
+                else "Current membership required",
+            }
+        },
     )
 
 
@@ -80,7 +116,7 @@ def sandbox_periods(request: Request):
 @app.get("/api/v1/academic/periods", response_model=AcademicPeriodList)
 def periods(request: Request):
     scope, owner = authorize(request, False)
-    return AcademicPeriodList(periods=repository().periods(scope, owner))
+    return AcademicPeriodList(periods=connected_repository(request, owner).periods())
 
 
 @app.post("/api/v1/academic/sandbox/periods", response_model=AcademicSnapshot, status_code=201)
@@ -92,7 +128,7 @@ def sandbox_create(body: PeriodCreate, request: Request):
 @app.post("/api/v1/academic/periods", response_model=AcademicSnapshot, status_code=201)
 def create(body: PeriodCreate, request: Request):
     scope, owner = authorize(request, False)
-    return repository().create_period(body, scope, owner)
+    return connected_repository(request, owner).create_period(body)
 
 
 @app.get("/api/v1/academic/sandbox/periods/{period_id}", response_model=AcademicSnapshot)
@@ -104,7 +140,7 @@ def sandbox_snapshot(period_id: str, request: Request):
 @app.get("/api/v1/academic/periods/{period_id}", response_model=AcademicSnapshot)
 def snapshot(period_id: str, request: Request):
     scope, owner = authorize(request, False)
-    return repository().snapshot(scope, owner, period_id)
+    return connected_repository(request, owner).snapshot(period_id)
 
 
 @app.put(
@@ -122,7 +158,7 @@ def sandbox_save(period_id: str, kind: str, record_id: str, body: RecordWrite, r
 )
 def save(period_id: str, kind: str, record_id: str, body: RecordWrite, request: Request):
     scope, owner = authorize(request, False)
-    return repository().save(scope, owner, period_id, kind, record_id, body)
+    return connected_repository(request, owner).save(period_id, kind, record_id, body)
 
 
 @app.put("/api/v1/academic/sandbox/periods/{period_id}/calendar")
@@ -134,4 +170,4 @@ def sandbox_calendar_write(period_id: str, body: CalendarWrite, request: Request
 @app.put("/api/v1/academic/periods/{period_id}/calendar")
 def calendar_write(period_id: str, body: CalendarWrite, request: Request):
     scope, owner = authorize(request, False)
-    return repository().save_calendar(scope, owner, period_id, body)
+    return connected_repository(request, owner).save_calendar(period_id, body)

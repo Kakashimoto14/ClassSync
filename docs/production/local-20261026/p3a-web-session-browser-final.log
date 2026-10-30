@@ -1,0 +1,25 @@
+Owned Auth Emulator root: C:\Users\lenovo\AppData\Local\Temp\classsync-auth-run-1e51f7090ed846d0b53427cacfcff9ac
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-6af563ec15784ced92ee694a100b7bbb
+Horizontal overflow
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 220, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 214, in main
+    evidence = qualify(args.bin, lambda connection: exercise(connection, root, marker))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 214, in <lambda>
+    evidence = qualify(args.bin, lambda connection: exercise(connection, root, marker))
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 192, in exercise
+    require(result.returncode == 0, "Actual browser session qualification failed")
+  File "C:\Projects\ClassSync\scripts\postgres_driver_qualification.py", line 17, in require
+    raise RuntimeError(description)
+RuntimeError: Actual browser session qualification failed
+Owned PostgreSQL/emulator qualification failed

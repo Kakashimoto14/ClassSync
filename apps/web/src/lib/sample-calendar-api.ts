@@ -1,8 +1,10 @@
 import { env } from './env';
+import { requireLiveCapability } from '../config/runtime-config';
 import type { CalendarData } from './calendar-model';
 
 export type CalendarSample = { id: string; title: string; period_id?: string };
 async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
+  requireLiveCapability();
   const response = await fetch(`${env.apiBaseUrl}/scheduling/sandbox/${path}`, { signal }).catch(
     (error) => {
       if (error.name === 'AbortError') throw error;

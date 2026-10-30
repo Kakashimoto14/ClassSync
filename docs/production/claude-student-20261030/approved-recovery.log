@@ -1,0 +1,17 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/config/institutional-routes.test.tsx -t opens only the verified Student workspace and ignores a conflicting preview persona
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ↓ src/config/institutional-routes.test.tsx > rejects stored/client-selected student as an institutional identity
+ ↓ src/config/institutional-routes.test.tsx > rejects stored/client-selected teacher as an institutional identity
+ ↓ src/config/institutional-routes.test.tsx > rejects stored/client-selected administrator as an institutional identity
+ ✓ src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona 561ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  18:35:28
+   Duration  82.87s (transform 2.98s, setup 9.22s, import 48.58s, tests 568ms, environment 22.15s)
+

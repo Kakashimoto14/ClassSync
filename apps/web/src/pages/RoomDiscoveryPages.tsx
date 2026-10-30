@@ -119,6 +119,11 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
           {inventorySource === 'demo' ? 'demo rooms' : 'spaces'}
         </p>
       </div>
+      {definition.role === 'student' && (
+        <Link className="text-action" to="/student/rooms?schedule=1">
+          Rooms on my schedule
+        </Link>
+      )}
       <div className="discovery-results">
         {shown.map((room) => (
           <RoomDirectoryCard
@@ -171,7 +176,8 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
 export function RoomDetailPage({ role }: { role: UserRole }) {
   const [query] = useSearchParams();
   if (
-    (schedulingSandboxEnabled || (presentationEnabled && readWorkspace(role).mode === 'presentation')) &&
+    (schedulingSandboxEnabled ||
+      (presentationEnabled && readWorkspace(role).mode === 'presentation')) &&
     query.getAll('id').length === 1 &&
     query.get('id')?.startsWith('synthetic-room-')
   )

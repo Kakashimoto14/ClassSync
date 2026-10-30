@@ -1,0 +1,114 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_ test_checksum_consistent_summary_corruption_is_not_reported_as_valid[session_count] _
+
+field = 'session_count'
+
+    @pytest.mark.parametrize("field", [
+        "session_count", "offerings_scheduled", "allocated_minutes", "required_minutes", "validation",
+    ])
+    def test_checksum_consistent_summary_corruption_is_not_reported_as_valid(field):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if field == "validation":
+            payload["draft"]["validation"]["valid"] = False
+        else:
+            payload["draft"][field] += 1
+        row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_snapshot_integrity.py:24: Failed
+_ test_checksum_consistent_summary_corruption_is_not_reported_as_valid[offerings_scheduled] _
+
+field = 'offerings_scheduled'
+
+    @pytest.mark.parametrize("field", [
+        "session_count", "offerings_scheduled", "allocated_minutes", "required_minutes", "validation",
+    ])
+    def test_checksum_consistent_summary_corruption_is_not_reported_as_valid(field):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if field == "validation":
+            payload["draft"]["validation"]["valid"] = False
+        else:
+            payload["draft"][field] += 1
+        row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_snapshot_integrity.py:24: Failed
+_ test_checksum_consistent_summary_corruption_is_not_reported_as_valid[allocated_minutes] _
+
+field = 'allocated_minutes'
+
+    @pytest.mark.parametrize("field", [
+        "session_count", "offerings_scheduled", "allocated_minutes", "required_minutes", "validation",
+    ])
+    def test_checksum_consistent_summary_corruption_is_not_reported_as_valid(field):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if field == "validation":
+            payload["draft"]["validation"]["valid"] = False
+        else:
+            payload["draft"][field] += 1
+        row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_snapshot_integrity.py:24: Failed
+_ test_checksum_consistent_summary_corruption_is_not_reported_as_valid[required_minutes] _
+
+field = 'required_minutes'
+
+    @pytest.mark.parametrize("field", [
+        "session_count", "offerings_scheduled", "allocated_minutes", "required_minutes", "validation",
+    ])
+    def test_checksum_consistent_summary_corruption_is_not_reported_as_valid(field):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if field == "validation":
+            payload["draft"]["validation"]["valid"] = False
+        else:
+            payload["draft"][field] += 1
+        row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_snapshot_integrity.py:24: Failed
+_ test_checksum_consistent_summary_corruption_is_not_reported_as_valid[validation] _
+
+field = 'validation'
+
+    @pytest.mark.parametrize("field", [
+        "session_count", "offerings_scheduled", "allocated_minutes", "required_minutes", "validation",
+    ])
+    def test_checksum_consistent_summary_corruption_is_not_reported_as_valid(field):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if field == "validation":
+            payload["draft"]["validation"]["valid"] = False
+        else:
+            payload["draft"][field] += 1
+        row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_snapshot_integrity.py:24: Failed
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_publication_snapshot_integrity.py::test_checksum_consistent_summary_corruption_is_not_reported_as_valid[session_count]
+FAILED services/scheduling/tests/test_publication_snapshot_integrity.py::test_checksum_consistent_summary_corruption_is_not_reported_as_valid[offerings_scheduled]
+FAILED services/scheduling/tests/test_publication_snapshot_integrity.py::test_checksum_consistent_summary_corruption_is_not_reported_as_valid[allocated_minutes]
+FAILED services/scheduling/tests/test_publication_snapshot_integrity.py::test_checksum_consistent_summary_corruption_is_not_reported_as_valid[required_minutes]
+FAILED services/scheduling/tests/test_publication_snapshot_integrity.py::test_checksum_consistent_summary_corruption_is_not_reported_as_valid[validation]
+5 failed in 0.70s

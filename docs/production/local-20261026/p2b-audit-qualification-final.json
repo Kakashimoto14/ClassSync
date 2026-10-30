@@ -1,0 +1,138 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-d4c9e65729ff49d2a152c14352881fe5",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-d4c9e65729ff49d2a152c14352881fe5/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-d4c9e65729ff49d2a152c14352881fe5^\\data^\" -l logfile start",
+  "port": 56376,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-d4c9e65729ff49d2a152c14352881fe5/data",
+    "user": "classsync_qa_34dbe63ab9e046ea8013bec1ccc9635b",
+    "port": 56376,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "revision": {
+      "restore": {
+        "identity": {
+          "transactional_migration_rollback": true,
+          "upgrade_downgrade_upgrade": true,
+          "constraint_cases": [
+            "duplicate identity",
+            "missing person",
+            "cross tenant student",
+            "mismatched person",
+            "unknown grant",
+            "empty grants",
+            "duplicate grants",
+            "null grant",
+            "invalid state",
+            "nonpositive revision",
+            "missing student binding",
+            "missing faculty binding",
+            "blank uid"
+          ],
+          "force_rls_all_tables": true,
+          "tenant_uid_project_isolation": true,
+          "record_binding": true,
+          "fresh_revocation": true,
+          "runtime_authority_writes_denied": true,
+          "database_failure_unavailable": true,
+          "second_uid_administrator": true,
+          "pooled_context_reset": true
+        },
+        "archive": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-d4c9e65729ff49d2a152c14352881fe5\\identity-0a4f5eee2cdb486096415a889067507c.dump",
+        "archive_sha256": "b2b69ac10749416a6a4f6b6e796579f1de757624583f280e043553b5640063c6",
+        "source_database": "postgres",
+        "restored_database": "classsync_restore_bfd2b2d5e0294120848f68c79d668150",
+        "source_fingerprint": {
+          "data": "e7f1e01a414a7ed5117a0d98f592e7dfee5720896dee06b09dffd517d0d327c3",
+          "catalog": "b022968e705d7e9157e3abb62267e47acb5407865af75a788c99101cf7a031d5",
+          "catalog_parts": {
+            "migration_revision": "5f0ee9d9c97e460eab3df4cdcdd8943e46ae07b62bfc331ab6de074621cef3d3",
+            "schema": "debf587b8093a9ee5e3e7c30f08cf5b9280f26a737ca3c7cf81f6c537ef7fbb7",
+            "schema_acl": "ef5d4d0b1be6849b21ccecab480bde7cf6bff10b7d8f65cb7d1d31e3253c1b72",
+            "columns": "edaf56762709e56cd332772bfed0f7b96f95ec346a10687b5fd60198d5ba7822",
+            "constraints": "b8c8335cb6f716e134bb214e1362858269faf7ef0ffb33a28f24ef6d0c77e244",
+            "tables": "8ceef1efe95353fae6892bfa35ea5d5d54960a0cb48f9376e53ee4ffa999a5e2",
+            "indexes": "9f5c6e6f34decef583ecd803d66931db0a4e347aa57973a65f075bd9c674b7fb",
+            "table_acl": "5d6c60651a98097eb0cf1d8a349b1d0a6b3051a675616d0ab3028957ff837066",
+            "functions": "0b6909920fab19d92516c37b895bb840b2c77c98747baa295f2213e75bb047ea",
+            "function_acl": "e383acf42e1f158b6340a9115405969b34ae369213f30243de5dd75778bedd38",
+            "triggers": "45b9410cb34f3e9e8f8cb0452c90b465df0631628c84265cef2be622822b63d6",
+            "policies": "4c06f1975accdc7a2834b1d035e7ae9f7cb99ff1556d5ce86c7a4276d32633b5",
+            "grants": "ebd2b5df6156ce3019c070904f06ef967fad215c2f2e48163935eea44c423046"
+          },
+          "rows": {
+            "tenants": 2,
+            "people": 3,
+            "students": 2,
+            "faculty": 2,
+            "memberships": 3,
+            "membership_audit": 4
+          }
+        },
+        "restored_fingerprint": {
+          "data": "e7f1e01a414a7ed5117a0d98f592e7dfee5720896dee06b09dffd517d0d327c3",
+          "catalog": "b022968e705d7e9157e3abb62267e47acb5407865af75a788c99101cf7a031d5",
+          "catalog_parts": {
+            "migration_revision": "5f0ee9d9c97e460eab3df4cdcdd8943e46ae07b62bfc331ab6de074621cef3d3",
+            "schema": "debf587b8093a9ee5e3e7c30f08cf5b9280f26a737ca3c7cf81f6c537ef7fbb7",
+            "schema_acl": "ef5d4d0b1be6849b21ccecab480bde7cf6bff10b7d8f65cb7d1d31e3253c1b72",
+            "columns": "edaf56762709e56cd332772bfed0f7b96f95ec346a10687b5fd60198d5ba7822",
+            "constraints": "b8c8335cb6f716e134bb214e1362858269faf7ef0ffb33a28f24ef6d0c77e244",
+            "tables": "8ceef1efe95353fae6892bfa35ea5d5d54960a0cb48f9376e53ee4ffa999a5e2",
+            "indexes": "9f5c6e6f34decef583ecd803d66931db0a4e347aa57973a65f075bd9c674b7fb",
+            "table_acl": "5d6c60651a98097eb0cf1d8a349b1d0a6b3051a675616d0ab3028957ff837066",
+            "functions": "0b6909920fab19d92516c37b895bb840b2c77c98747baa295f2213e75bb047ea",
+            "function_acl": "e383acf42e1f158b6340a9115405969b34ae369213f30243de5dd75778bedd38",
+            "triggers": "45b9410cb34f3e9e8f8cb0452c90b465df0631628c84265cef2be622822b63d6",
+            "policies": "4c06f1975accdc7a2834b1d035e7ae9f7cb99ff1556d5ce86c7a4276d32633b5",
+            "grants": "ebd2b5df6156ce3019c070904f06ef967fad215c2f2e48163935eea44c423046"
+          },
+          "rows": {
+            "tenants": 2,
+            "people": 3,
+            "students": 2,
+            "faculty": 2,
+            "memberships": 3,
+            "membership_audit": 4
+          }
+        },
+        "restored_rls_and_membership": true,
+        "privilege_drift_detected": true,
+        "restored_revision_guard": true,
+        "restored_audit_immutable": true,
+        "source_unchanged": true
+      },
+      "competing_lock_observed": true,
+      "stale_writer_conflict": true,
+      "rollback_preserved_revision": true,
+      "tenant_uid_mutation_denied": true,
+      "database_revision_guard": true,
+      "winner_state": "inactive",
+      "winner_revision": 3
+    },
+    "atomic_grant_revocation_audit": true,
+    "audit_failure_rolls_back_membership": true,
+    "immutable_history": true,
+    "definer_force_rls_without_context": true,
+    "maintenance_cannot_forge_audit": true,
+    "actor_pool_reset": true,
+    "second_uid_administrator": true,
+    "inactive_denied": true,
+    "missing_database_unavailable": true,
+    "connection_loss_unavailable": true,
+    "recovered_current_revocation": true,
+    "audit_revisions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "server_state": "stopped"
+}

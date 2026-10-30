@@ -1,0 +1,29 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+Error: spawnSync C:\Program Files\nodejs\node.exe ETIMEDOUT
+    at Object.spawnSync (node:internal/child_process:1120:20)
+    at spawnSync (node:child_process:902:24)
+    at Object.<anonymous> (C:\Projects\ClassSync\scripts\test-web.cjs:7:16)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'spawnSync C:\\Program Files\\nodejs\\node.exe',
+  path: 'C:\\Program Files\\nodejs\\node.exe',
+  spawnargs: [
+    'C:\\Projects\\ClassSync\\node_modules\\vitest\\vitest.mjs',
+    'run',
+    '--pool=threads',
+    '--reporter=verbose'
+  ]
+}

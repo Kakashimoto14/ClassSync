@@ -1,0 +1,21 @@
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-6a093623a9c74c60bceca7f143da504a
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 205, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 198, in main
+    evidence = qualify(args.bin)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 128, in qualify
+    run("pg_ctl.exe", "-D", root / "data", "-l", root / "server.log", "-w", "-t", "20", "start")
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 87, in run
+    result = subprocess.run(
+             ^^^^^^^^^^^^^^^
+  File "C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py", line 1630, in _communicate
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '['C:\\Program Files\\PostgreSQL\\18\\bin\\pg_ctl.exe', '-D', 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-6a093623a9c74c60bceca7f143da504a\\data', '-l', 'C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-6a093623a9c74c60bceca7f143da504a\\server.log', '-w', '-t', '20', 'start']' timed out after 45 seconds

@@ -1,0 +1,12 @@
+E501 Line too long (102 > 100)
+  --> scripts\postgres_academic_period_qualification.py:54:101
+   |
+52 |         created = store.create_for(admin, title=title)
+53 |         other_created = store.create_for(other_admin, title="Other owner's synthetic period")
+54 |         require(store.list_for(other_admin) == [other_created], "Other admin read first owner's data")
+   |                                                                                                     ^^
+55 |         require(created.title == title and created.revision == 1 and created.calendar is None,
+56 |                 "Committed metadata contract mismatch")
+   |
+
+Found 1 error.

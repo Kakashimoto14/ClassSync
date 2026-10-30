@@ -1,0 +1,31 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/auth/university-session.test.ts
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/auth/university-session.test.ts > current university session authority > observes signed-out then verifies identity without decoding tokens 14ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears membership before role verification and shows server role denial 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > cannot revive the previous UID after a later identity callback 7ms
+ ✓ src/auth/university-session.test.ts > current university session authority > blocks late authorization after offline, signout or disposal 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps logout failure cleared despite further SDK events or refresh 1ms
+ ✓ src/auth/university-session.test.ts > current university session authority > bounds stalled token/lookup work and ignores its late completion 10ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps offline events cleared until online revalidation succeeds 1ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears current authority on SDK observer failure 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > keeps only the authorized role record and rejects client role mismatch 2ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership null 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"another","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"","role":"student","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"superadmin","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":0} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1.1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":"1"} 0ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  18:48:48
+   Duration  7.42s (transform 333ms, setup 374ms, import 136ms, tests 48ms, environment 2ms)
+

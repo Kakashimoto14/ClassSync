@@ -1,0 +1,7 @@
+
+> @classync/web@0.1.0 test
+> vitest run --pool=threads --maxWorkers=1
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+

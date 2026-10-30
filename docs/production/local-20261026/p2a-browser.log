@@ -1,0 +1,14 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'Scheduling overview'
+- 'Choose your workspace'
+
+    at C:\Projects\ClassSync\docs\production\local-20261026\p2a-browser-check.cjs:36:16 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'Scheduling overview',
+  expected: 'Choose your workspace',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

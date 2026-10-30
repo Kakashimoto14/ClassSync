@@ -1,0 +1,276 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-5853b857fda5473d928edef87aa4c86f",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-5853b857fda5473d928edef87aa4c86f/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-5853b857fda5473d928edef87aa4c86f^\\data^\" -l logfile start",
+  "port": 50137,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-5853b857fda5473d928edef87aa4c86f/data",
+    "user": "classsync_qa_3ff2ceb319314192b5c034bd3b263c34",
+    "port": 50137,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "migration": "0011_publication_policy_cycle",
+    "actual_solver_statuses": [
+      "optimal",
+      "optimal"
+    ],
+    "ready_generated_academic_drafts": true,
+    "privileged_migration_rejected_transactionally": true,
+    "direct_authority_helper": {
+      "denied_contexts": [
+        "no_context",
+        "student",
+        "teacher",
+        "missing_uid",
+        "wrong_tenant",
+        "wrong_project"
+      ],
+      "valid_admin_control": true,
+      "denied_contexts_take_no_authority_row_locks": true,
+      "nonprivileged_noargs_fixed_path_definer": true,
+      "public_and_runtime_function_acl_checked": true,
+      "identity_and_audit_unchanged": true
+    },
+    "fixture_same_period_uuid_only_controlled": true,
+    "review_no_write": true,
+    "publish_one_two_original_receipt": true,
+    "history_admin_projection_reconnect_exact": true,
+    "two_active_admin_same_period_owner_denied": true,
+    "strict_key_stale_duplicate_denials": true,
+    "negative_roles_tenant_project": true,
+    "concurrent_publication": {
+      "observed_waiters": 2,
+      "winner_revision": 3,
+      "loser": {
+        "status": 409,
+        "code": "publication_version_conflict"
+      }
+    },
+    "restrictions": {
+      "revision_one_two_exact_audits": true,
+      "utc_midnight_interval": true,
+      "overlapping_published_event_denied": true
+    },
+    "postgres_provider_projection": {
+      "calendar_period_room_occupancy": true,
+      "current_student_and_teacher_record_scopes": true,
+      "unauthorized_role_projection_denied": true,
+      "persisted_student_enrollment_before_generation": true,
+      "other_section_and_unassigned_denial": true,
+      "revoked_student_calendar_denied": true
+    },
+    "observed_restriction_publication_writer_orders": [
+      {
+        "first_writer": "publication",
+        "observed_lock_waiters": 1,
+        "publication_revision": 4,
+        "restriction_revision": 4,
+        "both_real_writers_committed_once": true,
+        "immutable_history_and_audit_prefix_unchanged": true
+      },
+      {
+        "first_writer": "restriction",
+        "observed_lock_waiters": 1,
+        "publication_revision": 5,
+        "restriction_revision": 5,
+        "both_real_writers_committed_once": true,
+        "immutable_history_and_audit_prefix_unchanged": true
+      }
+    ],
+    "audit_failure_recovery": {
+      "forced_after_trigger_failure_rolls_back_all_state": true,
+      "named_generated_constraint_removed": true,
+      "recovery_revision_three_once": true
+    },
+    "actual_cross_period_conflict": {
+      "solver_status": "optimal",
+      "actual_shared_resource_negative": "publication_workload",
+      "outside_saved_semester_denied": true
+    },
+    "runtime_privilege_negatives": {
+      "identity_update_and_audit_insert_denied": true,
+      "audit_immutable": true
+    },
+    "actual_corruption": {
+      "checksum_consistent_raw_generated_version": "f015b6e4-29f8-4d7c-a78c-edb8a2954042",
+      "history_projection_replay_all_typed409": true,
+      "intentional_generated_corrupt_version_left_until_cluster_stop": true
+    },
+    "authority_row_locks": {
+      "membership_revocation": {
+        "observed_waiters": 1,
+        "mutation_denied_after_commit": true
+      },
+      "tenant_project": {
+        "observed_waiters": 1,
+        "mutation_denied_after_commit": true
+      }
+    },
+    "outages": {
+      "membership_and_publication_select_outage": true,
+      "actual_five_connection_pool": true,
+      "authority_helper_execute_outage": true
+    },
+    "academic_period_lock": {
+      "observed_waiters": 1,
+      "generated_revision_advanced_after_release": true
+    },
+    "migration_rollback_rehearsal": {
+      "upgrade_downgrade_upgrade": true,
+      "preserved_tables": [
+        "solver_runs",
+        "drafts",
+        "published_versions",
+        "publication_heads"
+      ],
+      "preserved_table_sha256": {
+        "solver_runs": "df6413ec4553991ae96b44c7ee62a021b60de1c4b8a4fb423ee9c305350b26ec",
+        "drafts": "4ab4f467a5666709eb9b153de297f761df1fc972f3e1fa6f6e8f3f05e2a84e52",
+        "published_versions": "7d1c1783dd560f5d67db939fd60c9dd3eb04e1ece03d06993d1957a478d2ec56",
+        "publication_heads": "286c4201cf06d92b8bd842fa613dea50dfd2e016cb4b3220ff7c6c83641d73bc"
+      },
+      "restriction_rows_removed_only_by_disposable_0008_rollback": true,
+      "record_projection_policy_restored_by_0009_reapply": true,
+      "history_and_exact_replay_after_reupgrade": true,
+      "restriction_insert_update_and_audit_after_reupgrade": true
+    },
+    "publication_policy_cycle": {
+      "old_runtime_insert_returning_42P17": true,
+      "forward_upgrade_rewrite_pass": true,
+      "before_pg_policy": [
+        {
+          "relname": "publication_heads",
+          "polname": "publication_head_advance",
+          "polcmd": "w",
+          "using_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (owner_uid = current_setting('classsync.uid'::text, true)))",
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision) AND (v.owner_uid = publication_heads.owner_uid) AND (v.owner_uid = current_setting('classsync.uid'::text, true))))))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "publication_heads",
+          "polname": "publication_head_create",
+          "polcmd": "a",
+          "using_expression": null,
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision) AND (v.owner_uid = publication_heads.owner_uid) AND (v.owner_uid = current_setting('classsync.uid'::text, true))))))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "publication_heads",
+          "polname": "publication_read",
+          "polcmd": "r",
+          "using_expression": "(((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)))))) OR (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision)))))",
+          "check_expression": null,
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "published_versions",
+          "polname": "publication_create",
+          "polcmd": "a",
+          "using_expression": null,
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (owner_uid = current_setting('classsync.uid'::text, true)) AND (((revision = 1) AND (NOT (EXISTS ( SELECT 1\n   FROM classsync_scheduling.publication_heads h\n  WHERE ((h.tenant_id = published_versions.tenant_id) AND (h.dataset = published_versions.dataset) AND (h.period_id = published_versions.period_id)))))) OR (EXISTS ( SELECT 1\n   FROM classsync_scheduling.publication_heads h\n  WHERE ((h.tenant_id = published_versions.tenant_id) AND (h.dataset = published_versions.dataset) AND (h.period_id = published_versions.period_id) AND (h.owner_uid = current_setting('classsync.uid'::text, true)) AND (h.revision = (published_versions.revision - 1)))))))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "published_versions",
+          "polname": "publication_read",
+          "polcmd": "r",
+          "using_expression": "(((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)))))) OR ((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)) AND (((current_setting('classsync.role'::text, true) = 'student'::text) AND ('student'::text = ANY (m.roles)) AND (m.student_id = current_setting('classsync.record_id'::text, true)) AND jsonb_path_exists((published_versions.payload)::jsonb, '$.\"draft\".\"input_snapshot\".\"enrollments\"[*]?(@.\"student_id\" == $\"record\")'::jsonpath, jsonb_build_object('record', to_jsonb(m.student_id)))) OR ((current_setting('classsync.role'::text, true) = 'teacher'::text) AND ('teacher'::text = ANY (m.roles)) AND (m.faculty_id = current_setting('classsync.record_id'::text, true)) AND jsonb_path_exists((published_versions.payload)::jsonb, '$.\"draft\".\"generation_result\".\"assignments\"[*]?(@.\"teacher_id\" == $\"record\")'::jsonpath, jsonb_build_object('record', to_jsonb(m.faculty_id))))))))))",
+          "check_expression": null,
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ],
+      "after_pg_policy": [
+        {
+          "relname": "publication_heads",
+          "polname": "publication_head_advance",
+          "polcmd": "w",
+          "using_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (owner_uid = current_setting('classsync.uid'::text, true)))",
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision) AND (v.owner_uid = publication_heads.owner_uid) AND (v.owner_uid = current_setting('classsync.uid'::text, true))))))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "publication_heads",
+          "polname": "publication_head_create",
+          "polcmd": "a",
+          "using_expression": null,
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision) AND (v.owner_uid = publication_heads.owner_uid) AND (v.owner_uid = current_setting('classsync.uid'::text, true))))))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "publication_heads",
+          "polname": "publication_read",
+          "polcmd": "r",
+          "using_expression": "(((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)))))) OR (EXISTS ( SELECT 1\n   FROM classsync_scheduling.published_versions v\n  WHERE ((v.tenant_id = publication_heads.tenant_id) AND (v.dataset = publication_heads.dataset) AND (v.period_id = publication_heads.period_id) AND (v.revision = publication_heads.revision)))))",
+          "check_expression": null,
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "published_versions",
+          "polname": "publication_create",
+          "polcmd": "a",
+          "using_expression": null,
+          "check_expression": "((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true))))) AND (owner_uid = current_setting('classsync.uid'::text, true)))",
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "published_versions",
+          "polname": "publication_read",
+          "polcmd": "r",
+          "using_expression": "(((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND ('administrator'::text = ANY (m.roles)) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)))))) OR ((tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (EXISTS ( SELECT 1\n   FROM (classsync_identity.memberships m\n     JOIN classsync_identity.tenants t ON ((t.id = m.tenant_id)))\n  WHERE ((m.tenant_id = current_setting('classsync.tenant_id'::text, true)) AND (m.uid = current_setting('classsync.uid'::text, true)) AND (m.state = 'active'::text) AND (t.firebase_project_id = current_setting('classsync.project_id'::text, true)) AND (((current_setting('classsync.role'::text, true) = 'student'::text) AND ('student'::text = ANY (m.roles)) AND (m.student_id = current_setting('classsync.record_id'::text, true)) AND jsonb_path_exists((published_versions.payload)::jsonb, '$.\"draft\".\"input_snapshot\".\"enrollments\"[*]?(@.\"student_id\" == $\"record\")'::jsonpath, jsonb_build_object('record', to_jsonb(m.student_id)))) OR ((current_setting('classsync.role'::text, true) = 'teacher'::text) AND ('teacher'::text = ANY (m.roles)) AND (m.faculty_id = current_setting('classsync.record_id'::text, true)) AND jsonb_path_exists((published_versions.payload)::jsonb, '$.\"draft\".\"generation_result\".\"assignments\"[*]?(@.\"teacher_id\" == $\"record\")'::jsonpath, jsonb_build_object('record', to_jsonb(m.faculty_id))))))))))",
+          "check_expression": null,
+          "owner": "classsync_migrator_a9ca69aa838f474e96bbc086b6e6e1ef",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ],
+      "real_insert_commit_and_projections": "asserted by subsequent repository probes"
+    },
+    "direct_publication_read_denials": {
+      "direct_versions_and_heads_denied_contexts": 7
+    },
+    "legacy_publication_archive": {
+      "generated_sqlite_source_fingerprint": "9192ed00490ec9a3eb0a6000163a922071ceea1046c01c66d74082e9659048ff",
+      "opaque_request_hash_and_payload_preserved": true,
+      "archive_not_active_publication": true,
+      "exact_replay_idempotent": true,
+      "conflicting_key_atomic_rollback": true,
+      "nonempty_archive_downgrade_denied": true
+    },
+    "exception_atomic_rollback": true,
+    "academic_revision_and_hash_freshness": true,
+    "pooled_context_reset": true,
+    "valid_state_before_deliberate_corruption_sha256": "a6437e106ed7ce3597c261371f9f2d408f8b6cdcf58a0cd2257eea6a51367665",
+    "limitations": [
+      "No provider/HTTP/browser composition",
+      "No approval authority",
+      "No outbox/realtime acceptance",
+      "No old history migration or restore",
+      "No full publication resource/scale matrix in this qualifier"
+    ],
+    "full_p3b": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

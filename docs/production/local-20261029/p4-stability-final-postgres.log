@@ -1,0 +1,26 @@
+2026-10-30 03:24:15.496 +08 [17948] LOG:  starting PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-30 03:24:15.497 +08 [17948] LOG:  listening on IPv4 address "127.0.0.1", port 61032
+2026-10-30 03:24:15.741 +08 [15744] LOG:  database system was shut down at 2026-10-30 03:24:10 +08
+2026-10-30 03:24:15.820 +08 [17948] LOG:  database system is ready to accept connections
+2026-10-30 03:24:16.350 +08 [8680] LOG:  no match in usermap "classsync_qa" for user "classsync_unmapped" authenticated as "lenovo@DESKTOP-LKOV9K1"
+2026-10-30 03:24:16.350 +08 [8680] FATAL:  SSPI authentication failed for user "classsync_unmapped"
+2026-10-30 03:24:16.350 +08 [8680] DETAIL:  Connection matched file "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-ff0cd5a9dc994951a5e9be7ec47a9f26/data/pg_hba.conf" line 1: "host all all 127.0.0.1/32 sspi include_realm=1 map=classsync_qa"
+2026-10-30 03:24:16.738 +08 [17948] LOG:  received SIGHUP, reloading configuration files
+2026-10-30 03:24:19.504 +08 [14868] ERROR:  A non-superuser non-BYPASSRLS migration owner is required
+2026-10-30 03:24:19.504 +08 [14868] CONTEXT:  PL/pgSQL function inline_code_block line 4 at RAISE
+2026-10-30 03:24:19.504 +08 [14868] STATEMENT:  
+	        DO $$ BEGIN
+	            IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles
+	                       WHERE rolname=current_user AND (rolsuper OR rolbypassrls)) THEN
+	                RAISE EXCEPTION 'A non-superuser non-BYPASSRLS migration owner is required'
+	                    USING ERRCODE='42501';
+	            END IF;
+	        END $$
+	    
+2026-10-30 03:25:29.100 +08 [17948] LOG:  received fast shutdown request
+2026-10-30 03:25:29.102 +08 [17948] LOG:  aborting any active transactions
+2026-10-30 03:25:29.120 +08 [17948] LOG:  background worker "logical replication launcher" (PID 10080) exited with exit code 1
+2026-10-30 03:25:29.123 +08 [19580] LOG:  shutting down
+2026-10-30 03:25:29.124 +08 [19580] LOG:  checkpoint starting: shutdown immediate
+2026-10-30 03:25:29.383 +08 [19580] LOG:  checkpoint complete: wrote 422 buffers (2.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.117 s, sync=0.116 s, total=0.260 s; sync files=203, longest=0.002 s, average=0.001 s; distance=2838 kB, estimate=2838 kB; lsn=0/1AADD88, redo lsn=0/1AADD88
+2026-10-30 03:25:29.792 +08 [17948] LOG:  database system is shut down

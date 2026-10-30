@@ -1,0 +1,57 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-e4bfc63fa35942c5b48c3cb43429d866",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-e4bfc63fa35942c5b48c3cb43429d866/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-e4bfc63fa35942c5b48c3cb43429d866^\\data^\" -l logfile start",
+  "port": 63256,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-e4bfc63fa35942c5b48c3cb43429d866/data",
+    "user": "classsync_qa_21af8b8a3aeb44d39b8be640bb8fbcf6",
+    "port": 63256,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "migration": "0008_publication_transactions",
+    "base_solver_status": "optimal",
+    "actual_durable_resource_matrix": [
+      {
+        "kind": "room",
+        "solver_status": "optimal",
+        "exact_422_publication_conflict": true,
+        "all_six_scheduling_tables_unchanged": true
+      },
+      {
+        "kind": "teacher",
+        "solver_status": "optimal",
+        "exact_422_publication_conflict": true,
+        "all_six_scheduling_tables_unchanged": true
+      },
+      {
+        "kind": "section",
+        "solver_status": "optimal",
+        "exact_422_publication_conflict": true,
+        "all_six_scheduling_tables_unchanged": true
+      },
+      {
+        "kind": "student",
+        "solver_status": "optimal",
+        "exact_422_publication_conflict": true,
+        "all_six_scheduling_tables_unchanged": true
+      }
+    ],
+    "same_time_disjoint_resource_control": true,
+    "control_solver_status": "optimal",
+    "final_scheduling_state_sha256": "9fbe1c570c8344121712578c5ebd9c3cade7de2ec4d91c3045eb06ac494f41d4",
+    "limitations": [
+      "Synthetic generated records only",
+      "No scale acceptance",
+      "No conflicting restriction/publication winner matrix",
+      "No provider/HTTP/browser, approval or outbox acceptance"
+    ],
+    "full_p3b": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

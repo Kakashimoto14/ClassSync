@@ -1,0 +1,96 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-a34b9773da5144b1bd3a16b0d4af8f4d",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-a34b9773da5144b1bd3a16b0d4af8f4d/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-a34b9773da5144b1bd3a16b0d4af8f4d^\\data^\" -l logfile start",
+  "port": 60901,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-a34b9773da5144b1bd3a16b0d4af8f4d/data",
+    "user": "classsync_qa_63544e61031444a5b3c758eb184cb759",
+    "port": 60901,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "migration": "0008_publication_transactions",
+    "actual_solver_statuses": [
+      "optimal",
+      "optimal"
+    ],
+    "ready_generated_academic_drafts": true,
+    "privileged_migration_rejected_transactionally": true,
+    "fixture_same_period_uuid_only_controlled": true,
+    "review_no_write": true,
+    "publish_one_two_original_receipt": true,
+    "history_admin_projection_reconnect_exact": true,
+    "two_active_admin_same_period_owner_denied": true,
+    "strict_key_stale_duplicate_denials": true,
+    "negative_roles_tenant_project": true,
+    "concurrent_publication": {
+      "observed_waiters": 2,
+      "winner_revision": 3,
+      "loser": {
+        "status": 409,
+        "code": "publication_version_conflict"
+      }
+    },
+    "restrictions": {
+      "revision_one_two_exact_audits": true,
+      "utc_midnight_interval": true,
+      "overlapping_published_event_denied": true
+    },
+    "audit_failure_recovery": {
+      "forced_after_trigger_failure_rolls_back_all_state": true,
+      "named_generated_constraint_removed": true,
+      "recovery_revision_three_once": true
+    },
+    "actual_cross_period_conflict": {
+      "solver_status": "optimal",
+      "actual_shared_resource_negative": "publication_workload",
+      "outside_saved_semester_denied": true
+    },
+    "runtime_privilege_negatives": {
+      "identity_update_and_audit_insert_denied": true,
+      "audit_immutable": true
+    },
+    "actual_corruption": {
+      "checksum_consistent_raw_generated_version": "bddcfd96-7a45-40da-b72c-bc597c5c287f",
+      "history_projection_replay_all_typed409": true,
+      "intentional_generated_corrupt_version_left_until_cluster_stop": true
+    },
+    "authority_row_locks": {
+      "membership_revocation": {
+        "observed_waiters": 1,
+        "mutation_denied_after_commit": true
+      },
+      "tenant_project": {
+        "observed_waiters": 1,
+        "mutation_denied_after_commit": true
+      }
+    },
+    "outages": {
+      "membership_and_publication_select_outage": true,
+      "actual_five_connection_pool": true,
+      "authority_helper_execute_outage": true
+    },
+    "academic_period_lock": {
+      "observed_waiters": 1,
+      "generated_revision_advanced_after_release": true
+    },
+    "exception_atomic_rollback": true,
+    "academic_revision_and_hash_freshness": true,
+    "pooled_context_reset": true,
+    "valid_state_before_deliberate_corruption_sha256": "72e3349cb6f32fe67e19996249c228404473151c6ebbabd9961536e3d5424e66",
+    "limitations": [
+      "No provider/HTTP/browser composition",
+      "No approval authority",
+      "No outbox/realtime acceptance",
+      "No old history migration or restore",
+      "No full publication resource/scale matrix in this qualifier"
+    ],
+    "full_p3b": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

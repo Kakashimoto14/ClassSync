@@ -1,0 +1,110 @@
+
+> classync@0.1.0 test:security
+> node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs scripts/tests/auth-emulator-qualification.test.cjs scripts/tests/web-session-fixture.test.cjs
+
+TAP version 13
+# Subtest: owned emulator environment removes credentials and every inherited proxy spelling
+ok 1 - owned emulator environment removes credentials and every inherited proxy spelling
+  ---
+  duration_ms: 8.1542
+  type: 'test'
+  ...
+# Subtest: owned emulator entry selects only fixed qualification modules and exact flags
+ok 2 - owned emulator entry selects only fixed qualification modules and exact flags
+  ---
+  duration_ms: 2.0958
+  type: 'test'
+  ...
+# Subtest: patched dependency versions are actually installed, not only declared
+ok 3 - patched dependency versions are actually installed, not only declared
+  ---
+  duration_ms: 67.9609
+  type: 'test'
+  ...
+# Subtest: Firestore Node module can load with the patched grpc API without connecting
+ok 4 - Firestore Node module can load with the patched grpc API without connecting
+  ---
+  duration_ms: 1062.9918
+  type: 'test'
+  ...
+# Subtest: patched selector parser preserves the used Tailwind and nested selector APIs
+ok 5 - patched selector parser preserves the used Tailwind and nested selector APIs
+  ---
+  duration_ms: 2465.1418
+  type: 'test'
+  ...
+# Subtest: hosted gate requires an independently supplied approved commit
+ok 6 - hosted gate requires an independently supplied approved commit
+  ---
+  duration_ms: 728.4172
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a different deployed commit
+ok 7 - hosted gate rejects a different deployed commit
+  ---
+  duration_ms: 249.4347
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a metadata-only HTML shell without JS and CSS
+ok 8 - hosted gate rejects a metadata-only HTML shell without JS and CSS
+  ---
+  duration_ms: 224.0745
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects dirty release metadata
+ok 9 - hosted gate rejects dirty release metadata
+  ---
+  duration_ms: 246.3199
+  type: 'test'
+  ...
+# Subtest: hosted HTTP gate accepts matching clean metadata and route/static/API boundaries
+ok 10 - hosted HTTP gate accepts matching clean metadata and route/static/API boundaries
+  ---
+  duration_ms: 519.3005
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a different HTML shell at /student/dashboard
+ok 11 - hosted gate rejects a different HTML shell at /student/dashboard
+  ---
+  duration_ms: 661.4207
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a different HTML shell at /student/schedule
+ok 12 - hosted gate rejects a different HTML shell at /student/schedule
+  ---
+  duration_ms: 185.7912
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a different HTML shell at /teacher/dashboard
+ok 13 - hosted gate rejects a different HTML shell at /teacher/dashboard
+  ---
+  duration_ms: 241.9006
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects a different HTML shell at /admin/calendar
+ok 14 - hosted gate rejects a different HTML shell at /admin/calendar
+  ---
+  duration_ms: 308.2352
+  type: 'test'
+  ...
+# Subtest: hosted gate rejects deep-link redirects even to the valid application shell
+ok 15 - hosted gate rejects deep-link redirects even to the valid application shell
+  ---
+  duration_ms: 207.2424
+  type: 'test'
+  ...
+# Subtest: browser fixture accepts only its marked synthetic loopback services
+ok 16 - browser fixture accepts only its marked synthetic loopback services
+  ---
+  duration_ms: 183.0083
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4163.3508

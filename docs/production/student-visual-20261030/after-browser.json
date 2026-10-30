@@ -1,0 +1,129 @@
+{
+  "phase": "after",
+  "screenshots": [
+    {
+      "scene": "home",
+      "width": 360,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-home-360.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 360,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-360.png"
+    },
+    {
+      "scene": "home",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-home-390.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-390.png"
+    },
+    {
+      "scene": "options",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-options-390.png"
+    },
+    {
+      "scene": "room-detail",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-room-detail-390.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-rooms-390.png"
+    },
+    {
+      "scene": "directory",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-directory-390.png"
+    },
+    {
+      "scene": "find-room",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-find-room-390.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-alerts-390.png"
+    },
+    {
+      "scene": "announcements",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-announcements-390.png"
+    },
+    {
+      "scene": "home",
+      "width": 768,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-home-768.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 768,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-768.png"
+    },
+    {
+      "scene": "home",
+      "width": 1024,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-home-1024.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 1024,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-1024.png"
+    },
+    {
+      "scene": "home",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-home-1440.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-1440.png"
+    },
+    {
+      "scene": "options",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-options-1440.png"
+    },
+    {
+      "scene": "room-detail",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-room-detail-1440.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-schedule-rooms-1440.png"
+    },
+    {
+      "scene": "directory",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-directory-1440.png"
+    },
+    {
+      "scene": "find-room",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-find-room-1440.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-alerts-1440.png"
+    },
+    {
+      "scene": "announcements",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793328100762-after-announcements-1440.png"
+    }
+  ],
+  "errors": [],
+  "api": [],
+  "clock": "2026-10-30T08:15:00+08:00",
+  "pass": true
+}

@@ -1,0 +1,5 @@
+Owned Auth Emulator root: C:\Users\lenovo\AppData\Local\Temp\classsync-auth-run-51f08d75725149fc91928c92eb248555
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-0165d7f172b541b4a377f84832276512
+Real browser session lifecycle verified
+Actual browser/Auth/Gateway/PostgreSQL qualification passed; owned servers stopped
+Actual owned Auth Emulator and disposable PostgreSQL stopped; qualification passed.

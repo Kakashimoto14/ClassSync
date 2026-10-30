@@ -1,0 +1,39 @@
+{
+  "nativeZoom": 2,
+  "devicePixelRatio": 2,
+  "checks": [
+    {
+      "control": "Next Class room details",
+      "box": {
+        "x": 40,
+        "y": 363.8984375,
+        "width": 145.21875,
+        "height": 48
+      },
+      "nav": {
+        "x": 0,
+        "y": 428,
+        "width": 720,
+        "height": 72
+      },
+      "fullyVisible": true
+    },
+    {
+      "control": "Last daily class",
+      "box": {
+        "x": 37,
+        "y": 301.8125,
+        "width": 646,
+        "height": 110
+      },
+      "nav": {
+        "x": 0,
+        "y": 428,
+        "width": 720,
+        "height": 72
+      },
+      "fullyVisible": true
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,104 @@
+{
+  "verifiedAtUTC": "2026-10-27T18:38:44.465136+00:00",
+  "head": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+  "originalSha256": {
+    "var/academic.sqlite3": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+    "var/scheduling.sqlite3": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+    "var/backups/scheduling-before-s2b-20261018074057.sqlite3": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d"
+  },
+  "ownedPgClusters": [
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-0ddf9b610b5942fe928de87f28e9300b",
+      "port": 49584,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-1871812a304d44bab696893c491b3226",
+      "port": 63448,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-227e63e976604f47a84449052c1d43bd",
+      "port": 49823,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-4da3723ec9f0411a87f2b7fda2596210",
+      "port": 62006,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-6113a9693625449eaea2a6432bc13d02",
+      "port": null,
+      "server_state": "not_running_at_cleanup",
+      "closed": null
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-6bf2410470ed4edca6356309f2d5dc78",
+      "port": 49530,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-6f3ddecead2a419daff26ba787e0ff45",
+      "port": 61898,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-974627f605d3491c973abcc1835d54c3",
+      "port": 53841,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-a95f696f562d43a1ac7d3f5fc8a1444d",
+      "port": 65076,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-b5450e9a992746d99bfc03bdaac31258",
+      "port": 49843,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-d0b35da2403f481eaad68f8bf9b6275d",
+      "port": 61967,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-d975c30426e541c98728c11972574f16",
+      "port": 53873,
+      "server_state": "stopped",
+      "closed": true
+    },
+    {
+      "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-f0233585f0a94af8ae5aa14a870dad7c",
+      "port": 62077,
+      "server_state": "stopped",
+      "closed": true
+    }
+  ],
+  "stoppedClusters": 12,
+  "neverStartedClusters": 1,
+  "sourceSha256": {
+    "services/scheduling/app/publication_repository.py": "03ec0067bf2a78c3cb210b8efc112c062df50e4ec760f7b0e8033b0b56a7e529",
+    "services/scheduling/app/publication_rules.py": "576210daa5a46a65e5a0a7229030c16da174d43d7b6582ab53b534d6667b1132",
+    "services/scheduling/app/occurrences.py": "ab454a95d49eb44162157cd879cb615bfc85b6f41253f4a68d53f78bfeab3d3f",
+    "services/scheduling/tests/test_publication_rules.py": "3e1fce8c46a595ba52e2ac7a8c004bf043a4bb31e4348981af87e75e29e2b1ba",
+    "packages/persistence/classync_persistence/migrations/versions/0007_publication_state.py": "dc724859542deb76691de0dbc30f15e13c3c893afa6a985ec50263ed1c81f8b8",
+    "scripts/postgres_publication_state_qualification.py": "c23be6ebea93b297911b7c49e9275e8045937c8d1c3bcadf65b1539ed6b49d8f",
+    "services/persistence/tests/test_publication_state_boundary.py": "4fc80c5c87eea61e4b55f6f962f229a914533955c47a437cb8f924201689a8a0",
+    ".github/workflows/quality.yml": "039c2b701570bd11f19da4283cf1a1005dde7b31b5ecd0c7758a3474d044632b"
+  },
+  "backendLogSha256": "a3cf2356f0a098623569e0f944110893d8604acd65a5c8e5ac64f207fac7d656",
+  "originalDataMigration": false,
+  "productionAcceptance": false
+}

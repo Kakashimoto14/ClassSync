@@ -293,13 +293,10 @@ def test_gateway_database_failure_is_explicit_and_retry_is_safe(api, tmp_path, m
     assert len(api.get(prefix + "/drafts").json()["data"]["drafts"]) == 1
 
 
-def test_protected_owner_isolation_and_sandbox_gating(api, monkeypatch):
-    from classync_contracts import scheduling_security
-
-    monkeypatch.setattr(scheduling_security, "initialize_firebase", lambda *_: None)
-    identity = {"uid": "admin-a", "role": "administrator"}
-    monkeypatch.setattr(scheduling_security.auth, "verify_id_token", lambda *_, **__: identity)
-    headers = {"Authorization": "Bearer verified-test"}
+def test_protected_owner_isolation_and_sandbox_gating(api, monkeypatch, identity_adapters):
+    for module in (gateway, main):
+        identity_adapters(module, uid="admin-a")
+    headers = {"Authorization": "Bearer e30.e30.synthetic-signature"}
     prefix = "/api/v1/scheduling"
     run = api.post(
         prefix + "/generate", headers=headers, json=tiny().model_dump(mode="json")
@@ -314,12 +311,17 @@ def test_protected_owner_isolation_and_sandbox_gating(api, monkeypatch):
             "idempotency_key": "private-key",
         },
     ).json()["data"]
-    assert api.get(prefix + "/sandbox/drafts").json()["data"]["drafts"] == []
-    assert api.get(prefix + "/sandbox/drafts/" + saved["id"]).status_code == 404
-    identity["uid"] = "admin-b"
+    with monkeypatch.context() as sandbox_settings:
+        for module in (gateway, main):
+            sandbox_settings.setattr(module.settings, "classsync_env", "development")
+        assert api.get(prefix + "/sandbox/drafts").json()["data"]["drafts"] == []
+        assert api.get(prefix + "/sandbox/drafts/" + saved["id"]).status_code == 404
+    for module in (gateway, main):
+        identity_adapters(module, uid="admin-b")
     assert api.get(prefix + "/drafts", headers=headers).json()["data"]["drafts"] == []
     assert api.get(prefix + "/drafts/" + saved["id"], headers=headers).status_code == 404
-    identity["role"] = "teacher"
+    for module in (gateway, main):
+        identity_adapters(module, "teacher", uid="admin-b")
     assert api.get(prefix + "/drafts", headers=headers).status_code == 403
     for config in (gateway.settings, main.settings):
         monkeypatch.setattr(config, "classsync_env", "production")

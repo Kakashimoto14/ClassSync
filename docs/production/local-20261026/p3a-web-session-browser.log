@@ -1,0 +1,31 @@
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-d73c697207e44a24ba8ddeec1d3a29bb
+
+warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+warn - Configure your content sources or your generated CSS will be missing styles.
+warn - https://tailwindcss.com/docs/content-configuration
+page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://127.0.0.1:5173/auth/login", waiting until "load"
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 214, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 208, in main
+    evidence = qualify(args.bin, lambda connection: exercise(connection, root, marker))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 208, in <lambda>
+    evidence = qualify(args.bin, lambda connection: exercise(connection, root, marker))
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_web_session_qualification.py", line 186, in exercise
+    require(result.returncode == 0, "Actual browser session qualification failed")
+  File "C:\Projects\ClassSync\scripts\postgres_driver_qualification.py", line 17, in require
+    raise RuntimeError(description)
+RuntimeError: Actual browser session qualification failed
+Owned PostgreSQL/emulator qualification failed

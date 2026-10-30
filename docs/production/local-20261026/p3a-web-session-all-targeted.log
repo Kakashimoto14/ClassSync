@@ -1,0 +1,58 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/auth/university-session.test.ts src/auth/university-session-driver.test.ts src/auth/UniversitySessionPanel.test.tsx src/auth/UniversitySessionProvider.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > restores focus to the signed-out status after an explicit sign-out 248ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > keeps the selected role button focused while access is checked and announced 61ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during denied 35ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during unavailable 30ms
+ ✓ src/auth/UniversitySessionPanel.test.tsx > university access controls > does not show prior membership during offline 22ms
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in presentation mode 53ms
+ ✓ src/auth/university-session-driver.test.ts > does not initialize identity SDK or fetch in sandbox mode 1ms
+ ✓ src/auth/university-session-driver.test.ts > preserves missing Firebase as unavailable without fake identity 2ms
+ ✓ src/auth/university-session-driver.test.ts > uses only current server membership with explicit safe request options 12ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP401/invalid_token to denied without provider error details 5ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/membership_denied to denied without provider error details 2ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP403/role_selection_required to role-required without provider error details 3ms
+ ✓ src/auth/university-session-driver.test.ts > maps HTTP503/membership_unavailable to unavailable without provider error details 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base //attacker.invalid/api before SDK use 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base http://attacker.invalid/api before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base https://user:secret@example.invalid/api before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api?redirect=elsewhere before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base /api#fragment before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects unsafe API base api/v1 before SDK use 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects a backslash-normalized external origin on an HTTPS page 1ms
+ ✓ src/auth/university-session-driver.test.ts > does not send a token once its identity changes during token retrieval 1ms
+ ✓ src/auth/university-session-driver.test.ts > rejects stale identity after server response even before the observer callback 2ms
+ ✓ src/auth/university-session-driver.test.ts > rejects HTML fallback and wrong response UID 4ms
+ ✓ src/auth/university-session.test.ts > current university session authority > observes signed-out then verifies identity without decoding tokens 9ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears membership before role verification and shows server role denial 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > cannot revive the previous UID after a later identity callback 4ms
+ ✓ src/auth/university-session.test.ts > current university session authority > blocks late authorization after offline, signout or disposal 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps logout failure cleared despite further SDK events or refresh 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > bounds stalled token/lookup work and ignores its late completion 10ms
+ ✓ src/auth/university-session.test.ts > current university session authority > keeps offline events cleared until online revalidation succeeds 2ms
+ ✓ src/auth/university-session.test.ts > current university session authority > clears current authority on SDK observer failure 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > keeps only the authorized role record and rejects client role mismatch 2ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership null 1ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"another","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"","role":"student","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"superadmin","student_id":"student-a","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","membership_revision":1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":0} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":1.1} 0ms
+ ✓ src/auth/university-session.test.ts > membership response contract > rejects invalid or mismatched membership {"uid":"uid-a","tenant_id":"tenant-a","role":"student","student_id":"student-a","membership_revision":"1"} 0ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not mount university identity in presentation mode 40ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not mount university identity in sandbox mode 5ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > cleans StrictMode observers, clears old data and never revives after unmount 111ms
+ ✓ src/auth/UniversitySessionProvider.test.tsx > does not attach an observer when asynchronous setup finishes after unmount 5ms
+
+ Test Files  4 passed (4)
+      Tests  45 passed (45)
+   Start at  22:52:13
+   Duration  12.65s (transform 378ms, setup 1.35s, import 4.80s, tests 706ms, environment 3.93s)
+

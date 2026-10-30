@@ -1,0 +1,23 @@
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > resolves every assignment identity without fabricating missing metadata 11ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > combines actual fields and includes the capacity boundary 4ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > orders recorded assignments and restricts draft visibility 68ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned student details and preserves IDs through demo access 3ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned teacher details and preserves IDs through demo access 1ms
+ ✓ src/lib/room-discovery.test.ts > room resource discovery > registers owned administrator details and preserves IDs through demo access 1ms
+ ✓ src/lib/workspace-context.test.ts > isolates roles and expires context with the preview session 152ms
+ ✓ src/lib/workspace-context.test.ts > prefers an existing published scope but respects a valid explicit selection 2ms
+ ✓ src/data/cdm-room-inventory.test.ts > user-supplied provisional CDM inventory > includes exactly the supplied spaces and no inferred PRRC gaps 13ms
+ ✓ src/data/cdm-room-inventory.test.ts > user-supplied provisional CDM inventory > keeps source provenance and excludes unknown resource requirements from matches 3ms
+ ✓ src/lib/firebase-config.test.ts > keeps absent/incomplete configuration distinct without initializing a misleading app 6ms
+ ✓ src/lib/firebase-config.test.ts > reuses the existing registration across module reloads 1ms
+ ✓ src/lib/firebase-config.test.ts > does not initialize a second application on a project/app mismatch 1ms
+ ✓ src/lib/firebase-config.test.ts > keeps an SDK initialization failure non-fatal for the read-only presentation 3ms
+
+ Test Files  4 passed (4)
+      Tests  14 passed (14)
+   Start at  10:44:16
+   Duration  24.71s (transform 568ms, setup 2.97s, import 8.46s, tests 286ms, environment 10.46s)
+

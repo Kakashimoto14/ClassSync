@@ -19,7 +19,7 @@ import {
   presentationOnlyBuild,
 } from '../lib/presentation-sample';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
-import { periodLabel } from '../lib/workspace-context';
+import { periodLabel, shouldAnnounceConnectionLoss } from '../lib/workspace-context';
 import type { UserRole } from '../types/ui';
 
 export function RoleScheduleWorkspace({
@@ -212,7 +212,7 @@ export function RoleScheduleWorkspace({
           {w.notice}
         </p>
       )}
-      {!w.connected && data && (
+      {shouldAnnounceConnectionLoss(context.mode, w.connected, Boolean(data)) && (
         <p role="status">Updates interrupted. Last confirmed timetable shown; reconnecting.</p>
       )}
       {error && (
@@ -220,9 +220,13 @@ export function RoleScheduleWorkspace({
           <h2>Couldn't load your timetable.</h2>
           <p>
             {w.errorStatus === 403 || w.errorStatus === 401
-              ? 'This timetable is not permitted for your current access. Choose an available sample.'
+              ? isSample
+                ? 'This timetable is not permitted for your current access. Choose an available sample.'
+                : 'Your current account cannot access this timetable. Check your university membership or assigned schedule.'
               : w.errorStatus === 404
-                ? 'That saved sample is unavailable. Choose another sample.'
+                ? isSample
+                  ? 'That saved sample is unavailable. Choose another sample.'
+                  : 'No published timetable was found for this period.'
                 : w.errorStatus === 422
                   ? isPresentation
                     ? 'Choose an identity included in this presentation sample.'

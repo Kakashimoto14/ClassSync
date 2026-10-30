@@ -1,0 +1,54 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+___________ test_original_restore_target_refused_before_connection ____________
+
+    def test_original_restore_target_refused_before_connection():
+>       restore = importlib.import_module("scripts.postgres_scheduling_restore_qualification")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\persistence\tests\test_scheduling_restore_boundary.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'scripts.postgres_scheduling_restore_qualification'
+import_ = <function _gcd_import at 0x0000012B59A380E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'scripts.postgres_scheduling_restore_qualification'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+____________ test_all_three_schema_data_and_authority_are_required ____________
+
+    def test_all_three_schema_data_and_authority_are_required():
+>       restore = importlib.import_module("scripts.postgres_scheduling_restore_qualification")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\persistence\tests\test_scheduling_restore_boundary.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'scripts.postgres_scheduling_restore_qualification'
+import_ = <function _gcd_import at 0x0000012B59A380E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'scripts.postgres_scheduling_restore_qualification'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED services/persistence/tests/test_scheduling_restore_boundary.py::test_original_restore_target_refused_before_connection
+FAILED services/persistence/tests/test_scheduling_restore_boundary.py::test_all_three_schema_data_and_authority_are_required
+2 failed in 0.46s

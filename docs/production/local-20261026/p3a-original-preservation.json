@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-10-26T11:15:00.695463+08:00",
+  "files": [
+    {
+      "path": "var/academic.sqlite3",
+      "sha256": "4CD5F60DE21BD365C914AC01E5BE692B3BEA1C7A56A7F17A76C6953EF8668738",
+      "matchesBaseline": true
+    },
+    {
+      "path": "var/scheduling.sqlite3",
+      "sha256": "1848377CC9A9EB656E12B5E58436E81198FEF92F18DD71C1FEA2F6F8B482E400",
+      "matchesBaseline": true
+    },
+    {
+      "path": "var/backups/scheduling-before-s2b-20261018074057.sqlite3",
+      "sha256": "9EC149413D69C1165B74A75E366FA262417C1ECBF41E7029FDD0D86AC96F395D",
+      "matchesBaseline": true
+    }
+  ]
+}

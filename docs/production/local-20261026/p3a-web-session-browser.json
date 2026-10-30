@@ -1,0 +1,412 @@
+{
+  "origin": "http://127.0.0.1:62105",
+  "journeys": [
+    {
+      "role": "student",
+      "width": 360,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your day",
+      "url": "http://127.0.0.1:62105/student/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "teacher",
+      "width": 360,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your teaching day",
+      "url": "http://127.0.0.1:62105/teacher/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "administrator",
+      "width": 360,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Scheduling overview",
+      "url": "http://127.0.0.1:62105/admin/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "student",
+      "width": 390,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your day",
+      "url": "http://127.0.0.1:62105/student/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": "C:/Users/lenovo/.codex/visualizations/2026/10/25/01a17489-5bf8-7c93-adb1-44b9f3722009/p3a-web-session-student-390.png"
+    },
+    {
+      "role": "teacher",
+      "width": 390,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your teaching day",
+      "url": "http://127.0.0.1:62105/teacher/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "administrator",
+      "width": 390,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Scheduling overview",
+      "url": "http://127.0.0.1:62105/admin/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "student",
+      "width": 768,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your day",
+      "url": "http://127.0.0.1:62105/student/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "teacher",
+      "width": 768,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your teaching day",
+      "url": "http://127.0.0.1:62105/teacher/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "administrator",
+      "width": 768,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Scheduling overview",
+      "url": "http://127.0.0.1:62105/admin/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "student",
+      "width": 1024,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your day",
+      "url": "http://127.0.0.1:62105/student/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "teacher",
+      "width": 1024,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your teaching day",
+      "url": "http://127.0.0.1:62105/teacher/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "administrator",
+      "width": 1024,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Scheduling overview",
+      "url": "http://127.0.0.1:62105/admin/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "student",
+      "width": 1440,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your day",
+      "url": "http://127.0.0.1:62105/student/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "teacher",
+      "width": 1440,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Your teaching day",
+      "url": "http://127.0.0.1:62105/teacher/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": null
+    },
+    {
+      "role": "administrator",
+      "width": 1440,
+      "title": "ClassSync — Smarter Classrooms Together",
+      "heading": "Scheduling overview",
+      "url": "http://127.0.0.1:62105/admin/dashboard",
+      "refresh": true,
+      "overflow": false,
+      "errors": [],
+      "api": [],
+      "screenshot": "C:/Users/lenovo/.codex/visualizations/2026/10/25/01a17489-5bf8-7c93-adb1-44b9f3722009/p3a-web-session-administrator-1440.png"
+    }
+  ],
+  "http": {
+    "origin": "http://127.0.0.1:62105",
+    "expectedSha": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+    "release": {
+      "schemaVersion": 1,
+      "mode": "read-only-presentation",
+      "appMode": "presentation",
+      "capabilityVersion": 1,
+      "sampleVersion": "classsync-presentation-v1",
+      "commit": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+      "uncommittedChanges": true
+    },
+    "failed": [
+      "/release.json"
+    ],
+    "results": [
+      {
+        "path": "/",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/auth/login",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/student/dashboard",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/student/schedule",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/teacher/dashboard",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/teacher/schedule",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/admin/dashboard",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/admin/calendar",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/dev/role-preview",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/dev/design-system",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1260,
+        "sha256": "addf9594254c48dc8fb75d4444f0b5b9a57b8c4fea3bc0c2dbd236a523e02ca2",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/release.json",
+        "status": 200,
+        "contentType": "application/json; charset=utf-8",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 250,
+        "sha256": "33d30c782bd28d4aca7a46ab3f6d972f00b01eaf2e54de9bbc200227fae72cb3",
+        "identity": "{ \"schemaVersion\": 1, \"mode\": \"read-only-presentation\", \"appMode\": \"presentation\", \"capabilityVersion\": 1, \"sa"
+      },
+      {
+        "path": "/fonts/InterVariable.woff2",
+        "status": 200,
+        "contentType": "font/woff2",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 352240,
+        "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+        "identity": null
+      },
+      {
+        "path": "/branding/classsync-logo-assets/classsync-icon-32.png",
+        "status": 200,
+        "contentType": "image/png",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 1546,
+        "sha256": "074aca0f326b5b83edd8bff3fc9a6bc3cc7f5a68a3254972c747069b69b06ed9",
+        "identity": null
+      },
+      {
+        "path": "/manifest.webmanifest",
+        "status": 200,
+        "contentType": "application/manifest+json",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 498,
+        "sha256": "7d2d404ea342722a1e5e7a7c482174321c33c2000f1e27c108352d06fc47434f",
+        "identity": "{ \"name\": \"ClassSync\", \"short_name\": \"ClassSync\", \"start_url\": \".\", \"display\": \"standalone\", \"background_color"
+      },
+      {
+        "path": "/api/v1/timetables/periods",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": null,
+        "etag": null,
+        "vercelId": null,
+        "bytes": 9,
+        "sha256": "920b8d07262e4e924669c0e38ef57e0da66b68c9d387248d83a9aa19be7c96c4",
+        "identity": "NOT_FOUND"
+      },
+      {
+        "path": "/assets/p1-missing.js",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": null,
+        "etag": null,
+        "vercelId": null,
+        "bytes": 9,
+        "sha256": "920b8d07262e4e924669c0e38ef57e0da66b68c9d387248d83a9aa19be7c96c4",
+        "identity": "NOT_FOUND"
+      },
+      {
+        "path": "/p1-unknown",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": null,
+        "etag": null,
+        "vercelId": null,
+        "bytes": 9,
+        "sha256": "920b8d07262e4e924669c0e38ef57e0da66b68c9d387248d83a9aa19be7c96c4",
+        "identity": "NOT_FOUND"
+      },
+      {
+        "path": "/assets/index-BFkBlGYd.js",
+        "status": 200,
+        "contentType": "application/javascript",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 527168,
+        "sha256": "4d1b8258ea1d2b2e5dd6403c4a9ba2b94125f60b6cc48a9547e72c1199f5ea3d",
+        "identity": "var xg=n=>{throw TypeError(n)};var Zf=(n,l,s)=>l.has(n)||xg(\"Cannot \"+s);var V=(n,l,s)=>(Zf(n,l,\"read from private field"
+      },
+      {
+        "path": "/assets/index-DcKcQNQN.css",
+        "status": 200,
+        "contentType": "text/css",
+        "cacheControl": "no-store",
+        "etag": null,
+        "vercelId": null,
+        "bytes": 85057,
+        "sha256": "31f38fd68b1c28718714b5d0b5ff94f4ab5be891695769891c3a14a7aca1b6af",
+        "identity": "@font-face{font-family:Inter;src:url(/fonts/InterVariable.woff2) format(\"woff2\");font-weight:100 900;font-style:normal;f"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+Owned Auth Emulator root: C:\Users\lenovo\AppData\Local\Temp\classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1
+C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-7bde32d2cfc94ce695f1a6dbc387476b
+Owned Student frontend: http://127.0.0.1:62451 · Vite 6.4.5
+Student browser journey passed
+Publication Auth/PG HTTP qualification passed; owned cluster stopped
+Actual owned Auth Emulator and disposable PostgreSQL stopped; qualification passed.

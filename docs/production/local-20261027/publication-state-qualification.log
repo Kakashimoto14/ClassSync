@@ -1,0 +1,97 @@
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-974627f605d3491c973abcc1835d54c3
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DependentObjectsStillExist: cannot drop table classsync_scheduling.publication_heads because other objects depend on it
+DETAIL:  policy publication_create on table classsync_scheduling.published_versions depends on table classsync_scheduling.publication_heads
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_publication_state_qualification.py", line 488, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_publication_state_qualification.py", line 483, in main
+    write_new_evidence(args.output, qualify(args.bin, exercise))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_publication_state_qualification.py", line 337, in exercise
+    foundation = identity_exercise(connection)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_identity_qualification.py", line 121, in exercise
+    migrate(session, target="base", downgrade=True)
+  File "C:\Projects\ClassSync\packages\persistence\classync_persistence\schema.py", line 19, in migrate
+    command.downgrade(config, target)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\command.py", line 534, in downgrade
+    script.run_env()
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\script\base.py", line 550, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 114, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 132, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Projects\ClassSync\packages\persistence\classync_persistence\migrations\env.py", line 10, in <module>
+    context.run_migrations()
+  File "<string>", line 8, in run_migrations
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\runtime\environment.py", line 970, in run_migrations
+    self.get_context().run_migrations(**kw)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\runtime\migration.py", line 616, in run_migrations
+    step.migration_fn(**kw)
+  File "C:\Projects\ClassSync\packages\persistence\classync_persistence\migrations\versions\0007_publication_state.py", line 195, in downgrade
+    op.execute("DROP TABLE classsync_scheduling.publication_heads")
+  File "<string>", line 8, in execute
+  File "<string>", line 3, in execute
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\operations\ops.py", line 2645, in execute
+    return operations.invoke(op)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\operations\base.py", line 448, in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\operations\toimpl.py", line 256, in execute_sql
+    operations.migration_context.impl.execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\ddl\impl.py", line 259, in execute
+    self._exec(sql, execution_options)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\alembic\ddl\impl.py", line 252, in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+           ^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.InternalError: (psycopg.errors.DependentObjectsStillExist) cannot drop table classsync_scheduling.publication_heads because other objects depend on it
+DETAIL:  policy publication_create on table classsync_scheduling.published_versions depends on table classsync_scheduling.publication_heads
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+[SQL: DROP TABLE classsync_scheduling.publication_heads]
+(Background on this error at: https://sqlalche.me/e/21/2j85)

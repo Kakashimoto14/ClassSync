@@ -1,0 +1,451 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx src/lib/student-timetable-api.test.ts src/lib/use-schedule-workspace.test.tsx src/config/institutional-routes.test.tsx src/components/layout/AppShell.test.tsx src/pages/AdminSchedulingHome.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > discloses preview options and closes them with Escape without changing role 1530ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > takes Teacher Rooms directly to the working resource directory 25ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > searches entry pages without offering record details that have no selection 1481ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > focuses the destination and returns to its heading after navigation 908ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every student navigation and account link registered and role-owned 461ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 2724ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 290ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every teacher navigation and account link registered and role-owned 680ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 178ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 258ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 160ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps every administrator navigation and account link registered and role-owned 675ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 627ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 238ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > preserves the four Student mobile destinations and closes the secondary drawer after navigation 1010ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > keeps generation active and consolidates the calendar alias under Schedule 815ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > uses ordinary accessible links for destination search 1061ms
+ ✓ src/components/layout/AppShell.test.tsx > workspace navigation > resolves every navigation owner within the route role 26ms
+ × src/pages/AdminSchedulingHome.test.tsx > uses real readiness to lead with generation without claiming publication 1668ms
+   → Unable to find role="link" and name "Generate Weekly Schedule"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33mclass[39m=[32m"admin-overview"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"ux-section-heading"[39m
+      [36m>[39m
+        [36m<h1>[39m
+          [0mScheduling overview[0m
+        [36m</h1>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"source-label"[39m
+        [36m>[39m
+          [0mLocal academic sandbox[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<label[39m
+        [33mclass[39m=[32m"admin-period-selector"[39m
+      [36m>[39m
+        [0mAcademic period[0m
+        [36m<select>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m""[39m
+          [36m>[39m
+            [0mChoose a period[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"p"[39m
+          [36m>[39m
+            [0mSample period[0m
+          [36m</option>[39m
+        [36m</select>[39m
+      [36m</label>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"admin-overview-content"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mrole[39m=[32m"status"[39m
+        [36m>[39m
+          [0mChecking academic readiness…[0m
+        [36m</p>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"workspace-card admin-activity"[39m
+        [36m>[39m
+          [36m<h2>[39m
+            [0mRecent scheduling activity[0m
+          [36m</h2>[39m
+          [36m<p>[39m
+            [0mNo saved draft recorded for this selected period.[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<nav[39m
+        [33maria-label[39m=[32m"Scheduling tools"[39m
+        [33mclass[39m=[32m"admin-tool-links"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/academic"[39m
+        [36m>[39m
+          [0mAcademic Setup[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/schedule-manager/drafts?source=academic"[39m
+        [36m>[39m
+          [0mSaved Drafts[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/calendar"[39m
+        [36m>[39m
+          [0mPublished Timetables[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/conflicts"[39m
+        [36m>[39m
+          [0mConflict Center[0m
+        [36m</a>[39m
+      [36m</nav>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33mclass[39m=[32m"admin-overview"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"ux-section-heading"[39m
+      [36m>[39m
+        [36m<h1>[39m
+          [0mScheduling overview[0m
+        [36m</h1>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"source-label"[39m
+        [36m>[39m
+          [0mLocal academic sandbox[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<label[39m
+        [33mclass[39m=[32m"admin-period-selector"[39m
+      [36m>[39m
+        [0mAcademic period[0m
+        [36m<select>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m""[39m
+          [36m>[39m
+            [0mChoose a period[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"p"[39m
+          [36m>[39m
+            [0mSample period[0m
+          [36m</option>[39m
+        [36m</select>[39m
+      [36m</label>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"admin-overview-content"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mrole[39m=[32m"status"[39m
+        [36m>[39m
+          [0mChecking academic readiness…[0m
+        [36m</p>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"workspace-card admin-activity"[39m
+        [36m>[39m
+          [36m<h2>[39m
+            [0mRecent scheduling activity[0m
+          [36m</h2>[39m
+          [36m<p>[39m
+            [0mNo saved draft recorded for this selected period.[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<nav[39m
+        [33maria-label[39m=[32m"Scheduling tools"[39m
+        [33mclass[39m=[32m"admin-tool-links"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/academic"[39m
+        [36m>[39m
+          [0mAcademic Setup[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/schedule-manager/drafts?source=academic"[39m
+        [36m>[39m
+          [0mSaved Drafts[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/calendar"[39m
+        [36m>[39m
+          [0mPublished Timetables[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"button button--secondary"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/admin/conflicts"[39m
+        [36m>[39m
+          [0mConflict Center[0m
+        [36m</a>[39m
+      [36m</nav>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ✓ src/pages/AdminSchedulingHome.test.tsx > leads blocked periods to requirements rather than a generation promise 533ms
+ ✓ src/pages/AdminSchedulingHome.test.tsx > keeps failed backend status recoverable without a fake ready state 321ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected student as an institutional identity 743ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected teacher as an institutional identity 140ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected administrator as an institutional identity 95ms
+ × src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona 418ms
+   → window.matchMedia is not a function
+ ✓ src/lib/student-timetable-api.test.ts > times out a stalled token refresh before starting a request 75ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint publish before network 39ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint sandbox/periods before network 3ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint history/p before network 3ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint calendar/../publish before network 4ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint //external before network 25ms
+ ✓ src/lib/student-timetable-api.test.ts > requires identity and sends current role/token to the Gateway without credentials 43ms
+ ✓ src/lib/student-timetable-api.test.ts > retains server denial and never replaces it with data 4ms
+ ✓ src/lib/use-schedule-workspace.test.tsx > retrieves the complete displayed week across a month boundary and clears old records after denial 345ms
+
+ Test Files  2 failed | 4 passed (6)
+      Tests  2 failed | 32 passed (34)
+   Start at  02:00:54
+   Duration  91.16s (transform 10.76s, setup 14.50s, import 73.70s, tests 17.73s, environment 59.87s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona
+TypeError: window.matchMedia is not a function
+ ❯ src/components/layout/AppShell.tsx:52:28
+     50|
+     51|   useEffect(() => {
+     52|     const desktop = window.matchMedia('(min-width: 1024px)');
+       |                            ^
+     53|     const onResize = () => {
+     54|       if (desktop.matches) closeMenu();
+ ❯ Object.react_stack_bottom_frame ../../node_modules/react-dom/cjs/react-dom-client.development.js:28656:20
+ ❯ runWithFiberInDEV ../../node_modules/react-dom/cjs/react-dom-client.development.js:1048:13
+ ❯ commitHookEffectListMount ../../node_modules/react-dom/cjs/react-dom-client.development.js:13748:29
+ ❯ commitHookPassiveMountEffects ../../node_modules/react-dom/cjs/react-dom-client.development.js:13835:11
+ ❯ commitPassiveMountOnFiber ../../node_modules/react-dom/cjs/react-dom-client.development.js:16906:13
+ ❯ recursivelyTraversePassiveMountEffects ../../node_modules/react-dom/cjs/react-dom-client.development.js:16851:13
+ ❯ commitPassiveMountOnFiber ../../node_modules/react-dom/cjs/react-dom-client.development.js:16898:11
+ ❯ recursivelyTraversePassiveMountEffects ../../node_modules/react-dom/cjs/react-dom-client.development.js:16851:13
+ ❯ commitPassiveMountOnFiber ../../node_modules/react-dom/cjs/react-dom-client.development.js:16898:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pages/AdminSchedulingHome.test.tsx > uses real readiness to lead with generation without claiming publication
+TestingLibraryElementError: Unable to find role="link" and name "Generate Weekly Schedule"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      class="admin-overview"
+    >
+      <div
+        class="ux-section-heading"
+      >
+        <h1>
+          Scheduling overview
+        </h1>
+        <span
+          class="source-label"
+        >
+          Local academic sandbox
+        </span>
+      </div>
+      <label
+        class="admin-period-selector"
+      >
+        Academic period
+        <select>
+          <option
+            value=""
+          >
+            Choose a period
+          </option>
+          <option
+            value="p"
+          >
+            Sample period
+          </option>
+        </select>
+      </label>
+      <div
+        class="admin-overview-content"
+      >
+        <p
+          role="status"
+        >
+          Checking academic readiness…
+        </p>
+        <section
+          class="workspace-card admin-activity"
+        >
+          <h2>
+            Recent scheduling activity
+          </h2>
+          <p>
+            No saved draft recorded for this selected period.
+          </p>
+        </section>
+      </div>
+      <nav
+        aria-label="Scheduling tools"
+        class="admin-tool-links"
+      >
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/academic"
+        >
+          Academic Setup
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/schedule-manager/drafts?source=academic"
+        >
+          Saved Drafts
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/calendar"
+        >
+          Published Timetables
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/conflicts"
+        >
+          Conflict Center
+        </a>
+      </nav>
+    </section>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      class="admin-overview"
+    >
+      <div
+        class="ux-section-heading"
+      >
+        <h1>
+          Scheduling overview
+        </h1>
+        <span
+          class="source-label"
+        >
+          Local academic sandbox
+        </span>
+      </div>
+      <label
+        class="admin-period-selector"
+      >
+        Academic period
+        <select>
+          <option
+            value=""
+          >
+            Choose a period
+          </option>
+          <option
+            value="p"
+          >
+            Sample period
+          </option>
+        </select>
+      </label>
+      <div
+        class="admin-overview-content"
+      >
+        <p
+          role="status"
+        >
+          Checking academic readiness…
+        </p>
+        <section
+          class="workspace-card admin-activity"
+        >
+          <h2>
+            Recent scheduling activity
+          </h2>
+          <p>
+            No saved draft recorded for this selected period.
+          </p>
+        </section>
+      </div>
+      <nav
+        aria-label="Scheduling tools"
+        class="admin-tool-links"
+      >
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/academic"
+        >
+          Academic Setup
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/schedule-manager/drafts?source=academic"
+        >
+          Saved Drafts
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/calendar"
+        >
+          Published Timetables
+        </a>
+        <a
+          class="button button--secondary"
+          data-discover="true"
+          href="/admin/conflicts"
+        >
+          Conflict Center
+        </a>
+      </nav>
+    </section>
+  </div>
+</body>
+ ❯ waitForWrapper ../../node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/AdminSchedulingHome.test.tsx:56:18
+     54|   );
+     55|   expect(
+     56|     await screen.findByRole('link', { name: 'Generate Weekly Schedule'…
+       |                  ^
+     57|   ).toHaveAttribute('href', '/admin/ai-scheduling?period=p');
+     58|   expect(screen.getByText('No published version for this period')).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

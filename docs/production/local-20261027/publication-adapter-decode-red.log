@@ -1,0 +1,334 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[malformed-json] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD189AAB70>
+tamper = 'malformed-json'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\scheduling\app\publication_rules.py:27: in decode
+    payload = json.loads(row["payload"])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\json\__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\json\decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <json.decoder.JSONDecoder object at 0x000001BD0B5B10D0>, s = '{malformed'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+>           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\json\decoder.py:354: JSONDecodeError
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[missing-draft] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A20710>
+tamper = 'missing-draft'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A20710>
+row = {'actor': 'synthetic-admin', 'checksum': '515803d38d065eabf47b8bc0e8982595752aa08e04b4d76bfda9cb721234e4a6', 'created_at': '2026-10-26T08:00:00+00:00', 'dataset': 'institutional', ...}
+
+    def decode(self, row):
+        if digest(row["payload"]) != row["checksum"]:
+            raise DraftError(409, "publication_integrity", "Published version integrity failed.")
+        payload = json.loads(row["payload"])
+>       payload["draft"] = DraftDetail.model_validate(payload["draft"])
+                                                      ^^^^^^^^^^^^^^^^
+E       KeyError: 'draft'
+
+services\scheduling\app\publication_rules.py:28: KeyError
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[missing-calendar] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A23320>
+tamper = 'missing-calendar'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A23320>
+row = {'actor': 'synthetic-admin', 'checksum': '82888a2a3f2387d2a13350775625ec259abb640e381308809da932d6c0358b88', 'created_at': '2026-10-26T08:00:00+00:00', 'dataset': 'institutional', ...}
+
+    def decode(self, row):
+        if digest(row["payload"]) != row["checksum"]:
+            raise DraftError(409, "publication_integrity", "Published version integrity failed.")
+        payload = json.loads(row["payload"])
+        payload["draft"] = DraftDetail.model_validate(payload["draft"])
+>       payload["calendar"] = AcademicCalendar.model_validate(payload["calendar"])
+                                                              ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'calendar'
+
+services\scheduling\app\publication_rules.py:29: KeyError
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[invalid-draft] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A22240>
+tamper = 'invalid-draft'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A22240>
+row = {'actor': 'synthetic-admin', 'checksum': '435672e1cdd6d2dec984a7975395c14cbb4619c98fc6d25ce168035d3dd75c71', 'created_at': '2026-10-26T08:00:00+00:00', 'dataset': 'institutional', ...}
+
+    def decode(self, row):
+        if digest(row["payload"]) != row["checksum"]:
+            raise DraftError(409, "publication_integrity", "Published version integrity failed.")
+        payload = json.loads(row["payload"])
+>       payload["draft"] = DraftDetail.model_validate(payload["draft"])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 18 validation errors for DraftDetail
+E       id
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       title
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       period_id
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       created_at
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       creator
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       source
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       run_id
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       input_hash
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       data_version
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       solver_status
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       session_count
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       offerings_requested
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       offerings_scheduled
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       required_minutes
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       allocated_minutes
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       input_snapshot
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       generation_result
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       validation
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+
+services\scheduling\app\publication_rules.py:28: ValidationError
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[invalid-calendar] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A22BD0>
+tamper = 'invalid-calendar'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD18A22BD0>
+row = {'actor': 'synthetic-admin', 'checksum': '9e0cacb78a41dfc8c456e67c7815203448fafe1325aee7d1f8e661642c03904e', 'created_at': '2026-10-26T08:00:00+00:00', 'dataset': 'institutional', ...}
+
+    def decode(self, row):
+        if digest(row["payload"]) != row["checksum"]:
+            raise DraftError(409, "publication_integrity", "Published version integrity failed.")
+        payload = json.loads(row["payload"])
+        payload["draft"] = DraftDetail.model_validate(payload["draft"])
+>       payload["calendar"] = AcademicCalendar.model_validate(payload["calendar"])
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       pydantic_core._pydantic_core.ValidationError: 4 validation errors for AcademicCalendar
+E       academic_year
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       semester
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       effective_start
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+E       effective_end
+E         Field required [type=missing, input_value={}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.14/v/missing
+
+services\scheduling\app\publication_rules.py:29: ValidationError
+_ test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[non-object] _
+
+repository = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD189EBD10>
+tamper = 'non-object'
+
+    @pytest.mark.parametrize("tamper", ["malformed-json", "missing-draft", "missing-calendar",
+                                      "invalid-draft", "invalid-calendar", "non-object"])
+    def test_checksum_consistent_corrupt_publication_is_typed_integrity_failure(repository, tamper):
+        row = publication_row()
+        payload = json.loads(row["payload"])
+        if tamper == "malformed-json":
+            row["payload"] = "{malformed"
+        elif tamper == "non-object":
+            row["payload"] = "null"
+        else:
+            action, field = tamper.split("-")
+            if action == "missing":
+                del payload[field]
+            else:
+                payload[field] = {}
+            row["payload"] = encode(payload)
+        row["checksum"] = digest(row["payload"])
+        with pytest.raises(DraftError) as denied:
+>           repository.decode(row)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <services.scheduling.app.postgres_publication_repository.PostgresPublicationRepository object at 0x000001BD189EBD10>
+row = {'actor': 'synthetic-admin', 'checksum': '74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b', 'created_at': '2026-10-26T08:00:00+00:00', 'dataset': 'institutional', ...}
+
+    def decode(self, row):
+        if digest(row["payload"]) != row["checksum"]:
+            raise DraftError(409, "publication_integrity", "Published version integrity failed.")
+        payload = json.loads(row["payload"])
+>       payload["draft"] = DraftDetail.model_validate(payload["draft"])
+                                                      ^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+services\scheduling\app\publication_rules.py:28: TypeError
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[malformed-json]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[missing-draft]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[missing-calendar]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[invalid-draft]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[invalid-calendar]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_checksum_consistent_corrupt_publication_is_typed_integrity_failure[non-object]
+6 failed, 76 deselected in 1.44s

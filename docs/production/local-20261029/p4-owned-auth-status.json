@@ -1,0 +1,52 @@
+[
+  {
+    "project": "demo-classsync-3bdd57c72044",
+    "endpoint": "127.0.0.1:53097",
+    "toolsVersion": "15.34.1",
+    "authOnly": true,
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-c9555dd3edd4488da909b8f7133de0ff",
+    "authStopped": true,
+    "childExit": 1,
+    "deniedOutbound": 0
+  },
+  {
+    "project": "demo-classsync-d6c19b9aa697",
+    "endpoint": "127.0.0.1:53161",
+    "toolsVersion": "15.34.1",
+    "authOnly": true,
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-2de4d1929d5a41998fe9c3c4361d7218",
+    "authStopped": true,
+    "childExit": 1,
+    "deniedOutbound": 0
+  },
+  {
+    "project": "demo-classsync-94ecb8568969",
+    "endpoint": "127.0.0.1:53607",
+    "toolsVersion": "15.34.1",
+    "authOnly": true,
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-9778b895a569444ba0d9c8efb29d34db",
+    "authStopped": true,
+    "childExit": 1,
+    "deniedOutbound": 0
+  },
+  {
+    "project": "demo-classsync-d32b46643442",
+    "endpoint": "127.0.0.1:53825",
+    "toolsVersion": "15.34.1",
+    "authOnly": true,
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-1dbb47e8517e4ba1b5bfb61a10747b7a",
+    "authStopped": true,
+    "childExit": 1,
+    "deniedOutbound": 0
+  },
+  {
+    "project": "demo-classsync-dea363d51578",
+    "endpoint": "127.0.0.1:54392",
+    "toolsVersion": "15.34.1",
+    "authOnly": true,
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-44b81a2c26a340cb89acc436193f36d0",
+    "authStopped": true,
+    "childExit": 1,
+    "deniedOutbound": 0
+  }
+]

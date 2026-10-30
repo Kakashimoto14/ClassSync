@@ -62,7 +62,8 @@ export interface RouteDefinition {
   icon: LucideIcon;
   mobileLabel?: string;
   plannedFeature?: PlannedFeature;
-  academicKind?: 'programs' | 'subjects' | 'sections' | 'faculty' | 'resources' | 'offerings' | 'constraints';
+  academicKind?:
+    'programs' | 'subjects' | 'sections' | 'faculty' | 'resources' | 'offerings' | 'constraints';
 }
 const make = (definition: RouteDefinition): RouteDefinition => definition;
 export const routeDefinitions = [
@@ -74,7 +75,7 @@ export const routeDefinitions = [
     description: 'Your next class, room, and schedule updates.',
     kind: 'dashboard',
     navigationGroup: 'Overview',
-    navigationLabel: 'Dashboard',
+    navigationLabel: 'Home',
     icon: LayoutDashboard,
     mobileLabel: 'Home',
   }),
@@ -86,7 +87,7 @@ export const routeDefinitions = [
     description: 'Your classes, instructors, and assigned classrooms for this week.',
     kind: 'schedule',
     navigationGroup: 'Academic',
-    navigationLabel: 'My Schedule',
+    navigationLabel: 'Schedule',
     icon: CalendarDays,
     mobileLabel: 'Schedule',
   }),
@@ -145,7 +146,7 @@ export const routeDefinitions = [
     description: 'Schedule and classroom updates that affect you.',
     kind: 'notifications',
     navigationGroup: 'Communication',
-    navigationLabel: 'Notifications',
+    navigationLabel: 'Alerts',
     icon: Bell,
     mobileLabel: 'Alerts',
   }),
@@ -418,8 +419,7 @@ export const routeDefinitions = [
     path: '/admin/ai-conflict-detection',
     role: 'administrator',
     title: 'AI Conflict Detection',
-    description:
-      'Independent constraint validation. AI explanations are planned.',
+    description: 'Independent constraint validation. AI explanations are planned.',
     kind: 'conflicts',
     navigationGroup: 'Scheduling',
     icon: Bot,
@@ -428,9 +428,9 @@ export const routeDefinitions = [
     id: 'administrator.ai-scheduling',
     path: '/admin/ai-scheduling',
     role: 'administrator',
-    title: 'AI-Powered Scheduling', mobileLabel: 'Generate',
-    description:
-      'Generate, validate and save a constraint-based weekly timetable.',
+    title: 'AI-Powered Scheduling',
+    mobileLabel: 'Generate',
+    description: 'Generate, validate and save a constraint-based weekly timetable.',
     kind: 'schedule-create',
     navigationGroup: 'Scheduling',
     navigationLabel: 'AI-Powered Scheduling',
@@ -513,25 +513,61 @@ export const routeDefinitions = [
     icon: UsersRound,
   }),
   make({
-    id: 'administrator.academic-data', path: '/admin/academic', role: 'administrator', title: 'Academic Management',
-    description: 'Manage saved academic periods and scheduling inputs.', kind: 'academic-manage', academicKind: 'programs',
-    navigationGroup: 'Academic Setup', navigationLabel: 'Academic Years / Semesters', icon: BookOpen,
+    id: 'administrator.academic-data',
+    path: '/admin/academic',
+    role: 'administrator',
+    title: 'Academic Management',
+    description: 'Manage saved academic periods and scheduling inputs.',
+    kind: 'academic-manage',
+    academicKind: 'programs',
+    navigationGroup: 'Academic Setup',
+    navigationLabel: 'Academic Years / Semesters',
+    icon: BookOpen,
   }),
   make({
-    id: 'administrator.programs', path: '/admin/programs', role: 'administrator', title: 'Programs',
-    description: 'Configure program names and section naming policies for a saved period.', navigationGroup: 'Academic Setup', navigationLabel: 'Programs', kind: 'academic-manage', academicKind: 'programs', icon: BookOpen,
+    id: 'administrator.programs',
+    path: '/admin/programs',
+    role: 'administrator',
+    title: 'Programs',
+    description: 'Configure program names and section naming policies for a saved period.',
+    navigationGroup: 'Academic Setup',
+    navigationLabel: 'Programs',
+    kind: 'academic-manage',
+    academicKind: 'programs',
+    icon: BookOpen,
   }),
   make({
-    id: 'administrator.offerings', path: '/admin/offerings', role: 'administrator', title: 'Subject Offerings',
-    description: 'Assign subjects, sections, eligible faculty and classrooms.', navigationGroup: 'Academic Setup', navigationLabel: 'Subject Offerings', kind: 'academic-manage', academicKind: 'offerings', icon: BookOpen,
+    id: 'administrator.offerings',
+    path: '/admin/offerings',
+    role: 'administrator',
+    title: 'Subject Offerings',
+    description: 'Assign subjects, sections, eligible faculty and classrooms.',
+    navigationGroup: 'Academic Setup',
+    navigationLabel: 'Subject Offerings',
+    kind: 'academic-manage',
+    academicKind: 'offerings',
+    icon: BookOpen,
   }),
   make({
-    id: 'administrator.resource-metadata', path: '/admin/academic/resources', role: 'administrator', title: 'Resource Metadata',
-    description: 'Enter resource constraints with provenance. Provisional locations remain separate from suitability.', kind: 'academic-manage', academicKind: 'resources', icon: Building2,
+    id: 'administrator.resource-metadata',
+    path: '/admin/academic/resources',
+    role: 'administrator',
+    title: 'Resource Metadata',
+    description:
+      'Enter resource constraints with provenance. Provisional locations remain separate from suitability.',
+    kind: 'academic-manage',
+    academicKind: 'resources',
+    icon: Building2,
   }),
   make({
-    id: 'administrator.scheduling-constraints', path: '/admin/scheduling-constraints', role: 'administrator', title: 'Scheduling Constraints',
-    description: 'Set allowed teaching windows, workload rules and locked assignments.', kind: 'academic-manage', academicKind: 'constraints', icon: CalendarDays,
+    id: 'administrator.scheduling-constraints',
+    path: '/admin/scheduling-constraints',
+    role: 'administrator',
+    title: 'Scheduling Constraints',
+    description: 'Set allowed teaching windows, workload rules and locked assignments.',
+    kind: 'academic-manage',
+    academicKind: 'constraints',
+    icon: CalendarDays,
   }),
   make({
     id: 'administrator.academic-detail',
@@ -713,12 +749,7 @@ export function navigationForRole(role: UserRole): { title: string; items: Route
 
 const mobileNavigationIds: Record<UserRole, readonly RouteId[]> = {
   student: ['student.dashboard', 'student.schedule', 'student.rooms', 'student.notifications'],
-  teacher: [
-    'teacher.dashboard',
-    'teacher.schedule',
-    'teacher.find-room',
-    'teacher.requests',
-  ],
+  teacher: ['teacher.dashboard', 'teacher.schedule', 'teacher.find-room', 'teacher.requests'],
   administrator: [
     'administrator.dashboard',
     'administrator.ai-scheduling',
@@ -768,9 +799,11 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
 
 export function navigationOwner(path: string, mobile = false): RouteId | undefined {
   const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
-  let route = routesByPath.get(pathname) ?? routeDefinitions.find(
-    (item) => item.path.includes('/:') && matchPath({ path: item.path, end: true }, pathname),
-  );
+  let route =
+    routesByPath.get(pathname) ??
+    routeDefinitions.find(
+      (item) => item.path.includes('/:') && matchPath({ path: item.path, end: true }, pathname),
+    );
   const visited = new Set<RouteId>();
   while (route && !visited.has(route.id)) {
     visited.add(route.id);

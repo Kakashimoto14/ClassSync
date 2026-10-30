@@ -1,10 +1,12 @@
 import { env } from './env';
+import { requireLiveCapability } from '../config/runtime-config';
 import type { AcademicPeriodList, AcademicSnapshot, AcademicReadiness, RecordWrite, PeriodCreate, GenerationResult } from '../../../../packages/shared-types/src/scheduling';
 export type { AcademicSnapshot, AcademicReadiness, RecordWrite, RecordEnvelope, AcademicPeriod } from '../../../../packages/shared-types/src/scheduling';
 export type AcademicKind = NonNullable<RecordWrite['record']['kind']>;
 export type AcademicRecord = RecordWrite['record'] & { id: string; kind: AcademicKind };
 
 async function academicRequest<T>(path: string, body?: unknown, method = 'GET'): Promise<T> {
+  requireLiveCapability();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 50000);
   try {

@@ -1,5 +1,7 @@
 # Deployment decision — UX-06
 
+> Historical UX-06 observations below are retained as dated context. Current read-only hosted checks and P1 gate decisions are in `../production/p1-gate-closure-report.md` (21 October 2026). The public alias still returns 404 on nested refresh and `/release.json`; its deployed SHA and private project settings remain unverified. No deployment/settings change has been made.
+
 ## Confirmed deployment failure
 
 Local clean baseline and pushed `main` were both
@@ -67,7 +69,7 @@ It neither overwrites server records nor impersonates an official publication.
 
 ## Staged Vercel configuration — not applied
 
-`vercel.json` assumes **repository-root Root Directory**, `npm run build`, output
+`vercel.json` assumes **repository-root Root Directory**, `npm run build:presentation`, output
 `apps/web/dist`. The owner must inspect the actual Vercel Root Directory before
 applying it; this setting was not accessible to the audit. Explicit frontend route
 prefixes rewrite to `index.html`; `/api/*` is deliberately excluded and must retain
@@ -76,15 +78,20 @@ a real HTTP error until a real API exists. Static logo/favicon paths stay static
 For the approved presentation build only:
 
 ```text
-VITE_ENABLE_ROLE_PREVIEW=true
-VITE_ENABLE_PRESENTATION_SAMPLE=true
+VITE_CLASSSYNC_MODE=presentation
 ```
 
-Leave `VITE_API_BASE_URL` at `/api/v1` for the ordinary connected build. The
-presentation does not call it. Never point a public build to localhost/private QA
+Leave `VITE_API_BASE_URL` at `/api/v1` for the explicitly connected local sandbox.
+Ordinary builds currently provide unavailable institutional access; neither that
+artifact nor the read-only presentation calls the API. Never point a public build to localhost/private QA
 ports. Sample mode is not an automatic fallback when an institutional API fails.
-Both flags are opt-in; ordinary production builds keep preview disabled. Existing
-backend sandbox flags stay false in public hosting. Do not upload server secrets.
+The presentation build script supplies the reviewed presentation build target. The
+canonical mode is `presentation`; leave legacy flags unset, or use only compatible
+values documented in the P1 mode matrix. Contradictory flags fail the build.
+Ordinary builds default to unavailable institutional access, not presentation.
+Every distributable build rejects sandbox. Backend sandbox flags stay false in
+public hosting. These frontend settings grant no backend authority. Do not upload
+server secrets.
 
 After owner approval: deploy the reviewed revision, confirm its SHA in Vercel,
 verify root/deep-route refresh and all three roles on the public URL, inspect logo/

@@ -1,0 +1,1862 @@
+{
+  "date": "2026-10-21",
+  "head": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+  "initialStatus": " M .github/workflows/quality.yml\n M apps/web/.env.example\n M apps/web/package.json\n M apps/web/src/auth/preview-session.ts\n M apps/web/src/components/layout/AppShell.tsx\n M apps/web/src/lib/academic-api.ts\n M apps/web/src/lib/presentation-sample.ts\n M apps/web/src/lib/publication-api.ts\n M apps/web/src/lib/sample-calendar-api.ts\n M apps/web/src/lib/scheduling-api.ts\n M apps/web/src/pages/AcademicCalendarEditor.tsx\n M apps/web/src/pages/AcademicFixtureImport.tsx\n M apps/web/src/pages/ProductScreenPage.tsx\n M apps/web/src/pages/PublicationPanel.tsx\n M apps/web/src/pages/R1Presentation.test.tsx\n M apps/web/src/routes/RouteGuard.tsx\n M apps/web/src/services/api-client.ts\n M apps/web/vite.config.ts\n M docs/architecture.md\n M docs/infrastructure/vercel-backend-deployment-plan.md\n M docs/releases/r1-public-presentation.md\n M docs/security.md\n M package-lock.json\n M package.json\n M scripts/build-presentation.cjs\n M scripts/preview-presentation.cjs\n M services/academic/requirements.txt\n M services/gateway/requirements.txt\n M services/notification/requirements.txt\n M services/scheduling/requirements.txt\n M vercel.json\n?? apps/web/config/\n?? apps/web/src/config/\n?? docs/production/\n?? scripts/lib/\n?? scripts/security/\n?? scripts/tests/\n?? scripts/verify-hosted-presentation.cjs\n?? services/scheduling/tests/test_mode_boundaries.py\n?? services/scheduling/tests/test_security_audit.py\n?? services/security-constraints.txt\n",
+  "initialCumulativeCount": 67,
+  "initialCumulativeInventory": [
+    {
+      "file": ".github/workflows/quality.yml",
+      "bytes": 2784,
+      "sha256": "9ac9a16603ac89d5b7399f3a8a91e537f2b01cb521eaadd6cf993f57baf6668c",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/.env.example",
+      "bytes": 746,
+      "sha256": "44e0a29f55c2bca3e43e028f872d2a8128269048291296d79c6b75790d45a624",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/config/release-metadata.ts",
+      "bytes": 1112,
+      "sha256": "5c784bdbf6615e7b17e6b442c4a10b7e50729aa0187fd9a24d7b21175b87aaf3",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/package.json",
+      "bytes": 1207,
+      "sha256": "db8034887a74c6149f4f7e4ad661eb7289578de191b514b39dab1693f98eeb7a",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "apps/web/src/auth/preview-session.ts",
+      "bytes": 1664,
+      "sha256": "32ba009caf883e8db0bb738b2b15bee1488a8566a01c40a7336f76159ee9d791",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/components/layout/AppShell.tsx",
+      "bytes": 10483,
+      "sha256": "2657869a08a63ca4ce2ab6f696dab254f44f970c8c08523bdc8c29830993a8c9",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/config/api-boundaries.test.ts",
+      "bytes": 2576,
+      "sha256": "0ff2f200e7340a398798c946d851da963c19dc9ec98d454bfc8809e3aef34003",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/config/app-mode.test.ts",
+      "bytes": 2714,
+      "sha256": "b823fd9a0da41ae832e82d1b06482d9894a6cdd42cfc8eed5839040088782514",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/config/app-mode.ts",
+      "bytes": 2556,
+      "sha256": "9e24b8a2dc1aecfa01f2e62efec604d8852187fc70d66ceb05382c735f2cbb54",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/config/institutional-routes.test.tsx",
+      "bytes": 1372,
+      "sha256": "188842952c0649874eed5a27d9f0204fce2fd5dcc6361bfcb326a2aee0b557d0",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/config/runtime-config.ts",
+      "bytes": 1170,
+      "sha256": "c5fe1c1f87edbe9a77f5ad9d716828300c6db9f3b98fc8ac87363b4bf370eb9e",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/lib/academic-api.ts",
+      "bytes": 2904,
+      "sha256": "e36b050e81b44b2744ddbf801ecaa715f02aaeeea2306bc9b23eab511ea9f94e",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/lib/presentation-sample.ts",
+      "bytes": 1495,
+      "sha256": "43e4f594c5272ee99c03bbf3a4b3dfb511b4cbb9461836d7ef4536f5b3ca22be",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/lib/publication-api.ts",
+      "bytes": 4290,
+      "sha256": "a76849d2ae2c2983f95fd3594af2372a4678efa37fcb0763c409ee3d8ab3d681",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/lib/sample-calendar-api.ts",
+      "bytes": 1625,
+      "sha256": "22202d0389daa6f9d2b2a618c6cc6f645ae6f890c2b2ece83f901e3a41479469",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/lib/scheduling-api.ts",
+      "bytes": 3223,
+      "sha256": "dd4ce1629f4db5d2a74d88a51cf9ed6ae90d6d9f34c58798c667ded8dfc1f5e8",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/pages/AcademicCalendarEditor.tsx",
+      "bytes": 4706,
+      "sha256": "9f85372da994aa00555ed46623b1de79454b0c2af58f61cbb0e2acfba1547907",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/pages/AcademicFixtureImport.tsx",
+      "bytes": 7775,
+      "sha256": "5016d8c7295f70dd778862b8aa43247c30a6222635660ba16b629e8fc2fec0e2",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/pages/ProductScreenPage.tsx",
+      "bytes": 16943,
+      "sha256": "f19e59f67c1bb08d6378e556049dba86f8e264232c9c1c927670e5c45fc1fe9a",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/pages/PublicationPanel.tsx",
+      "bytes": 7750,
+      "sha256": "d72843b192b738555068362be3b73779efc17f7ff6bc34aabc378d0ca39e650b",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/pages/R1Presentation.test.tsx",
+      "bytes": 4361,
+      "sha256": "0dcf5f44ac900f8500c3f17cff3ad34dfcafcec60a8d3e1b2a3bce1d71efe547",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/routes/RouteGuard.tsx",
+      "bytes": 2253,
+      "sha256": "13ccde123b7d1dc9c58c68c439cfcb2b9f2c7928122264a95ef2700860d6320d",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/src/services/api-client.ts",
+      "bytes": 524,
+      "sha256": "318dbc19e852c3855d389cf7374e573ae3a51d4441cf7517a677995153568b39",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "apps/web/vite.config.ts",
+      "bytes": 1351,
+      "sha256": "3ca8d4725047baef18dd017d88bed80ee7bd1f0a2a8167510a7f66bede89db85",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "docs/architecture.md",
+      "bytes": 1800,
+      "sha256": "c2b9b1b12817cee3f4bf2737750616ac1cf7b11ed8142c7e27990cb1a3ea2b67",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/infrastructure/vercel-backend-deployment-plan.md",
+      "bytes": 10598,
+      "sha256": "a9889da8e08645a14f465661767860201e6638eed76418084b23bbee4b52ee09",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/dependency-advisory-register.md",
+      "bytes": 12042,
+      "sha256": "48eb61393dbd594ee81c60f312bdf375f4ed566fba7a2f8d8b87611e158c9361",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/dependency-audit-2026-10-21.json",
+      "bytes": 11747,
+      "sha256": "9b365e2372d830cfd1ab54729b6176d5ff1e37062f13af1d71064bd2727e83c7",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-browser-evidence.json",
+      "bytes": 6271,
+      "sha256": "ff4ee4b1744a58c7b16a604f599d4f637ac9dc9999a002815243a6f7bbf41e62",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-database-preservation.json",
+      "bytes": 1686,
+      "sha256": "1e1c818a320af85dab3116a606a3c77325c912b304926db71409b5958ee182b7",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-execution-contract.md",
+      "bytes": 3449,
+      "sha256": "1179d43b86af4ee86f93820b893a767294732cbaf7cf29ff2f18692cfdbcabdf",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/p1-final-blocker-evidence.json",
+      "bytes": 213248,
+      "sha256": "85563eba9d179dbb4fc7cdb9c4f7e315d12c443bcc0d95de0cf54a395735c4a0",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-final-blocker-remediation.md",
+      "bytes": 24154,
+      "sha256": "686286827d89a444c5d9bb0acab1e3651a79bd8eb083aab0a24068b49c84f6e8",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/p1-gate-closure-evidence.json",
+      "bytes": 64664,
+      "sha256": "5fdf31897564518ea436c05c4b7a05aaf8484ba49aaab6ab91f15f76d3215df2",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-gate-closure-report.md",
+      "bytes": 30462,
+      "sha256": "6ad0a88d3b5a68bc674d912b15a04cdffa6b0cdfa63f1162c6c7c8de0886dba0",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/administrator-1440.png",
+      "bytes": 96611,
+      "sha256": "74e5d702875a873c4ebb90e80d238a2730060ce1b2c67afd8e32a671d69094a0",
+      "review": "Historical screenshot artifact; identity/hash retained; not runtime source"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/hosted-student-390.png",
+      "bytes": 34893,
+      "sha256": "86d1d0cfe50a10f8b0bf7e198f0fadd8fea978e008d7a3f2479b8ffb950f323b",
+      "review": "Historical screenshot artifact; identity/hash retained; not runtime source"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/native-200-percent.png",
+      "bytes": 45227,
+      "sha256": "dc324f42e17346395ea8f4c9771bf06871648568942feb1385f17d2bce0e8e1f",
+      "review": "Historical screenshot artifact; identity/hash retained; not runtime source"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/student-390.png",
+      "bytes": 50009,
+      "sha256": "105dfc460f3a9c806605a9196f3ea49938c5330386d0a06456116e1f798a17d9",
+      "review": "Historical screenshot artifact; identity/hash retained; not runtime source"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/teacher-1440.png",
+      "bytes": 112891,
+      "sha256": "82f622b0f861604b14fc5fefda90700237eb12c9372635ed55135367b9287b9e",
+      "review": "Historical screenshot artifact; identity/hash retained; not runtime source"
+    },
+    {
+      "file": "docs/production/p1-researched-hosted-http.json",
+      "bytes": 7460,
+      "sha256": "055f5ab8118a6e26ce71bb39f39e9af0ba1cded2cac91f2b28af0e8fb4f4d326",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-researched-npm-audit.json",
+      "bytes": 2869,
+      "sha256": "f3e905bf1e36843905c2da8febedaeb61e3a67c51db9a43a6c934a6125e5e226",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-researched-python-audit/installed-third-party.txt",
+      "bytes": 1219,
+      "sha256": "4d650fb5753ed8317941933636a85fefa01baaffe238ff8cc3178899f3c7415e",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/p1-researched-python-audit/pip-audit.json",
+      "bytes": 3608,
+      "sha256": "82a693eca90663c3e2dfc727767976f92af47ba85d9eca26f10f74ebe55f3765",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-researched-python-audit/scope.json",
+      "bytes": 1734,
+      "sha256": "f67186fce435857b97e7ac34fb5c4e2b672ae452c5a0f12c640ee65b0256614c",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "docs/production/p1-researched-remediation-report.md",
+      "bytes": 23553,
+      "sha256": "14941f2084a84845122be652fa91d016333b9c682666d4b6433879ecde8825c2",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/p1-verification.md",
+      "bytes": 15178,
+      "sha256": "d2e9879490149bdf61e8cfe292dafcf35a7eff19861bc419e6bb35148c4863de",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/production/reconciled-master-plan.md",
+      "bytes": 22423,
+      "sha256": "81f1189c6aacd0a957c1b62e6e9b723ed6cde9e0abe9275940fc4d63c6f8c547",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/releases/r1-public-presentation.md",
+      "bytes": 17218,
+      "sha256": "7e9d5585150b9b2a4c50459d1c3644b266277219bcffbd8fa338d76ce4ff081a",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "docs/security.md",
+      "bytes": 5580,
+      "sha256": "e36b9400eee345a4977e58356c698d3c2ee1d9709fa51af4774d27a69ab7ea8a",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "package-lock.json",
+      "bytes": 234144,
+      "sha256": "e07e07d1b9abb650869abeb155d337ddcbdc3c29952fb05b8cd6f12476e478e1",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "package.json",
+      "bytes": 1094,
+      "sha256": "cd00cdf189bb2846a97d35a49212fc102b8543889e79abccf66f00d2729382c5",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    },
+    {
+      "file": "scripts/build-presentation.cjs",
+      "bytes": 745,
+      "sha256": "e88a371694712e4eac0e90873c4f3933bcdc4d0be5eb9d14589ad1a220d5e5f6",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/lib/artifact-server.cjs",
+      "bytes": 1945,
+      "sha256": "e886c64bd3fe0ea83ebfca9cc0a50fe583ccb034ad91e22cb99ff4839b3ccc48",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/preview-presentation.cjs",
+      "bytes": 1183,
+      "sha256": "608bcc2f34db6c887a986ad8e6e391260aa08f778085259d8ef0068e362ae41f",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/security/python_audit.py",
+      "bytes": 5354,
+      "sha256": "3650f3c58484a9d934df1f890253a175122a335a7e0fa149968aee84b409fbed",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/tests/dependency-security.test.cjs",
+      "bytes": 2182,
+      "sha256": "72ad866453065331c5c01ef6d8f307e5822d6104de3759dbca304717b493a70a",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/tests/production-artifacts.test.cjs",
+      "bytes": 5713,
+      "sha256": "29eb15eab5ce5710595b30e81cf281d2036797397fb56fa50f969277b41f9aa2",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "scripts/verify-hosted-presentation.cjs",
+      "bytes": 4745,
+      "sha256": "9f04755f74035e997abc99db853ef86c8258ff6e96d2d2480d6e256c95697782",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "services/academic/requirements.txt",
+      "bytes": 147,
+      "sha256": "e59c8e8c5eb1677c6b5c6b9b4feee3717d107d63febd55f47ea8a38e4bedc4df",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "services/gateway/requirements.txt",
+      "bytes": 147,
+      "sha256": "1ecc5274de7176110e595a02d74da33fb3ffb486bb566cff0b795bfd174137f0",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "services/notification/requirements.txt",
+      "bytes": 131,
+      "sha256": "2081877646382bb4c7f7922b9768ce4acc25a67332e0912d0b5216c2c1619f7b",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "services/scheduling/requirements.txt",
+      "bytes": 167,
+      "sha256": "a5182f45a68492c59de1de32ab09d749bb8376bf2dda7c6e5470370dee89e331",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "services/scheduling/tests/test_mode_boundaries.py",
+      "bytes": 2309,
+      "sha256": "367e833c763523eaecba994f9c703a7d4976007b619e15b907e7e30550c89fa0",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "services/scheduling/tests/test_security_audit.py",
+      "bytes": 2214,
+      "sha256": "9e2183c3747d61ee94d758a83fbb7cea27fd69fc7a5731bfdbaaee74f8fd550f",
+      "review": "Cumulative source/config/test diff reviewed against HEAD or complete untracked addition"
+    },
+    {
+      "file": "services/security-constraints.txt",
+      "bytes": 130,
+      "sha256": "1875aa89c039dd8e13ccd237c1aae021af4e0cc5737aab971d187c84aae57914",
+      "review": "Documentation/security/provenance record; historical results distinguished from current checks"
+    },
+    {
+      "file": "vercel.json",
+      "bytes": 733,
+      "sha256": "1f5abaad0ff95af89d00534fc22f0e774f73685c9597750d1edc8bca3ffe77fa",
+      "review": "Parsed configuration/lock/evidence JSON; classified against source and report"
+    }
+  ],
+  "finalCumulativeFiles": [
+    ".github/workflows/quality.yml",
+    "apps/web/.env.example",
+    "apps/web/config/release-metadata.ts",
+    "apps/web/package.json",
+    "apps/web/src/auth/preview-session.ts",
+    "apps/web/src/components/layout/AppShell.tsx",
+    "apps/web/src/config/api-boundaries.test.ts",
+    "apps/web/src/config/app-mode.test.ts",
+    "apps/web/src/config/app-mode.ts",
+    "apps/web/src/config/institutional-routes.test.tsx",
+    "apps/web/src/config/runtime-config.ts",
+    "apps/web/src/lib/academic-api.ts",
+    "apps/web/src/lib/presentation-sample.ts",
+    "apps/web/src/lib/publication-api.ts",
+    "apps/web/src/lib/sample-calendar-api.ts",
+    "apps/web/src/lib/scheduling-api.ts",
+    "apps/web/src/pages/AcademicCalendarEditor.tsx",
+    "apps/web/src/pages/AcademicFixtureImport.tsx",
+    "apps/web/src/pages/ProductScreenPage.tsx",
+    "apps/web/src/pages/PublicationPanel.tsx",
+    "apps/web/src/pages/R1Presentation.test.tsx",
+    "apps/web/src/routes/RouteGuard.tsx",
+    "apps/web/src/services/api-client.ts",
+    "apps/web/vite.config.ts",
+    "docs/architecture.md",
+    "docs/infrastructure/vercel-backend-deployment-plan.md",
+    "docs/production/dependency-advisory-register.md",
+    "docs/production/dependency-audit-2026-10-21.json",
+    "docs/production/p1-browser-evidence.json",
+    "docs/production/p1-cumulative-review-and-p2-readiness.md",
+    "docs/production/p1-cumulative-review-evidence.json",
+    "docs/production/p1-database-preservation.json",
+    "docs/production/p1-execution-contract.md",
+    "docs/production/p1-final-blocker-evidence.json",
+    "docs/production/p1-final-blocker-remediation.md",
+    "docs/production/p1-gate-closure-evidence.json",
+    "docs/production/p1-gate-closure-report.md",
+    "docs/production/p1-gate-closure/administrator-1440.png",
+    "docs/production/p1-gate-closure/hosted-student-390.png",
+    "docs/production/p1-gate-closure/native-200-percent.png",
+    "docs/production/p1-gate-closure/student-390.png",
+    "docs/production/p1-gate-closure/teacher-1440.png",
+    "docs/production/p1-researched-hosted-http.json",
+    "docs/production/p1-researched-npm-audit.json",
+    "docs/production/p1-researched-python-audit/installed-third-party.txt",
+    "docs/production/p1-researched-python-audit/pip-audit.json",
+    "docs/production/p1-researched-python-audit/scope.json",
+    "docs/production/p1-researched-remediation-report.md",
+    "docs/production/p1-verification.md",
+    "docs/production/reconciled-master-plan.md",
+    "docs/releases/r1-public-presentation.md",
+    "docs/security.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/build-presentation.cjs",
+    "scripts/lib/artifact-server.cjs",
+    "scripts/preview-presentation.cjs",
+    "scripts/security/python_audit.py",
+    "scripts/tests/dependency-security.test.cjs",
+    "scripts/tests/hosted-verification.test.cjs",
+    "scripts/tests/production-artifacts.test.cjs",
+    "scripts/verify-hosted-presentation.cjs",
+    "services/academic/requirements.txt",
+    "services/gateway/requirements.txt",
+    "services/notification/requirements.txt",
+    "services/scheduling/requirements.txt",
+    "services/scheduling/tests/test_mode_boundaries.py",
+    "services/scheduling/tests/test_security_audit.py",
+    "services/security-constraints.txt",
+    "vercel.json"
+  ],
+  "reviewOnlyChanges": [
+    {
+      "file": "docs/architecture.md",
+      "before": "3e4ee9b63e5495bcc554ec52f67c047042a5371dbf8549937bf914d0050f685d",
+      "after": "c2b9b1b12817cee3f4bf2737750616ac1cf7b11ed8142c7e27990cb1a3ea2b67"
+    },
+    {
+      "file": "docs/infrastructure/vercel-backend-deployment-plan.md",
+      "before": "a974690eb09b4fca2cd1628c8176dd0cfabf76535384650d467f3013d7b981ed",
+      "after": "a9889da8e08645a14f465661767860201e6638eed76418084b23bbee4b52ee09"
+    },
+    {
+      "file": "docs/production/p1-cumulative-review-and-p2-readiness.md",
+      "before": null,
+      "after": "d66ef2f5445903bddf3265a4c71b16bd834a89f0c8b200f3839bc04db17afb64"
+    },
+    {
+      "file": "docs/production/reconciled-master-plan.md",
+      "before": "f4e363f00f3f1dee79ddfc6cc2696bef7ddecff1d8cbefc6332ca9656ac9c5bf",
+      "after": "81f1189c6aacd0a957c1b62e6e9b723ed6cde9e0abe9275940fc4d63c6f8c547"
+    },
+    {
+      "file": "package.json",
+      "before": "3470e5b1073e471faefdc33edc5868b4960d8a8531fe756ae3dd6772df632621",
+      "after": "cd00cdf189bb2846a97d35a49212fc102b8543889e79abccf66f00d2729382c5"
+    },
+    {
+      "file": "scripts/tests/hosted-verification.test.cjs",
+      "before": null,
+      "after": "c2c8bf4f75022a49b515421ed9c8a5e4004364a83cb62294915410d8a8e6c1c7"
+    },
+    {
+      "file": "scripts/verify-hosted-presentation.cjs",
+      "before": "dc7bfbd3f18e4d1a42987eb5647ba77e9d63d4cb45d896a2c1906e4a5a38055f",
+      "after": "9f04755f74035e997abc99db853ef86c8258ff6e96d2d2480d6e256c95697782"
+    },
+    {
+      "file": "docs/production/p1-cumulative-review-evidence.json",
+      "before": null,
+      "after": "self-referential hash omitted"
+    }
+  ],
+  "protectedRuntimeFilesUnchanged": 208,
+  "lockfileUnchanged": true,
+  "gitDiffCheck": "PASS",
+  "skills": {
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\react-best-practices\\SKILL.md": {
+      "sha256": "cc7d03309817f392c419a203e1bc1f1759ef94831f7dbedf39d91a35ac5bc86a",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\react-best-practices\\rules\\bundle-conditional.md": {
+      "sha256": "09c8259c3efb04fc0abb8e412ccbda217c222ae8118516283e571c995fe3a7d4",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\react-best-practices\\rules\\rerender-derived-state-no-effect.md": {
+      "sha256": "cb11ec76f50aa7b6847269f02d79b120c889a30d9ecd2c1d578f75144419c77a",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\frontend-testing-debugging\\SKILL.md": {
+      "sha256": "03724620cf7e7de425b607a5492f572d867b1cf5d9c92c74bf50d057d7415e0b",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\supabase-best-practices\\SKILL.md": {
+      "sha256": "cfc4da3ed47c14f4fb24c5b4db4be443fa200e12e71d674fb1270eecce87a302",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\supabase-best-practices\\references\\lock-deadlock-prevention.md": {
+      "sha256": "09aee46f51d7178c8e55fe056cd5a94a64ba2c122fe418e6900cd99f297b2347",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\supabase-best-practices\\references\\lock-short-transactions.md": {
+      "sha256": "5aa7f61095916986d39644b446cdbcd2bacca7ef698a3bb50b3f82dd60207602",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\supabase-best-practices\\references\\security-privileges.md": {
+      "sha256": "095909274a4fb43df785d7144cf674eeb40284d2d45628f14af4108737b93663",
+      "loadedThisReview": true
+    },
+    "C:\\Users\\lenovo\\.codex\\plugins\\cache\\openai-curated-remote\\build-web-apps\\0.1.2\\skills\\supabase-best-practices\\references\\security-rls-basics.md": {
+      "sha256": "e04dd1a3a382aafdaaa73fe9f7976352acdde6e90c2a2470d281b94d4f44b096",
+      "loadedThisReview": true
+    }
+  },
+  "commands": [
+    {
+      "name": "tree",
+      "exit": 0,
+      "seconds": 3.64
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "seconds": 14.28
+    },
+    {
+      "name": "typecheck",
+      "exit": 0,
+      "seconds": 24.31
+    },
+    {
+      "name": "security",
+      "exit": 0,
+      "seconds": 3.77
+    },
+    {
+      "name": "frontend",
+      "exit": 0,
+      "seconds": 169.62
+    },
+    {
+      "name": "ordinary",
+      "exit": 0,
+      "seconds": 37.67
+    },
+    {
+      "name": "presentation",
+      "exit": 0,
+      "seconds": 37.3
+    },
+    {
+      "name": "artifacts",
+      "exit": 0,
+      "seconds": 84.62
+    }
+  ],
+  "backend": {
+    "databases": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-review-1f9fcd86-1c39-40c9-9bbc-80daa7ab485b",
+    "ruff": 0,
+    "pytest": 0
+  },
+  "logs": {
+    "artifacts.log": "\n> classync@0.1.0 test:artifacts\n> node --test scripts/tests/production-artifacts.test.cjs\n\nTAP version 13\n# Subtest: actual Vite builds reject unsafe configuration before emitting artifacts\nok 1 - actual Vite builds reject unsafe configuration before emitting artifacts\n  ---\n  duration_ms: 24723.6467\n  type: 'test'\n  ...\n# Verified ordinary: C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\classsync-p1-artifacts-a5BFTn\\\\ordinary\n# Subtest: ordinary production metadata, SPA refresh and static/API boundaries\nok 2 - ordinary production metadata, SPA refresh and static/API boundaries\n  ---\n  duration_ms: 18908.0114\n  type: 'test'\n  ...\n# Verified presentation: C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\classsync-p1-artifacts-a5BFTn\\\\presentation\n# Subtest: presentation production metadata, SPA refresh and static/API boundaries\nok 3 - presentation production metadata, SPA refresh and static/API boundaries\n  ---\n  duration_ms: 21776.0092\n  type: 'test'\n  ...\n# Verified legacy-preview: C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\classsync-p1-artifacts-a5BFTn\\\\legacy-preview\n# Subtest: legacy-preview production metadata, SPA refresh and static/API boundaries\nok 4 - legacy-preview production metadata, SPA refresh and static/API boundaries\n  ---\n  duration_ms: 17876.4503\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 83463.9004\n",
+    "backend.log": "============================= test session starts =============================\nplatform win32 -- Python 3.12.14, pytest-9.0.3, pluggy-1.7.0\nrootdir: C:\\Projects\\ClassSync\nconfigfile: pyproject.toml\ntestpaths: services\nplugins: anyio-4.15.1\ncollected 105 items\n\nservices\\academic\\tests\\test_academic.py ..............                  [ 13%]\nservices\\academic\\tests\\test_health.py .                                 [ 14%]\nservices\\gateway\\tests\\test_health.py .                                  [ 15%]\nservices\\gateway\\tests\\test_timetable_stream.py .                        [ 16%]\nservices\\notification\\tests\\test_health.py .                             [ 17%]\nservices\\scheduling\\tests\\test_api.py ...........                        [ 27%]\nservices\\scheduling\\tests\\test_calendar.py ....                          [ 31%]\nservices\\scheduling\\tests\\test_drafts.py .................               [ 47%]\nservices\\scheduling\\tests\\test_engine.py ....................            [ 66%]\nservices\\scheduling\\tests\\test_health.py .                               [ 67%]\nservices\\scheduling\\tests\\test_mode_boundaries.py ...............        [ 81%]\nservices\\scheduling\\tests\\test_publication.py .......                    [ 88%]\nservices\\scheduling\\tests\\test_security_audit.py ............            [100%]\n\n============================== warnings summary ===============================\n.venv\\Lib\\site-packages\\fastapi\\testclient.py:1\n  C:\\Projects\\ClassSync\\.venv\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n================== 105 passed, 1 warning in 60.95s (0:01:00) ==================\n",
+    "frontend.log": "\n> classync@0.1.0 test:web\n> npm run test --workspace=@classync/web\n\n\n> @classync/web@0.1.0 test\n> vitest run\n\n\n RUN  v4.1.11 C:/Projects/ClassSync/apps/web\n\n\n Test Files  36 passed (36)\n      Tests  664 passed (664)\n   Start at  19:27:26\n   Duration  163.44s (transform 5.32s, setup 30.61s, import 118.79s, tests 49.26s, environment 98.55s)\n\n",
+    "lint.log": "\n> classync@0.1.0 lint\n> npm run lint --workspace=@classync/web\n\n\n> @classync/web@0.1.0 lint\n> eslint . --max-warnings=0\n\n",
+    "ordinary.log": "\n> classync@0.1.0 build\n> npm run build --workspace=@classync/web\n\n\n> @classync/web@0.1.0 build\n> tsc --noEmit && vite build\n\nvite v6.4.4 building for production...\ntransforming...\n\u2713 1742 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/release.json                                0.19 kB \u2502 gzip:   0.15 kB\ndist/index.html                                  1.26 kB \u2502 gzip:   0.58 kB\ndist/assets/index-BX0sBzLw.css                  84.64 kB \u2502 gzip:  15.87 kB\ndist/assets/RoleScheduleWorkspace-DY5f1uND.js   14.84 kB \u2502 gzip:   4.79 kB\ndist/assets/index.esm-CPpzC-M1.js              113.12 kB \u2502 gzip:  23.32 kB\ndist/assets/index-ByrCLjr4.js                  519.95 kB \u2502 gzip: 154.28 kB\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n\u2713 built in 16.90s\n",
+    "presentation.log": "\n> classync@0.1.0 build:presentation\n> node scripts/build-presentation.cjs\n\nvite v6.4.4 building for production...\ntransforming...\n\u2713 1742 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/release.json                                    0.25 kB \u2502 gzip:   0.18 kB\ndist/index.html                                      1.26 kB \u2502 gzip:   0.58 kB\ndist/assets/index-BX0sBzLw.css                      84.64 kB \u2502 gzip:  15.87 kB\ndist/assets/RoleScheduleWorkspace-DeGmp0d8.js       15.89 kB \u2502 gzip:   4.98 kB\ndist/assets/presentation-timetable.v1-CPRV2u8w.js   31.91 kB \u2502 gzip:   2.00 kB\ndist/assets/index.esm-BVTDUjMg.js                  113.12 kB \u2502 gzip:  23.32 kB\ndist/assets/index-BnbGXpfd.js                      524.87 kB \u2502 gzip: 155.61 kB\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n\u2713 built in 16.41s\n",
+    "ruff.log": "All checks passed!\n",
+    "security-final.log": "\n> classync@0.1.0 test:security\n> node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs\n\nTAP version 13\n# Subtest: patched dependency versions are actually installed, not only declared\nok 1 - patched dependency versions are actually installed, not only declared\n  ---\n  duration_ms: 38.4717\n  type: 'test'\n  ...\n# Subtest: Firestore Node module can load with the patched grpc API without connecting\nok 2 - Firestore Node module can load with the patched grpc API without connecting\n  ---\n  duration_ms: 920.6189\n  type: 'test'\n  ...\n# Subtest: patched selector parser preserves the used Tailwind and nested selector APIs\nok 3 - patched selector parser preserves the used Tailwind and nested selector APIs\n  ---\n  duration_ms: 1876.5337\n  type: 'test'\n  ...\n# Subtest: hosted gate requires an independently supplied approved commit\nok 4 - hosted gate requires an independently supplied approved commit\n  ---\n  duration_ms: 452.506\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects a different deployed commit\nok 5 - hosted gate rejects a different deployed commit\n  ---\n  duration_ms: 201.3846\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects a metadata-only HTML shell without JS and CSS\nok 6 - hosted gate rejects a metadata-only HTML shell without JS and CSS\n  ---\n  duration_ms: 212.7988\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects dirty release metadata\nok 7 - hosted gate rejects dirty release metadata\n  ---\n  duration_ms: 151.7748\n  type: 'test'\n  ...\n# Subtest: hosted HTTP gate accepts matching clean metadata and route/static/API boundaries\nok 8 - hosted HTTP gate accepts matching clean metadata and route/static/API boundaries\n  ---\n  duration_ms: 228.0364\n  type: 'test'\n  ...\n1..8\n# tests 8\n# suites 0\n# pass 8\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3138.8996\n",
+    "security.log": "\n> classync@0.1.0 test:security\n> node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs\n\nTAP version 13\n# Subtest: patched dependency versions are actually installed, not only declared\nok 1 - patched dependency versions are actually installed, not only declared\n  ---\n  duration_ms: 35.7938\n  type: 'test'\n  ...\n# Subtest: Firestore Node module can load with the patched grpc API without connecting\nok 2 - Firestore Node module can load with the patched grpc API without connecting\n  ---\n  duration_ms: 662.6721\n  type: 'test'\n  ...\n# Subtest: patched selector parser preserves the used Tailwind and nested selector APIs\nok 3 - patched selector parser preserves the used Tailwind and nested selector APIs\n  ---\n  duration_ms: 1567.8959\n  type: 'test'\n  ...\n# Subtest: hosted gate requires an independently supplied approved commit\nok 4 - hosted gate requires an independently supplied approved commit\n  ---\n  duration_ms: 399.9212\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects a different deployed commit\nok 5 - hosted gate rejects a different deployed commit\n  ---\n  duration_ms: 175.7974\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects a metadata-only HTML shell without JS and CSS\nok 6 - hosted gate rejects a metadata-only HTML shell without JS and CSS\n  ---\n  duration_ms: 203.5404\n  type: 'test'\n  ...\n# Subtest: hosted gate rejects dirty release metadata\nok 7 - hosted gate rejects dirty release metadata\n  ---\n  duration_ms: 223.0392\n  type: 'test'\n  ...\n# Subtest: hosted HTTP gate accepts matching clean metadata and route/static/API boundaries\nok 8 - hosted HTTP gate accepts matching clean metadata and route/static/API boundaries\n  ---\n  duration_ms: 182.2922\n  type: 'test'\n  ...\n1..8\n# tests 8\n# suites 0\n# pass 8\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 2541.3791\n",
+    "tree.log": "classync@0.1.0 C:\\Projects\\ClassSync\n\u251c\u2500\u2500 @classync/shared-types@0.1.0 -> .\\packages\\shared-types\n\u251c\u2500\u252c @classync/web@0.1.0 -> .\\apps\\web\n\u2502 \u251c\u2500\u2500 @eslint/js@9.39.5\n\u2502 \u251c\u2500\u252c @tanstack/react-query@5.104.1\n\u2502 \u2502 \u251c\u2500\u2500 @tanstack/query-core@5.104.1\n\u2502 \u2502 \u2514\u2500\u2500 react@19.3.0 deduped\n\u2502 \u251c\u2500\u252c @testing-library/jest-dom@6.9.1\n\u2502 \u2502 \u251c\u2500\u2500 @adobe/css-tools@4.5.0\n\u2502 \u2502 \u251c\u2500\u252c aria-query@5.3.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 dequal@2.0.3\n\u2502 \u2502 \u251c\u2500\u2500 css.escape@1.5.1\n\u2502 \u2502 \u251c\u2500\u2500 dom-accessibility-api@0.6.3\n\u2502 \u2502 \u251c\u2500\u2500 picocolors@1.1.1\n\u2502 \u2502 \u2514\u2500\u252c redent@3.0.0\n\u2502 \u2502   \u251c\u2500\u2500 indent-string@4.0.0\n\u2502 \u2502   \u2514\u2500\u252c strip-indent@3.0.0\n\u2502 \u2502     \u2514\u2500\u2500 min-indent@1.0.1\n\u2502 \u251c\u2500\u252c @testing-library/react@16.3.3\n\u2502 \u2502 \u251c\u2500\u2500 @babel/runtime@7.29.7\n\u2502 \u2502 \u251c\u2500\u252c @testing-library/dom@10.4.2\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/code-frame@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/helper-validator-identifier@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 js-tokens@4.0.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/runtime@7.29.7 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @types/aria-query@5.0.4\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 aria-query@5.3.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 dom-accessibility-api@0.5.16\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 lz-string@1.5.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u252c pretty-format@27.5.1\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 ansi-regex@5.0.1\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 ansi-styles@5.2.0\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 react-is@17.0.2\n\u2502 \u2502 \u251c\u2500\u2500 @types/react-dom@19.3.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @types/react@19.3.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 react-dom@19.3.0 deduped\n\u2502 \u2502 \u2514\u2500\u2500 react@19.3.0 deduped\n\u2502 \u251c\u2500\u252c @types/node@22.20.5\n\u2502 \u2502 \u2514\u2500\u2500 undici-types@6.21.0\n\u2502 \u251c\u2500\u252c @types/react-dom@19.3.0\n\u2502 \u2502 \u2514\u2500\u2500 @types/react@19.3.0 deduped\n\u2502 \u251c\u2500\u252c @types/react@19.3.0\n\u2502 \u2502 \u2514\u2500\u2500 csstype@3.2.3\n\u2502 \u251c\u2500\u252c @vitejs/plugin-react@4.7.0\n\u2502 \u2502 \u251c\u2500\u252c @babel/core@7.29.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/code-frame@7.29.7 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/generator@7.29.8\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/parser@7.29.9 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @jridgewell/gen-mapping@0.3.13 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @jridgewell/trace-mapping@0.3.31\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @jridgewell/resolve-uri@3.1.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @jridgewell/sourcemap-codec@1.6.0 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 jsesc@3.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/helper-compilation-targets@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/compat-data@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/helper-validator-option@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 browserslist@4.29.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c lru-cache@5.1.1\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 yallist@3.1.1\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 semver@6.3.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/helper-module-transforms@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/core@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/helper-module-imports@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/traverse@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/helper-validator-identifier@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/traverse@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/helpers@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/template@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/parser@7.29.9\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/template@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/code-frame@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/parser@7.29.9 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/traverse@7.29.8\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/code-frame@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/generator@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/helper-globals@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/parser@7.29.9 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/template@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @babel/types@7.29.8\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/helper-string-parser@7.29.7\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/helper-validator-identifier@7.29.7 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @jridgewell/remapping@2.3.5\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @jridgewell/gen-mapping@0.3.13 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @jridgewell/trace-mapping@0.3.31 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 convert-source-map@2.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 gensync@1.0.0-beta.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 json5@2.2.3\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 semver@6.3.1\n\u2502 \u2502 \u251c\u2500\u252c @babel/plugin-transform-react-jsx-self@7.29.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/core@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/helper-plugin-utils@7.29.7\n\u2502 \u2502 \u251c\u2500\u252c @babel/plugin-transform-react-jsx-source@7.29.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/core@7.29.7 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/helper-plugin-utils@7.29.7 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @rolldown/pluginutils@1.0.0-beta.27\n\u2502 \u2502 \u251c\u2500\u252c @types/babel__core@7.20.5\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/parser@7.29.9 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @types/babel__generator@7.27.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @types/babel__template@7.4.4\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @babel/parser@7.29.9 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u252c @types/babel__traverse@7.28.0\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 @babel/types@7.29.8 deduped\n\u2502 \u2502 \u251c\u2500\u2500 react-refresh@0.17.0\n\u2502 \u2502 \u2514\u2500\u2500 vite@6.4.4 deduped\n\u2502 \u251c\u2500\u252c autoprefixer@10.6.1\n\u2502 \u2502 \u251c\u2500\u252c browserslist@4.29.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 baseline-browser-mapping@2.11.27\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 caniuse-lite@1.0.30001814 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 electron-to-chromium@1.5.445\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 node-releases@2.0.57\n\u2502 \u2502 \u2502 \u2514\u2500\u252c update-browserslist-db@1.3.3\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 browserslist@4.29.3 deduped\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 escalade@3.2.0\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502 \u251c\u2500\u2500 caniuse-lite@1.0.30001814\n\u2502 \u2502 \u251c\u2500\u2500 fraction.js@5.3.4\n\u2502 \u2502 \u251c\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502 \u251c\u2500\u2500 postcss-value-parser@4.2.0\n\u2502 \u2502 \u2514\u2500\u252c postcss@8.5.29\n\u2502 \u2502   \u251c\u2500\u2500 nanoid@3.3.20\n\u2502 \u2502   \u251c\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502   \u2514\u2500\u2500 source-map-js@1.2.2\n\u2502 \u251c\u2500\u252c eslint-plugin-react-hooks@5.2.0\n\u2502 \u2502 \u2514\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u251c\u2500\u252c eslint-plugin-react-refresh@0.4.26\n\u2502 \u2502 \u2514\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u251c\u2500\u252c eslint@9.39.5\n\u2502 \u2502 \u251c\u2500\u252c @eslint-community/eslint-utils@4.10.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 eslint-visitor-keys@3.4.3\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @eslint-community/regexpp@4.12.2\n\u2502 \u2502 \u251c\u2500\u252c @eslint/config-array@0.21.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @eslint/object-schema@2.1.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 minimatch@3.1.5 deduped\n\u2502 \u2502 \u251c\u2500\u252c @eslint/config-helpers@0.4.2\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @eslint/core@0.17.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c @eslint/core@0.17.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @types/json-schema@7.0.15\n\u2502 \u2502 \u251c\u2500\u252c @eslint/eslintrc@3.3.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 ajv@6.15.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 espree@10.4.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 globals@14.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 ignore@5.3.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c import-fresh@3.3.1\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c parent-module@1.0.1\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 callsites@3.1.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 resolve-from@4.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c js-yaml@4.3.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 argparse@2.0.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 minimatch@3.1.5 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 strip-json-comments@3.1.1\n\u2502 \u2502 \u251c\u2500\u2500 @eslint/js@9.39.5 deduped\n\u2502 \u2502 \u251c\u2500\u252c @eslint/plugin-kit@0.4.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @eslint/core@0.17.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u252c levn@0.4.1\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 prelude-ls@1.2.1 deduped\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 type-check@0.4.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c @humanfs/node@0.16.8\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @humanfs/core@0.19.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @humanfs/types@0.15.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @humanfs/types@0.15.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @humanwhocodes/retry@0.4.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @humanwhocodes/module-importer@1.0.1\n\u2502 \u2502 \u251c\u2500\u2500 @humanwhocodes/retry@0.4.3\n\u2502 \u2502 \u251c\u2500\u2500 @types/estree@1.0.9\n\u2502 \u2502 \u251c\u2500\u252c ajv@6.15.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 fast-deep-equal@3.1.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 fast-json-stable-stringify@2.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 json-schema-traverse@0.4.1\n\u2502 \u2502 \u2502 \u2514\u2500\u252c uri-js@4.4.1\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 punycode@2.3.1\n\u2502 \u2502 \u251c\u2500\u252c chalk@4.1.2\n\u2502 \u2502 \u2502 \u251c\u2500\u252c ansi-styles@4.3.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c color-convert@2.0.1\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 color-name@1.1.4\n\u2502 \u2502 \u2502 \u2514\u2500\u252c supports-color@7.2.0\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 has-flag@4.0.0\n\u2502 \u2502 \u251c\u2500\u252c cross-spawn@7.0.6\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 path-key@3.1.1\n\u2502 \u2502 \u2502 \u251c\u2500\u252c shebang-command@2.0.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 shebang-regex@3.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u252c which@2.0.2\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 isexe@2.0.0\n\u2502 \u2502 \u251c\u2500\u252c debug@4.4.3\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 ms@2.1.3\n\u2502 \u2502 \u251c\u2500\u2500 escape-string-regexp@4.0.0\n\u2502 \u2502 \u251c\u2500\u252c eslint-scope@8.4.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c esrecurse@4.3.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 estraverse@5.3.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 estraverse@5.3.0\n\u2502 \u2502 \u251c\u2500\u2500 eslint-visitor-keys@4.2.1\n\u2502 \u2502 \u251c\u2500\u252c espree@10.4.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c acorn-jsx@5.3.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 acorn@8.19.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 acorn@8.19.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 eslint-visitor-keys@4.2.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c esquery@1.7.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 estraverse@5.3.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 esutils@2.0.3\n\u2502 \u2502 \u251c\u2500\u2500 fast-deep-equal@3.1.3\n\u2502 \u2502 \u251c\u2500\u252c file-entry-cache@8.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u252c flat-cache@4.0.1\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 flatted@3.4.4\n\u2502 \u2502 \u2502   \u2514\u2500\u252c keyv@4.5.4\n\u2502 \u2502 \u2502     \u2514\u2500\u2500 json-buffer@3.0.1\n\u2502 \u2502 \u251c\u2500\u252c find-up@5.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c locate-path@6.0.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c p-locate@5.0.0\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u252c p-limit@3.1.0\n\u2502 \u2502 \u2502 \u2502     \u2514\u2500\u2500 yocto-queue@0.1.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 path-exists@4.0.0\n\u2502 \u2502 \u251c\u2500\u252c glob-parent@6.0.2\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 is-glob@4.0.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 ignore@5.3.2\n\u2502 \u2502 \u251c\u2500\u2500 imurmurhash@0.1.4\n\u2502 \u2502 \u251c\u2500\u252c is-glob@4.0.3\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 is-extglob@2.1.1\n\u2502 \u2502 \u251c\u2500\u2500 jiti@1.21.7\n\u2502 \u2502 \u251c\u2500\u2500 json-stable-stringify-without-jsonify@1.0.1\n\u2502 \u2502 \u251c\u2500\u2500 lodash.merge@4.6.2\n\u2502 \u2502 \u251c\u2500\u252c minimatch@3.1.5\n\u2502 \u2502 \u2502 \u2514\u2500\u252c brace-expansion@1.1.21\n\u2502 \u2502 \u2502   \u251c\u2500\u2500 balanced-match@1.0.2\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 concat-map@0.0.1\n\u2502 \u2502 \u251c\u2500\u2500 natural-compare@1.4.0\n\u2502 \u2502 \u2514\u2500\u252c optionator@0.9.4\n\u2502 \u2502   \u251c\u2500\u2500 deep-is@0.1.4\n\u2502 \u2502   \u251c\u2500\u2500 fast-levenshtein@2.0.6\n\u2502 \u2502   \u251c\u2500\u2500 levn@0.4.1 deduped\n\u2502 \u2502   \u251c\u2500\u2500 prelude-ls@1.2.1\n\u2502 \u2502   \u251c\u2500\u252c type-check@0.4.0\n\u2502 \u2502   \u2502 \u2514\u2500\u2500 prelude-ls@1.2.1 deduped\n\u2502 \u2502   \u2514\u2500\u2500 word-wrap@1.2.5\n\u2502 \u251c\u2500\u252c firebase@11.10.0\n\u2502 \u2502 \u251c\u2500\u252c @firebase/ai@1.4.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-check-interop-types@0.3.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/component@0.6.18\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/logger@0.4.4\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1\n\u2502 \u2502 \u251c\u2500\u252c @firebase/analytics-compat@0.2.23\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/analytics-types@0.8.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/analytics@0.10.17 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/analytics@0.10.17\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/installations@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/app-check-compat@0.3.26\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-check-types@0.5.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-check@0.10.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/app-check@0.10.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/app-compat@0.4.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3\n\u2502 \u2502 \u251c\u2500\u252c @firebase/app@0.13.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 idb@7.1.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/auth-compat@0.5.28\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/auth-types@0.13.0\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/auth@1.10.8 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/auth@1.10.8\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @react-native-async-storage/async-storage@^1.18.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/data-connect@0.3.10\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/auth-interop-types@0.2.4\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/database-compat@2.0.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/database-types@1.0.15\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/database@1.0.20 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/database@1.0.20\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-check-interop-types@0.3.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/auth-interop-types@0.2.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c faye-websocket@0.11.4\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c websocket-driver@0.7.5\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 http-parser-js@0.5.10\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 safe-buffer@5.2.1\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 websocket-extensions@0.1.4\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/firestore-compat@0.3.53\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/firestore-types@3.0.3\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/firestore@4.8.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/firestore@4.8.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/webchannel-wrapper@1.0.3\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @grpc/grpc-js@1.14.5 overridden\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @grpc/proto-loader@0.8.1\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 lodash.camelcase@4.3.0 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 long@5.3.2 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 protobufjs@7.6.6 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 yargs@17.7.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @js-sdsl/ordered-map@4.4.2\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @grpc/proto-loader@0.7.15\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 lodash.camelcase@4.3.0\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 long@5.3.2\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c protobufjs@7.6.6\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/aspromise@1.1.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/base64@1.1.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/codegen@2.0.5\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/eventemitter@1.1.1\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @protobufjs/fetch@1.1.1\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @protobufjs/aspromise@1.1.2 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/float@1.0.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/path@1.1.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/pool@1.1.0\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @protobufjs/utf8@1.1.2\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @types/node@22.20.5 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 long@5.3.2 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c yargs@17.7.3\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u252c cliui@8.0.1\n\u2502 \u2502 \u2502 \u2502   \u2502 \u251c\u2500\u2500 string-width@4.2.3 deduped\n\u2502 \u2502 \u2502 \u2502   \u2502 \u251c\u2500\u252c strip-ansi@6.0.1\n\u2502 \u2502 \u2502 \u2502   \u2502 \u2502 \u2514\u2500\u2500 ansi-regex@5.0.1 deduped\n\u2502 \u2502 \u2502 \u2502   \u2502 \u2514\u2500\u252c wrap-ansi@7.0.0\n\u2502 \u2502 \u2502 \u2502   \u2502   \u251c\u2500\u2500 ansi-styles@4.3.0 deduped\n\u2502 \u2502 \u2502 \u2502   \u2502   \u251c\u2500\u2500 string-width@4.2.3 deduped\n\u2502 \u2502 \u2502 \u2502   \u2502   \u2514\u2500\u2500 strip-ansi@6.0.1 deduped\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 escalade@3.2.0 deduped\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 get-caller-file@2.0.5\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 require-directory@2.1.1\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u252c string-width@4.2.3\n\u2502 \u2502 \u2502 \u2502   \u2502 \u251c\u2500\u2500 emoji-regex@8.0.0\n\u2502 \u2502 \u2502 \u2502   \u2502 \u251c\u2500\u2500 is-fullwidth-code-point@3.0.0\n\u2502 \u2502 \u2502 \u2502   \u2502 \u2514\u2500\u2500 strip-ansi@6.0.1 deduped\n\u2502 \u2502 \u2502 \u2502   \u251c\u2500\u2500 y18n@5.0.8\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 yargs-parser@21.1.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/functions-compat@0.3.26\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/functions-types@0.6.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/functions@0.12.9 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/functions@0.12.9\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-check-interop-types@0.3.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/auth-interop-types@0.2.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/messaging-interop-types@0.2.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/installations-compat@0.2.18\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/installations-types@0.5.3\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/installations@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/installations@0.6.18\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 idb@7.1.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/messaging-compat@0.2.22\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/messaging@0.12.22 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/messaging@0.12.22\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/installations@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/messaging-interop-types@0.2.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 idb@7.1.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/performance-compat@0.2.20\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/performance-types@0.2.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/performance@0.7.7 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/performance@0.7.7\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/installations@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 web-vitals@4.2.4\n\u2502 \u2502 \u251c\u2500\u252c @firebase/remote-config-compat@0.2.18\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/remote-config-types@0.4.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/remote-config@0.6.5 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/remote-config@0.6.5\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/installations@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/logger@0.4.4 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/storage-compat@0.3.24\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-compat@0.4.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @firebase/storage-types@0.8.3\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app-types@0.9.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/storage@0.13.14 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c @firebase/storage@0.13.14\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/app@0.13.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/component@0.6.18 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @firebase/util@1.12.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u2502 \u2514\u2500\u252c @firebase/util@1.12.1\n\u2502 \u2502   \u2514\u2500\u2500 tslib@2.8.1 deduped\n\u2502 \u251c\u2500\u2500 globals@15.15.0\n\u2502 \u251c\u2500\u252c jsdom@26.1.0\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY canvas@^3.0.0\n\u2502 \u2502 \u251c\u2500\u252c cssstyle@4.6.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @asamuzakjp/css-color@3.2.0\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @csstools/css-calc@2.1.4\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @csstools/css-parser-algorithms@3.0.5 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @csstools/css-tokenizer@3.0.4 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @csstools/css-color-parser@3.1.0\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @csstools/color-helpers@5.1.0\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @csstools/css-calc@2.1.4 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @csstools/css-parser-algorithms@3.0.5 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @csstools/css-tokenizer@3.0.4 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @csstools/css-parser-algorithms@3.0.5\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @csstools/css-tokenizer@3.0.4 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @csstools/css-tokenizer@3.0.4\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 lru-cache@10.4.3\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 rrweb-cssom@0.8.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c data-urls@5.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 whatwg-mimetype@4.0.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 whatwg-url@14.2.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 decimal.js@10.6.0\n\u2502 \u2502 \u251c\u2500\u252c html-encoding-sniffer@4.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 whatwg-encoding@3.1.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c http-proxy-agent@7.0.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 agent-base@7.1.4\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u251c\u2500\u252c https-proxy-agent@7.0.6\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 agent-base@7.1.4 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 is-potential-custom-element-name@1.0.1\n\u2502 \u2502 \u251c\u2500\u2500 nwsapi@2.2.28\n\u2502 \u2502 \u251c\u2500\u252c parse5@7.3.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 entities@6.0.1\n\u2502 \u2502 \u251c\u2500\u2500 rrweb-cssom@0.8.0\n\u2502 \u2502 \u251c\u2500\u252c saxes@6.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 xmlchars@2.2.0\n\u2502 \u2502 \u251c\u2500\u2500 symbol-tree@3.2.4\n\u2502 \u2502 \u251c\u2500\u252c tough-cookie@5.1.2\n\u2502 \u2502 \u2502 \u2514\u2500\u252c tldts@6.1.86\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 tldts-core@6.1.86\n\u2502 \u2502 \u251c\u2500\u252c w3c-xmlserializer@5.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 xml-name-validator@5.0.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 webidl-conversions@7.0.0\n\u2502 \u2502 \u251c\u2500\u252c whatwg-encoding@3.1.1\n\u2502 \u2502 \u2502 \u2514\u2500\u252c iconv-lite@0.6.3\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 safer-buffer@2.1.2\n\u2502 \u2502 \u251c\u2500\u2500 whatwg-mimetype@4.0.0\n\u2502 \u2502 \u251c\u2500\u252c whatwg-url@14.2.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c tr46@5.1.1\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 punycode@2.3.1 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 webidl-conversions@7.0.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c ws@8.22.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY bufferutil@^4.0.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 UNMET OPTIONAL DEPENDENCY utf-8-validate@>=5.0.2\n\u2502 \u2502 \u2514\u2500\u2500 xml-name-validator@5.0.0\n\u2502 \u251c\u2500\u252c lucide-react@0.475.0\n\u2502 \u2502 \u2514\u2500\u2500 react@19.3.0 deduped\n\u2502 \u251c\u2500\u252c react-dom@19.3.0\n\u2502 \u2502 \u251c\u2500\u2500 react@19.3.0 deduped\n\u2502 \u2502 \u2514\u2500\u2500 scheduler@0.28.0\n\u2502 \u251c\u2500\u252c react-hook-form@7.89.0\n\u2502 \u2502 \u251c\u2500\u2500 @types/react@19.3.0 deduped\n\u2502 \u2502 \u2514\u2500\u2500 react@19.3.0 deduped\n\u2502 \u251c\u2500\u252c react-router-dom@7.18.4\n\u2502 \u2502 \u251c\u2500\u2500 react-dom@19.3.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c react-router@7.18.4\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 cookie@1.1.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 react-dom@19.3.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 react@19.3.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 set-cookie-parser@2.7.2\n\u2502 \u2502 \u2514\u2500\u2500 react@19.3.0 deduped\n\u2502 \u251c\u2500\u2500 react@19.3.0\n\u2502 \u251c\u2500\u252c tailwindcss@3.4.19\n\u2502 \u2502 \u251c\u2500\u2500 @alloc/quick-lru@5.3.0\n\u2502 \u2502 \u251c\u2500\u2500 arg@5.0.2\n\u2502 \u2502 \u251c\u2500\u252c chokidar@3.6.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c anymatch@3.1.3\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 normalize-path@3.0.0 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 picomatch@2.3.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c braces@3.0.3\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c fill-range@7.1.1\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u252c to-regex-range@5.0.1\n\u2502 \u2502 \u2502 \u2502     \u2514\u2500\u2500 is-number@7.0.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY fsevents@~2.3.2\n\u2502 \u2502 \u2502 \u251c\u2500\u252c glob-parent@5.1.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 is-glob@4.0.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c is-binary-path@2.1.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 binary-extensions@2.3.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 is-glob@4.0.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 normalize-path@3.0.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u252c readdirp@3.6.0\n\u2502 \u2502 \u2502   \u2514\u2500\u2500 picomatch@2.3.2 deduped\n\u2502 \u2502 \u251c\u2500\u2500 didyoumean@1.2.2\n\u2502 \u2502 \u251c\u2500\u2500 dlv@1.1.3\n\u2502 \u2502 \u251c\u2500\u252c fast-glob@3.3.3\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @nodelib/fs.stat@2.0.5\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @nodelib/fs.walk@1.2.8\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u252c @nodelib/fs.scandir@2.1.5\n\u2502 \u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @nodelib/fs.stat@2.0.5 deduped\n\u2502 \u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c run-parallel@1.2.0\n\u2502 \u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 queue-microtask@1.2.3\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c fastq@1.20.3\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 reusify@1.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c glob-parent@5.1.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 is-glob@4.0.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 merge2@1.4.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 micromatch@4.0.8 deduped\n\u2502 \u2502 \u251c\u2500\u2500 glob-parent@6.0.2 deduped\n\u2502 \u2502 \u251c\u2500\u2500 is-glob@4.0.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 jiti@1.21.7 deduped\n\u2502 \u2502 \u251c\u2500\u2500 lilconfig@3.1.3\n\u2502 \u2502 \u251c\u2500\u252c micromatch@4.0.8\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 braces@3.0.3 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 picomatch@2.3.2\n\u2502 \u2502 \u251c\u2500\u2500 normalize-path@3.0.0\n\u2502 \u2502 \u251c\u2500\u2500 object-hash@3.0.0\n\u2502 \u2502 \u251c\u2500\u2500 picocolors@1.1.1 deduped\n\u2502 \u2502 \u251c\u2500\u252c postcss-import@15.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 postcss-value-parser@4.2.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 read-cache@1.0.2\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 resolve@1.22.12 deduped\n\u2502 \u2502 \u251c\u2500\u252c postcss-js@4.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 camelcase-css@2.0.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u251c\u2500\u252c postcss-load-config@6.0.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 jiti@1.21.7 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 lilconfig@3.1.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY tsx@^4.8.1\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 UNMET OPTIONAL DEPENDENCY yaml@^2.4.2\n\u2502 \u2502 \u251c\u2500\u252c postcss-nested@6.2.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 postcss-selector-parser@7.1.6 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u251c\u2500\u252c postcss-selector-parser@7.1.6 overridden\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 cssesc@3.0.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 util-deprecate@1.0.2\n\u2502 \u2502 \u251c\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u251c\u2500\u252c resolve@1.22.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 es-errors@1.3.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c is-core-module@2.17.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c hasown@2.0.4\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 function-bind@1.1.2\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 path-parse@1.0.7\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 supports-preserve-symlinks-flag@1.0.0\n\u2502 \u2502 \u2514\u2500\u252c sucrase@3.35.1\n\u2502 \u2502   \u251c\u2500\u252c @jridgewell/gen-mapping@0.3.13\n\u2502 \u2502   \u2502 \u251c\u2500\u2500 @jridgewell/sourcemap-codec@1.6.0 deduped\n\u2502 \u2502   \u2502 \u2514\u2500\u2500 @jridgewell/trace-mapping@0.3.31 deduped\n\u2502 \u2502   \u251c\u2500\u2500 commander@4.1.1\n\u2502 \u2502   \u251c\u2500\u2500 lines-and-columns@1.2.4\n\u2502 \u2502   \u251c\u2500\u252c mz@2.7.0\n\u2502 \u2502   \u2502 \u251c\u2500\u2500 any-promise@1.3.0\n\u2502 \u2502   \u2502 \u251c\u2500\u2500 object-assign@4.1.1\n\u2502 \u2502   \u2502 \u2514\u2500\u252c thenify-all@1.6.0\n\u2502 \u2502   \u2502   \u2514\u2500\u252c thenify@3.3.1\n\u2502 \u2502   \u2502     \u2514\u2500\u2500 any-promise@1.3.0 deduped\n\u2502 \u2502   \u251c\u2500\u2500 pirates@4.0.7\n\u2502 \u2502   \u251c\u2500\u2500 tinyglobby@0.2.17 deduped\n\u2502 \u2502   \u2514\u2500\u2500 ts-interface-checker@0.1.13\n\u2502 \u251c\u2500\u252c typescript-eslint@8.71.1\n\u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/eslint-plugin@8.71.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @eslint-community/regexpp@4.12.2 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/parser@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/scope-manager@8.71.1\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @typescript-eslint/visitor-keys@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/type-utils@8.71.1\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/typescript-estree@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/utils@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 ts-api-utils@2.5.0 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/utils@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/visitor-keys@8.71.1\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 eslint-visitor-keys@5.0.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 ignore@7.0.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 natural-compare@1.4.0 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c ts-api-utils@2.5.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/parser@8.71.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/scope-manager@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/typescript-estree@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/visitor-keys@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/typescript-estree@8.71.1\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/project-service@8.71.1\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/tsconfig-utils@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/tsconfig-utils@8.71.1\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/visitor-keys@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 debug@4.4.3 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c minimatch@10.2.6\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u252c brace-expansion@5.0.12\n\u2502 \u2502 \u2502 \u2502   \u2514\u2500\u2500 balanced-match@4.0.4\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 semver@7.8.5\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 tinyglobby@0.2.17 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 ts-api-utils@2.5.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u251c\u2500\u252c @typescript-eslint/utils@8.71.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @eslint-community/eslint-utils@4.10.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/scope-manager@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/types@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @typescript-eslint/typescript-estree@8.71.1 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 eslint@9.39.5 deduped\n\u2502 \u2502 \u2514\u2500\u2500 typescript@5.7.3 deduped\n\u2502 \u251c\u2500\u2500 typescript@5.7.3\n\u2502 \u251c\u2500\u252c vite@6.4.4\n\u2502 \u2502 \u251c\u2500\u2500 @types/node@22.20.5 deduped\n\u2502 \u2502 \u251c\u2500\u252c esbuild@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/aix-ppc64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/android-arm@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/android-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/android-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/darwin-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/darwin-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/freebsd-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/freebsd-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-arm@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-ia32@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-loong64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-mips64el@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-ppc64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-riscv64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-s390x@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/linux-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/netbsd-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/netbsd-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/openbsd-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/openbsd-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/openharmony-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/sunos-x64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/win32-arm64@0.25.12\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @esbuild/win32-ia32@0.25.12\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @esbuild/win32-x64@0.25.12\n\u2502 \u2502 \u251c\u2500\u252c fdir@6.5.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 picomatch@4.0.7 deduped\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY fsevents@~2.3.3\n\u2502 \u2502 \u251c\u2500\u2500 jiti@1.21.7 deduped\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY less@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY lightningcss@^1.21.0\n\u2502 \u2502 \u251c\u2500\u2500 picomatch@4.0.7\n\u2502 \u2502 \u251c\u2500\u2500 postcss@8.5.29 deduped\n\u2502 \u2502 \u251c\u2500\u252c rollup@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @napi-rs/lzma-linux-x64-gnu@1.5.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-android-arm-eabi@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-android-arm64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-darwin-arm64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-darwin-x64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-freebsd-arm64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-freebsd-x64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-arm-gnueabihf@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-arm-musleabihf@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-arm64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-arm64-musl@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-loong64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-loong64-musl@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-ppc64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-ppc64-musl@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-riscv64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-riscv64-musl@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-s390x-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-x64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-linux-x64-musl@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-openbsd-x64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-openharmony-arm64@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-win32-arm64-msvc@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @rollup/rollup-win32-ia32-msvc@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @rollup/rollup-win32-x64-gnu@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @rollup/rollup-win32-x64-msvc@4.64.0\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @types/estree@1.0.9 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 UNMET OPTIONAL DEPENDENCY fsevents@~2.3.2\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY sass-embedded@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY sass@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY stylus@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY sugarss@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY terser@^5.16.0\n\u2502 \u2502 \u251c\u2500\u252c tinyglobby@0.2.17\n\u2502 \u2502 \u2502 \u251c\u2500\u252c fdir@6.5.0\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 picomatch@4.0.7 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 picomatch@4.0.7\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY tsx@^4.8.1\n\u2502 \u2502 \u2514\u2500\u2500 UNMET OPTIONAL DEPENDENCY yaml@^2.4.2\n\u2502 \u251c\u2500\u252c vitest@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @edge-runtime/vm@*\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @opentelemetry/api@^1.9.0\n\u2502 \u2502 \u251c\u2500\u2500 @types/node@22.20.5 deduped\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/browser-playwright@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/browser-preview@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/browser-webdriverio@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/coverage-istanbul@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/coverage-v8@4.1.11\n\u2502 \u2502 \u251c\u2500\u252c @vitest/expect@4.1.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @standard-schema/spec@1.1.0\n\u2502 \u2502 \u2502 \u251c\u2500\u252c @types/chai@5.2.3\n\u2502 \u2502 \u2502 \u2502 \u251c\u2500\u2500 @types/deep-eql@4.0.2\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 assertion-error@2.0.1\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/spy@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/utils@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 chai@6.3.0\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tinyrainbow@3.2.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c @vitest/mocker@4.1.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/spy@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u252c estree-walker@3.0.3\n\u2502 \u2502 \u2502 \u2502 \u2514\u2500\u2500 @types/estree@1.0.9 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 magic-string@0.30.21 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY msw@^2.4.9\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 vite@6.4.4 deduped\n\u2502 \u2502 \u251c\u2500\u252c @vitest/pretty-format@4.1.11\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tinyrainbow@3.2.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c @vitest/runner@4.1.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/utils@4.1.11 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 pathe@2.0.3 deduped\n\u2502 \u2502 \u251c\u2500\u252c @vitest/snapshot@4.1.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/pretty-format@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/utils@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 magic-string@0.30.21 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 pathe@2.0.3 deduped\n\u2502 \u2502 \u251c\u2500\u2500 @vitest/spy@4.1.11\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY @vitest/ui@4.1.11\n\u2502 \u2502 \u251c\u2500\u252c @vitest/utils@4.1.11\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 @vitest/pretty-format@4.1.11 deduped\n\u2502 \u2502 \u2502 \u251c\u2500\u2500 convert-source-map@2.0.0 deduped\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 tinyrainbow@3.2.0 deduped\n\u2502 \u2502 \u251c\u2500\u2500 es-module-lexer@2.3.2\n\u2502 \u2502 \u251c\u2500\u2500 expect-type@1.4.0\n\u2502 \u2502 \u251c\u2500\u2500 UNMET OPTIONAL DEPENDENCY happy-dom@*\n\u2502 \u2502 \u251c\u2500\u2500 jsdom@26.1.0 deduped\n\u2502 \u2502 \u251c\u2500\u252c magic-string@0.30.21\n\u2502 \u2502 \u2502 \u2514\u2500\u2500 @jridgewell/sourcemap-codec@1.6.0\n\u2502 \u2502 \u251c\u2500\u2500 obug@2.2.1\n\u2502 \u2502 \u251c\u2500\u2500 pathe@2.0.3\n\u2502 \u2502 \u251c\u2500\u2500 picomatch@4.0.7\n\u2502 \u2502 \u251c\u2500\u2500 std-env@4.3.0\n\u2502 \u2502 \u251c\u2500\u2500 tinybench@2.9.0\n\u2502 \u2502 \u251c\u2500\u2500 tinyexec@1.3.1\n\u2502 \u2502 \u251c\u2500\u2500 tinyglobby@0.2.17 deduped\n\u2502 \u2502 \u251c\u2500\u2500 tinyrainbow@3.2.0\n\u2502 \u2502 \u251c\u2500\u2500 vite@6.4.4 deduped\n\u2502 \u2502 \u2514\u2500\u252c why-is-node-running@2.3.0\n\u2502 \u2502   \u251c\u2500\u2500 siginfo@2.0.0\n\u2502 \u2502   \u2514\u2500\u2500 stackback@0.0.2\n\u2502 \u2514\u2500\u2500 zod@3.25.76\n\u2514\u2500\u2500 prettier@3.9.9\n\n",
+    "typecheck.log": "\n> classync@0.1.0 typecheck\n> npm run typecheck --workspace=@classync/web\n\n\n> @classync/web@0.1.0 typecheck\n> tsc --noEmit --pretty false\n\n"
+  },
+  "npmAudit": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "braces": {
+        "name": "braces",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ],
+        "effects": [
+          "chokidar",
+          "micromatch"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/braces"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "chokidar": {
+        "name": "chokidar",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "tailwindcss"
+        ],
+        "range": "2.0.0 - 3.6.0",
+        "nodes": [
+          "node_modules/chokidar"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "fast-glob": {
+        "name": "fast-glob",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "micromatch"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/fast-glob"
+        ],
+        "fixAvailable": true
+      },
+      "micromatch": {
+        "name": "micromatch",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "fast-glob",
+          "tailwindcss"
+        ],
+        "range": ">=0.2.0",
+        "nodes": [
+          "node_modules/micromatch"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "tailwindcss": {
+        "name": "tailwindcss",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "chokidar",
+          "fast-glob",
+          "micromatch"
+        ],
+        "effects": [],
+        "range": "<=0.0.0-oxide-insiders.ff2c25f || 2.1.0-canary.1 - 3.4.19",
+        "nodes": [
+          "node_modules/tailwindcss"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 5,
+        "critical": 0,
+        "total": 5
+      },
+      "dependencies": {
+        "prod": 106,
+        "dev": 359,
+        "optional": 53,
+        "peer": 7,
+        "peerOptional": 0,
+        "total": 464
+      }
+    }
+  },
+  "npmAuditExit": 1,
+  "bracesLatest": "3.0.3",
+  "pythonAudit": {
+    "dependencies": [
+      {
+        "name": "absl-py",
+        "version": "2.5.1",
+        "vulns": []
+      },
+      {
+        "name": "annotated-doc",
+        "version": "0.0.5",
+        "vulns": []
+      },
+      {
+        "name": "annotated-types",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "anyio",
+        "version": "4.15.1",
+        "vulns": []
+      },
+      {
+        "name": "cachecontrol",
+        "version": "0.14.4",
+        "vulns": []
+      },
+      {
+        "name": "certifi",
+        "version": "2026.10.19",
+        "vulns": []
+      },
+      {
+        "name": "cffi",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "charset-normalizer",
+        "version": "3.5.2",
+        "vulns": []
+      },
+      {
+        "name": "click",
+        "version": "8.5.0",
+        "vulns": []
+      },
+      {
+        "name": "colorama",
+        "version": "0.4.6",
+        "vulns": []
+      },
+      {
+        "name": "cryptography",
+        "version": "50.0.2",
+        "vulns": []
+      },
+      {
+        "name": "fastapi",
+        "version": "0.143.3",
+        "vulns": []
+      },
+      {
+        "name": "firebase-admin",
+        "version": "7.7.0",
+        "vulns": []
+      },
+      {
+        "name": "google-api-core",
+        "version": "2.42.0",
+        "vulns": []
+      },
+      {
+        "name": "google-auth",
+        "version": "2.62.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-core",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-firestore",
+        "version": "2.34.1",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-storage",
+        "version": "3.17.1",
+        "vulns": []
+      },
+      {
+        "name": "google-crc32c",
+        "version": "1.9.0",
+        "vulns": []
+      },
+      {
+        "name": "google-resumable-media",
+        "version": "2.11.0",
+        "vulns": []
+      },
+      {
+        "name": "googleapis-common-protos",
+        "version": "1.75.5",
+        "vulns": []
+      },
+      {
+        "name": "grpcio",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "grpcio-status",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "h11",
+        "version": "0.16.0",
+        "vulns": []
+      },
+      {
+        "name": "h2",
+        "version": "4.4.1",
+        "vulns": []
+      },
+      {
+        "name": "hpack",
+        "version": "4.2.0",
+        "vulns": []
+      },
+      {
+        "name": "httpcore",
+        "version": "1.0.9",
+        "vulns": []
+      },
+      {
+        "name": "httpx",
+        "version": "0.28.1",
+        "vulns": []
+      },
+      {
+        "name": "hyperframe",
+        "version": "6.1.0",
+        "vulns": []
+      },
+      {
+        "name": "idna",
+        "version": "3.20",
+        "vulns": []
+      },
+      {
+        "name": "immutabledict",
+        "version": "4.3.1",
+        "vulns": []
+      },
+      {
+        "name": "iniconfig",
+        "version": "2.3.1",
+        "vulns": []
+      },
+      {
+        "name": "msgpack",
+        "version": "1.2.3",
+        "vulns": []
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.4",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-api",
+        "version": "1.45.1",
+        "vulns": []
+      },
+      {
+        "name": "ortools",
+        "version": "9.15.6755",
+        "vulns": []
+      },
+      {
+        "name": "packaging",
+        "version": "26.3",
+        "vulns": []
+      },
+      {
+        "name": "pandas",
+        "version": "3.0.6",
+        "vulns": []
+      },
+      {
+        "name": "pip",
+        "version": "26.2.2",
+        "vulns": []
+      },
+      {
+        "name": "pluggy",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "proto-plus",
+        "version": "1.29.0",
+        "vulns": []
+      },
+      {
+        "name": "protobuf",
+        "version": "6.33.6",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1",
+        "version": "0.6.4",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1-modules",
+        "version": "0.4.2",
+        "vulns": []
+      },
+      {
+        "name": "pycparser",
+        "version": "3.11",
+        "vulns": []
+      },
+      {
+        "name": "pydantic",
+        "version": "2.14.1",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-core",
+        "version": "2.50.1",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-settings",
+        "version": "2.16.0",
+        "vulns": []
+      },
+      {
+        "name": "pygments",
+        "version": "2.21.0",
+        "vulns": []
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.15.1",
+        "vulns": []
+      },
+      {
+        "name": "pytest",
+        "version": "9.0.3",
+        "vulns": []
+      },
+      {
+        "name": "python-dateutil",
+        "version": "2.9.0.post0",
+        "vulns": []
+      },
+      {
+        "name": "python-dotenv",
+        "version": "1.2.4",
+        "vulns": []
+      },
+      {
+        "name": "requests",
+        "version": "2.34.2",
+        "vulns": []
+      },
+      {
+        "name": "ruff",
+        "version": "0.17.1",
+        "vulns": []
+      },
+      {
+        "name": "six",
+        "version": "1.17.0",
+        "vulns": []
+      },
+      {
+        "name": "starlette",
+        "version": "1.8.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspection",
+        "version": "0.4.4",
+        "vulns": []
+      },
+      {
+        "name": "tzdata",
+        "version": "2026.5",
+        "vulns": []
+      },
+      {
+        "name": "urllib3",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "uvicorn",
+        "version": "0.54.0",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "pythonScope": {
+    "packages": {
+      "absl-py": "2.5.1",
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.15.1",
+      "cachecontrol": "0.14.4",
+      "certifi": "2026.10.19",
+      "cffi": "2.1.1",
+      "charset-normalizer": "3.5.2",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "cryptography": "50.0.2",
+      "fastapi": "0.143.3",
+      "firebase-admin": "7.7.0",
+      "googleapis-common-protos": "1.75.5",
+      "google-api-core": "2.42.0",
+      "google-auth": "2.62.0",
+      "google-cloud-core": "2.8.0",
+      "google-cloud-firestore": "2.34.1",
+      "google-cloud-storage": "3.17.1",
+      "google-crc32c": "1.9.0",
+      "google-resumable-media": "2.11.0",
+      "grpcio": "1.84.0",
+      "grpcio-status": "1.84.0",
+      "h11": "0.16.0",
+      "h2": "4.4.1",
+      "hpack": "4.2.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "hyperframe": "6.1.0",
+      "idna": "3.20",
+      "immutabledict": "4.3.1",
+      "iniconfig": "2.3.1",
+      "msgpack": "1.2.3",
+      "numpy": "2.5.4",
+      "opentelemetry-api": "1.45.1",
+      "ortools": "9.15.6755",
+      "packaging": "26.3",
+      "pandas": "3.0.6",
+      "pip": "26.2.2",
+      "pluggy": "1.7.0",
+      "protobuf": "6.33.6",
+      "proto-plus": "1.29.0",
+      "pyasn1": "0.6.4",
+      "pyasn1-modules": "0.4.2",
+      "pycparser": "3.11",
+      "pydantic": "2.14.1",
+      "pydantic-core": "2.50.1",
+      "pydantic-settings": "2.16.0",
+      "pygments": "2.21.0",
+      "pyjwt": "2.15.1",
+      "pytest": "9.0.3",
+      "python-dateutil": "2.9.0.post0",
+      "python-dotenv": "1.2.4",
+      "requests": "2.34.2",
+      "ruff": "0.17.1",
+      "six": "1.17.0",
+      "starlette": "1.8.0",
+      "typing-extensions": "4.16.0",
+      "typing-inspection": "0.4.4",
+      "tzdata": "2026.5",
+      "urllib3": "2.8.0",
+      "uvicorn": "0.54.0"
+    },
+    "service_manifests_verified": [
+      "services\\gateway\\requirements.txt",
+      "services\\academic\\requirements.txt",
+      "services\\scheduling\\requirements.txt",
+      "services\\notification\\requirements.txt"
+    ],
+    "source_reviewed": {
+      "classync-api-contracts": "0.1.0"
+    }
+  },
+  "pythonScanner": "pip-audit 2.10.1",
+  "browserCommands": [
+    {
+      "name": "verify",
+      "exit": 0,
+      "seconds": 47.22
+    },
+    {
+      "name": "boundaries",
+      "exit": 0,
+      "seconds": 10.86
+    },
+    {
+      "name": "native-zoom",
+      "exit": 0,
+      "seconds": 5.22
+    },
+    {
+      "name": "module-graph",
+      "exit": 0,
+      "seconds": 16.16
+    }
+  ],
+  "browser": [
+    {
+      "role": "student",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "institutional": true,
+      "forgedPreviewDenied": true,
+      "allRoleRoutes": true,
+      "keyboardFocus": {
+        "name": "Return to access",
+        "outline": "solid"
+      },
+      "noApi": true
+    },
+    {
+      "contrast": {
+        "ink": 15.55399364339602,
+        "secondary": 4.974752735406439,
+        "rouge": 8.342651869784216
+      }
+    }
+  ],
+  "boundaries": {
+    "institutional": {
+      "forgedPreviewDenied": true,
+      "allRoles": true,
+      "widths": [
+        390,
+        1440
+      ],
+      "refresh": true
+    },
+    "contrast": {
+      "colors": {
+        "paragraph": "rgb(102, 112, 133)",
+        "title": "rgb(32, 36, 44)",
+        "background": "rgb(255, 255, 255)",
+        "outline": "solid"
+      },
+      "ratios": {
+        "paragraph": 4.974752735406439,
+        "title": 15.55399364339602
+      }
+    },
+    "invalidAndExpiredSession": true,
+    "mountedExpiry": true,
+    "shortDialog": true,
+    "noApi": true,
+    "noPageErrors": true
+  },
+  "nativeZoom": {
+    "nativeZoom": 2,
+    "before": {
+      "innerWidth": 1424,
+      "outerWidth": 1440,
+      "dpr": 1,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "after": {
+      "innerWidth": 712,
+      "outerWidth": 1440,
+      "dpr": 2,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "keyboard": true,
+    "noOverflow": true,
+    "method": "Temporary isolated Chrome extension tabs.setZoom/getZoom via CDP loadUnpacked; no user profile or application source changed"
+  },
+  "emittedGraph": {
+    "emittedModules": 173,
+    "excluded": [
+      {
+        "name": "@firebase/firestore",
+        "matches": []
+      },
+      {
+        "name": "@firebase/firestore-compat",
+        "matches": []
+      },
+      {
+        "name": "@grpc/grpc-js",
+        "matches": []
+      },
+      {
+        "name": "vitest",
+        "matches": []
+      },
+      {
+        "name": "@vitest/mocker",
+        "matches": []
+      },
+      {
+        "name": "tinypool",
+        "matches": []
+      },
+      {
+        "name": "tailwindcss",
+        "matches": []
+      },
+      {
+        "name": "braces",
+        "matches": []
+      },
+      {
+        "name": "chokidar",
+        "matches": []
+      },
+      {
+        "name": "fast-glob",
+        "matches": []
+      },
+      {
+        "name": "micromatch",
+        "matches": []
+      },
+      {
+        "name": "postcss-nested",
+        "matches": []
+      },
+      {
+        "name": "postcss-selector-parser",
+        "matches": []
+      },
+      {
+        "name": "@hookform/resolvers",
+        "matches": []
+      },
+      {
+        "name": "ajv",
+        "matches": []
+      }
+    ]
+  },
+  "localRelease": {
+    "schemaVersion": 1,
+    "mode": "read-only-presentation",
+    "appMode": "presentation",
+    "capabilityVersion": 1,
+    "sampleVersion": "classsync-presentation-v1",
+    "commit": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+    "uncommittedChanges": true
+  },
+  "cssSha256": "3817d76d0ddb2a3799e3dfba586c4a125989414b38a9059c01603ae11cafcc50",
+  "dataPreservation": [
+    {
+      "file": "var/academic.sqlite3",
+      "before": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+      "after": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+      "payloads": 567,
+      "checksumErrors": 0,
+      "integrity": "ok",
+      "foreignKeyErrors": 0
+    },
+    {
+      "file": "var/scheduling.sqlite3",
+      "before": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+      "after": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+      "payloads": 25,
+      "checksumErrors": 0,
+      "integrity": "ok",
+      "foreignKeyErrors": 0
+    },
+    {
+      "file": "var/backups/scheduling-before-s2b-20261018074057.sqlite3",
+      "before": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+      "after": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+      "payloads": 12,
+      "checksumErrors": 0,
+      "integrity": "ok",
+      "foreignKeyErrors": 0
+    }
+  ],
+  "hostedHttp": {
+    "origin": "https://class-sync-bhiv.vercel.app",
+    "expectedSha": null,
+    "release": null,
+    "failed": [
+      "approved-commit-required",
+      "/student/dashboard",
+      "/teacher/schedule",
+      "/admin/dashboard",
+      "/dev/role-preview",
+      "/dev/design-system",
+      "/release.json",
+      "/fonts/InterVariable.woff2"
+    ],
+    "results": [
+      {
+        "path": "/",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": "W/\"10773618e6e83a606a1132a30ddfc08c\"",
+        "vercelId": "sin1::wg7fk-1792582092432-183f7835f238",
+        "bytes": 1260,
+        "sha256": "faedb73bbca522beffd08665804b91caa600941235aa97e305833d8bd8edadee",
+        "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+      },
+      {
+        "path": "/student/dashboard",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::vsx6k-1792582092494-d404ffb02314",
+        "bytes": 79,
+        "sha256": "4ae0dcdb478084f29c648943f13ca108fb986f3c78d0a054e8bef774841e3867",
+        "identity": "The page could not be found NOT_FOUND sin1::vsx6k-1792582092494-d404ffb02314 "
+      },
+      {
+        "path": "/teacher/schedule",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::pkwfk-1792582092647-d6efe4d5438d",
+        "bytes": 79,
+        "sha256": "4af4dcff724b519940f23ee864ce702f5fbda5764e1d83177b7b7e76e78eb286",
+        "identity": "The page could not be found NOT_FOUND sin1::pkwfk-1792582092647-d6efe4d5438d "
+      },
+      {
+        "path": "/admin/dashboard",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::hf7tc-1792582092711-95bb7bb64ea8",
+        "bytes": 79,
+        "sha256": "da6fce21991ec29a9213626be081a3a8ef0e2927f4eede5d81766e867bcb6516",
+        "identity": "The page could not be found NOT_FOUND sin1::hf7tc-1792582092711-95bb7bb64ea8 "
+      },
+      {
+        "path": "/dev/role-preview",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::nc5gr-1792582092761-6886e52d2898",
+        "bytes": 79,
+        "sha256": "2155329a953a1a3275b9cce2c6d78bd93698867c56bbab49a333c56459295b1b",
+        "identity": "The page could not be found NOT_FOUND sin1::nc5gr-1792582092761-6886e52d2898 "
+      },
+      {
+        "path": "/dev/design-system",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::tkrfj-1792582092830-35459672be7f",
+        "bytes": 79,
+        "sha256": "6db2f8cb851742b5d235895fb3da5f506dd22b8b3ab440c101a943248033f5f6",
+        "identity": "The page could not be found NOT_FOUND sin1::tkrfj-1792582092830-35459672be7f "
+      },
+      {
+        "path": "/release.json",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::fzpmm-1792582092892-7430714fe80c",
+        "bytes": 79,
+        "sha256": "fc10ac12248e7038cb2f024ac224b76772799b5c766ce7d070d9bf2cb0fcc7c4",
+        "identity": "The page could not be found NOT_FOUND sin1::fzpmm-1792582092892-7430714fe80c "
+      },
+      {
+        "path": "/fonts/InterVariable.woff2",
+        "error": "TimeoutError: The operation was aborted due to timeout"
+      },
+      {
+        "path": "/branding/classsync-logo-assets/classsync-icon-32.png",
+        "status": 200,
+        "contentType": "image/png",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": "\"f95e3704bc3b3ba8480c9fffe1910436\"",
+        "vercelId": "sin1::5c9h7-1792582108052-e6e5838796ee",
+        "bytes": 1546,
+        "sha256": "074aca0f326b5b83edd8bff3fc9a6bc3cc7f5a68a3254972c747069b69b06ed9",
+        "identity": null
+      },
+      {
+        "path": "/manifest.webmanifest",
+        "status": 200,
+        "contentType": "application/manifest+json; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": "\"5ee93b8d2281c31a82e83fdb72238d38\"",
+        "vercelId": "sin1::hrsbw-1792582108103-16b077be16ab",
+        "bytes": 498,
+        "sha256": "7d2d404ea342722a1e5e7a7c482174321c33c2000f1e27c108352d06fc47434f",
+        "identity": "{ \"name\": \"ClassSync\", \"short_name\": \"ClassSync\", \"start_url\": \".\", \"display\": \"standalone\", \"background_color"
+      },
+      {
+        "path": "/api/v1/timetables/periods",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::pkwfk-1792582108150-a2fceb177a90",
+        "bytes": 79,
+        "sha256": "89651f86b8b8b592d6ba58aa4273e1f5ae0fe3af19313dad4082f8bbd110a175",
+        "identity": "The page could not be found NOT_FOUND sin1::pkwfk-1792582108150-a2fceb177a90 "
+      },
+      {
+        "path": "/assets/p1-missing.js",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::kwn7d-1792582108195-dd5457bd1f53",
+        "bytes": 79,
+        "sha256": "be85ec1041613174728c8ad6d3d401aa65398f67a614133fdc64e5db43dec1fc",
+        "identity": "The page could not be found NOT_FOUND sin1::kwn7d-1792582108195-dd5457bd1f53 "
+      },
+      {
+        "path": "/p1-unknown",
+        "status": 404,
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": null,
+        "vercelId": "sin1::pdlls-1792582108242-6abc0f454c41",
+        "bytes": 79,
+        "sha256": "311fc3ae9c72260c6247736e578d05fc02d174c1cd30da8954ff25b9ebe9906b",
+        "identity": "The page could not be found NOT_FOUND sin1::pdlls-1792582108242-6abc0f454c41 "
+      },
+      {
+        "path": "/assets/index-CbQh0kvf.js",
+        "status": 200,
+        "contentType": "application/javascript; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": "W/\"8324b56d15d33e13b3ca044db064f331\"",
+        "vercelId": "sin1::dgg9j-1792582108289-77ff97955e25",
+        "bytes": 498692,
+        "sha256": "017e9c9725b8bd105c9dfdb3ce966407598d3b7be41e9348bf25ff0e4748912e",
+        "identity": "var sp=n=>{throw TypeError(n)};var Hf=(n,i,s)=>i.has(n)||sp(\"Cannot \"+s);var Q=(n,i,s)=>(Hf(n,i,\"read from private field"
+      },
+      {
+        "path": "/assets/index-n6CW7Rwm.css",
+        "status": 200,
+        "contentType": "text/css; charset=utf-8",
+        "cacheControl": "public, max-age=0, must-revalidate",
+        "etag": "W/\"ad9e54caaf7aa2953a42910cab545d13\"",
+        "vercelId": "sin1::7gzxw-1792582109932-27544822bb1b",
+        "bytes": 81915,
+        "sha256": "6109ade9d9290d7f5fa4c475959a84feef97cd080d37aa321832c19e228d2185",
+        "identity": "@font-face{font-family:Inter;src:url(/fonts/InterVariable.woff2) format(\"woff2\");font-weight:100 900;font-style:normal;f"
+      }
+    ]
+  },
+  "vercelAccess": {
+    "projectLink": false,
+    "cli": false,
+    "tokenPresent": false,
+    "projectIdPresent": false,
+    "orgIdPresent": false,
+    "availableConnector": false,
+    "browserAttempt": "Read-only dashboard navigation timed out then redirected to https://vercel.com/login?next=%2Fdashboard; Log in to Vercel observed; no credentials submitted; temporary tab closed",
+    "actualRootDirectory": null,
+    "actualFrameworkBuildOutput": null,
+    "deploymentSha": null,
+    "backingDeploymentAlias": null,
+    "routingMetadata": null
+  },
+  "screenshots": [
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-administrator-1024.png",
+      "sha256": "0889daaa997ce055dc41f6ff513a40febe78127b6dede8203b6b7cff2df66825"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-administrator-1440.png",
+      "sha256": "74e5d702875a873c4ebb90e80d238a2730060ce1b2c67afd8e32a671d69094a0"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-administrator-360.png",
+      "sha256": "a57529fe5b23c1e93574387d1d94669f03a0e5b112a8bbe9c4ffecdc63a09b57"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-administrator-390.png",
+      "sha256": "dd335d1acd82a5115caa7b7cd511389bb4a7a1a82a3416a1588c73014709d938"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-administrator-768.png",
+      "sha256": "b08eccfba176b77d467460ca496ca558ae6edb9648a29cdd465ccd888e6980ef"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-student-1024.png",
+      "sha256": "d16a938dd90de16c1dcb25b39e5dcc943b6549e04f8cb3e44cdcc1dbaf969f6c"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-student-1440.png",
+      "sha256": "22ff865dea5a105fb3054be72eae66039a1ba530e7e1db1797b79e54954ca2a1"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-student-360.png",
+      "sha256": "432c0c18cd05b7d137bb7939546b65d22da1ece56b7fde1a9f3386ba6283bc0c"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-student-390.png",
+      "sha256": "0962a40fe49f7d49c1c086096184468419fb0d05e1fac3ab9c402a1b065e829a"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-student-768.png",
+      "sha256": "ae56048862379245fc5992782d8253858f735a22d557dbf6354dd207f95259b5"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-teacher-1024.png",
+      "sha256": "70b22e348521eff273ade5de154407c84fd567f9bed41f6a02837c889468cc21"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-teacher-1440.png",
+      "sha256": "10ab2fa248a8ef75595d247021efc9fac5a12f6f81ae576470f6bb971dacc33e"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-teacher-360.png",
+      "sha256": "52b7a498e311d624a9d8c2808143f0b170e1b9f899dc6de8f808ce239d512ba9"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-teacher-390.png",
+      "sha256": "e62d2a0eaa966a8f832720be59eed8e19a7d27eb1597086d3384bf10d078415f"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-details-teacher-768.png",
+      "sha256": "214ed48e6559e76ead652298162f86c2081930c7b63f475e35bc0adf7dbca992"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-institutional-390.png",
+      "sha256": "b16f37316566339064c603beb3674652aa825a6aac51201be8e3b20f508702fe"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-native-200-percent.png",
+      "sha256": "dc324f42e17346395ea8f4c9771bf06871648568942feb1385f17d2bce0e8e1f"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-student-1024.png",
+      "sha256": "a62543752fe9a67f1fc3ae4d8272d74f972fea9b702cdde8ea698722b014ecf6"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-student-1440.png",
+      "sha256": "41a5965065dd1059bc4f95163568cd2d06a997118a4ed87a41cfef9c555a146b"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-student-360.png",
+      "sha256": "4c8bf8bf72611cdeaf282b60f6bc1c58aa5dee386e3a7757005f82ca43b2ba8c"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-student-390.png",
+      "sha256": "e39c0153c36c02591ca1423b4c0aae17b9f3cc1366f079b4b41c248c27e92beb"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-student-768.png",
+      "sha256": "0e28a2d97ce1c9dedc7b3c5a107ea83af2ca2b4324632299376c8c539c19de55"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-teacher-1024.png",
+      "sha256": "9f7f8b81e2c5236a2a39632aa8902af9857db78182aa849969aea418bd6e50d6"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-teacher-1440.png",
+      "sha256": "c08c36c0f669022e45f0f6111439aa769773a802de0649e10d27c595643bf298"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-teacher-360.png",
+      "sha256": "d217b1d31bde5311915d622764e83757bd96ba1e5acd1b8bd61609a15e2d50bc"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-teacher-390.png",
+      "sha256": "872c6b5f9f3bd7d0e7f528448d3d4fd016c89bca2445c757690435056c8dbb53"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-schedule-teacher-768.png",
+      "sha256": "4799ece7647f7109ef9857bcdc6a2ae5fd21d0f8042ca6d361e7d08110eed126"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-short-dialog.png",
+      "sha256": "d284293c3bd00c211a807b3fec65e508801a586475efa266a7ccbf360ce96965"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-student-1024.png",
+      "sha256": "a4c82e206729eb811ce0105035b7f10f30c816a1649fe3fe3bfcd4d75fdef7fb"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-student-1440.png",
+      "sha256": "299eff94d5378fee0ebe4d5345a9264b7247aae73f7fd6ec867acf41c38bb1c9"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-student-360.png",
+      "sha256": "3cee69a5443c02b4acb3ae56dc1728d280edc21d2303b993aa74ab991d9c7cfd"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-student-390.png",
+      "sha256": "105dfc460f3a9c806605a9196f3ea49938c5330386d0a06456116e1f798a17d9"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-student-768.png",
+      "sha256": "7c1e6ca3448947f15dad4382e9920d2e3d1ee5368611feaf2b8c16f048415794"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-teacher-1024.png",
+      "sha256": "3dc763e6634c9ec2da3e67087eaf86ac94bb3c59fb1376c7f4e25e365202ea2d"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-teacher-1440.png",
+      "sha256": "82f622b0f861604b14fc5fefda90700237eb12c9372635ed55135367b9287b9e"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-teacher-360.png",
+      "sha256": "3a850a9b11fd47e9465c6c8b194c11c27f2a3a1a8930aa366bff52beff42a5f7"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-teacher-390.png",
+      "sha256": "c0e57bde1f49fcaaf7d06fa8afcb631ad74c95101c5f03e5d38c6affb5db51d7"
+    },
+    {
+      "file": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-readiness\\browser\\p1-teacher-768.png",
+      "sha256": "b82cf95aab113f654ad2acb8a7afb6c78db589c5dc6512e65beaff06dcc86039"
+    }
+  ],
+  "decisions": {
+    "p1LocalEngineering": "GO: bounded functional acceptance only",
+    "p1DependencySecurity": "FAIL",
+    "p1RepositoryCommit": "CONDITIONAL GO: explicit owner scope/commit and security disposition required",
+    "presentationCandidateDeployment": "NO-GO",
+    "p2LocalImplementation": "CONDITIONAL GO: explicit approval/security and P2b qualification required; not started",
+    "institutionalProduction": "NO-GO"
+  },
+  "noCommitPushDeployMigrationProvisionOrP2": true
+}

@@ -1,0 +1,5 @@
+
+> classync@0.1.0 test:artifacts
+> node --test scripts/tests/production-artifacts.test.cjs
+
+TAP version 13

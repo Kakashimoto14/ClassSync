@@ -1,0 +1,121 @@
+{
+  "milestone": "P4a/P4b",
+  "status": "PARTIAL",
+  "timestamp": "2026-10-30T02:32:00+08:00",
+  "head": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+  "connected_attempt": "p4-student-browser-06-approved-serial.log",
+  "api_statuses": [
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/calendar/42faadb1-ed52-41fe-b7e5-78a31f118478",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/calendar/42faadb1-ed52-41fe-b7e5-78a31f118478",
+      "status": 503
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/calendar/42faadb1-ed52-41fe-b7e5-78a31f118478",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 503
+    }
+  ],
+  "positive_connected_assertions": [
+    "SDK sign-in/current membership",
+    "initial published period/calendar/version",
+    "360/390/768/1024/1440 no overflow",
+    "keyboard class details/focus restore",
+    "rooms with unknown occupancy",
+    "schedule shell/direct refresh"
+  ],
+  "failed": "Return Home after schedule refresh: actual calendar503/periods503, next-class wait timed out",
+  "not_reached": [
+    "offline",
+    "loading",
+    "injected403/503",
+    "actual revoked/unassigned",
+    "logout",
+    "native200%",
+    "final console assertion"
+  ],
+  "full_frontend_gate": "timeout; not passed",
+  "source_hashes_after_final_edits": {
+    "apps/web/src/pages/StudentHome.tsx": "f809cccd2ce371967f1d46ee69687e1234a12b83821cf2b6670a9afcdf056227",
+    "apps/web/src/pages/student-home.css": "e4b06d62cde22c5e7343427048a5b76931c6f9bad15a21496bc2f049ee448698",
+    "apps/web/src/pages/StudentHome.test.tsx": "8bc8d1473899d9c7dcedf11b59147f497fa3eb5b24c9ad05d99d379b863a5e9c",
+    "apps/web/src/lib/student-timetable-api.ts": "bdf1369926c9bce46b1166cc9463b5aec25229caedcb1f55121f75b0312e6431",
+    "apps/web/src/lib/student-timetable-api.test.ts": "a833e2326ec046a681088f8f55c0603d495a51d9a5e2583d3beebd35bfd594dd",
+    "apps/web/src/lib/use-schedule-workspace.ts": "36db9997c727449508957619507c65d49b85ede1731cad494b2a7e74f78b18e0",
+    "apps/web/src/lib/use-schedule-workspace.test.tsx": "2c85fcf00f42b9302574bfb3ca9aa318b7dc32f8f4502695dd700c0358faaea2",
+    "apps/web/src/routes/RouteGuard.tsx": "38112cbed61a10bae8701d13b0c1e935c3d6907976e1349ea857fb11f524132c",
+    "apps/web/src/config/institutional-routes.test.tsx": "3be4d4bd3f5acfa9b9e365c76dba83fe03f7ace44a93b7f4134f2b8bc3f8a8b6",
+    "apps/web/src/config/app-mode.ts": "00292686c97c6fe09c27611d2297eb181e73676135b7d6a54a83ee55ab834a8c",
+    "apps/web/src/components/layout/AppShell.tsx": "f05bbb39fb08187c1ba136be89b1c7e87a27150938ce9397025e509701cfe96e",
+    "apps/web/src/components/layout/AppShell.test.tsx": "34e7d03d41b2093f68a4a3103d5616da595c14edcc01db5be28faeae5130bdc1",
+    "apps/web/src/auth/UniversitySessionPanel.tsx": "12a6ce22e68e867781beb5100247a21fa0504f654423661e4dff0c32426a224d",
+    "apps/web/src/pages/AuthPage.tsx": "2338e5ec4964ab9304988f497b9e2519c8da129a169aef2a708cef8b9c2d1bd4",
+    "apps/web/src/pages/OperationsPreviewPage.tsx": "e012a455db97b2dbc221f362cb958eebb6f8807b6f72981d54729d2491197f16",
+    "apps/web/src/pages/RoleScheduleWorkspace.tsx": "43bf7ef9537decc24418b7b2005561410240b9536dcc1060ed5e923d9ae87be4",
+    "scripts/student_experience_browser.cjs": "7c015a1085c5fda7e4c8e28445d76637e7b6a13c07fe3f0f74d49a0525f3b5ce",
+    "scripts/postgres_student_experience_qualification.py": "603c9146c37bffc6c52b99baa44fe6b4c2d6c53ea9f758d3317ea5f9074c6783",
+    "scripts/auth_emulator_qualification.cjs": "3cc42b110549d196e920a70592a9e1081eb7e8b9e2a7464693a65b20cb717bdf",
+    "scripts/tests/auth-emulator-qualification.test.cjs": "da520890da8d092b5d9df65a841c878d640cecffd2f507777c14f27992898046"
+  },
+  "screenshots": {
+    "p4-before-1440.png": "06a35763be607863d468aed75a0a5efa6ef63d072ca40b86a97bf0ce14105142",
+    "p4-before-390.png": "b4ebb28e90bff6dd3f84af4ba54c19567ac6e61c7db426146e10475271dd4057",
+    "p4-browser-failure.png": "35f6185f3a07bc156b3f71a8f0b1b3b0d1889bf70ee80d61ff6d6a6e04941aef",
+    "p4-connected-503.png": "35f6185f3a07bc156b3f71a8f0b1b3b0d1889bf70ee80d61ff6d6a6e04941aef",
+    "p4-presentation-after-1024.png": "df0fba6929e77c2ef3ba127d5248b36160e203c3a95ad46fe752130b68e9fa0e",
+    "p4-presentation-after-1440.png": "20b61c75e148d41cc85a3e14a93aec149ee5a6b3ecd94ed18aea84ee6d26f4a2",
+    "p4-presentation-after-360.png": "62477eca4287d99ac42dd1739986b7f3c7016a36795fa8008be4386aaed3b57e",
+    "p4-presentation-after-390.png": "47b5a33908f5a62a68d32de50c8ac546249ff0de897bb21d956dbb90c2cf00b5",
+    "p4-presentation-after-768.png": "48d22037c3270a70555a2d7b4bdedd6d9a9b1f196d5d8be1a3f1e76180731a93",
+    "p4-presentation-diagnostic.png": "9c277e4593d25c21cd73c93642015236761e2a3e3e94cecbf4ca3c20b273ad5d",
+    "p4-student-after-1024.png": "dff4dadfd803e5b4badc76ed684b091d5101678758eb2c1d7be50daf65d048ed",
+    "p4-student-after-1440.png": "b59baaff98e17acaa91dcab80b3a1f0f506d8cbdd398d165b8253e34bedfbd5f",
+    "p4-student-after-360.png": "435ea9e00804710e60284f09a9a56fa4306975b1409e30c6e150e9ef3094d4bd",
+    "p4-student-after-390.png": "45ee665c0f7cd7a9630dc8cc96997e4fa74de2cc6d854bbbdf69ff78e71546f0",
+    "p4-student-after-768.png": "dc388bfaef3ad602b8bccff9b6be09fcd297d55d16c0985c9592a2202d50fd9a"
+  },
+  "manual_screen_reader": "unverified",
+  "production_acceptance": false
+}

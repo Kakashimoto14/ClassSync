@@ -1,0 +1,62 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-d83de74267ba4ae6b3251dbdd3e5a185",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-d83de74267ba4ae6b3251dbdd3e5a185/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-d83de74267ba4ae6b3251dbdd3e5a185^\\data^\" -l logfile start",
+  "port": 64092,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-d83de74267ba4ae6b3251dbdd3e5a185/data",
+    "user": "classsync_qa_18e94c675ab94d73ab9dddcfc0d47c79",
+    "port": 64092,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "foundation": {
+      "transactional_migration_rollback": true,
+      "upgrade_downgrade_upgrade": true,
+      "constraint_cases": [
+        "duplicate identity",
+        "missing person",
+        "cross tenant student",
+        "mismatched person",
+        "unknown grant",
+        "empty grants",
+        "duplicate grants",
+        "null grant",
+        "invalid state",
+        "nonpositive revision",
+        "missing student binding",
+        "missing faculty binding",
+        "blank uid"
+      ],
+      "force_rls_all_tables": true,
+      "tenant_uid_project_isolation": true,
+      "record_binding": true,
+      "fresh_revocation": true,
+      "runtime_authority_writes_denied": true,
+      "database_failure_unavailable": true,
+      "second_uid_administrator": true,
+      "pooled_context_reset": true
+    },
+    "generated_source_only": true,
+    "source_sqlite_sha256_unchanged": "ced58b00c987f5309d4592f7ba1f14dd9ab621fad4744ec5930a3aca0f5b6dfc",
+    "mapped_snapshot_equal": true,
+    "record_count": 81,
+    "canonical_rows_sha256": "3002bbb15260a305050fa81fd2ae260ae81bd0d7c10eeca69333a1339b966ddd",
+    "payload_checksums_and_revisions_equal": true,
+    "interrupted_import_atomic_rollback": true,
+    "replay_conflict_preserves_data": true,
+    "reconnect_preserves_import": true,
+    "explicit_synthetic_mapping": {
+      "source_scope": "sandbox",
+      "source_owner": "development-academic-sandbox",
+      "target_tenant": "tenant-a",
+      "target_owner": "uid-admin"
+    },
+    "original_data_migration": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

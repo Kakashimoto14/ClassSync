@@ -1,0 +1,23 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_______________ test_constructor_and_import_require_no_database _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B2D3413950>
+
+    def test_constructor_and_import_require_no_database(monkeypatch):
+        monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: pytest.fail("Opened database"))
+>       from services.scheduling.app.publication_rules import PublicationRules
+E       ModuleNotFoundError: No module named 'services.scheduling.app.publication_rules'
+
+services\scheduling\tests\test_publication_rules.py:12: ModuleNotFoundError
+________ test_corrupt_publication_checksum_is_rejected_before_decoding ________
+
+    def test_corrupt_publication_checksum_is_rejected_before_decoding():
+>       from services.scheduling.app.publication_rules import PublicationRules
+E       ModuleNotFoundError: No module named 'services.scheduling.app.publication_rules'
+
+services\scheduling\tests\test_publication_rules.py:19: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_publication_rules.py::test_constructor_and_import_require_no_database
+FAILED services/scheduling/tests/test_publication_rules.py::test_corrupt_publication_checksum_is_rejected_before_decoding
+2 failed in 1.61s

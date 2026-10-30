@@ -1,3 +1,4 @@
+import { timeRange } from '../../lib/student-presentation';
 import { facultyDisplayName } from '../../lib/presentation-sample';
 import { sessionRoomPath } from '../../lib/session-room';
 import { Link } from 'react-router-dom';
@@ -22,7 +23,10 @@ export function ClassSessionDetails({
   presentation?: boolean;
   onClose: () => void;
 }) {
-  const roomPath = sessionRoomPath(role, session.room.id);
+  const roomPath =
+    role === 'student'
+      ? `/student/rooms/detail?id=${encodeURIComponent(session.room.id)}&date=${encodeURIComponent(session.date)}&schedule=1`
+      : sessionRoomPath(role, session.room.id);
   const duration = (Date.parse(session.ends_at) - Date.parse(session.starts_at)) / 60000;
   return (
     <DialogSurface
@@ -50,9 +54,13 @@ export function ClassSessionDetails({
           </h3>
           <p className="class-session-time">
             <Clock3 size={20} aria-hidden="true" />
-            {manilaTime(session.starts_at)}–{manilaTime(session.ends_at)}
+            {role === 'student'
+              ? timeRange(session.starts_at, session.ends_at)
+              : `${manilaTime(session.starts_at)}–${manilaTime(session.ends_at)}`}
           </p>
-          <p className="muted">{duration} minutes · Asia/Manila</p>
+          <p className="muted">
+            {duration} minutes{role !== 'student' ? ' · Asia/Manila' : ''}
+          </p>
         </section>
         <section className="class-session-section" aria-label="Classroom">
           <h3>

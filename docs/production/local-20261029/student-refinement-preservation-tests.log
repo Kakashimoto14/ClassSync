@@ -1,0 +1,54 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/RoomNavigation.test.tsx src/pages/PresentationRoutes.test.tsx src/routes/NavigationReliability.test.tsx src/pages/StudentHome.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 699ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 83ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 74ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 51ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 56ms
+ ✓ src/pages/StudentHome.test.tsx > keeps IDs and term controls out of the primary Home interface 99ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 70ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 289ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 90ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > student keeps selection through navigation, back, forward, and refresh 2436ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > teacher keeps selection through navigation, back, forward, and refresh 984ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > administrator keeps selection through navigation, back, forward, and refresh 1736ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > retains the selected role on forbidden navigation and recovers to its workspace 270ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > switches roles only through explicit selection and exit prevents history revival 537ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > preserves a valid direct link with query and hash after explicit matching selection 182ms
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  15 passed (15)
+   Start at  05:26:30
+   Duration  27.73s (transform 3.76s, setup 3.68s, import 12.89s, tests 7.67s, environment 10.46s)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/PresentationRoutes.test.tsx [ src/pages/PresentationRoutes.test.tsx ]
+ FAIL  src/pages/RoomNavigation.test.tsx [ src/pages/RoomNavigation.test.tsx ]
+Error: Transform failed with 1 error:
+C:/Projects/ClassSync/apps/web/src/pages/RoomDiscoveryPages.tsx:124:21: ERROR: Expected "}" but found "."
+  Plugin: vite:esbuild
+  File: C:/Projects/ClassSync/apps/web/src/pages/RoomDiscoveryPages.tsx:124:21
+  
+  Expected "}" but found "."
+  122|        <div className="discovery-results">
+  123|          {shown.map((room) => (
+  124|            {definition.role === 'student' && <Link className="text-action" to="/student/rooms?schedule=1">Rooms on my schedule</Link>}
+     |                       ^
+  125|        <RoomDirectoryCard
+  126|              key={room.id}
+  
+ ❯ failureErrorWithLog ../../node_modules/esbuild/lib/main.js:1467:15
+ ❯ ../../node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> ../../node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket ../../node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout ../../node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+

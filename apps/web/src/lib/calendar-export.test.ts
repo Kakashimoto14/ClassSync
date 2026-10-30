@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { calendarEventUid, escapeIcsText, foldIcsLine, serializeCalendar } from './calendar-export';
 

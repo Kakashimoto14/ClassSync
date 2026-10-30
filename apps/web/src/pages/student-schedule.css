@@ -1,0 +1,211 @@
+@import './student-home.css';
+.student-schedule {
+  display: grid;
+  gap: 20px;
+}
+.student-calendar-toolbar,
+.student-calendar-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.student-calendar-toolbar strong {
+  font-size: 0.9rem;
+}
+.student-calendar-desktop {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.student-calendar-head,
+.student-calendar-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(0, 1fr));
+}
+.student-calendar-head {
+  border-bottom: 1px solid var(--line);
+}
+.student-calendar-head > * {
+  padding: 16px 4px;
+  text-align: center;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--ink);
+  background: none;
+  border: 0;
+}
+.student-calendar-head button {
+  cursor: pointer;
+}
+.student-calendar-head [aria-current='date'] {
+  background: var(--primary);
+  color: white;
+}
+.student-calendar-hours,
+.student-calendar-day {
+  position: relative;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 59px,
+    var(--line) 59px,
+    var(--line) 60px
+  );
+}
+.student-calendar-hours span {
+  position: absolute;
+  right: 10px;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+.student-calendar-event {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  width: calc(100% - 6px);
+  border: 1px solid #e9d5dd;
+  border-left: 3px solid var(--primary);
+  border-radius: 7px;
+  background: var(--primary-soft);
+  color: var(--ink);
+  padding: 7px;
+  text-align: left;
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.student-calendar-event .student-agenda-time {
+  font-size: 0.65rem;
+}
+.student-calendar-event strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.76rem;
+  line-height: 1.3;
+}
+.student-calendar-event small {
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 4px;
+}
+.student-calendar-event .student-calendar-instructor {
+  display: none;
+}
+.student-calendar-agenda h2 {
+  margin-bottom: 16px;
+}
+@media (min-width: 1280px) {
+  .student-calendar-event .student-calendar-instructor {
+    display: block;
+  }
+}
+@media (max-width: 1023px) {
+  .student-calendar-desktop {
+    display: none;
+  }
+  .student-calendar-toolbar {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .student-calendar-toolbar > div {
+    gap: 8px;
+  }
+  .student-calendar-toolbar strong {
+    font-size: 0.75rem;
+  }
+  .student-calendar-agenda .student-agenda-row {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+.student-schedule-options {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+.student-schedule-options summary {
+  cursor: pointer;
+  min-height: 32px;
+}
+.student-schedule-options label {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  max-width: 100%;
+}
+.student-schedule-options select {
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+}
+.student-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.student-month-grid button {
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 6px;
+  cursor: pointer;
+}
+.student-month-grid small {
+  display: block;
+  margin-top: 6px;
+}
+.student-month-grid [aria-pressed='true'] {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+@media (max-width: 600px) {
+  .student-month-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.student-calendar-hours,
+.student-calendar-day {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 89px,
+    var(--line) 89px,
+    var(--line) 90px
+  );
+}
+.student-calendar-agenda .student-agenda-row {
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr);
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 16px 0;
+  background: none;
+  gap: 18px;
+}
+.student-calendar-agenda .student-agenda-time {
+  width: auto;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+@media (max-width: 600px) {
+  .student-calendar-agenda .student-agenda-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

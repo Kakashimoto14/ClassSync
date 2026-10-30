@@ -106,7 +106,8 @@ describe('workspace navigation', () => {
       const links = [...navigation.querySelectorAll('a')].map((link) => link.getAttribute('href'));
       expect(new Set(links).size).toBe(links.length);
       for (const route of navigationForRole(role).flatMap((group) => group.items)) {
-        if (route.kind !== 'settings') expect(links).toContain(route.path);
+        if (route.plannedFeature) expect(links).not.toContain(route.path);
+        else if (route.kind !== 'settings') expect(links).toContain(route.path);
       }
     },
   );
@@ -130,9 +131,7 @@ describe('workspace navigation', () => {
   });
 
   it('keeps generation active and consolidates the calendar alias under Schedule', () => {
-    expect(navigationOwner('/admin/schedule-manager/create')).toBe(
-      'administrator.ai-scheduling',
-    );
+    expect(navigationOwner('/admin/schedule-manager/create')).toBe('administrator.ai-scheduling');
     expect(navigationOwner('/admin/schedule-manager/create', true)).toBe(
       'administrator.ai-scheduling',
     );

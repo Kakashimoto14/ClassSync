@@ -1,0 +1,375 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/config/institutional-routes.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected student as an institutional identity 269ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected teacher as an institutional identity 39ms
+ ✓ src/config/institutional-routes.test.tsx > rejects stored/client-selected administrator as an institutional identity 35ms
+ × src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona 166ms
+   → Unable to find an element with the text: Student · University. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-shell brand-shell student-shell"[39m
+    [36m>[39m
+      [36m<a[39m
+        [33mclass[39m=[32m"skip-link"[39m
+        [33mhref[39m=[32m"#main-content"[39m
+      [36m>[39m
+        [0mSkip to content[0m
+      [36m</a>[39m
+      [36m<aside[39m
+        [33maria-label[39m=[32m"Workspace sidebar"[39m
+        [33mclass[39m=[32m"sidebar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"ClassSync home"[39m
+          [33mclass[39m=[32m"brand"[39m
+          [33mdata-discover[39m=[32m"true"[39m
+          [33mhref[39m=[32m"/student/dashboard"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"classsync-logo classsync-logo--medium classsync-logo--light"[39m
+            [33mdata-logo-asset[39m=[32m"provisional-raster"[39m
+            [33mdata-logo-variant[39m=[32m"horizontal"[39m
+          [36m>[39m
+            [36m<picture>[39m
+              [36m<img[39m
+                [33malt[39m=[32m""[39m
+                [33mheight[39m=[32m"295"[39m
+                [33msrc[39m=[32m"/branding/classsync-logo-assets/classsync-horizontal-light.png"[39m
+                [33mwidth[39m=[32m"1100"[39m
+              [36m/>[39m
+            [36m</picture>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary navigation"[39m
+          [33mclass[39m=[32m"sidebar-navigation"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"primary-links"[39m
+          [36m>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"nav-item"[39m
+              [33mdata-discover[39m=[32m"true"[39m
+              [33mhref[39m=[32m"/student/dashboard"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-layout-dashboard"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"9"[39m
+                  [33mrx[39m=[32m"1"[39m
+                  [33mwidth[39m=[32m"7"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"3"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"5"[39m
+                  [33mrx[39m=[32m"1"[39m
+                  [33mwidth[39m=[32m"7"[39m
+                  [33mx[39m=[32m"14"[39m
+                  [33my[39m=[32m"3"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"9"[39m
+                  [33mrx[39m=[32m"1"[39m
+                  [33mwidth[39m=[32m"7"[39m
+                  [33mx[39m=[32m"14"[39m
+                  [33my[39m=[32m"12"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"5"[39m
+                  [33mrx[39m=[32m"1"[39m
+                  [33mwidth[39m=[32m"7"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"16"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<span>[39m
+                [0mHome[0m
+              [36m</span>[39m
+            [36m</a>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"nav-item"[39m
+              [33mdata-discover[39m=[32m"true"[39m
+              [33mhref[39m=[32m"/student/schedule"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-calendar-days"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 2v4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 2v4"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"18"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"18"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 10h18"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 14h.01"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 14h.01"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 14h.01"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 18h.01"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 18h.01"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 18h.01"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<span>[39m
+                [0mSchedule[0m
+              [36m</span>[39m
+            [36m</a>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"nav-item"[39m
+              [33mdata-discover[39m=[32m"true"[39m
+              [33mhref[39m=[32m"/student/rooms"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-map-pin"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+      ...
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  10:46:01
+   Duration  11.05s (transform 2.22s, setup 683ms, import 6.26s, tests 515ms, environment 2.92s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/config/institutional-routes.test.tsx > opens only the verified Student workspace and ignores a conflicting preview persona
+TestingLibraryElementError: Unable to find an element with the text: Student · University. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="app-shell brand-shell student-shell"
+    >
+      <a
+        class="skip-link"
+        href="#main-content"
+      >
+        Skip to content
+      </a>
+      <aside
+        aria-label="Workspace sidebar"
+        class="sidebar"
+      >
+        <a
+          aria-label="ClassSync home"
+          class="brand"
+          data-discover="true"
+          href="/student/dashboard"
+        >
+          <span
+            aria-hidden="true"
+            class="classsync-logo classsync-logo--medium classsync-logo--light"
+            data-logo-asset="provisional-raster"
+            data-logo-variant="horizontal"
+          >
+            <picture>
+              <img
+                alt=""
+                height="295"
+                src="/branding/classsync-logo-assets/classsync-horizontal-light.png"
+                width="1100"
+              />
+            </picture>
+          </span>
+        </a>
+        <nav
+          aria-label="Primary navigation"
+          class="sidebar-navigation"
+        >
+          <div
+            class="primary-links"
+          >
+            <a
+              class="nav-item"
+              data-discover="true"
+              href="/student/dashboard"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layout-dashboard"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="3"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="3"
+                />
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="12"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="16"
+                />
+              </svg>
+              <span>
+                Home
+              </span>
+            </a>
+            <a
+              class="nav-item"
+              data-discover="true"
+              href="/student/schedule"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-calendar-days"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 2v4"
+                />
+                <path
+                  d="M16 2v4"
+                />
+                <rect
+                  height="18"
+                  rx="2"
+                  width="18"
+                  x="3"
+                  y="4"
+                />
+                <path
+                  d="M3 10h18"
+                />
+                <path
+                  d="M8 14h.01"
+                />
+                <path
+                  d="M12 14h.01"
+                />
+                <path
+                  d="M16 14h.01"
+                />
+                <path
+                  d="M8 18h.01"
+                />
+                <path
+                  d="M12 18h.01"
+                />
+                <path
+                  d="M16 18h.01"
+                />
+              </svg>
+              <span>
+                Schedule
+              </span>
+            </a>
+            <a
+              class="nav-item"
+              data-discover="true"
+              href="/student/rooms"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-map-pin"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+      ...
+ ❯ Object.getElementError ../../node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/config/institutional-routes.test.tsx:79:17
+     77|   );
+     78|   expect(screen.getByRole('heading', { name: 'Connected Student Home' …
+     79|   expect(screen.getByText('Student · University')).toBeInTheDocument();
+       |                 ^
+     80|   expect(screen.queryByText('Maria Santos')).not.toBeInTheDocument();
+     81|   expect(screen.queryByRole('link', { name: 'Switch preview role' })).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

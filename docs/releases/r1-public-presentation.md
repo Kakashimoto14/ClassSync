@@ -47,8 +47,7 @@ Official references: [Vite SPA deep-link configuration](https://vercel.com/docs/
 
 ## Explicit public sample strategy
 
-`npm run build:presentation` deliberately enables both presentation and role-preview
-flags. Generic `npm run build` retains its ordinary production behavior. Vercel's
+`npm run build:presentation` deliberately selects the validated presentation target. It rejects contradictory canonical/legacy flags instead of overriding them. Generic `npm run build` defaults to institutional unavailable access unless presentation is explicitly configured; sandbox is rejected for every build. Vercel's
 reviewed build command explicitly chooses the read-only artifact; no failed API
 request activates it. A stale connected preview session or hostile source query
 cannot select live/private data in that artifact.
@@ -98,8 +97,9 @@ not fully audited; the earlier denied probe is not a complete rules certificatio
 | Build | `npm run build:presentation` |
 | Output | `apps/web/dist` relative to repository root |
 | Node | 22.x; locally tested 22.23.1, pinned in root package and lockfile |
-| `VITE_ENABLE_ROLE_PREVIEW` | `true`; release command also explicitly sets it |
-| `VITE_ENABLE_PRESENTATION_SAMPLE` | `true`; release command also explicitly sets it |
+| `VITE_CLASSSYNC_MODE` | Prefer `presentation`, or omit with the explicit presentation build command |
+| `VITE_ENABLE_ROLE_PREVIEW` | Legacy alias: omit or `true`; explicit `false` conflicts with presentation |
+| `VITE_ENABLE_PRESENTATION_SAMPLE` | Legacy alias: omit or `true`; explicit `false` conflicts with presentation |
 | `VITE_API_BASE_URL` | Unset; no localhost/private host or public sandbox target |
 | `ENABLE_SCHEDULING_SANDBOX` / backend credentials | Unset; not part of static release |
 | `VERCEL_GIT_COMMIT_SHA` | Vercel-provided Git commit metadata; ensure available |

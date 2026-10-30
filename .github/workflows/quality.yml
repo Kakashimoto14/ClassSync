@@ -1,28 +1,35 @@
 name: Quality
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { persist-credentials: false }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run test:security
       - run: npm run test:web
       - run: npm run build
+      - run: npm run test:artifacts
       - name: Build the read-only public presentation without cloud credentials
         run: npm run build:presentation
       - name: Check release source and presentation mode
-        run: node -e "const r=require('./apps/web/dist/release.json'); if(r.mode!=='read-only-presentation'||r.sampleVersion!=='classsync-presentation-v1'||r.commit!==process.env.GITHUB_SHA) throw new Error('Unexpected presentation release metadata');"
+        run: node -e "const r=require('./apps/web/dist/release.json'); if(r.mode!=='read-only-presentation'||r.appMode!=='presentation'||r.capabilityVersion!==1||r.sampleVersion!=='classsync-presentation-v1'||r.commit!==process.env.GITHUB_SHA||r.uncommittedChanges!==false) throw new Error('Unexpected presentation release metadata');"
   python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { persist-credentials: false }
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - run: pip install ruff pytest
+      - run: python -m pip install pip==26.2.2
+      - run: pip install ruff pytest==9.0.3
       - run: pip install -r requirements.txt
         working-directory: services/gateway
       - run: pip install -r requirements.txt
@@ -31,5 +38,26 @@ jobs:
         working-directory: services/scheduling
       - run: pip install -r requirements.txt
         working-directory: services/notification
-      - run: ruff check services packages
+      - run: pip install -r requirements.txt
+        working-directory: services/persistence
+      - run: ruff check scripts/security scripts/postgres_disposable.py scripts/postgres_driver_qualification.py scripts/postgres_identity_qualification.py scripts/postgres_restore_qualification.py scripts/postgres_revision_qualification.py scripts/postgres_audit_qualification.py scripts/postgres_identity_http_qualification.py scripts/postgres_emulator_qualification.py scripts/postgres_provider_qualification.py scripts/postgres_web_session_qualification.py scripts/postgres_academic_period_qualification.py scripts/postgres_academic_repository_qualification.py scripts/postgres_academic_migration_qualification.py scripts/postgres_academic_provider_qualification.py scripts/postgres_academic_restore_qualification.py scripts/postgres_draft_qualification.py scripts/postgres_scheduling_provider_qualification.py scripts/postgres_scheduling_migration_qualification.py scripts/postgres_scheduling_restore_qualification.py scripts/postgres_publication_state_qualification.py scripts/postgres_publication_repository_qualification.py scripts/postgres_publication_resource_qualification.py scripts/postgres_publication_scale_qualification.py services packages
       - run: pytest
+      - name: Create isolated pinned security scanner
+        run: |
+          python -m venv "${RUNNER_TEMP}/classsync-audit-tools"
+          "${RUNNER_TEMP}/classsync-audit-tools/bin/python" -m pip install pip==26.2.2 pip-audit==2.10.1
+      - name: Audit exact installed dependencies including the persistence foundation
+        run: python scripts/security/python_audit.py --tool-python "${RUNNER_TEMP}/classsync-audit-tools/bin/python" --output-dir "${RUNNER_TEMP}/classsync-python-audit"
+  dependency-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --ignore-scripts
+      - name: Reject invalid or missing dependency peers
+        run: npm ls --all
+      # Every advisory remains blocking until fixed or an owner-approved policy changes.
+      # Registry/network failures also fail; no continue-on-error or advisory exclusions.
+      - run: npm audit --audit-level=low

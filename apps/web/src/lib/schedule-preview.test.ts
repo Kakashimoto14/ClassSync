@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { previewContext, schedulePreview, type ScheduleOccurrence } from '../data/schedule-preview';
 import {

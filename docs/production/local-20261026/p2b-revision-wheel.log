@@ -1,0 +1,13 @@
+Processing .\packages\persistence
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: classync-persistence
+  Building wheel for classync-persistence (pyproject.toml): started
+  Building wheel for classync-persistence (pyproject.toml): finished with status 'done'
+  Created wheel for classync-persistence: filename=classync_persistence-0.1.0-py3-none-any.whl size=7207 sha256=a135362c238d8fb443b5d4615fc502c34582148b0c873ffd9d7891142e8c184b
+  Stored in directory: C:\Users\lenovo\AppData\Local\Temp\pip-ephem-wheel-cache-i19hn2eb\wheels\5f\12\9f\f5f70aa0a6262b942066a2d84bff3bbe24a9f9fc021b312888
+Successfully built classync-persistence

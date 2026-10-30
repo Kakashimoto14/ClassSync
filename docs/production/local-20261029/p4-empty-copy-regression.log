@@ -1,0 +1,20 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 762ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 70ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 43ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 60ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 60ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 201ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 88ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  02:23:20
+   Duration  12.31s (transform 1.67s, setup 760ms, import 6.19s, tests 1.29s, environment 3.29s)
+
