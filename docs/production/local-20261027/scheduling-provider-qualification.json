@@ -1,0 +1,338 @@
+{
+  "project": "demo-classsync-85afb7123638",
+  "endpoint": "127.0.0.1:65067",
+  "toolsVersion": "15.34.1",
+  "authOnly": true,
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-36cddb81ce614a6eacda5434af71d34e",
+  "authStopped": true,
+  "deniedOutbound": 0,
+  "postgres": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-a95f696f562d43a1ac7d3f5fc8a1444d",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-a95f696f562d43a1ac7d3f5fc8a1444d/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-a95f696f562d43a1ac7d3f5fc8a1444d^\\data^\" -l logfile start",
+    "port": 65076,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-a95f696f562d43a1ac7d3f5fc8a1444d/data",
+      "user": "classsync_qa_cb4fbb9490d6460e891481eaa4f57d17",
+      "port": 65076,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "foundation": {
+        "transactional_migration_rollback": true,
+        "upgrade_downgrade_upgrade": true,
+        "constraint_cases": [
+          "duplicate identity",
+          "missing person",
+          "cross tenant student",
+          "mismatched person",
+          "unknown grant",
+          "empty grants",
+          "duplicate grants",
+          "null grant",
+          "invalid state",
+          "nonpositive revision",
+          "missing student binding",
+          "missing faculty binding",
+          "blank uid"
+        ],
+        "force_rls_all_tables": true,
+        "tenant_uid_project_isolation": true,
+        "record_binding": true,
+        "fresh_revocation": true,
+        "runtime_authority_writes_denied": true,
+        "database_failure_unavailable": true,
+        "second_uid_administrator": true,
+        "pooled_context_reset": true
+      },
+      "actual_auth_sdk_current_pg_asgi_http": true,
+      "generation_save_replay_list_get": true,
+      "changed_key_title_run_hash_rejected": true,
+      "client_result_and_forged_stored_candidate_rejected": true,
+      "two_active_administrator_owner_isolation": true,
+      "separate_student_teacher_no_membership_and_bad_tokens_denied": true,
+      "client_tenant_owner_headers_ignored": true,
+      "guard_to_storage_current_revocation": true,
+      "actual_select_and_insert_permission_outage_recovery": true,
+      "failed_generation_persistence_no_false_success": true,
+      "actual_five_connection_exhaustion_recovery": true,
+      "actual_infeasible_not_persisted": true,
+      "unknown_solver_status": "not forced; portable control-flow coverage only",
+      "all_institutional_publication_routes_unavailable": true,
+      "server_tenant_project_denied": true,
+      "actual_postmaster_and_provider_restart_durable": true,
+      "physical_restart": {
+        "postmaster_before": "2026-10-27T05:37:16.951688+08:00",
+        "postmaster_after": "2026-10-27T05:37:27.563320+08:00",
+        "runtime_backend_before": 1988,
+        "runtime_backend_after": 17252
+      },
+      "normal_exceptional_shutdown_zero_runtime_sessions": true,
+      "no_sqlite_fallback": true,
+      "http_statuses": [
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 401
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/generate",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 422
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 404
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 409
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts?tenant_id=tenant-b&owner=forged",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 404
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 404
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 422
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/generate",
+          "status": 503
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/generate",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/aa028dde-710d-4489-b28a-6e4b045fb9a9",
+          "status": 404
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/generate",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/periods",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/history/synthetic-period",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/calendar/synthetic-period?start=2026-10-01&end=2026-10-31",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/events/synthetic-period?start=2026-10-01&end=2026-10-31",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/availability?room_id=room-a&start=2026-10-01T08:00:00%2B08:00&end=2026-10-01T09:00:00%2B08:00",
+          "status": 503
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/timetables/review",
+          "status": 503
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/timetables/publish",
+          "status": 503
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/timetables/restrictions/synthetic-restriction",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/periods",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/timetables/periods",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/b2286704-383d-47ce-a235-eacec555dc54",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/scheduling/drafts",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/scheduling/drafts/aa028dde-710d-4489-b28a-6e4b045fb9a9",
+          "status": 200
+        }
+      ],
+      "academic_service_forwarding": "not composed by this bounded qualifier",
+      "tcp_browser_workflows": "not performed; HTTP uses FastAPI ASGI TestClient",
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

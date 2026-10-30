@@ -1,0 +1,13 @@
+# Shared publication rules and workload correction
+
+28 October 2026. Current/base HEAD `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`. Acceptance preceded extraction in `publication-rules-acceptance.md`.
+
+Root moved five existing domain methods (`decode`, `expanded`, `conflicts`, `summary`, `project`) and the interval helper into `publication_rules.py`; the SQLite repository inherits them and retains every storage query and transaction. Occurrence expansion now imports the same `DraftError` from `draft_rules`, removing its dependency on the SQLite repository. No provider or route was enabled.
+
+A separate agent authored storage-free tests, with database and CP-SAT execution prohibited by sentinels. Initial missing-module RED2 is retained. Independent read-only security review found no extraction/privacy regression, then identified a pre-existing workload ordering defect: a later larger or absent cap could erase an earlier supplied limit for the same teacher/day or ISO week. Eight new regression cases reproduced four failures and four already-correct reverse-order denials. Root fixed this by retaining the strictest non-None supplied cap for each teacher/bucket and checking the accumulated load against it on every event. This enforces all supplied constraints without inventing policy values. The reviewer confirmed the fix and bucket isolation without executing tests or editing source.
+
+Final portable evidence `publication-rules-final-portable.log`: 43 passed in 2.53s, including conflicts for four resource types, transition buffers, workload and bucket boundaries, effective revisions, checksum tampering, explicit storage ports, current record binding and role-specific private-data removal. `publication-workload-red.log` retains the ordering reproduction. Existing SQLite publication/HTTP projection tests passed 11/11 before the correction; final full serial backend `publication-rules-backend.log` passed 650/650 in 91.20s after it. Root security tests passed 16/16; exit Ruff/diff checks passed. The existing Starlette/httpx deprecation remains.
+
+`publication-rules-preservation.json` verifies original database hashes, 10 stopped owned clusters with closed assigned ports plus one never-started cluster and four source fingerprints. No dependency or frontend changed; previous browser/build/audit evidence remains dated and is not a new acceptance claim.
+
+This prerequisite is locally qualified; PostgreSQL publication persistence/provider adoption, hash-bound approval, complete P3b/P6/P7 and connected institutional role workflows remain incomplete. Production remains NO-GO.

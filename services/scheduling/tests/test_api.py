@@ -90,32 +90,21 @@ def test_preview_role_and_general_dev_bypass_never_authorize_production(app, mon
     )
 
 
-def test_verified_admin_role_is_required(monkeypatch):
-    from classync_contracts import scheduling_security
-
-    monkeypatch.setattr(scheduling_security, "initialize_firebase", lambda *_: None)
-    monkeypatch.setattr(
-        scheduling_security.auth,
-        "verify_id_token",
-        lambda *_, **__: {"uid": "verified", "role": "teacher"},
-    )
+def test_verified_admin_role_is_required(identity_adapters):
+    identity_adapters(scheduling, "teacher", uid="verified")
     response = TestClient(scheduling.app).post(
         "/api/v1/scheduling/generate",
         json=tiny().model_dump(mode="json"),
-        headers={"Authorization": "Bearer verified-test"},
+        headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
     )
     assert response.status_code == 403
-    monkeypatch.setattr(
-        scheduling_security.auth,
-        "verify_id_token",
-        lambda *_, **__: {"uid": "verified", "role": "administrator"},
-    )
+    identity_adapters(scheduling, "administrator", uid="verified")
     assert (
         TestClient(scheduling.app)
         .post(
             "/api/v1/scheduling/generate",
             json=tiny().model_dump(mode="json"),
-            headers={"Authorization": "Bearer verified-test"},
+            headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
         )
         .status_code
         == 200

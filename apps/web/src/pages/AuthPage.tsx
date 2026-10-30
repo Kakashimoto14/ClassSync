@@ -8,15 +8,21 @@ import { demoDestination, validateLogin, type LoginValidationErrors } from '../a
 import { previewEnabled } from '../auth/preview-session';
 import { useDevelopmentRole } from '../auth/useDevelopmentRole';
 import { EntranceTimetable } from '../components/brand/EntranceTimetable';
+import { useUniversitySession } from '../auth/university-session-context';
+import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
+import { appMode } from '../config/runtime-config';
 
 export function AuthPage() {
   const { role } = useDevelopmentRole();
+  const university = useUniversitySession();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginValidationErrors>({});
   const [unavailable, setUnavailable] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [signInError, setSignInError] = useState('');
   const emailInput = useRef<HTMLInputElement>(null);
   const passwordInput = useRef<HTMLInputElement>(null);
   const returnTo = searchParams.get('returnTo');
@@ -24,7 +30,7 @@ export function AuthPage() {
     ? '/dev/role-preview?returnTo=' + encodeURIComponent(returnTo)
     : '/dev/role-preview';
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validation = validateLogin(email, password);
     setErrors(validation);
@@ -37,7 +43,22 @@ export function AuthPage() {
       passwordInput.current?.focus();
       return;
     }
-    // No provider is configured. Do not simulate network activity or send credentials.
+    if (appMode === 'institutional' && university.available) {
+      setSigningIn(true);
+      setSignInError('');
+      try {
+        const { firebaseApp } = await import('../lib/firebase');
+        const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
+        if (!firebaseApp) throw new Error('Provider unavailable');
+        await signInWithEmailAndPassword(getAuth(firebaseApp), email.trim(), password);
+        setPassword('');
+      } catch {
+        setSignInError('Sign-in failed. Check your details and connection, then try again.');
+      } finally {
+        setSigningIn(false);
+      }
+      return;
+    }
     setUnavailable(true);
   };
 
@@ -85,7 +106,9 @@ export function AuthPage() {
                 ? role
                   ? `Your ${role} preview is ready to continue.`
                   : 'Choose a role and explore your campus workspace.'
-                : 'University access is not available yet.'}
+                : university.available
+                  ? 'Check your current university membership.'
+                  : 'University access is not available yet.'}
             </p>
           </div>
           {previewEnabled && (
@@ -105,87 +128,102 @@ export function AuthPage() {
               )}
             </>
           )}
-          <details className="university-access">
-            <summary>
-              University sign-in <span>Not connected</span>
-            </summary>
-            <div>
-              <p className="muted">
-                Production authentication is not connected. No credentials are sent or stored.
-              </p>
-              <form noValidate onSubmit={submit}>
-                <div className="auth-field">
-                  <label htmlFor="email">University email</label>
-                  <input
-                    ref={emailInput}
-                    id="email"
-                    type="email"
-                    autoComplete="username"
-                    value={email}
-                    onChange={(event) => {
-                      setEmail(event.target.value);
-                      setErrors((value) => ({ ...value, email: undefined }));
-                      setUnavailable(false);
-                    }}
-                    aria-invalid={Boolean(errors.email)}
-                    aria-describedby={errors.email ? 'email-error' : undefined}
-                    placeholder="name@university.edu"
-                  />
-                  {errors.email && (
-                    <p id="email-error" className="field-error" role="alert">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-                <div className="auth-field">
-                  <label htmlFor="password">Password</label>
-                  <div className="password-field">
+          {appMode === 'institutional' && <UniversitySessionPanel />}
+          {(!university.available || university.state.status === 'signed-out') && (
+            <details
+              className="university-access"
+              open={appMode === 'institutional' && university.available}
+            >
+              <summary>
+                University sign-in{' '}
+                <span>{university.available ? 'Connected provider' : 'Not connected'}</span>
+              </summary>
+              <div>
+                <p className="muted">
+                  {university.available
+                    ? 'Sign in with your university account. Access depends on current membership.'
+                    : 'Production authentication is not connected. No credentials are sent or stored.'}
+                </p>
+                <form noValidate onSubmit={submit}>
+                  <div className="auth-field">
+                    <label htmlFor="email">University email</label>
                     <input
-                      ref={passwordInput}
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      value={password}
+                      ref={emailInput}
+                      id="email"
+                      type="email"
+                      autoComplete="username"
+                      value={email}
                       onChange={(event) => {
-                        setPassword(event.target.value);
-                        setErrors((value) => ({ ...value, password: undefined }));
+                        setEmail(event.target.value);
+                        setErrors((value) => ({ ...value, email: undefined }));
                         setUnavailable(false);
                       }}
-                      aria-invalid={Boolean(errors.password)}
-                      aria-describedby={errors.password ? 'password-error' : undefined}
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={errors.email ? 'email-error' : undefined}
+                      placeholder="name@university.edu"
                     />
-                    <button
-                      type="button"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      aria-pressed={showPassword}
-                      onClick={() => setShowPassword((value) => !value)}
-                    >
-                      {showPassword ? (
-                        <EyeOff size={18} aria-hidden="true" />
-                      ) : (
-                        <Eye size={18} aria-hidden="true" />
-                      )}
-                    </button>
+                    {errors.email && (
+                      <p id="email-error" className="field-error" role="alert">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
-                  {errors.password && (
-                    <p id="password-error" className="field-error" role="alert">
-                      {errors.password}
-                    </p>
+                  <div className="auth-field">
+                    <label htmlFor="password">Password</label>
+                    <div className="password-field">
+                      <input
+                        ref={passwordInput}
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(event) => {
+                          setPassword(event.target.value);
+                          setErrors((value) => ({ ...value, password: undefined }));
+                          setUnavailable(false);
+                        }}
+                        aria-invalid={Boolean(errors.password)}
+                        aria-describedby={errors.password ? 'password-error' : undefined}
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword((value) => !value)}
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} aria-hidden="true" />
+                        ) : (
+                          <Eye size={18} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p id="password-error" className="field-error" role="alert">
+                        {errors.password}
+                      </p>
+                    )}
+                  </div>
+                  <Button type="submit" disabled={signingIn}>
+                    {signingIn
+                      ? 'Signing in…'
+                      : university.available
+                        ? 'Sign in'
+                        : 'Check sign-in availability'}{' '}
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </Button>
+                  {signInError && <p role="alert">{signInError}</p>}
+                  {unavailable && (
+                    <Alert tone="warning" title="Sign-in unavailable">
+                      {previewEnabled
+                        ? 'Your details were not sent or saved. Use the development preview to explore the interface.'
+                        : 'Your details were not sent or saved. Contact your university for sign-in availability.'}
+                    </Alert>
                   )}
-                </div>
-                <Button type="submit">
-                  Check sign-in availability <ArrowRight size={17} aria-hidden="true" />
-                </Button>
-                {unavailable && (
-                  <Alert tone="warning" title="Sign-in unavailable">
-                    {previewEnabled
-                      ? 'Your details were not sent or saved. Use the development preview to explore the interface.'
-                      : 'Your details were not sent or saved. Contact your university for sign-in availability.'}
-                  </Alert>
-                )}
-              </form>
-            </div>
-          </details>
+                </form>
+              </div>
+            </details>
+          )}
         </div>
       </section>
       <EntranceTimetable />

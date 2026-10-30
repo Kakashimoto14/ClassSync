@@ -1,0 +1,103 @@
+FFF...                                                                   [100%]
+================================== FAILURES ===================================
+_ test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-same-period-earlier] _
+
+case = 'same-period-earlier', limit = 180
+
+    @pytest.mark.parametrize("case", ["same-period-earlier", "different-period-earlier",
+                                      "different-period-later"])
+    @pytest.mark.parametrize("limit", [180, 270])
+    def test_publication_checks_retained_minutes_outside_effective_dates_in_same_week(case, limit):
+        old_period, new_period = "period-a", "period-a" if case.startswith("same") else "period-b"
+        old_days, old_start, old_end = (0, 2), "2026-10-05", "2026-10-11"
+        new_days, new_start, new_end = (2, 4), "2026-10-07", "2026-10-11"
+        if case == "different-period-earlier":
+            old_end = old_start  # Retain Monday only, entirely before the new effective interval.
+        elif case == "different-period-later":
+            old_days, old_start = (0, 4), "2026-10-09"
+            new_days, new_start, new_end = (0, 2), "2026-10-05", "2026-10-07"
+        old, _, _ = fixture(version=1, period=old_period, days=old_days, start=old_start,
+                            end=old_end, limit=limit)
+        new, draft, command = fixture(version=2, period=new_period, days=new_days,
+                                      start=new_start, end=new_end, limit=limit)
+        rules = EmptyRestrictions()
+        full_week = rules.expanded([old, new], date(2026, 10, 5), date(2026, 10, 11))
+        assert sum(90 for _ in full_week) == 270
+        if limit == 180:
+            with pytest.raises(DraftError) as independently_denied:
+                rules.conflicts(full_week)
+            assert independently_denied.value.code == "publication_workload"
+>           with pytest.raises(DraftError) as denied:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_week_boundaries.py:107: Failed
+_ test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-different-period-earlier] _
+
+case = 'different-period-earlier', limit = 180
+
+    @pytest.mark.parametrize("case", ["same-period-earlier", "different-period-earlier",
+                                      "different-period-later"])
+    @pytest.mark.parametrize("limit", [180, 270])
+    def test_publication_checks_retained_minutes_outside_effective_dates_in_same_week(case, limit):
+        old_period, new_period = "period-a", "period-a" if case.startswith("same") else "period-b"
+        old_days, old_start, old_end = (0, 2), "2026-10-05", "2026-10-11"
+        new_days, new_start, new_end = (2, 4), "2026-10-07", "2026-10-11"
+        if case == "different-period-earlier":
+            old_end = old_start  # Retain Monday only, entirely before the new effective interval.
+        elif case == "different-period-later":
+            old_days, old_start = (0, 4), "2026-10-09"
+            new_days, new_start, new_end = (0, 2), "2026-10-05", "2026-10-07"
+        old, _, _ = fixture(version=1, period=old_period, days=old_days, start=old_start,
+                            end=old_end, limit=limit)
+        new, draft, command = fixture(version=2, period=new_period, days=new_days,
+                                      start=new_start, end=new_end, limit=limit)
+        rules = EmptyRestrictions()
+        full_week = rules.expanded([old, new], date(2026, 10, 5), date(2026, 10, 11))
+        assert sum(90 for _ in full_week) == 270
+        if limit == 180:
+            with pytest.raises(DraftError) as independently_denied:
+                rules.conflicts(full_week)
+            assert independently_denied.value.code == "publication_workload"
+>           with pytest.raises(DraftError) as denied:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_week_boundaries.py:107: Failed
+_ test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-different-period-later] _
+
+case = 'different-period-later', limit = 180
+
+    @pytest.mark.parametrize("case", ["same-period-earlier", "different-period-earlier",
+                                      "different-period-later"])
+    @pytest.mark.parametrize("limit", [180, 270])
+    def test_publication_checks_retained_minutes_outside_effective_dates_in_same_week(case, limit):
+        old_period, new_period = "period-a", "period-a" if case.startswith("same") else "period-b"
+        old_days, old_start, old_end = (0, 2), "2026-10-05", "2026-10-11"
+        new_days, new_start, new_end = (2, 4), "2026-10-07", "2026-10-11"
+        if case == "different-period-earlier":
+            old_end = old_start  # Retain Monday only, entirely before the new effective interval.
+        elif case == "different-period-later":
+            old_days, old_start = (0, 4), "2026-10-09"
+            new_days, new_start, new_end = (0, 2), "2026-10-05", "2026-10-07"
+        old, _, _ = fixture(version=1, period=old_period, days=old_days, start=old_start,
+                            end=old_end, limit=limit)
+        new, draft, command = fixture(version=2, period=new_period, days=new_days,
+                                      start=new_start, end=new_end, limit=limit)
+        rules = EmptyRestrictions()
+        full_week = rules.expanded([old, new], date(2026, 10, 5), date(2026, 10, 11))
+        assert sum(90 for _ in full_week) == 270
+        if limit == 180:
+            with pytest.raises(DraftError) as independently_denied:
+                rules.conflicts(full_week)
+            assert independently_denied.value.code == "publication_workload"
+>           with pytest.raises(DraftError) as denied:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_week_boundaries.py:107: Failed
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_publication_week_boundaries.py::test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-same-period-earlier]
+FAILED services/scheduling/tests/test_publication_week_boundaries.py::test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-different-period-earlier]
+FAILED services/scheduling/tests/test_publication_week_boundaries.py::test_publication_checks_retained_minutes_outside_effective_dates_in_same_week[180-different-period-later]
+3 failed, 3 passed in 0.69s

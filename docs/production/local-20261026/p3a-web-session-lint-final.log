@@ -1,0 +1,8 @@
+
+> classync@0.1.0 lint
+> npm run lint --workspace=@classync/web
+
+
+> @classync/web@0.1.0 lint
+> eslint . --max-warnings=0
+

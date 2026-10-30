@@ -1,0 +1,46 @@
+ M .github/workflows/quality.yml
+ M apps/web/.env.example
+ M apps/web/package.json
+ M apps/web/src/auth/preview-session.ts
+ M apps/web/src/components/layout/AppShell.tsx
+ M apps/web/src/lib/academic-api.ts
+ M apps/web/src/lib/presentation-sample.ts
+ M apps/web/src/lib/publication-api.ts
+ M apps/web/src/lib/sample-calendar-api.ts
+ M apps/web/src/lib/scheduling-api.ts
+ M apps/web/src/pages/AcademicCalendarEditor.tsx
+ M apps/web/src/pages/AcademicFixtureImport.tsx
+ M apps/web/src/pages/ProductScreenPage.tsx
+ M apps/web/src/pages/PublicationPanel.tsx
+ M apps/web/src/pages/R1Presentation.test.tsx
+ M apps/web/src/routes/RouteGuard.tsx
+ M apps/web/src/services/api-client.ts
+ M apps/web/vite.config.ts
+ M docs/architecture.md
+ M docs/infrastructure/vercel-backend-deployment-plan.md
+ M docs/releases/r1-public-presentation.md
+ M docs/security.md
+ M package-lock.json
+ M package.json
+ M scripts/build-presentation.cjs
+ M scripts/preview-presentation.cjs
+ M services/academic/requirements.txt
+ M services/gateway/requirements.txt
+ M services/notification/requirements.txt
+ M services/scheduling/requirements.txt
+ M vercel.json
+?? AGENTS.md
+?? apps/web/config/
+?? apps/web/src/config/
+?? docs/autonomy/
+?? docs/production/
+?? packages/api-contracts/classync_contracts/identity.py
+?? scripts/lib/
+?? scripts/security/
+?? scripts/test-web.cjs
+?? scripts/tests/
+?? scripts/verify-hosted-presentation.cjs
+?? services/gateway/tests/test_identity_contracts.py
+?? services/scheduling/tests/test_mode_boundaries.py
+?? services/scheduling/tests/test_security_audit.py
+?? services/security-constraints.txt

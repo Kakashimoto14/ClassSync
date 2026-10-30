@@ -1,0 +1,10 @@
+{
+  "wheel": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p2b-wheel-verified-5bfffcb975864139882d878cc2ebe541\\classync_persistence-0.1.0-py3-none-any.whl",
+  "sha256": "352463329b31ced259d5faad4fdd81ae5fb3dbce1d4d936f46f7709aac0e3153",
+  "migration_files_verified": [
+    "classync_persistence/memberships.py",
+    "classync_persistence/migrations/env.py",
+    "classync_persistence/migrations/versions/0001_identity.py",
+    "classync_persistence/schema.py"
+  ]
+}

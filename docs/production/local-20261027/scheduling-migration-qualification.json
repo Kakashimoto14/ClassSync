@@ -1,0 +1,91 @@
+{
+  "migration": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-227e63e976604f47a84449052c1d43bd",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-227e63e976604f47a84449052c1d43bd/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-227e63e976604f47a84449052c1d43bd^\\data^\" -l logfile start",
+    "port": 49823,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-227e63e976604f47a84449052c1d43bd/data",
+      "user": "classsync_qa_0b33b8a661014d3d843128fbae90d740",
+      "port": 49823,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "foundation": {
+        "transactional_migration_rollback": true,
+        "upgrade_downgrade_upgrade": true,
+        "constraint_cases": [
+          "duplicate identity",
+          "missing person",
+          "cross tenant student",
+          "mismatched person",
+          "unknown grant",
+          "empty grants",
+          "duplicate grants",
+          "null grant",
+          "invalid state",
+          "nonpositive revision",
+          "missing student binding",
+          "missing faculty binding",
+          "blank uid"
+        ],
+        "force_rls_all_tables": true,
+        "tenant_uid_project_isolation": true,
+        "record_binding": true,
+        "fresh_revocation": true,
+        "runtime_authority_writes_denied": true,
+        "database_failure_unavailable": true,
+        "second_uid_administrator": true,
+        "pooled_context_reset": true
+      },
+      "migration": "0006_scheduling_drafts",
+      "source": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-227e63e976604f47a84449052c1d43bd\\synthetic-scheduling-source.sqlite3",
+      "source_sha256": "8c91539da1bcbe316e090db5a2d4c596937892561636a350f8f97a1ec7b4a8a4",
+      "source_unchanged": true,
+      "imported_runs": 3,
+      "imported_drafts": 1,
+      "full_snapshot_exact": true,
+      "raw_payload_checksum_metadata_exact": true,
+      "physical_reconnect": true,
+      "interrupted_run_and_draft_insert_rollback": true,
+      "replay_conflict": true,
+      "original_save_key_replays": true,
+      "alternate_key_conflict": true,
+      "expired_run_stays_expired": true,
+      "pending_run_saveable": true,
+      "unrelated_owner_preserved": true,
+      "current_role_tenant_project_denied": true,
+      "revoked_import_denied": true,
+      "original_data_migration": false,
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  },
+  "existing_key_conflict": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-b5450e9a992746d99bfc03bdaac31258",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-b5450e9a992746d99bfc03bdaac31258/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-b5450e9a992746d99bfc03bdaac31258^\\data^\" -l logfile start",
+    "port": 49843,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-b5450e9a992746d99bfc03bdaac31258/data",
+      "user": "classsync_qa_6e47e15769554b05a21335051e3b7113",
+      "port": 49843,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "source": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-b5450e9a992746d99bfc03bdaac31258\\synthetic-scheduling-source.sqlite3",
+      "source_sha256": "7f6d8018e2ac22435d07726929f93ca08c564880a4b1399fe4a2f4353e64260c",
+      "source_unchanged": true,
+      "existing_key_batch_rollback": true,
+      "all_existing_rows_unchanged": true,
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

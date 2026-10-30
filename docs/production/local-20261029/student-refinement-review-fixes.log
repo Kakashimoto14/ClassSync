@@ -1,0 +1,1002 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentSchedule.test.tsx src/pages/RoomNavigation.test.tsx src/pages/PresentationRoutes.test.tsx src/routes/NavigationReliability.test.tsx src/pages/StudentHome.test.tsx
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens the structured Student calendar without legacy published fixtures 1081ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to student without implying verified resources 1555ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > keeps Student alerts consistent with the dashboard update and provides a working schedule action 450ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to teacher without implying verified resources 974ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers provisional CDM inventory to administrator without implying verified resources 1284ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only PRRC rooms and returns through the same building 1748ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'student' detail route 534ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'student' detail route 496ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only New Building rooms and returns through the same building 1429ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'student' detail route 449ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > opens only Court rooms and returns through the same building 1176ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters  249ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'student' detail route 436ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=missing 263ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'teacher' detail route 469ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'teacher' detail route 458ms
+ ✓ src/pages/PresentationRoutes.test.tsx > presentation journey integrity > does not substitute a building for absent or invalid parameters ?building=Science+Building&building=Computing+Building 246ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'teacher' detail route 509ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the student-owned date and correct count 750ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'teacher' detail route 475ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the teacher-owned date and correct count 540ms
+ ✓ src/pages/PresentationRoutes.test.tsx > calendar preview data and interaction > shows the administrator-owned date and correct count 645ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'SCI-218' through its 'administrator' detail route 639ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'ENG-204' through its 'administrator' detail route 788ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'LAB-04' through its 'administrator' detail route 698ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > opens 'Room 405' through its 'administrator' detail route 660ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > filters combined attributes, preserves filtered return, and resets 904ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > reports invalid capacity rather than matching everything 251ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /student/find-room 867ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /teacher/room-availability 765ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > offers published occupancy without asserting resource suitability at /admin/room-availability 1006ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters  128ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=unknown 88ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id= 150ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > does not substitute SCI-218 for invalid detail parameters ?id=room-sci-218&id=room-eng-204 92ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows unknown resource metadata without inventing it 143ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > shows the actual administrator draft alongside published assignments 180ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > rejects cross-role detail access 12ms
+ ✓ src/pages/RoomNavigation.test.tsx > room discovery routes and interactions > retains the room ID when a refresh requires demo access again 10ms
+ × src/routes/NavigationReliability.test.tsx > real route tree preview continuity > student keeps selection through navigation, back, forward, and refresh 1204ms
+   → expected '/student/schedule?date=2026-10-30' to be '/student/schedule' // Object.is equality
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > teacher keeps selection through navigation, back, forward, and refresh 1052ms
+ × src/routes/NavigationReliability.test.tsx > real route tree preview continuity > administrator keeps selection through navigation, back, forward, and refresh 990ms
+   → expected '/admin/rooms?date=2026-10-30' to be '/admin/rooms' // Object.is equality
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > retains the selected role on forbidden navigation and recovers to its workspace 367ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > switches roles only through explicit selection and exit prevents history revival 676ms
+ ✓ src/routes/NavigationReliability.test.tsx > real route tree preview continuity > preserves a valid direct link with query and hash after explicit matching selection 235ms
+ ✓ src/pages/StudentSchedule.test.tsx > announces an unloaded month as pending instead of an empty schedule 1108ms
+ × src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace 1641ms
+   → expected  to have a length of 3 but got +0
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"student-schedule student-home"[39m
+        [33mdata-published-version[39m=[32m"classsync-presentation-v1"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"student-home-heading"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h1>[39m
+              [0mMy Schedule[0m
+            [36m</h1>[39m
+            [36m<p>[39m
+              [0mAY 2026–2027 · 1st Semester[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"muted"[39m
+          [36m>[39m
+            [0mSample schedule · Illustrative data[0m
+          [36m</span>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"student-calendar-toolbar"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Previous week"[39m
+              [33mclass[39m=[32m"button button--secondary "[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-left"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m15 18-6-6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+            [36m<strong>[39m
+              [0mMon, Oct 26[0m
+              [0m – [0m
+              [0mSun, Nov 1[0m
+            [36m</strong>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Next week"[39m
+              [33mclass[39m=[32m"button button--secondary "[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-right"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mToday[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<details[39m
+          [33mclass[39m=[32m"student-schedule-options"[39m
+          [33mopen[39m=[32m""[39m
+        [36m>[39m
+          [36m<summary>[39m
+            [0mSchedule options[0m
+          [36m</summary>[39m
+          [36m<label>[39m
+            [0mAcademic period[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"p"[39m
+              [36m>[39m
+                [0mAY 2026-2027 · 1st Semester — Sample[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+          [36m<label>[39m
+            [0mCalendar view[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"week"[39m
+              [36m>[39m
+                [0mWeek[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"day"[39m
+              [36m>[39m
+                [0mDay[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"month"[39m
+              [36m>[39m
+                [0mMonth[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+          [36m<label>[39m
+            [0mSample section[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"syn-bsit-3-A"[39m
+              [36m>[39m
+                [0mBSIT 3A[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mOpen sample schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mUse local published schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button button--secondary "[39m
+          [36m>[39m
+            [0mChoose saved sample[0m
+          [36m</button>[39m
+          [36m<label>[39m
+            [0mSaved sample[0m
+            [36m<select>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m""[39m
+              [36m>[39m
+                [0mChoose a sample[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"saved"[39m
+              [36m>[39m
+                [0mRich sample[0m
+              [36m</option>[39m
+            [36m</select>[39m
+          [36m</label>[39m
+        [36m</details>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Select a day"[39m
+          [33mclass[39m=[32m"student-week-strip"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Mon, Oct 26"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-26"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mMon[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m26[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Tue, Oct 27"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-27"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mTue[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m27[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Wed, Oct 28"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-28"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mWed[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m28[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Thu, Oct 29"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-29"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mThu[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m29[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"date"[39m
+            [33maria-label[39m=[32m"Fri, Oct 30"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-30"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mFri[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m30[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Sat, Oct 31"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-10-31"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mSat[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m31[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-label[39m=[32m"Sun, Nov 1"[39m
+            [33mhref[39m=[32m"?period=p&date=2026-11-01"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mSun[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m1[0m
+            [36m</strong>[39m
+            [36m<small>[39m
+              [0m0[0m
+              [36m<span[39m
+                [33mclass[39m=[32m"student-class-word"[39m
+              [36m>[39m
+                [0m classes[0m
+              [36m</span>[39m
+            [36m</small>[39m
+          [36m</a>[39m
+        [36m</nav>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m"Weekly schedule"[39m
+          [33mclass[39m=[32m"student-calendar-desktop"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"student-calendar-head"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mTime[0m
+            [36m</span>[39m
+            [36m<button>[39m
+              [0mMon, Oct 26[0m
+            [36m</button>[39m
+            [36m<button>[39m
+              [0mTue, Oct 27[0m
+            [36m</button>[39m
+            [36m<button>[39m
+              [0mWed, Oct 28[0m
+            [36m</button>[39m
+            [36m<button>[39m
+              [0mThu, Oct 29[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-current[39m=[32m"date"[39m
+            [36m>[39m
+              [0mFri, Oct 30[0m
+            [36m</button>[39m
+            [36m<button>[39m
+              [0mSat, Oct 31[0m
+            [36m</button>[39m
+            [36m<button>[39m
+              [0mSun, Nov 1[0m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"student-calendar-grid"[39m
+            [33mstyle[39m=[32m"height: 810px;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-hours"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 0px;"[39m
+              [36m>[39m
+                [0m8:00 AM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 90px;"[39m
+              [36m>[39m
+                [0m9:00 AM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 180px;"[39m
+              [36m>[39m
+                [0m10:00 AM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 270px;"[39m
+              [36m>[39m
+                [0m11:00 AM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 360px;"[39m
+              [36m>[39m
+                [0m12:00 PM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 450px;"[39m
+              [36m>[39m
+                [0m1:00 PM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 540px;"[39m
+              [36m>[39m
+                [0m2:00 PM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 630px;"[39m
+              [36m>[39m
+                [0m3:00 PM[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mstyle[39m=[32m"top: 720px;"[39m
+              [36m>[39m
+                [0m4:00 PM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"student-calendar-day"[39m
+            [36m/>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"student-panel student-calendar-agenda"[39m
+        [36m>[39m
+          [36m<h2>[39m
+            [0mFri, Oct 30[0m
+            [0m [0m
+            [36m<span[39m
+              [33mclass[39m=[32m"muted"[39m
+            [36m>[39m
+              [0m· [0m
+              [0m0[0m
+              [0m [0m
+              [0mclasses[0m
+            [36m</span>[39m
+          [36m</h2>[39m
+          [36m<p>[39m
+            [0mNo classes on this day.[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</section>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ✓ src/pages/StudentSchedule.test.tsx > keeps a class ending at midnight at its real duration 168ms
+ ✓ src/pages/StudentSchedule.test.tsx > opens the requested day with three classes, details, stable room IDs, week navigation and empty weekend 1178ms
+ ✓ src/pages/StudentSchedule.test.tsx > does not render a calendar or empty-success state when the backend is unavailable 144ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 605ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 68ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 52ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 45ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 56ms
+ ✓ src/pages/StudentHome.test.tsx > keeps IDs and term controls out of the primary Home interface 74ms
+ ✓ src/pages/StudentHome.test.tsx > limits room details to the requested authorized room and handles unknown IDs honestly 60ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 261ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 98ms
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  3 failed | 56 passed (59)
+   Start at  05:35:53
+   Duration  55.33s (transform 5.50s, setup 5.65s, import 37.88s, tests 33.72s, environment 19.68s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/StudentSchedule.test.tsx > opens saved samples deliberately from a fresh workspace
+AssertionError: expected  to have a length of 3 but got +0
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <section
+        class="student-schedule student-home"
+        data-published-version="classsync-presentation-v1"
+      >
+        <header
+          class="student-home-heading"
+        >
+          <div>
+            <h1>
+              My Schedule
+            </h1>
+            <p>
+              AY 2026–2027 · 1st Semester
+            </p>
+          </div>
+          <span
+            class="muted"
+          >
+            Sample schedule · Illustrative data
+          </span>
+        </header>
+        <div
+          class="student-calendar-toolbar"
+        >
+          <div>
+            <button
+              aria-label="Previous week"
+              class="button button--secondary "
+            >
+              <svg
+                class="lucide lucide-chevron-left"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m15 18-6-6 6-6"
+                />
+              </svg>
+            </button>
+            <strong>
+              Mon, Oct 26
+               – 
+              Sun, Nov 1
+            </strong>
+            <button
+              aria-label="Next week"
+              class="button button--secondary "
+            >
+              <svg
+                class="lucide lucide-chevron-right"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m9 18 6-6-6-6"
+                />
+              </svg>
+            </button>
+          </div>
+          <button
+            class="button button--secondary "
+          >
+            Today
+          </button>
+        </div>
+        <details
+          class="student-schedule-options"
+          open=""
+        >
+          <summary>
+            Schedule options
+          </summary>
+          <label>
+            Academic period
+            <select>
+              <option
+                value="p"
+              >
+                AY 2026-2027 · 1st Semester — Sample
+              </option>
+            </select>
+          </label>
+          <label>
+            Calendar view
+            <select>
+              <option
+                value="week"
+              >
+                Week
+              </option>
+              <option
+                value="day"
+              >
+                Day
+              </option>
+              <option
+                value="month"
+              >
+                Month
+              </option>
+            </select>
+          </label>
+          <label>
+            Sample section
+            <select>
+              <option
+                value="syn-bsit-3-A"
+              >
+                BSIT 3A
+              </option>
+            </select>
+          </label>
+          <button
+            class="button button--secondary "
+          >
+            Open sample schedule
+          </button>
+          <button
+            class="button button--secondary "
+          >
+            Use local published schedule
+          </button>
+          <button
+            class="button button--secondary "
+          >
+            Choose saved sample
+          </button>
+          <label>
+            Saved sample
+            <select>
+              <option
+                value=""
+              >
+                Choose a sample
+              </option>
+              <option
+                value="saved"
+              >
+                Rich sample
+              </option>
+            </select>
+          </label>
+        </details>
+        <nav
+          aria-label="Select a day"
+          class="student-week-strip"
+        >
+          <a
+            aria-label="Mon, Oct 26"
+            href="?period=p&date=2026-10-26"
+          >
+            <span>
+              Mon
+            </span>
+            <strong>
+              26
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-label="Tue, Oct 27"
+            href="?period=p&date=2026-10-27"
+          >
+            <span>
+              Tue
+            </span>
+            <strong>
+              27
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-label="Wed, Oct 28"
+            href="?period=p&date=2026-10-28"
+          >
+            <span>
+              Wed
+            </span>
+            <strong>
+              28
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-label="Thu, Oct 29"
+            href="?period=p&date=2026-10-29"
+          >
+            <span>
+              Thu
+            </span>
+            <strong>
+              29
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-current="date"
+            aria-label="Fri, Oct 30"
+            href="?period=p&date=2026-10-30"
+          >
+            <span>
+              Fri
+            </span>
+            <strong>
+              30
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-label="Sat, Oct 31"
+            href="?period=p&date=2026-10-31"
+          >
+            <span>
+              Sat
+            </span>
+            <strong>
+              31
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+          <a
+            aria-label="Sun, Nov 1"
+            href="?period=p&date=2026-11-01"
+          >
+            <span>
+              Sun
+            </span>
+            <strong>
+              1
+            </strong>
+            <small>
+              0
+              <span
+                class="student-class-word"
+              >
+                 classes
+              </span>
+            </small>
+          </a>
+        </nav>
+        <div
+          aria-label="Weekly schedule"
+          class="student-calendar-desktop"
+        >
+          <div
+            class="student-calendar-head"
+          >
+            <span>
+              Time
+            </span>
+            <button>
+              Mon, Oct 26
+            </button>
+            <button>
+              Tue, Oct 27
+            </button>
+            <button>
+              Wed, Oct 28
+            </button>
+            <button>
+              Thu, Oct 29
+            </button>
+            <button
+              aria-current="date"
+            >
+              Fri, Oct 30
+            </button>
+            <button>
+              Sat, Oct 31
+            </button>
+            <button>
+              Sun, Nov 1
+            </button>
+          </div>
+          <div
+            class="student-calendar-grid"
+            style="height: 810px;"
+          >
+            <div
+              class="student-calendar-hours"
+            >
+              <span
+                style="top: 0px;"
+              >
+                8:00 AM
+              </span>
+              <span
+                style="top: 90px;"
+              >
+                9:00 AM
+              </span>
+              <span
+                style="top: 180px;"
+              >
+                10:00 AM
+              </span>
+              <span
+                style="top: 270px;"
+              >
+                11:00 AM
+              </span>
+              <span
+                style="top: 360px;"
+              >
+                12:00 PM
+              </span>
+              <span
+                style="top: 450px;"
+              >
+                1:00 PM
+              </span>
+              <span
+                style="top: 540px;"
+              >
+                2:00 PM
+              </span>
+              <span
+                style="top: 630px;"
+              >
+                3:00 PM
+              </span>
+              <span
+                style="top: 720px;"
+              >
+                4:00 PM
+              </span>
+            </div>
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+            <div
+              class="student-calendar-day"
+            />
+          </div>
+        </div>
+        <section
+          class="student-panel student-calendar-agenda"
+        >
+          <h2>
+            Fri, Oct 30
+             
+            <span
+              class="muted"
+            >
+              · 
+              0
+               
+              classes
+            </span>
+          </h2>
+          <p>
+            No classes on this day.
+          </p>
+        </section>
+      </section>
+    </div>
+  </body>
+</html>
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ src/pages/StudentSchedule.test.tsx:65:75
+     63|     ),
+     64|   );
+     65|   await waitFor(() => expect(document.querySelectorAll('.ux-agenda-row…
+       |                                                                           ^
+     66| });
+     67|
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/routes/NavigationReliability.test.tsx > real route tree preview continuity > student keeps selection through navigation, back, forward, and refresh
+AssertionError: expected '/student/schedule?date=2026-10-30' to be '/student/schedule' // Object.is equality
+
+Expected: "/student/schedule"
+Received: "/student/schedule?date=2026-10-30"
+
+ ❯ src/routes/NavigationReliability.test.tsx:62:11
+     60|         expect(
+     61|           restored.router.state.location.pathname + restored.router.st…
+     62|         ).toBe(path);
+       |           ^
+     63|         expectRole(role);
+     64|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/routes/NavigationReliability.test.tsx > real route tree preview continuity > administrator keeps selection through navigation, back, forward, and refresh
+AssertionError: expected '/admin/rooms?date=2026-10-30' to be '/admin/rooms' // Object.is equality
+
+Expected: "/admin/rooms"
+Received: "/admin/rooms?date=2026-10-30"
+
+ ❯ src/routes/NavigationReliability.test.tsx:62:11
+     60|         expect(
+     61|           restored.router.state.location.pathname + restored.router.st…
+     62|         ).toBe(path);
+       |           ^
+     63|         expectRole(role);
+     64|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

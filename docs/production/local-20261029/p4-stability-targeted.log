@@ -1,0 +1,29 @@
+
+> classync@0.1.0 test:web
+> node scripts/test-web.cjs src/pages/StudentHome.test.tsx src/lib/use-schedule-workspace.test.tsx src/lib/student-timetable-api.test.ts
+
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/lib/use-schedule-workspace.test.tsx > retrieves the complete displayed week across a month boundary and clears old records after denial 202ms
+ ✓ src/lib/student-timetable-api.test.ts > times out a stalled token refresh before starting a request 35ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint publish before network 7ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint sandbox/periods before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint history/p before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint calendar/../publish before network 2ms
+ ✓ src/lib/student-timetable-api.test.ts > rejects non-Student-read endpoint //external before network 1ms
+ ✓ src/lib/student-timetable-api.test.ts > requires identity and sends current role/token to the Gateway without credentials 31ms
+ ✓ src/lib/student-timetable-api.test.ts > retains server denial and never replaces it with data 3ms
+ ✓ src/pages/StudentHome.test.tsx > prioritizes a sourced next class, chronological agenda, duration and room path 668ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 401 and provides retry 103ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 403 and provides retry 62ms
+ ✓ src/pages/StudentHome.test.tsx > hides previously loaded classes during HTTP 503 and provides retry 76ms
+ ✓ src/pages/StudentHome.test.tsx > does not invent classes when no publication is available 68ms
+ ✓ src/pages/StudentHome.test.tsx > removes class details when the selected class leaves the current data scope 256ms
+ ✓ src/pages/StudentHome.test.tsx > announces initial loading and provides an honest class-free day 60ms
+
+ Test Files  3 passed (3)
+      Tests  16 passed (16)
+   Start at  02:54:33
+   Duration  13.82s (transform 1.73s, setup 3.63s, import 8.51s, tests 1.60s, environment 9.50s)
+

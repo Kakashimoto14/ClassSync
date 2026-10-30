@@ -192,9 +192,9 @@ def test_projection_isolation_irregular_enrollment_and_exception_conflicts(setup
         )
 
 
-def test_api_rejects_preview_and_student_publication_and_production_sandbox(monkeypatch, tmp_path):
-    from classync_contracts import scheduling_security as security
-
+def test_api_rejects_preview_and_student_publication_and_production_sandbox(
+    monkeypatch, tmp_path, identity_adapters
+):
     from services.scheduling.app import main
 
     monkeypatch.setattr(main.settings, "scheduling_database_path", str(tmp_path / "s.db"))
@@ -209,17 +209,12 @@ def test_api_rejects_preview_and_student_publication_and_production_sandbox(monk
         "calendar": configuration().calendar.model_dump(mode="json"),
     }
     assert client.post("/api/v1/timetables/publish", json=body).status_code == 401
-    monkeypatch.setattr(security, "initialize_firebase", lambda _: None)
-    monkeypatch.setattr(
-        security.auth,
-        "verify_id_token",
-        lambda *a, **k: {"uid": "student", "role": "student", "tenant_id": "tenant"},
-    )
+    identity_adapters(main, "student", uid="student")
     assert (
         client.post(
             "/api/v1/timetables/publish",
             json=body,
-            headers={"Authorization": "Bearer verified-test"},
+            headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
         ).status_code
         == 403
     )

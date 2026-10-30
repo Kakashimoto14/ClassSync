@@ -1,6 +1,26 @@
-import { beforeEach, expect, it } from 'vitest';
-import { defaultPeriod, periodLabel, readWorkspace, rememberWorkspace } from './workspace-context';
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  defaultPeriod,
+  periodLabel,
+  readWorkspace,
+  rememberWorkspace,
+  shouldAnnounceConnectionLoss,
+} from './workspace-context';
 beforeEach(() => sessionStorage.clear());
+describe('live timetable connection status', () => {
+  it('announces interruption only for a loaded published timetable', () => {
+    expect(shouldAnnounceConnectionLoss('published', false, true)).toBe(true);
+    expect(shouldAnnounceConnectionLoss('published', true, true)).toBe(false);
+    expect(shouldAnnounceConnectionLoss('published', false, false)).toBe(false);
+  });
+
+  it.each(['presentation', 'review'] as const)(
+    'does not imply live synchronization in %s mode',
+    (mode) => {
+      expect(shouldAnnounceConnectionLoss(mode, false, true)).toBe(false);
+    },
+  );
+});
 it('isolates roles and expires context with the preview session', () => {
   const startedAt = Date.now() - 1000;
   sessionStorage.setItem(

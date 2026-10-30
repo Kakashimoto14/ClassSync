@@ -8,12 +8,14 @@ import type {
   DraftList,
 } from '../../../../packages/shared-types/src/scheduling';
 import { env } from './env';
+import { appMode, requireLiveCapability } from '../config/runtime-config';
 
 export type { GenerationInput, GenerationResult, ValidationResult };
 export type { DraftDetail, DraftList, SaveDraftRequest };
-export const schedulingSandboxEnabled = import.meta.env.DEV;
+export const schedulingSandboxEnabled = appMode === 'sandbox';
 
 async function request<T>(operation: string, body?: unknown): Promise<T> {
+  requireLiveCapability();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 50000);
   try {

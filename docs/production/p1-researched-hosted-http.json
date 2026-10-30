@@ -1,0 +1,179 @@
+{
+  "origin": "https://class-sync-bhiv.vercel.app",
+  "release": null,
+  "failed": [
+    "/student/dashboard",
+    "/teacher/schedule",
+    "/admin/dashboard",
+    "/dev/role-preview",
+    "/dev/design-system",
+    "/release.json"
+  ],
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "W/\"10773618e6e83a606a1132a30ddfc08c\"",
+      "vercelId": "sin1::75lxm-1792580542408-6d5918622e1a",
+      "bytes": 1260,
+      "sha256": "faedb73bbca522beffd08665804b91caa600941235aa97e305833d8bd8edadee",
+      "identity": "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\" /> <meta name=\"viewport\" content=\"width=device-w"
+    },
+    {
+      "path": "/student/dashboard",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::75lxm-1792580542526-c323cc09fbbe",
+      "bytes": 79,
+      "sha256": "885d8e9b001153724c7ff80dd96d8278d7454440206a92dcbb3cd143a39033a2",
+      "identity": "The page could not be found NOT_FOUND sin1::75lxm-1792580542526-c323cc09fbbe "
+    },
+    {
+      "path": "/teacher/schedule",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::pz4bz-1792580542654-fe13492c9c0e",
+      "bytes": 79,
+      "sha256": "f6a43d764a2e56e2cf750aa9805f48548cb6b3214c5679db3687402c76c047cd",
+      "identity": "The page could not be found NOT_FOUND sin1::pz4bz-1792580542654-fe13492c9c0e "
+    },
+    {
+      "path": "/admin/dashboard",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::h84rh-1792580542704-790314d24fab",
+      "bytes": 79,
+      "sha256": "ffded50c97dfa810027cef2b766fe88fe780442be4e79f91439021453de18bae",
+      "identity": "The page could not be found NOT_FOUND sin1::h84rh-1792580542704-790314d24fab "
+    },
+    {
+      "path": "/dev/role-preview",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::fhg6f-1792580542750-60bb9e172d24",
+      "bytes": 79,
+      "sha256": "89b58012ecbcce15af99224f4de11740cbfe29488e88dd12c5f4397cf967c58d",
+      "identity": "The page could not be found NOT_FOUND sin1::fhg6f-1792580542750-60bb9e172d24 "
+    },
+    {
+      "path": "/dev/design-system",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::xxr9d-1792580542793-7d76106a50b4",
+      "bytes": 79,
+      "sha256": "4a722f26edb613d0488edcdcb19ff5d0179eaca915b1a60d0174520c5f1b7c27",
+      "identity": "The page could not be found NOT_FOUND sin1::xxr9d-1792580542793-7d76106a50b4 "
+    },
+    {
+      "path": "/release.json",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::9cdqb-1792580542849-d5e91aa0007b",
+      "bytes": 79,
+      "sha256": "8ef6b41004408e7cf17c8858b48e8994e0f6bb43e7c413efe23af1fd3eb0d7c9",
+      "identity": "The page could not be found NOT_FOUND sin1::9cdqb-1792580542849-d5e91aa0007b "
+    },
+    {
+      "path": "/fonts/InterVariable.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "\"2bf3d951bf9d6109437ea0874bbf12fb\"",
+      "vercelId": "sin1::kjlns-1792580542906-59154929548c",
+      "bytes": 352240,
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+      "identity": null
+    },
+    {
+      "path": "/branding/classsync-logo-assets/classsync-icon-32.png",
+      "status": 200,
+      "contentType": "image/png",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "\"f95e3704bc3b3ba8480c9fffe1910436\"",
+      "vercelId": "sin1::dcb49-1792580543142-863e96ffc5b2",
+      "bytes": 1546,
+      "sha256": "074aca0f326b5b83edd8bff3fc9a6bc3cc7f5a68a3254972c747069b69b06ed9",
+      "identity": null
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "status": 200,
+      "contentType": "application/manifest+json; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "\"5ee93b8d2281c31a82e83fdb72238d38\"",
+      "vercelId": "sin1::g42lg-1792580543193-93ef959726c3",
+      "bytes": 498,
+      "sha256": "7d2d404ea342722a1e5e7a7c482174321c33c2000f1e27c108352d06fc47434f",
+      "identity": "{ \"name\": \"ClassSync\", \"short_name\": \"ClassSync\", \"start_url\": \".\", \"display\": \"standalone\", \"background_color"
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::wvjlg-1792580543289-15aa860c21e2",
+      "bytes": 79,
+      "sha256": "833c501dde945a803ca916ed1e7334db9a47eba77c64536773f5879bec81e567",
+      "identity": "The page could not be found NOT_FOUND sin1::wvjlg-1792580543289-15aa860c21e2 "
+    },
+    {
+      "path": "/assets/p1-missing.js",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::n9kjs-1792580543351-f7c707606644",
+      "bytes": 79,
+      "sha256": "9f13287e1a471faf3842242264767725996b9c4afc15b1f121e7b5590743e4b1",
+      "identity": "The page could not be found NOT_FOUND sin1::n9kjs-1792580543351-f7c707606644 "
+    },
+    {
+      "path": "/p1-unknown",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": null,
+      "vercelId": "sin1::wvjlg-1792580543393-b731d807223a",
+      "bytes": 79,
+      "sha256": "dadf929b13d51fb851d5ad0ff09f87eeb03e688deca48c2093cacea8ad752252",
+      "identity": "The page could not be found NOT_FOUND sin1::wvjlg-1792580543393-b731d807223a "
+    },
+    {
+      "path": "/assets/index-CbQh0kvf.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "W/\"8324b56d15d33e13b3ca044db064f331\"",
+      "vercelId": "sin1::75lxm-1792580543440-cf25a991db9d",
+      "bytes": 498692,
+      "sha256": "017e9c9725b8bd105c9dfdb3ce966407598d3b7be41e9348bf25ff0e4748912e",
+      "identity": "var sp=n=>{throw TypeError(n)};var Hf=(n,i,s)=>i.has(n)||sp(\"Cannot \"+s);var Q=(n,i,s)=>(Hf(n,i,\"read from private field"
+    },
+    {
+      "path": "/assets/index-n6CW7Rwm.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "etag": "W/\"ad9e54caaf7aa2953a42910cab545d13\"",
+      "vercelId": "sin1::ppwhq-1792580543524-64f6d37b0d20",
+      "bytes": 81915,
+      "sha256": "6109ade9d9290d7f5fa4c475959a84feef97cd080d37aa321832c19e228d2185",
+      "identity": "@font-face{font-family:Inter;src:url(/fonts/InterVariable.woff2) format(\"woff2\");font-weight:100 900;font-style:normal;f"
+    }
+  ]
+}

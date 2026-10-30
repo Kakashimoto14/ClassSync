@@ -512,13 +512,12 @@ def test_api_authorization_and_catalog_write(api, monkeypatch):
     assert api.get(f"/api/v1/scheduling/sandbox/academic/{pid}/readiness").status_code == 403
 
 
-def test_protected_records_and_generation_require_verified_owner(api, monkeypatch):
-    from classync_contracts import scheduling_security
-
-    monkeypatch.setattr(scheduling_security, "initialize_firebase", lambda *_: None)
-    identity = {"uid": "admin-a", "role": "administrator"}
-    monkeypatch.setattr(scheduling_security.auth, "verify_id_token", lambda *_, **__: identity)
-    headers = {"Authorization": "Bearer verified-test"}
+def test_protected_records_and_generation_require_verified_owner(
+    api, monkeypatch, identity_adapters
+):
+    for module in (gateway, academic, scheduling):
+        identity_adapters(module, uid="admin-a")
+    headers = {"Authorization": "Bearer e30.e30.synthetic-signature"}
     source = complete(academic.repository())
     saved = api.post(
         "/api/v1/academic/periods", headers=headers, json={"title": "Authorized entered period"}
@@ -559,10 +558,15 @@ def test_protected_records_and_generation_require_verified_owner(api, monkeypatc
     )
     assert draft.status_code == 201, draft.text
     assert draft.json()["data"]["source"] == "institutional"
-    assert api.get(f"/api/v1/academic/sandbox/periods/{pid}").status_code == 404
-    identity["uid"] = "admin-b"
+    with monkeypatch.context() as sandbox_settings:
+        for module in (gateway, academic, scheduling):
+            sandbox_settings.setattr(module.settings, "classsync_env", "development")
+        assert api.get(f"/api/v1/academic/sandbox/periods/{pid}").status_code == 404
+    for module in (gateway, academic, scheduling):
+        identity_adapters(module, uid="admin-b")
     assert api.get(f"/api/v1/academic/periods/{pid}", headers=headers).status_code == 404
-    identity["role"] = "teacher"
+    for module in (gateway, academic, scheduling):
+        identity_adapters(module, "teacher", uid="admin-b")
     assert (
         api.post("/api/v1/academic/periods", headers=headers, json={"title": "Denied"}).status_code
         == 403

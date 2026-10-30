@@ -1,0 +1,26 @@
+[
+  {
+    "command": "npm run lint",
+    "exit_code": 0
+  },
+  {
+    "command": "npm run typecheck",
+    "exit_code": 0
+  },
+  {
+    "command": "npm run test:security",
+    "exit_code": 0
+  },
+  {
+    "command": "npm run build",
+    "exit_code": 0
+  },
+  {
+    "command": "npm run build:presentation",
+    "exit_code": 0
+  },
+  {
+    "command": "npm run test:artifacts",
+    "exit_code": 0
+  }
+]

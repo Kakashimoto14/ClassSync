@@ -1,0 +1,50 @@
+[
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+    "sha256": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+    "schemaVersion": 3,
+    "integrity": "ok",
+    "foreignKeyIssues": 0,
+    "tables": {
+      "academic_periods": 4,
+      "academic_records": 567,
+      "academic_references": 319,
+      "academic_calendars": 1
+    },
+    "payloadsVerified": 567,
+    "payloadChecksumErrors": 0,
+    "sortedPayloadHashesSha256": "8264848a4223ca3b1fd15f15d26f05dd42fc1d0e231435a7677025c83db05d14"
+  },
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+    "sha256": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+    "schemaVersion": 2,
+    "integrity": "ok",
+    "foreignKeyIssues": 0,
+    "tables": {
+      "solver_runs": 13,
+      "scheduling_drafts": 12,
+      "publication_heads": 0,
+      "published_versions": 0,
+      "sqlite_sequence": 0,
+      "publication_room_restrictions": 0
+    },
+    "payloadsVerified": 25,
+    "payloadChecksumErrors": 0,
+    "sortedPayloadHashesSha256": "9882c3eef47cac932cd6d6666ca64230881b91f4ec3fbf8a215afa02a61d6e62"
+  },
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+    "sha256": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+    "schemaVersion": 1,
+    "integrity": "ok",
+    "foreignKeyIssues": 0,
+    "tables": {
+      "solver_runs": 6,
+      "scheduling_drafts": 6
+    },
+    "payloadsVerified": 12,
+    "payloadChecksumErrors": 0,
+    "sortedPayloadHashesSha256": "d59024ed349e3af195d9971560df795c55169e82401e2896be6241c7101400ad"
+  }
+]

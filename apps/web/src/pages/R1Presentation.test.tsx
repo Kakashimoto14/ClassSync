@@ -88,7 +88,9 @@ it('keeps the loaded agenda when selecting another date within the same sample m
     }),
   );
   await waitFor(() => expect(readWorkspace('student').date).toBe('2026-10-22'));
-  expect(document.querySelectorAll('.ux-agenda-row').length).toBeGreaterThan(0);
+  await waitFor(() =>
+    expect(document.querySelectorAll('.ux-agenda-row').length).toBeGreaterThan(0),
+  );
   expect(timetableRequest).not.toHaveBeenCalled();
 });
 it('reports only stored conflict validation at export without providing a live validator', async () => {

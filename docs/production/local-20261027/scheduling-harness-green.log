@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: owned emulator environment removes credentials and every inherited proxy spelling
+ok 1 - owned emulator environment removes credentials and every inherited proxy spelling
+  ---
+  duration_ms: 3.8301
+  type: 'test'
+  ...
+# Subtest: owned emulator entry selects only fixed qualification modules and exact flags
+ok 2 - owned emulator entry selects only fixed qualification modules and exact flags
+  ---
+  duration_ms: 1.2661
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 205.252

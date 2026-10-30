@@ -1,0 +1,25 @@
+
+> classync@0.1.0 build
+> npm run build --workspace=@classync/web
+
+
+> @classync/web@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v6.4.4 building for production...
+transforming...
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/release.json                                0.19 kB │ gzip:   0.15 kB
+dist/index.html                                  1.26 kB │ gzip:   0.58 kB
+dist/assets/index-BX0sBzLw.css                  84.64 kB │ gzip:  15.87 kB
+dist/assets/RoleScheduleWorkspace-DY5f1uND.js   14.84 kB │ gzip:   4.79 kB
+dist/assets/index.esm-CPpzC-M1.js              113.12 kB │ gzip:  23.32 kB
+dist/assets/index-ByrCLjr4.js                  519.95 kB │ gzip: 154.28 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 52.80s

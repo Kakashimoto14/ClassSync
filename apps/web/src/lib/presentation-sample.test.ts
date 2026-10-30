@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { expect, it, vi } from 'vitest';
 import { presentationCalendar, presentationData } from './presentation-sample';
 it('loads a deterministic versioned synthetic sample without network access or live changes', async () => {

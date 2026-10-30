@@ -1,0 +1,80 @@
+ M .github/workflows/quality.yml
+ M apps/web/.env.example
+ M apps/web/package.json
+ M apps/web/src/auth/preview-session.ts
+ M apps/web/src/components/layout/AppShell.tsx
+ M apps/web/src/data/cdm-room-inventory.test.ts
+ M apps/web/src/lib/academic-api.ts
+ M apps/web/src/lib/calendar-export.test.ts
+ M apps/web/src/lib/firebase-config.test.ts
+ M apps/web/src/lib/presentation-sample.test.ts
+ M apps/web/src/lib/presentation-sample.ts
+ M apps/web/src/lib/publication-api.ts
+ M apps/web/src/lib/room-discovery.test.ts
+ M apps/web/src/lib/sample-calendar-api.ts
+ M apps/web/src/lib/schedule-preview.test.ts
+ M apps/web/src/lib/scheduling-api.ts
+ M apps/web/src/pages/AcademicCalendarEditor.tsx
+ M apps/web/src/pages/AcademicFixtureImport.tsx
+ M apps/web/src/pages/ProductScreenPage.tsx
+ M apps/web/src/pages/PublicationPanel.tsx
+ M apps/web/src/pages/R1Presentation.test.tsx
+ M apps/web/src/routes/RouteGuard.tsx
+ M apps/web/src/routes/route-config.test.ts
+ M apps/web/src/services/api-client.ts
+ M apps/web/src/test/setup.ts
+ M apps/web/vite.config.ts
+ M docs/architecture.md
+ M docs/infrastructure/vercel-backend-deployment-plan.md
+ M docs/releases/r1-public-presentation.md
+ M docs/security.md
+ M package-lock.json
+ M package.json
+ M packages/api-contracts/classync_contracts/scheduling_security.py
+ M pyproject.toml
+ M scripts/build-presentation.cjs
+ M scripts/preview-presentation.cjs
+ M services/academic/app/main.py
+ M services/academic/requirements.txt
+ M services/academic/tests/test_academic.py
+ M services/gateway/app/main.py
+ M services/gateway/requirements.txt
+ M services/notification/requirements.txt
+ M services/scheduling/app/main.py
+ M services/scheduling/app/publication_api.py
+ M services/scheduling/app/publication_repository.py
+ M services/scheduling/requirements.txt
+ M services/scheduling/tests/test_api.py
+ M services/scheduling/tests/test_drafts.py
+ M services/scheduling/tests/test_publication.py
+ M vercel.json
+?? AGENTS.md
+?? apps/web/config/
+?? apps/web/src/config/
+?? docs/autonomy/
+?? docs/production/
+?? packages/api-contracts/classync_contracts/identity.py
+?? packages/api-contracts/classync_contracts/request_authorization.py
+?? packages/api-contracts/classync_contracts/token_verification.py
+?? packages/persistence/
+?? scripts/lib/
+?? scripts/postgres_audit_qualification.py
+?? scripts/postgres_disposable.py
+?? scripts/postgres_driver_qualification.py
+?? scripts/postgres_identity_qualification.py
+?? scripts/postgres_restore_qualification.py
+?? scripts/postgres_revision_qualification.py
+?? scripts/security/
+?? scripts/test-web.cjs
+?? scripts/tests/
+?? scripts/verify-hosted-presentation.cjs
+?? services/conftest.py
+?? services/gateway/tests/test_identity_contracts.py
+?? services/gateway/tests/test_request_authorization.py
+?? services/gateway/tests/test_token_verification.py
+?? services/persistence/
+?? services/scheduling/tests/test_identity_stream.py
+?? services/scheduling/tests/test_institutional_projection.py
+?? services/scheduling/tests/test_mode_boundaries.py
+?? services/scheduling/tests/test_security_audit.py
+?? services/security-constraints.txt

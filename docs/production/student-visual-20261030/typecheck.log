@@ -1,0 +1,8 @@
+
+> classync@0.1.0 typecheck
+> npm run typecheck --workspace=@classync/web
+
+
+> @classync/web@0.1.0 typecheck
+> tsc --noEmit --pretty false
+

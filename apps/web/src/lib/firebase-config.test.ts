@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { beforeEach, expect, it, vi } from 'vitest';
 const sdk = vi.hoisted(() => ({ getApps: vi.fn(), initializeApp: vi.fn() }));
 vi.mock('firebase/app', () => sdk);

@@ -1,0 +1,71 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-1871812a304d44bab696893c491b3226",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-1871812a304d44bab696893c491b3226/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-1871812a304d44bab696893c491b3226^\\data^\" -l logfile start",
+  "port": 63448,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-1871812a304d44bab696893c491b3226/data",
+    "user": "classsync_qa_dbb8913e9bfd432baf3f4a55647d9dfc",
+    "port": 63448,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "foundation": {
+      "transactional_migration_rollback": true,
+      "upgrade_downgrade_upgrade": true,
+      "constraint_cases": [
+        "duplicate identity",
+        "missing person",
+        "cross tenant student",
+        "mismatched person",
+        "unknown grant",
+        "empty grants",
+        "duplicate grants",
+        "null grant",
+        "invalid state",
+        "nonpositive revision",
+        "missing student binding",
+        "missing faculty binding",
+        "blank uid"
+      ],
+      "force_rls_all_tables": true,
+      "tenant_uid_project_isolation": true,
+      "record_binding": true,
+      "fresh_revocation": true,
+      "runtime_authority_writes_denied": true,
+      "database_failure_unavailable": true,
+      "second_uid_administrator": true,
+      "pooled_context_reset": true
+    },
+    "solver_status": "optimal",
+    "exact_snapshot_reconnect": true,
+    "strict_key_replay_conflicts": true,
+    "server_held_run_only": true,
+    "invalid_solver_runs_denied": 4,
+    "two_active_owner_isolation": true,
+    "active_non_admin_denied": true,
+    "wrong_tenant_project_denied": true,
+    "observed_lock_waiters": 2,
+    "concurrent_exactly_one_create": true,
+    "expired_run_denied": true,
+    "checksum_consistent_corruption_denied": true,
+    "database_negative_cases": [
+      "cross-owner-run-fk",
+      "checksum",
+      "immutable-update",
+      "immutable-delete",
+      "immutable-truncate"
+    ],
+    "current_revocation": true,
+    "actual_outage_recovery": true,
+    "pooled_context_reset": true,
+    "upgrade_downgrade_upgrade": true,
+    "downgrade_preserves_draft_data": false,
+    "service_cutover": false,
+    "production_acceptance": false
+  },
+  "server_state": "stopped"
+}

@@ -1,0 +1,7 @@
+# P3b Academic service provider adoption — before implementation
+
+- Use the qualified PostgreSQL academic adapter in explicitly configured institutional Academic routes. Require SDK-verified identity plus current tenant/project/Administrator membership at the service and data boundary. Preserve owner isolation, role/tenant/record denial and versioned save responses.
+- Share the reviewed explicit PostgreSQL URL/transport validation with Gateway; retain Gateway behavior and tests. Academic lifecycle owns one bounded pool and its identity/academic adapters, removes/disposes on startup/body/shutdown failure. No constructor/startup migrations or real provisioning. Missing configuration is unavailable; a configured failure never falls back to SQLite.
+- Sandbox remains explicit development-only SQLite. Existing test-only identity/SQLite adapters may be used only under exact test+adapter flag. No production institutional SQLite fallback, no original database access/write/cutover.
+- Portable lifecycle/configuration/no-fallback tests and real owned Auth Emulator/current PG/FastAPI HTTP create/list/snapshot/save/calendar flows, wrong roles/owner/tenant/project, revocation, stale save, outage/recovery, restart and cleanup. No test client membership/token doubles presented as actual emulator evidence.
+- Independent review, full relevant backend regression, Ruff/dependency/package checks and original hashes. UI source/data API gates unchanged; no connected scheduling/browser claim. Full P3b remains partial until restore and scheduling/publication adaptation pass.

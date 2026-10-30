@@ -1,0 +1,35 @@
+{
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-488f9fc574c0493aafe038b7726da0c3",
+  "authentication": "sspi",
+  "stopped": true,
+  "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-488f9fc574c0493aafe038b7726da0c3/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-488f9fc574c0493aafe038b7726da0c3^\\data^\" -l logfile start",
+  "port": 49756,
+  "server": {
+    "version": "18.6",
+    "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-488f9fc574c0493aafe038b7726da0c3/data",
+    "user": "classsync_qa_068e233c849c4336aecc3d30844da28e",
+    "port": 49756,
+    "smoke": 2
+  },
+  "unmapped_role_denied": true,
+  "exercise": {
+    "exact_22001_reproduced": true,
+    "exact_3F000_reproduced": true,
+    "archive_migration_injected_failure_rollback": true,
+    "archive": {
+      "canonical_schema_ownership_acl_rls": true,
+      "cross_schema_fk_checks": true,
+      "current_admin_import_and_replay": true,
+      "denied_identity_contexts": true,
+      "runtime_create_update_denied": true,
+      "immutability": true,
+      "nonempty_downgrade_preserves_data_and_revision": true
+    },
+    "incremental_0008_0009_head": true,
+    "widening_and_stamp_transactional_rollback": true,
+    "downgrade_retains_capacity_and_reupgrade": true,
+    "clean_base_to_head": true,
+    "nonprivileged_migration_owner": true
+  },
+  "server_state": "stopped"
+}

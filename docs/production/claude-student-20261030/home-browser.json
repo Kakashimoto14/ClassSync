@@ -1,0 +1,19 @@
+{
+  "phase": "home",
+  "screenshots": [
+    {
+      "scene": "home",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356750505-home-home-390.png"
+    },
+    {
+      "scene": "home",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356750505-home-home-1440.png"
+    }
+  ],
+  "errors": [],
+  "api": [],
+  "clock": "2026-10-30T08:15:00+08:00",
+  "pass": true
+}

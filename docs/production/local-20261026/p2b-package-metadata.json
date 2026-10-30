@@ -1,0 +1,35 @@
+[
+  {
+    "name": "psycopg",
+    "version": "3.3.6",
+    "requires_python": ">=3.10",
+    "compatible_files": [
+      "psycopg-3.3.6-py3-none-any.whl"
+    ]
+  },
+  {
+    "name": "psycopg-binary",
+    "version": "3.3.6",
+    "requires_python": ">=3.10",
+    "compatible_files": [
+      "psycopg_binary-3.3.6-cp312-cp312-win_amd64.whl"
+    ]
+  },
+  {
+    "name": "SQLAlchemy",
+    "version": "2.1.6",
+    "requires_python": ">=3.11",
+    "compatible_files": [
+      "sqlalchemy-2.1.6-cp312-cp312-win_amd64.whl",
+      "sqlalchemy-2.1.6-py3-none-any.whl"
+    ]
+  },
+  {
+    "name": "alembic",
+    "version": "1.20.1",
+    "requires_python": ">=3.10",
+    "compatible_files": [
+      "alembic-1.20.1-py3-none-any.whl"
+    ]
+  }
+]

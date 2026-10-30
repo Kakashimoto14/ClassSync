@@ -1,0 +1,69 @@
+{
+  "originalSha256": {
+    "var/academic.sqlite3": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+    "var/scheduling.sqlite3": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+    "var/backups/scheduling-before-s2b-20261018074057.sqlite3": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d"
+  },
+  "ownedPorts": [
+    {
+      "port": 61532,
+      "closed": true
+    },
+    {
+      "port": 61535,
+      "closed": true
+    },
+    {
+      "port": 61541,
+      "closed": true
+    },
+    {
+      "port": 61543,
+      "closed": true
+    },
+    {
+      "port": 61774,
+      "closed": true
+    },
+    {
+      "port": 61797,
+      "closed": true
+    },
+    {
+      "port": 61799,
+      "closed": true
+    },
+    {
+      "port": 61926,
+      "closed": true
+    },
+    {
+      "port": 61947,
+      "closed": true
+    },
+    {
+      "port": 61956,
+      "closed": true
+    },
+    {
+      "port": 61958,
+      "closed": true
+    },
+    {
+      "port": 62100,
+      "closed": true
+    },
+    {
+      "port": 62198,
+      "closed": true
+    },
+    {
+      "port": 62205,
+      "closed": true
+    },
+    {
+      "port": 62207,
+      "closed": true
+    }
+  ]
+}

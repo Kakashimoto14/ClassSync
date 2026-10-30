@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { env } from '../lib/env';
+import { liveFetch } from '../config/runtime-config';
 import { addDays } from '../lib/calendar-model';
 
 export function AcademicFixtureImport() {
@@ -33,7 +34,7 @@ export function AcademicFixtureImport() {
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
-      const response = await fetch(`${env.apiBaseUrl}/academic/sandbox/fixtures`, {
+      const response = await liveFetch(`${env.apiBaseUrl}/academic/sandbox/fixtures`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

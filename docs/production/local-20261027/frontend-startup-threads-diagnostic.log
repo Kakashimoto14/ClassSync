@@ -1,0 +1,13 @@
+
+ RUN  v4.1.12 C:/Projects/ClassSync/apps/web
+
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > creates an RFC-style UTC calendar with stable caller-provided UIDs 13ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > derives a stable UID from an authorized assignment identifier 4ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > escapes special characters and folds long Unicode lines by UTF-8 bytes 4ms
+ ✓ src/lib/calendar-export.test.ts > calendar export serialization > rejects incomplete or impossible event times 2ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  04:55:44
+   Duration  2.98s (transform 186ms, setup 161ms, import 117ms, tests 34ms, environment 0ms)
+

@@ -19,15 +19,30 @@ import {
   type WorkspacePeriod,
 } from './workspace-context';
 import type { UserRole } from '../types/ui';
+import { appMode } from '../config/runtime-config';
+import { studentTimetableRequest } from './student-timetable-api';
+
+function readTimetable<T>(path: string, signal?: AbortSignal) {
+  return appMode === 'institutional'
+    ? studentTimetableRequest<T>(path, signal)
+    : timetableRequest<T>(path, undefined, signal);
+}
 
 export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   const [params, setParams] = useSearchParams();
   const [context, setContext] = useState<WorkspaceContext>(() => {
     const saved = readWorkspace(role);
+    const requestedDate = params.get('date');
     // Reviewed build configuration selects this source, never an API-error fallback.
     if (presentationOnlyBuild)
       return {
         ...saved,
+        date:
+          requestedDate &&
+          /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) &&
+          Number.isFinite(Date.parse(requestedDate))
+            ? requestedDate
+            : saved.date,
         mode: 'presentation',
         period: presentationVersion,
         draft: '',
@@ -36,6 +51,12 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     return {
       ...saved,
       period: params.get('period') ?? saved.period,
+      date:
+        requestedDate &&
+        /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) &&
+        Number.isFinite(Date.parse(requestedDate))
+          ? requestedDate
+          : saved.date,
       mode:
         presentationEnabled && saved.mode === 'presentation'
           ? 'presentation'
@@ -49,6 +70,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       draft: params.get('review') ?? saved.draft,
     };
   });
+  const initialDate = useRef(context.date);
   const [periods, setPeriods] = useState<WorkspacePeriod[]>([]);
   const [drafts, setDrafts] = useState<Array<{ id: string; title: string; period_id?: string }>>(
     [],
@@ -76,9 +98,13 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     .toISOString()
     .slice(0, 10);
   const start = dashboard
-    ? first
+    ? addDays(date, -((new Date(date + 'T00:00:00Z').getUTCDay() + 6) % 7))
     : addDays(first, -((new Date(first + 'T00:00:00Z').getUTCDay() + 6) % 7));
-  const end = dashboard ? last : addDays(last, (7 - new Date(last + 'T00:00:00Z').getUTCDay()) % 7);
+  // The API permits at most 63 inclusive days. Start with the complete displayed
+  // week and look ahead without exceeding that contract at month boundaries.
+  const end = dashboard
+    ? addDays(start, 62)
+    : addDays(last, (7 - new Date(last + 'T00:00:00Z').getUTCDay()) % 7);
   const { period, identity, mode, draft } = context;
   const query = new URLSearchParams({
     start,
@@ -103,6 +129,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     )
       setData(null);
     const next = new URLSearchParams(params);
+    if (patch.date !== undefined) next.set('date', patch.date);
     if (patch.period !== undefined) next.set('period', patch.period);
     if (patch.mode !== undefined) {
       next.set('mode', patch.mode);
@@ -112,10 +139,25 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       next.set('review', patch.draft);
       next.set('mode', 'review');
     } else if (patch.draft === '') next.delete('review');
-    if (patch.period !== undefined || patch.mode !== undefined || patch.draft !== undefined)
-      setParams(next, { replace: true });
+    if (
+      patch.period !== undefined ||
+      patch.mode !== undefined ||
+      patch.draft !== undefined ||
+      patch.date !== undefined
+    )
+      setParams(next, { replace: patch.date === undefined });
     setNotice('');
   }
+  useEffect(() => {
+    const requestedDate = params.get('date');
+    const nextDate =
+      requestedDate &&
+      /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) &&
+      Number.isFinite(Date.parse(requestedDate))
+        ? requestedDate
+        : initialDate.current;
+    setContext((current) => (current.date === nextDate ? current : { ...current, date: nextDate }));
+  }, [params]);
   useEffect(() => {
     rememberWorkspace(role, context);
   }, [context, role]);
@@ -158,7 +200,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
                 });
               }
             })
-          : timetableRequest<{ periods: WorkspacePeriod[] }>(prefix + 'periods').then((p) => {
+          : readTimetable<{ periods: WorkspacePeriod[] }>(prefix + 'periods').then((p) => {
               if (!ignore) {
                 setPeriods(p.periods);
                 setContext((c) => ({ ...c, period: defaultPeriod(p.periods, c.period) }));
@@ -169,6 +211,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         if (!ignore) {
           setError(e.message);
           setErrorStatus(e.status ?? 0);
+          setData(null);
         }
       })
       .finally(() => {
@@ -180,6 +223,15 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   }, [mode, prefix, refresh, draft]);
   useEffect(() => {
     if (mode !== 'published' || !period) return;
+    if (appMode === 'institutional') {
+      const resume = () => setRefresh((n) => n + 1);
+      const timer = window.setInterval(resume, 30000);
+      window.addEventListener('online', resume);
+      return () => {
+        clearInterval(timer);
+        window.removeEventListener('online', resume);
+      };
+    }
     return subscribeTimetable(
       `${prefix}events/${encodeURIComponent(period)}?${query}`,
       () => setRefresh((n) => n + 1),
@@ -196,9 +248,8 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         ? presentationCalendar(role, identity, start, end)
         : mode === 'review' && schedulingSandboxEnabled
           ? loadSampleCalendar(draft, query, controller.signal)
-          : timetableRequest<CalendarData>(
+          : readTimetable<CalendarData>(
               `${prefix}calendar/${encodeURIComponent(period)}?${query}`,
-              undefined,
               controller.signal,
             );
     load
@@ -232,6 +283,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         if (e.name !== 'AbortError') {
           setError(e.message);
           setErrorStatus(e.status ?? 0);
+          setData(null);
         }
       })
       .finally(() => {

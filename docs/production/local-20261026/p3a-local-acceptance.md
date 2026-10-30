@@ -1,0 +1,13 @@
+# P3a local identity/current-DB request composition — before edits
+
+Entry: complete bounded local P2b PASS in STATUS, with fresh backend260, frontend664/36, security13/artifacts4, both builds, actual PG/audit/concurrency/restore, rendered15/native200%, independent reviews and originals hash-equal. Owner local P2–P8 authorization applies. No real institution policy/account provisioning, credentials, live data, production Firebase/cloud/Git/deployment or SQLite cutover.
+
+First slice: prove the existing Gateway `/api/v1/auth/me` composes actual offline Firebase SDK RSA signature/claim verification with the qualified current PostgreSQL repository. Synthetic private test signing material stays only in memory; certificate/account transports are stubbed explicitly. This is not emulator/live Firebase acceptance, production identity, or phase P3a completion. Runtime service configuration/defaults remain unavailable.
+
+Acceptance before implementation:
+- Extract the existing offline SDK fixture into reusable test-only support, preserving every existing crypto/revocation assertion. No runtime source imports test support or replaces Google trust/cert transport.
+- Start only the checked new-cluster harness, migrate/seed synthetic records, inject qualified PostgreSQL membership lookup and offline actual SDK verifier into the existing Gateway TestClient. Use explicit no-env-file test settings; restore all app/settings/SDK state in finally.
+- Actual signed UID selects only server-tenant current grants and explicit academic IDs. Forged signed role/tenant/record claims and client headers/query cannot grant authority; Student/Teacher selector works only among current grants; ambiguous/unknown grant denied. A separate actual PG Administrator UID works; unknown verified UID does not.
+- Missing/malformed/expired/wrong-issuer/wrong-audience/bad-signature/SDK-disabled identity denies before DB lookup. Same still-valid token observes role withdrawal, inactive/revoked state and changed membership revision immediately; no token refresh/sample fallback needed to deny.
+- Actual PG permission outage produces HTTP503 typed unavailable without token/SQL/private-error disclosure. Wrong/missing tenant/project membership denies, not fallback. No auth assertion becomes an academic/scheduling persistence qualification or real enrollment/policy.
+- Existing unit suites and new portable boundary tests remain green; real request composition runs inside owned cluster, which stops on every outcome. Independent security review and exact original hash preservation before slice PASS. Actual emulator service lifecycle and broader P3a adoption remain subsequent gates.

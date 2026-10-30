@@ -1,0 +1,5 @@
+-c ../security-constraints.txt
+-e ../../packages/persistence
+# Lock migration template dependencies as well as the direct runtime versions.
+Mako==1.4.3
+MarkupSafe==3.0.4

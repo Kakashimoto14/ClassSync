@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { provisionalCdmRooms } from './cdm-room-inventory';
 import { schedulePreview } from './schedule-preview';

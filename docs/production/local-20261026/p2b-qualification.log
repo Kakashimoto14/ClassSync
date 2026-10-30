@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 179, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 173, in main
+    evidence = qualify(args.bin)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 77, in qualify
+    evidence["initdb"] = run(
+                         ^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 72, in run
+    raise RuntimeError(f"{executable} failed: {result.stdout}\n{result.stderr}")
+RuntimeError: initdb.exe failed: 
+initdb: error: invalid authentication method "sspi" for "local" connections
+

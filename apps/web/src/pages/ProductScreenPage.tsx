@@ -1,4 +1,6 @@
+import { StudentHome } from './StudentHome';
 import { presentationOnlyBuild } from '../lib/presentation-sample';
+import { capabilitiesFor } from '../config/app-mode';
 import { PresentationConflictSummary } from '../components/scheduling/PresentationConflictSummary';
 import { useState } from 'react';
 import { previewViewer, schedulePreview } from '../data/schedule-preview';
@@ -9,7 +11,7 @@ import {
   PreviewUpdatesView,
 } from './PreviewOperationsViews';
 import { CalendarDays, FileBarChart, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { RoomDiscoveryPage, RoomDetailPage } from './RoomDiscoveryPages';
 import { PreviewBuildingDirectory, PreviewBuildingDetail } from './PreviewBuildingViews';
@@ -26,6 +28,8 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { rolePath, type RouteDefinition } from '../routes/route-config';
 
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
+  const [params] = useSearchParams();
+  const scheduleRooms = params.get('schedule') === '1';
   if (
     presentationOnlyBuild &&
     definition.role === 'administrator' &&
@@ -47,14 +51,31 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
         <section className="workspace-card">
           <h1>Read-only presentation</h1>
           {definition.kind === 'conflicts' && <PresentationConflictSummary />}
-          <p>
-            This tool needs the connected backend and verified Administrator access. Generation,
-            editing, validation, saving and publishing are unavailable in this presentation.
-          </p>
+          <p>{capabilitiesFor('presentation').description}</p>
           <Link className="button button--secondary" to="/admin/calendar">
             Review sample timetable
           </Link>
         </section>
+      </AppShell>
+    );
+  if (
+    definition.role === 'student' &&
+    definition.roomMode !== 'availability' &&
+    (['schedule', 'calendar', 'notifications'].includes(definition.kind) ||
+      (scheduleRooms && ['rooms', 'room-detail'].includes(definition.kind)))
+  )
+    return (
+      <AppShell>
+        {['schedule', 'calendar'].includes(definition.kind) ? (
+          <StructuredCalendarPage role="student" />
+        ) : (
+          <StudentHome
+            key={definition.id}
+            rooms={['rooms', 'room-detail'].includes(definition.kind)}
+            roomDetail={definition.kind === 'room-detail'}
+            alerts={definition.kind === 'notifications'}
+          />
+        )}
       </AppShell>
     );
   if (definition.kind === 'rooms')
@@ -381,8 +402,12 @@ function AnnouncementScreen({ role }: { role: RouteDefinition['role'] }) {
           <div>
             <StatusBadge tone="info">{index === 0 ? 'Academic' : 'Room'}</StatusBadge>
             <h2>{title}</h2>
-            <p>Information relevant to current classroom schedules and availability.</p>
-            <small>{index + 1} days ago</small>
+            {role !== 'student' && (
+              <>
+                <p>Information relevant to current classroom schedules and availability.</p>
+                <small>{index + 1} days ago</small>
+              </>
+            )}
           </div>
           {role === 'administrator' && (
             <span className="status status--neutral">Editing unavailable</span>

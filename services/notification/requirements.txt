@@ -1,4 +1,5 @@
+-c ../security-constraints.txt
 fastapi>=0.115,<1
 uvicorn[standard]>=0.34,<1
 -e ../../packages/api-contracts
-pytest>=8.3,<9
+pytest>=9.0.3,<10

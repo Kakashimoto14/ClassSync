@@ -1,0 +1,41 @@
+
+> classync@0.1.0 test:artifacts
+> node --test scripts/tests/production-artifacts.test.cjs
+
+TAP version 13
+# Subtest: actual Vite builds reject unsafe configuration before emitting artifacts
+ok 1 - actual Vite builds reject unsafe configuration before emitting artifacts
+  ---
+  duration_ms: 118995.9632
+  type: 'test'
+  ...
+# Verified ordinary: C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-artifacts-x25EsE\\ordinary
+# Subtest: ordinary production metadata, SPA refresh and static/API boundaries
+ok 2 - ordinary production metadata, SPA refresh and static/API boundaries
+  ---
+  duration_ms: 83720.2351
+  type: 'test'
+  ...
+# Verified presentation: C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-artifacts-x25EsE\\presentation
+# Subtest: presentation production metadata, SPA refresh and static/API boundaries
+ok 3 - presentation production metadata, SPA refresh and static/API boundaries
+  ---
+  duration_ms: 81822.9176
+  type: 'test'
+  ...
+# Verified legacy-preview: C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-artifacts-x25EsE\\legacy-preview
+# Subtest: legacy-preview production metadata, SPA refresh and static/API boundaries
+ok 4 - legacy-preview production metadata, SPA refresh and static/API boundaries
+  ---
+  duration_ms: 39667.3354
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 325177.0509

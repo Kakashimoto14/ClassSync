@@ -1,0 +1,802 @@
+{
+  "project": "demo-classsync-758bd2a5de30",
+  "endpoint": "127.0.0.1:62422",
+  "toolsVersion": "15.34.1",
+  "authOnly": true,
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1",
+  "authStopped": true,
+  "deniedOutbound": 0,
+  "postgres": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-7bde32d2cfc94ce695f1a6dbc387476b",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-7bde32d2cfc94ce695f1a6dbc387476b/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-7bde32d2cfc94ce695f1a6dbc387476b^\\data^\" -l logfile start",
+    "port": 62433,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-7bde32d2cfc94ce695f1a6dbc387476b/data",
+      "user": "classsync_qa_3c61b1fab9f54e8caa818e39f196a5ba",
+      "port": 62433,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "actualAuthGatewayPostgres": true,
+      "viteVersion": "6.4.5",
+      "syntheticFixture": true,
+      "widths": [
+        360,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "mobileBottomNavigationClearance": true,
+      "nativeZoom": 2,
+      "className": "Application Development",
+      "apiStatuses": [
+        {
+          "at": 1793309596980,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "dc1639f1-ed47-4b1d-a52a-b2eac62eb774"
+        },
+        {
+          "at": 1793309597615,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 403,
+          "requestId": "f2f08dec-cbed-4268-97dd-be0fb0532eb6"
+        },
+        {
+          "at": 1793309597853,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "120ef84b-efe3-4377-9c2a-c110e015a811"
+        },
+        {
+          "at": 1793309598593,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "047ffb21-a4bf-434c-b61c-c7511b145d22"
+        },
+        {
+          "at": 1793309598595,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "d297b498-70ff-4436-a418-57bf389169af"
+        },
+        {
+          "at": 1793309598803,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "56b921ac-a441-4b98-bd8d-287a74400ffe"
+        },
+        {
+          "at": 1793309601716,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "8f5392c7-32c5-4e8f-98a1-4d32061a2ab6"
+        },
+        {
+          "at": 1793309601771,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-09-28&end=2026-11-01&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "8082884d-829b-4768-ab21-2363e3cce715"
+        },
+        {
+          "at": 1793309601789,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "b31d15c8-bf08-4d2a-bfaa-7993b188eb35"
+        },
+        {
+          "at": 1793309605452,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "db591ffa-9c19-433c-af59-27f1700218ef"
+        },
+        {
+          "at": 1793309606009,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "c57d12f8-3f0e-4629-b04e-4d5b7833c1a7"
+        },
+        {
+          "at": 1793309606015,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-09-28&end=2026-11-01&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "1319cdc9-29bc-423f-a6a6-8bfe2cf4d353"
+        },
+        {
+          "at": 1793309606246,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "bd587e30-6d1e-4817-9cf8-1cb113e0dcd3"
+        },
+        {
+          "at": 1793309606723,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "229ccf57-dbd2-425e-b477-fcce7a0d1405"
+        },
+        {
+          "at": 1793309606724,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "207cf342-128e-4f5e-a078-6cb38c05d99d"
+        },
+        {
+          "at": 1793309606724,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "66425238-6aba-4afb-b3bf-90ff207fdf60"
+        },
+        {
+          "at": 1793309607647,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "10fabe9a-4b10-403d-b268-faba58c65950"
+        },
+        {
+          "at": 1793309607652,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "ae42db21-d282-4ad1-b008-b2763df9a8e0"
+        },
+        {
+          "at": 1793309607662,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "f9b758c5-b132-4647-8d02-02cc4576b4f0"
+        },
+        {
+          "at": 1793309608510,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "a7764f77-2c25-4593-bd17-fb3c0801fd67"
+        },
+        {
+          "at": 1793309608534,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "ddaa8a0b-4517-4e3f-a39f-12e9e63b8200"
+        },
+        {
+          "at": 1793309608566,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "e3bcd852-e5c4-4994-babc-842000d3df1f"
+        },
+        {
+          "at": 1793309610960,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "5d3c05d6-99d0-4b9e-b87f-15fea1ceb5c3"
+        },
+        {
+          "at": 1793309611641,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "ae731959-9566-4bfb-bb34-872aaf597b1b"
+        },
+        {
+          "at": 1793309611691,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-09-28&end=2026-11-01&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "d34fb1aa-618d-4ef4-baa8-99b1ff7f528a"
+        },
+        {
+          "at": 1793309611694,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "10856aee-ff5f-4e76-b498-7c9c63485d23"
+        },
+        {
+          "at": 1793309613447,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "a92b8e4c-4a7c-42be-889a-adc95b5e44ea"
+        },
+        {
+          "at": 1793309613893,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-09-28&end=2026-11-01&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "a403aa22-d72e-493c-abdf-c8cac09392f6"
+        },
+        {
+          "at": 1793309613961,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "76898305-4bc0-431e-ad4e-a74150974d0e"
+        },
+        {
+          "at": 1793309613963,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "96bbb386-c1fa-4012-9dc2-a5bd540e472e"
+        },
+        {
+          "at": 1793309617302,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "c346d5bd-aad6-4404-bbd1-14c028987009"
+        },
+        {
+          "at": 1793309619490,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "c4a4a38b-86fb-428f-a32b-887faf663fc9"
+        },
+        {
+          "at": 1793309619957,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "5aaed9a6-b18c-485e-b901-7acb29f40782"
+        },
+        {
+          "at": 1793309620003,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "03826dc1-9f93-4ec6-91e5-0de6b9b719f4"
+        },
+        {
+          "at": 1793309620135,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "ec479574-3aec-49db-8088-8624061dce81"
+        },
+        {
+          "at": 1793309621941,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "96206c1b-ea4c-49f5-8b34-95a9be6df06c"
+        },
+        {
+          "at": 1793309622323,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "25e89862-923a-4f1d-83cb-bc3ab5fdf223"
+        },
+        {
+          "at": 1793309622331,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "4b7d0acd-50cc-4ae3-99fc-4cb081e0f42a"
+        },
+        {
+          "at": 1793309622350,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "c4bfaee4-84e4-482a-8c53-d3ab772e871d"
+        },
+        {
+          "at": 1793309622968,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "1f557737-4014-48f4-a9d8-8a76c7beb56b"
+        },
+        {
+          "at": 1793309623356,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "c7b621ff-c819-43eb-8aaf-e17ee5a832e9"
+        },
+        {
+          "at": 1793309623362,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "7bb14b83-d1bb-4b32-97e4-6eda711374ca"
+        },
+        {
+          "at": 1793309623363,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "24fd5c5e-16c1-4317-8981-855ca5a8adce"
+        },
+        {
+          "at": 1793309625117,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "4b847b10-d794-4354-a981-ae195d0f2289"
+        },
+        {
+          "at": 1793309625642,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "14976492-71f6-4ab8-8f54-119628024c9f"
+        },
+        {
+          "at": 1793309625645,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "86a4f8eb-33cf-425d-8d26-8ebd4a3789e4"
+        },
+        {
+          "at": 1793309625661,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "e6c76db1-71d2-47c2-9976-9916bff2392f"
+        },
+        {
+          "at": 1793309627220,
+          "phase": "intentional-outage",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "9d0b53be-383e-4ec2-888f-c1a15ff5452a"
+        },
+        {
+          "at": 1793309629470,
+          "phase": "intentional-outage",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 503,
+          "requestId": "ab8cba33-2442-4305-be48-2bbfc625c86d"
+        },
+        {
+          "at": 1793309629736,
+          "phase": "intentional-outage",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 503,
+          "requestId": "86022ff1-be7e-4add-8835-ab175848cf87"
+        },
+        {
+          "at": 1793309629738,
+          "phase": "intentional-outage",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 503,
+          "requestId": "be6c81a7-41ce-40f9-a9b7-c519b007e137"
+        },
+        {
+          "at": 1793309630198,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "de036ac9-3d3e-47ab-966e-c33bdfcf88af"
+        },
+        {
+          "at": 1793309630200,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "2ae6dbf2-d0bf-48f0-a23f-a3772f3db9e9"
+        },
+        {
+          "at": 1793309632678,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "02be6ae7-2689-46ea-8663-db97e5c5d0a8"
+        },
+        {
+          "at": 1793309632829,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 403
+        },
+        {
+          "at": 1793309632831,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 403
+        },
+        {
+          "at": 1793309632831,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 403
+        },
+        {
+          "at": 1793309634663,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "2644b4c9-0fe9-42cf-8e82-3cc8c4365b36"
+        },
+        {
+          "at": 1793309635068,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "54214f50-be23-45e8-8c19-96f3edb08151"
+        },
+        {
+          "at": 1793309635138,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "5948c8ae-c294-463e-9238-65b1d61910b6"
+        },
+        {
+          "at": 1793309635161,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "5d9429f3-8238-4e3b-a62d-7bc8d649d768"
+        },
+        {
+          "at": 1793309637424,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 403,
+          "requestId": "16b81fd0-b97c-4e5d-ae0a-87cd96bbfd77"
+        },
+        {
+          "at": 1793309637959,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "410d47b5-6061-4ca6-b2c0-338dfa1b33ae"
+        },
+        {
+          "at": 1793309638492,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "1dcc43a6-dad0-451d-aab7-fdb43411efc1"
+        },
+        {
+          "at": 1793309638493,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "839016fa-9de1-4c41-8697-5f48b1a9ef90"
+        },
+        {
+          "at": 1793309638633,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "3575f055-1809-4dbf-a198-16f2137cb9b2"
+        },
+        {
+          "at": 1793309640599,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "9ec317be-e650-4508-80c8-8d17b29c8fb0"
+        },
+        {
+          "at": 1793309641082,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "bad025bb-127c-408a-a304-55002b81cc19"
+        },
+        {
+          "at": 1793309641089,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "622d1954-093e-437c-b7be-826692fc68b4"
+        },
+        {
+          "at": 1793309643320,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "d5ede8a9-ddcc-41d3-bd8d-0283478a72bb"
+        },
+        {
+          "at": 1793309643655,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "05ccc688-aea5-4607-9261-89b2bdb95d0c"
+        },
+        {
+          "at": 1793309643661,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "1b9bc18f-6b38-4bc8-94a7-6b3a7efc9229"
+        },
+        {
+          "at": 1793309643803,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "ec72beea-a999-4bb3-a7ee-058739518d71"
+        },
+        {
+          "at": 1793309646400,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "2e84d1e3-6fec-4daa-b881-361bed5464f4"
+        },
+        {
+          "at": 1793309646819,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "f127542f-d766-47b4-9e31-967674ee7d2e"
+        },
+        {
+          "at": 1793309646854,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "ea6547c2-2053-48b3-b553-9a6ecab4f01f"
+        },
+        {
+          "at": 1793309646885,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-09-28&end=2026-11-01&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "a47badeb-81da-453d-8865-4f53032e6364"
+        },
+        {
+          "at": 1793309648728,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 200,
+          "requestId": "a17da6cd-26dd-4967-af7d-8743e794b889"
+        },
+        {
+          "at": 1793309649114,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "29dd25af-bc74-40d9-a1f3-9650b9b7f6ea"
+        },
+        {
+          "at": 1793309649131,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2?start=2026-10-26&end=2026-12-27&role=student&section=&teacher=",
+          "path": "/api/v1/timetables/calendar/c5820a6e-466b-4832-af50-f7ce07fbc3d2",
+          "status": 200,
+          "requestId": "d97240db-15dc-4d9a-91e4-9a0bd7833171"
+        },
+        {
+          "at": 1793309649254,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/timetables/periods",
+          "path": "/api/v1/timetables/periods",
+          "status": 200,
+          "requestId": "992651c4-ef92-4c40-ad9b-4f033210fffe"
+        },
+        {
+          "at": 1793309652245,
+          "phase": "healthy",
+          "method": "GET",
+          "url": "http://127.0.0.1:62451/api/v1/auth/me",
+          "path": "/api/v1/auth/me",
+          "status": 403,
+          "requestId": "346a9c3e-bbd2-485f-b1ee-1feda77c771e"
+        }
+      ],
+      "runtimeErrors": [],
+      "consoleErrors": [],
+      "screenshots": [
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-after-360.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-after-390.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-after-768.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-after-1024.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-after-1440.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-after-360.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-after-390.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-after-768.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-after-1024.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-after-1440.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-offline.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-loading.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-unavailable.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-denied.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-membership-revoked.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-unassigned.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-student-native-200.png",
+        "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\p4-stability-classsync-auth-run-8ac8f4156dea427d8cc76d75895f5fc1-schedule-native-200.png"
+      ],
+      "manualScreenReader": "unverified",
+      "outageAndDenial": "real stopped Scheduling endpoint503/recovery; injected403 and audited PG revocation/unassignment",
+      "productionAcceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

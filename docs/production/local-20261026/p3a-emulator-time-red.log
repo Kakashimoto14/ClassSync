@@ -1,0 +1,365 @@
+.......FFFFFFFFFF                                                        [100%]
+================================== FAILURES ===================================
+_ test_emulator_helper_validates_times_and_claim_shapes[changes0-token_expired] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB769460>
+changes = {'exp': 1}, expected = <TokenErrorCode.EXPIRED: 'token_expired'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes1-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB769490>
+changes = {'exp': None}, expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes2-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB76B470>
+changes = {'exp': '9999999999'}
+expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes3-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB7ECE30>
+changes = {'exp': True}, expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes4-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB7EC770>
+changes = {'iat': None}, expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes5-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB7ED0D0>
+changes = {'iat': 1792988951}
+expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes6-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB76AFC0>
+changes = {'auth_time': 1792988951}
+expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes7-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB769490>
+changes = {'auth_time': '1'}
+expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+>           with pytest.raises(TokenVerificationError) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'classync_contracts.token_verification.TokenVerificationError'>
+
+services\gateway\tests\test_emulator_support.py:55: Failed
+_ test_emulator_helper_validates_times_and_claim_shapes[changes8-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB76A6C0>
+changes = {'firebase': []}, expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+            with pytest.raises(TokenVerificationError) as caught:
+                sdk[0].verify("synthetic-test-only")
+>       assert caught.value.code is expected
+E       AssertionError: assert <TokenErrorCode.UNAVAILABLE: 'identity_unavailable'> is <TokenErrorCode.INVALID: 'invalid_token'>
+E        +  where <TokenErrorCode.UNAVAILABLE: 'identity_unavailable'> = TokenVerificationError('identity_unavailable').code
+E        +    where TokenVerificationError('identity_unavailable') = <ExceptionInfo TokenVerificationError('identity_unavailable') tblen=2>.value
+
+services\gateway\tests\test_emulator_support.py:57: AssertionError
+_ test_emulator_helper_validates_times_and_claim_shapes[changes9-invalid_token] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1DB747860>
+changes = {'firebase': None}
+expected = <TokenErrorCode.INVALID: 'invalid_token'>
+
+    @pytest.mark.parametrize("changes,expected", [
+        ({"exp": 1}, TokenErrorCode.EXPIRED),
+        ({"exp": None}, TokenErrorCode.INVALID), ({"exp": "9999999999"}, TokenErrorCode.INVALID),
+        ({"exp": True}, TokenErrorCode.INVALID), ({"iat": None}, TokenErrorCode.INVALID),
+        ({"iat": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": int(time.time()) + 3600}, TokenErrorCode.INVALID),
+        ({"auth_time": "1"}, TokenErrorCode.INVALID), ({"firebase": []}, TokenErrorCode.INVALID),
+        ({"firebase": None}, TokenErrorCode.INVALID),
+    ])
+    def test_emulator_helper_validates_times_and_claim_shapes(monkeypatch, changes, expected):
+        from services.testing import emulator_firebase as helper
+    
+        now = int(time.time())
+        claims = {"uid": "synthetic", "sub": "synthetic", "aud": "demo-test",
+                  "iss": "https://securetoken.google.com/demo-test", "exp": now + 600,
+                  "iat": now - 10, "auth_time": now - 20, "firebase": {}}
+        calls = []
+    
+        def verified(token, *, app, check_revoked):
+            calls.append(check_revoked)
+            return claims | changes
+    
+        monkeypatch.setattr(helper.auth, "verify_id_token", verified)
+        with emulator_firebase(monkeypatch, project="demo-test", endpoint="127.0.0.1:19099") as sdk:
+            with pytest.raises(TokenVerificationError) as caught:
+                sdk[0].verify("synthetic-test-only")
+>       assert caught.value.code is expected
+E       AssertionError: assert <TokenErrorCode.UNAVAILABLE: 'identity_unavailable'> is <TokenErrorCode.INVALID: 'invalid_token'>
+E        +  where <TokenErrorCode.UNAVAILABLE: 'identity_unavailable'> = TokenVerificationError('identity_unavailable').code
+E        +    where TokenVerificationError('identity_unavailable') = <ExceptionInfo TokenVerificationError('identity_unavailable') tblen=2>.value
+
+services\gateway\tests\test_emulator_support.py:57: AssertionError
+=========================== short test summary info ===========================
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes0-token_expired]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes1-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes2-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes3-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes4-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes5-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes6-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes7-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes8-invalid_token]
+FAILED services/gateway/tests/test_emulator_support.py::test_emulator_helper_validates_times_and_claim_shapes[changes9-invalid_token]
+10 failed, 7 passed in 0.48s

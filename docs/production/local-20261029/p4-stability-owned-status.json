@@ -1,0 +1,17 @@
+[
+  {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-64d64ceb4f724ea19bc6a0562430f76d",
+    "status": 3,
+    "message": "pg_ctl: no server running"
+  },
+  {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-9f1e188028a64edbbb78cd0dbfe43e51",
+    "status": 3,
+    "message": "pg_ctl: no server running"
+  },
+  {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-ff0cd5a9dc994951a5e9be7ec47a9f26",
+    "status": 3,
+    "message": "pg_ctl: no server running"
+  }
+]

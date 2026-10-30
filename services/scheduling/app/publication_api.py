@@ -10,9 +10,16 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 
 from .draft_repository import DraftError
+from .provider import require_local_publication
 from .publication_repository import PublicationRepository
 
 router = APIRouter(prefix="/api/v1/timetables")
+
+
+def settings_only():
+    from .main import settings
+
+    return settings
 
 
 def settings_and_repo():
@@ -21,36 +28,60 @@ def settings_and_repo():
     return settings, PublicationRepository(repository())
 
 
+def scoped_repo(request, claims):
+    settings = settings_only()
+    if settings.scheduling_database_url is None:
+        return settings_and_repo()
+    tenant = claims.get("tenant_id") if claims else None
+    if tenant != settings.institutional_tenant_id:
+        raise HTTPException(403, "A verified institutional tenant is required")
+    engine = getattr(request.app.state, "scheduling_engine", None)
+    if engine is None:
+        raise HTTPException(503, "Scheduling storage is unavailable")
+    from classync_contracts.identity import VerifiedPrincipal
+
+    from .postgres_publication_repository import PostgresPublicationRepository
+
+    return settings, PostgresPublicationRepository(
+        engine, tenant_id=settings.institutional_tenant_id,
+        firebase_project_id=settings.firebase_project_id,
+        principal=VerifiedPrincipal(uid=claims["uid"]),
+    )
+
+
 def identity(request):
     from classync_contracts.scheduling_security import require_identity
 
-    settings, _ = settings_and_repo()
-    return require_identity(request, settings)
+    return require_identity(request, settings_only())
 
 
-def read_scope(request, sandbox, role="student", section="", teacher=""):
-    settings, repo = settings_and_repo()
+def read_scope(request, sandbox, role="student", section="", teacher="", claims=None):
+    settings = settings_only()
     if sandbox:
         require_sandbox(settings)
         if role not in {"student", "teacher", "administrator"}:
             raise HTTPException(422, "Unknown preview role")
+        require_local_publication(settings, True)
+        _, repo = settings_and_repo()
         return (
             repo,
             "development-synthetic",
             "synthetic",
             {"role": role, "uid": "mock-viewer", "mock_section": section, "faculty_id": teacher},
         )
-    claims = identity(request)
+    claims = claims or identity(request)
     tenant = claims.get("tenant_id")
     if not isinstance(tenant, str) or not tenant:
         raise HTTPException(403, "A verified institutional tenant is required")
+    require_local_publication(settings, False)
+    _, repo = scoped_repo(request, claims)
     return repo, tenant, "institutional", claims
 
 
 def prepare(body, request, commit):
     from .main import academic_readiness, persisted_academic_snapshot
 
-    settings, repo = settings_and_repo()
+    settings = settings_only()
     claims = require_administrator(request, settings)
     if not claims.get("uid"):
         raise HTTPException(401, "A verified administrator identity is required")
@@ -66,6 +97,16 @@ def prepare(body, request, commit):
                 403, "Institutional publication needs a verified tenant and owned draft"
             )
         tenant, owner = claims["tenant_id"], claims["uid"]
+    require_local_publication(settings, synthetic)
+    if settings.scheduling_database_url is not None:
+        _, repo = scoped_repo(request, claims)
+        try:
+            return repo.publish(body, commit=commit)
+        except DraftError as error:
+            raise HTTPException(error.status, detail={"error": {
+                "code": error.code, "message": str(error),
+            }}) from error
+    _, repo = settings_and_repo()
     draft = repo.drafts.get(body.draft_id, body.source, owner)
     from .draft_repository import digest, encode
 
@@ -80,34 +121,10 @@ def prepare(body, request, commit):
             return repo.summary(prior, db)
     snapshot = persisted_academic_snapshot(draft.period_id, request, synthetic)
     checked = academic_readiness(snapshot)
-    if (
-        snapshot.period.revision != body.expected_academic_revision
-        or not checked.ready
-        or checked.inputs is None
-    ):
-        raise HTTPException(
-            409, "Academic records changed or are no longer ready. Revalidate the saved scope."
-        )
-    from classync_contracts.scheduling import scheduling_input_hash
-
-    if scheduling_input_hash(checked.inputs) != draft.input_hash:
-        raise HTTPException(
-            409,
-            "Saved draft does not match the current academic constraints. Generate a new revision.",
-        )
-    if snapshot.period.calendar is None:
-        raise HTTPException(422, "The academic period requires a semester calendar")
-    saved = snapshot.period.calendar
-    if (
-        body.calendar.academic_year != saved.academic_year
-        or body.calendar.semester != saved.semester
-        or body.calendar.instructional_days != saved.instructional_days
-        or not saved.effective_start
-        <= body.calendar.effective_start
-        <= body.calendar.effective_end
-        <= saved.effective_end
-    ):
-        raise HTTPException(422, "Publication dates must stay within the saved academic semester")
+    try:
+        repo.validate_academic_scope(body, draft, snapshot, checked)
+    except DraftError as error:
+        raise HTTPException(error.status, str(error)) from error
     return repo.publish(body, draft, tenant, claims["uid"], commit=commit)
 
 
@@ -123,7 +140,7 @@ def publish(body: PublicationCommand, request: Request):
 
 @router.get("/history/{period}")
 def history(period: str, request: Request, dataset: str = "institutional"):
-    settings, repo = settings_and_repo()
+    settings = settings_only()
     claims = require_administrator(request, settings)
     if dataset not in {"institutional", "synthetic"}:
         raise HTTPException(422, "Unknown dataset")
@@ -134,11 +151,25 @@ def history(period: str, request: Request, dataset: str = "institutional"):
         tenant = claims.get("tenant_id")
         if not tenant:
             raise HTTPException(403, "Verified tenant required")
+    require_local_publication(settings, dataset == "synthetic")
+    _, repo = scoped_repo(request, claims)
+    if settings.scheduling_database_url is not None:
+        try:
+            return {"versions": repo.history(dataset, period)}
+        except DraftError as error:
+            raise HTTPException(error.status, detail={"error": {
+                "code": error.code, "message": str(error),
+            }}) from error
     return {"versions": repo.history(tenant, dataset, period)}
 
 
-def periods_for(request, sandbox, role, section, teacher):
-    repo, tenant, dataset, viewer = read_scope(request, sandbox, role, section, teacher)
+def periods_for(request, sandbox, role, section, teacher, claims=None):
+    repo, tenant, dataset, viewer = read_scope(
+        request, sandbox, role, section, teacher, claims=claims
+    )
+    if hasattr(repo, "periods"):
+        return repo.periods(role, student_id=viewer.get("student_id"),
+                            faculty_id=viewer.get("faculty_id"))
     with repo.drafts.connection() as db:
         ids = db.execute(
             "SELECT period_id,revision FROM publication_heads WHERE tenant=? AND dataset=? "
@@ -162,7 +193,7 @@ def periods_for(request, sandbox, role, section, teacher):
                 )
                 or (
                     viewer["role"] == "student"
-                    and any(e.student_id == viewer["uid"] for e in inputs.enrollments)
+                    and any(e.student_id == viewer.get("student_id") for e in inputs.enrollments)
                 )
             )
             if eligible:
@@ -198,11 +229,14 @@ def sandbox_periods(request: Request, role: str = "student", section: str = "", 
 
 @router.get("/periods")
 def periods(request: Request):
-    return periods_for(request, False, "student", "", "")
+    claims = identity(request)
+    return periods_for(request, False, claims["role"], "", "", claims=claims)
 
 
-def calendar_for(period, request, sandbox, start, end, role, section, teacher):
-    repo, tenant, dataset, viewer = read_scope(request, sandbox, role, section, teacher)
+def calendar_for(period, request, sandbox, start, end, role, section, teacher, claims=None):
+    repo, tenant, dataset, viewer = read_scope(
+        request, sandbox, role, section, teacher, claims=claims
+    )
     try:
         return repo.calendar(tenant, dataset, period, start, end, viewer)
     except DraftError as error:
@@ -244,19 +278,35 @@ def sandbox_calendar(
 
 @router.get("/calendar/{period}")
 def calendar(period: str, request: Request, start: date, end: date):
-    return calendar_for(period, request, False, start, end, "student", "", "")
+    claims = identity(request)
+    return calendar_for(
+        period, request, False, start, end, claims["role"], "", "", claims=claims
+    )
 
 
 async def stream(period, request, sandbox, start, end, role, section, teacher, after):
-    repo, tenant, dataset, viewer = read_scope(request, sandbox, role, section, teacher)
+    repo, tenant, dataset, viewer = await asyncio.to_thread(
+        read_scope, request, sandbox, role, section, teacher
+    )
     # Authenticate before sending HTTP 200; reconnects revalidate tokens and revocation.
-    calendar_for(period, request, sandbox, start, end, role, section, teacher)
+    await asyncio.to_thread(
+        calendar_for, period, request, sandbox, start, end, role, section, teacher
+    )
 
     async def events():
         cursor = after
         for _ in range(80):
             if await request.is_disconnected():
                 break
+            if not sandbox:
+                try:
+                    current = await asyncio.to_thread(identity, request)
+                except HTTPException:
+                    return
+                # A reconnect must establish a fresh record/role projection. Never
+                # continue a stream with revoked, rebound or unavailable membership.
+                if current != viewer:
+                    return
             try:
                 value = await asyncio.to_thread(
                     repo.calendar, tenant, dataset, period, start, end, viewer
@@ -298,11 +348,12 @@ async def sandbox_events(
 async def events(
     period: str, request: Request, start: date, end: date, after: int = Query(0, ge=0)
 ):
-    return await stream(period, request, False, start, end, "student", "", "", after)
+    claims = identity(request)
+    return await stream(period, request, False, start, end, claims["role"], "", "", after)
 
 
 def availability_for(request, sandbox, room_id, start, end):
-    repo, tenant, dataset, _ = read_scope(request, sandbox, "administrator", "", "")
+    repo, tenant, dataset, viewer = read_scope(request, sandbox, "administrator", "", "")
     if (
         start.tzinfo is None
         or end.tzinfo is None
@@ -313,6 +364,13 @@ def availability_for(request, sandbox, room_id, start, end):
     from .occurrences import ZONE
 
     start, end = start.astimezone(ZONE), end.astimezone(ZONE)
+    if hasattr(repo, "availability"):
+        try:
+            return repo.availability(dataset, room_id, start, end)
+        except DraftError as error:
+            raise HTTPException(error.status, detail={"error": {
+                "code": error.code, "message": str(error),
+            }}) from error
     with repo.drafts.connection() as db:
         rows = repo.rows(db, tenant, dataset)
         if not rows:
@@ -384,7 +442,7 @@ def availability(request: Request, room_id: str, start: datetime, end: datetime)
 
 @router.put("/restrictions/{restriction_id}")
 def save_restriction(restriction_id: str, body: RoomRestriction, request: Request):
-    settings, repo = settings_and_repo()
+    settings = settings_only()
     claims = require_administrator(request, settings)
     if body.id != restriction_id:
         raise HTTPException(422, "Restriction identity differs from its URL")
@@ -404,6 +462,16 @@ def save_restriction(restriction_id: str, body: RoomRestriction, request: Reques
     from .draft_repository import now
     from .occurrences import ZONE
 
+    require_local_publication(settings, body.dataset == "synthetic")
+    if settings.scheduling_database_url is not None:
+        _, repo = scoped_repo(request, claims)
+        try:
+            return repo.put_restriction(body)
+        except DraftError as error:
+            raise HTTPException(error.status, detail={"error": {
+                "code": error.code, "message": str(error),
+            }}) from error
+    _, repo = settings_and_repo()
     value = {
         **body.model_dump(),
         "starts_at": start.astimezone(ZONE).isoformat(),

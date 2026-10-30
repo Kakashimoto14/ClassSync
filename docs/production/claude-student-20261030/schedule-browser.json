@@ -1,0 +1,29 @@
+{
+  "phase": "schedule",
+  "screenshots": [
+    {
+      "scene": "schedule",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356822208-schedule-schedule-390.png"
+    },
+    {
+      "scene": "options",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356822208-schedule-options-390.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356822208-schedule-schedule-1440.png"
+    },
+    {
+      "scene": "options",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793356822208-schedule-options-1440.png"
+    }
+  ],
+  "errors": [],
+  "api": [],
+  "clock": "2026-10-30T08:15:00+08:00",
+  "pass": true
+}

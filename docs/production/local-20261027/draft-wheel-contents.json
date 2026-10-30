@@ -1,0 +1,21 @@
+{
+  "wheel": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-draft-wheel-6299e1545d0841d182b7022851aff528\\classync_persistence-0.1.0-py3-none-any.whl",
+  "sha256": "d8cdbb1bef1e1614ccf0bd9ef713fb853640d489e9e6cf64342b7359497b96ad",
+  "sourceFilesByteEqual": 14,
+  "files": [
+    "classync_persistence/__init__.py",
+    "classync_persistence/academic_periods.py",
+    "classync_persistence/configuration.py",
+    "classync_persistence/database.py",
+    "classync_persistence/membership_changes.py",
+    "classync_persistence/memberships.py",
+    "classync_persistence/migrations/env.py",
+    "classync_persistence/migrations/versions/0001_identity.py",
+    "classync_persistence/migrations/versions/0002_membership_revision.py",
+    "classync_persistence/migrations/versions/0003_membership_audit.py",
+    "classync_persistence/migrations/versions/0004_academic_period_metadata.py",
+    "classync_persistence/migrations/versions/0005_academic_records.py",
+    "classync_persistence/migrations/versions/0006_scheduling_drafts.py",
+    "classync_persistence/schema.py"
+  ]
+}

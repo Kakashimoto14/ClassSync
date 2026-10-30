@@ -13,15 +13,23 @@
     "preview:presentation": "node scripts/preview-presentation.cjs",
     "lint": "npm run lint --workspace=@classync/web",
     "typecheck": "npm run typecheck --workspace=@classync/web",
-    "test:web": "npm run test --workspace=@classync/web",
+    "test:web": "node scripts/test-web.cjs",
+    "test:artifacts": "node --test scripts/tests/production-artifacts.test.cjs",
+    "test:security": "node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs scripts/tests/auth-emulator-qualification.test.cjs scripts/tests/web-session-fixture.test.cjs",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "dev": "node scripts/dev.cjs"
   },
   "devDependencies": {
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "vite": "6.4.5"
   },
   "engines": {
     "node": "22.x"
+  },
+  "overrides": {
+    "vite": "6.4.5",
+    "@grpc/grpc-js": "1.14.5",
+    "postcss-selector-parser": "7.1.6"
   }
 }

@@ -1,0 +1,135 @@
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+__________ test_constructor_never_connects_migrates_or_opens_sqlite ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000204A6D4BBF0>
+
+    def test_constructor_never_connects_migrates_or_opens_sqlite(monkeypatch):
+        class NoDatabase:
+            def __getattr__(self, name):
+                pytest.fail(f"Constructor accessed database capability: {name}")
+    
+        monkeypatch.setattr(sqlite3, "connect", lambda *_a, **_k: pytest.fail("SQLite fallback"))
+>       repository_type()(NoDatabase(), tenant_id="tenant-a", firebase_project_id="synthetic-project",
+        ^^^^^^^^^^^^^^^^^
+                          principal=VerifiedPrincipal(uid="uid-admin"))
+
+services\scheduling\tests\test_postgres_publication_boundary.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\scheduling\tests\test_postgres_publication_boundary.py:11: in repository_type
+    return importlib.import_module(
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'services.scheduling.app.postgres_publication_repository'
+import_ = <function _gcd_import at 0x00000204988F80E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'services.scheduling.app.postgres_publication_repository'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+____________ test_unverified_principals_never_reach_storage[None] _____________
+
+principal = None
+
+    @pytest.mark.parametrize("principal", [None, "uid-admin", {"uid": "uid-admin"}])
+    def test_unverified_principals_never_reach_storage(principal):
+        with pytest.raises(ValueError, match="verified principal"):
+>           repository_type()(object(), tenant_id="tenant-a", firebase_project_id="synthetic-project",
+            ^^^^^^^^^^^^^^^^^
+                              principal=principal)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\scheduling\tests\test_postgres_publication_boundary.py:11: in repository_type
+    return importlib.import_module(
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'services.scheduling.app.postgres_publication_repository'
+import_ = <function _gcd_import at 0x00000204988F80E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'services.scheduling.app.postgres_publication_repository'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+__________ test_unverified_principals_never_reach_storage[uid-admin] __________
+
+principal = 'uid-admin'
+
+    @pytest.mark.parametrize("principal", [None, "uid-admin", {"uid": "uid-admin"}])
+    def test_unverified_principals_never_reach_storage(principal):
+        with pytest.raises(ValueError, match="verified principal"):
+>           repository_type()(object(), tenant_id="tenant-a", firebase_project_id="synthetic-project",
+            ^^^^^^^^^^^^^^^^^
+                              principal=principal)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\scheduling\tests\test_postgres_publication_boundary.py:11: in repository_type
+    return importlib.import_module(
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'services.scheduling.app.postgres_publication_repository'
+import_ = <function _gcd_import at 0x00000204988F80E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'services.scheduling.app.postgres_publication_repository'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+_________ test_unverified_principals_never_reach_storage[principal2] __________
+
+principal = {'uid': 'uid-admin'}
+
+    @pytest.mark.parametrize("principal", [None, "uid-admin", {"uid": "uid-admin"}])
+    def test_unverified_principals_never_reach_storage(principal):
+        with pytest.raises(ValueError, match="verified principal"):
+>           repository_type()(object(), tenant_id="tenant-a", firebase_project_id="synthetic-project",
+            ^^^^^^^^^^^^^^^^^
+                              principal=principal)
+
+services\scheduling\tests\test_postgres_publication_boundary.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\scheduling\tests\test_postgres_publication_boundary.py:11: in repository_type
+    return importlib.import_module(
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'services.scheduling.app.postgres_publication_repository'
+import_ = <function _gcd_import at 0x00000204988F80E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'services.scheduling.app.postgres_publication_repository'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_constructor_never_connects_migrates_or_opens_sqlite
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_unverified_principals_never_reach_storage[None]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_unverified_principals_never_reach_storage[uid-admin]
+FAILED services/scheduling/tests/test_postgres_publication_boundary.py::test_unverified_principals_never_reach_storage[principal2]
+4 failed in 0.76s

@@ -1,0 +1,11 @@
+
+> classync@0.1.0 test:web
+> npm run test --workspace=@classync/web
+
+
+> @classync/web@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Projects/ClassSync/apps/web
+

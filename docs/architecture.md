@@ -8,11 +8,12 @@ React web / future React Native
        /        |         \\
 Academic   Scheduling   Notification
        \\        |         /
-              Firebase
+     local SQLite repositories
+     Firebase token verification (protected API)
 ```
 
-The gateway owns public HTTP conventions, Firebase token verification, request correlation, CORS, rate-limit policy enforcement, and routing. It is the authentication boundary; frontend route guards are UX only.
+The gateway implements public HTTP conventions, Firebase token verification, request correlation, CORS and routing. Production rate-limit policy enforcement remains planned, not verified by the local P1 gate. Protected services independently enforce authorization; frontend route guards are UX only.
 
-The Academic service will own teachers, students, subjects, programs, sections, classrooms, academic periods, and availability. The Scheduling service will own schedule validity, conflicts, room recommendations, and optimization. The Notification service will own delivery orchestration and provider integrations. Each service can be deployed and tested independently; their public contracts live in `packages/api-contracts`.
+Academic implements programs, sections, subjects, faculty, offerings, period/calendar and resource records in local SQLite. Scheduling implements OR-Tools CP-SAT, independent validation, immutable drafts, publication versions, role projections and server-originated timetable events. Notification currently provides health endpoints; delivery orchestration remains future work. Public contracts live in `packages/api-contracts`. Local service success does not establish production hosting or institutional authorization readiness.
 
-Scheduling constraints are not implemented. The service boundary deliberately gives its future engine authoritative access to teacher, section, room, capacity, and operating-hour validation rather than placing those rules in React.
+Scheduling constraints are implemented in Python, not React. P1 introduces a validated frontend operating mode and capability descriptions, not a new authorization system. Presentation uses a fixed versioned sample with no live requests. Sandbox requires a development server and independent backend gates. Institutional UI remains honestly unavailable until production identity/current-membership integration is complete. See [P1 execution contract](production/p1-execution-contract.md) and [reconciled production plan](production/reconciled-master-plan.md) for exact boundaries and future PostgreSQL sequencing. Firestore remains unused by current scheduling storage.

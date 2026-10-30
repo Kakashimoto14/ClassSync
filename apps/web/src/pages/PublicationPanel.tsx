@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { timetableRequest } from '../lib/publication-api';
 import { env } from '../lib/env';
+import { liveFetch } from '../config/runtime-config';
 import { OccurrenceExceptionEditor } from './OccurrenceExceptionEditor';
 import type { DraftDetail } from '../lib/scheduling-api';
 
@@ -51,7 +52,7 @@ function PublicationContent({
     let ignore = false;
     if (source !== 'academic') return;
     Promise.all([
-      fetch(`${env.apiBaseUrl}/academic/sandbox/periods/${draft.period_id}`).then((r) => r.json()),
+      liveFetch(`${env.apiBaseUrl}/academic/sandbox/periods/${draft.period_id}`).then((r) => r.json()),
       timetableRequest<{ versions: Version[] }>(`history/${draft.period_id}?dataset=${dataset}`),
     ])
       .then(([p, h]) => {

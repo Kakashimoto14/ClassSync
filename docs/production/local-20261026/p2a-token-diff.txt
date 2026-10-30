@@ -1,0 +1,396 @@
+diff --git a/packages/api-contracts/classync_contracts/scheduling_security.py b/packages/api-contracts/classync_contracts/scheduling_security.py
+index 98c0b1f..2d3bf42 100644
+--- a/packages/api-contracts/classync_contracts/scheduling_security.py
++++ b/packages/api-contracts/classync_contracts/scheduling_security.py
+@@ -1,14 +1,17 @@
+ """Scheduling privilege never comes from the browser's role-preview selection."""
+ 
+ from fastapi import HTTPException, Request
+-from firebase_admin import auth
+ 
+-from .firebase import FirebaseSettings, initialize_firebase
++from .firebase import FirebaseSettings
++from .models import UserRole
++from .request_authorization import request_identity
+ 
+ 
+ class SchedulingSecuritySettings(FirebaseSettings):
+     classsync_env: str = "production"
+     enable_scheduling_sandbox: bool = False
++    institutional_tenant_id: str | None = None
++    enable_test_identity_adapters: bool = False
+ 
+ 
+ def require_sandbox(settings):
+@@ -17,21 +20,8 @@ def require_sandbox(settings):
+ 
+ 
+ def require_administrator(request: Request, settings):
+-    claims = require_identity(request, settings)
+-    if claims.get("role") != "administrator":
+-        raise HTTPException(403, "Administrator authorization is required")
+-    return claims
++    return request_identity(request, settings, UserRole.ADMINISTRATOR)
+ 
+ 
+ def require_identity(request: Request, settings):
+-    header = request.headers.get("Authorization", "")
+-    if not header.startswith("Bearer "):
+-        raise HTTPException(401, "A verified Administrator token is required")
+-    try:
+-        initialize_firebase(settings)
+-        claims = auth.verify_id_token(header.removeprefix("Bearer "), check_revoked=True)
+-    except Exception as error:
+-        raise HTTPException(401, "Invalid authentication token") from error
+-    if not claims.get("uid") or claims.get("role") not in {"administrator", "teacher", "student"}:
+-        raise HTTPException(403, "A verified role and identity are required")
+-    return claims
++    return request_identity(request, settings)
+diff --git a/services/academic/app/main.py b/services/academic/app/main.py
+index 52b67f2..1ab8552 100644
+--- a/services/academic/app/main.py
++++ b/services/academic/app/main.py
+@@ -8,6 +8,7 @@ from classync_contracts.academic import (
+     RecordWrite,
+ )
+ from classync_contracts.models import HealthResponse
++from classync_contracts.request_authorization import install_identity_errors
+ from classync_contracts.scheduling_security import (
+     SchedulingSecuritySettings,
+     require_administrator,
+@@ -51,6 +52,7 @@ def authorize(request, sandbox):
+ 
+ 
+ app = FastAPI(title="ClassSync Academic Service", version="1.0.0")
++install_identity_errors(app)
+ 
+ 
+ @app.post("/api/v1/academic/sandbox/fixtures", response_model=AcademicSnapshot)
+diff --git a/services/gateway/app/main.py b/services/gateway/app/main.py
+index 79ada58..6c60d74 100644
+--- a/services/gateway/app/main.py
++++ b/services/gateway/app/main.py
+@@ -4,19 +4,23 @@ from pathlib import Path
+ from uuid import UUID, uuid4
+ 
+ import httpx
+-from classync_contracts.firebase import FirebaseSettings, initialize_firebase
+ from classync_contracts.models import HealthResponse
+-from classync_contracts.scheduling_security import require_administrator, require_sandbox
++from classync_contracts.request_authorization import install_identity_errors
++from classync_contracts.scheduling_security import (
++    SchedulingSecuritySettings,
++    require_administrator,
++    require_identity,
++    require_sandbox,
++)
+ from fastapi import FastAPI, HTTPException, Request
+ from fastapi.middleware.cors import CORSMiddleware
+ from fastapi.responses import JSONResponse
+-from firebase_admin import auth
+ from pydantic_settings import SettingsConfigDict
+ 
+ ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
+ 
+ 
+-class Settings(FirebaseSettings):
++class Settings(SchedulingSecuritySettings):
+     model_config = SettingsConfigDict(env_file=ROOT_DIRECTORY / ".env", extra="ignore")
+     academic_service_url: str = "http://127.0.0.1:8001"
+     scheduling_service_url: str = "http://127.0.0.1:8002"
+@@ -40,12 +44,13 @@ async def lifespan(_: FastAPI):
+ 
+ 
+ app = FastAPI(title="ClassSync API Gateway", version="1.0.0", lifespan=lifespan)
++install_identity_errors(app)
+ app.add_middleware(
+     CORSMiddleware,
+     allow_origins=["http://localhost:5173"],
+     allow_credentials=False,
+     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+-    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
++    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-ClassSync-Role"],
+ )
+ 
+ 
+@@ -72,16 +77,7 @@ async def http_error(request: Request, exc: HTTPException):
+ 
+ 
+ def require_authenticated(request: Request) -> dict:
+-    header = request.headers.get("Authorization", "")
+-    if settings.classsync_env == "development" and settings.allow_unauthenticated_development:
+-        return {"uid": "local-development", "role": "administrator"}
+-    if not header.startswith("Bearer "):
+-        raise HTTPException(401, "Authentication is required")
+-    try:
+-        initialize_firebase(settings)
+-        return auth.verify_id_token(header.removeprefix("Bearer "))
+-    except Exception as error:
+-        raise HTTPException(401, "Invalid authentication token") from error
++    return require_identity(request, settings)
+ 
+ 
+ @app.get("/health", response_model=HealthResponse)
+@@ -157,6 +153,7 @@ async def service_proxy(service_name, path, request):
+                     "Content-Type": "application/json",
+                     "Authorization": request.headers.get("Authorization", ""),
+                     "X-Request-ID": request.state.request_id,
++                    "X-ClassSync-Role": request.headers.get("X-ClassSync-Role", ""),
+                 },
+             )
+         payload = response.json()
+@@ -313,9 +310,10 @@ async def timetable_proxy(operation: str, request: Request):
+         if request.method != "GET":
+             raise HTTPException(404, "No anonymous publication operation exists")
+     else:
+-        require_identity(request, settings)
+         if request.method != "GET" or operation.startswith("history/"):
+             require_administrator(request, settings)
++        else:
++            require_identity(request, settings)
+     if "/events/" not in "/" + operation:
+         return await service_proxy("scheduling", "/api/v1/timetables/" + operation, request)
+     client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None))
+@@ -325,7 +323,10 @@ async def timetable_proxy(operation: str, request: Request):
+                 "GET",
+                 settings.scheduling_service_url + "/api/v1/timetables/" + operation,
+                 params=request.query_params,
+-                headers={"Authorization": request.headers.get("Authorization", "")},
++                headers={
++                    "Authorization": request.headers.get("Authorization", ""),
++                    "X-ClassSync-Role": request.headers.get("X-ClassSync-Role", ""),
++                },
+             ),
+             stream=True,
+         )
+diff --git a/services/scheduling/app/main.py b/services/scheduling/app/main.py
+index 8bbc896..62c716e 100644
+--- a/services/scheduling/app/main.py
++++ b/services/scheduling/app/main.py
+@@ -9,6 +9,7 @@ from classync_contracts.academic import (
+     AcademicSnapshot,
+ )
+ from classync_contracts.models import HealthResponse
++from classync_contracts.request_authorization import install_identity_errors
+ from classync_contracts.scheduling import (
+     DraftDetail,
+     DraftList,
+@@ -50,6 +51,7 @@ settings = Settings()
+ generation_slot = BoundedSemaphore(1)
+ 
+ app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0")
++install_identity_errors(app)
+ app.include_router(publication_router)
+ 
+ 
+diff --git a/services/scheduling/app/publication_api.py b/services/scheduling/app/publication_api.py
+index 4b01731..cca10a9 100644
+--- a/services/scheduling/app/publication_api.py
++++ b/services/scheduling/app/publication_api.py
+@@ -15,6 +15,12 @@ from .publication_repository import PublicationRepository
+ router = APIRouter(prefix="/api/v1/timetables")
+ 
+ 
++def settings_only():
++    from .main import settings
++
++    return settings
++
++
+ def settings_and_repo():
+     from .main import repository, settings
+ 
+@@ -24,16 +30,16 @@ def settings_and_repo():
+ def identity(request):
+     from classync_contracts.scheduling_security import require_identity
+ 
+-    settings, _ = settings_and_repo()
+-    return require_identity(request, settings)
++    return require_identity(request, settings_only())
+ 
+ 
+ def read_scope(request, sandbox, role="student", section="", teacher=""):
+-    settings, repo = settings_and_repo()
++    settings = settings_only()
+     if sandbox:
+         require_sandbox(settings)
+         if role not in {"student", "teacher", "administrator"}:
+             raise HTTPException(422, "Unknown preview role")
++        _, repo = settings_and_repo()
+         return (
+             repo,
+             "development-synthetic",
+@@ -44,13 +50,14 @@ def read_scope(request, sandbox, role="student", section="", teacher=""):
+     tenant = claims.get("tenant_id")
+     if not isinstance(tenant, str) or not tenant:
+         raise HTTPException(403, "A verified institutional tenant is required")
++    _, repo = settings_and_repo()
+     return repo, tenant, "institutional", claims
+ 
+ 
+ def prepare(body, request, commit):
+     from .main import academic_readiness, persisted_academic_snapshot
+ 
+-    settings, repo = settings_and_repo()
++    settings = settings_only()
+     claims = require_administrator(request, settings)
+     if not claims.get("uid"):
+         raise HTTPException(401, "A verified administrator identity is required")
+@@ -66,6 +73,7 @@ def prepare(body, request, commit):
+                 403, "Institutional publication needs a verified tenant and owned draft"
+             )
+         tenant, owner = claims["tenant_id"], claims["uid"]
++    _, repo = settings_and_repo()
+     draft = repo.drafts.get(body.draft_id, body.source, owner)
+     from .draft_repository import digest, encode
+ 
+@@ -123,7 +131,7 @@ def publish(body: PublicationCommand, request: Request):
+ 
+ @router.get("/history/{period}")
+ def history(period: str, request: Request, dataset: str = "institutional"):
+-    settings, repo = settings_and_repo()
++    settings = settings_only()
+     claims = require_administrator(request, settings)
+     if dataset not in {"institutional", "synthetic"}:
+         raise HTTPException(422, "Unknown dataset")
+@@ -134,6 +142,7 @@ def history(period: str, request: Request, dataset: str = "institutional"):
+         tenant = claims.get("tenant_id")
+         if not tenant:
+             raise HTTPException(403, "Verified tenant required")
++    _, repo = settings_and_repo()
+     return {"versions": repo.history(tenant, dataset, period)}
+ 
+ 
+@@ -162,7 +171,7 @@ def periods_for(request, sandbox, role, section, teacher):
+                 )
+                 or (
+                     viewer["role"] == "student"
+-                    and any(e.student_id == viewer["uid"] for e in inputs.enrollments)
++                    and any(e.student_id == viewer.get("student_id") for e in inputs.enrollments)
+                 )
+             )
+             if eligible:
+@@ -384,7 +393,7 @@ def availability(request: Request, room_id: str, start: datetime, end: datetime)
+ 
+ @router.put("/restrictions/{restriction_id}")
+ def save_restriction(restriction_id: str, body: RoomRestriction, request: Request):
+-    settings, repo = settings_and_repo()
++    settings = settings_only()
+     claims = require_administrator(request, settings)
+     if body.id != restriction_id:
+         raise HTTPException(422, "Restriction identity differs from its URL")
+@@ -404,6 +413,7 @@ def save_restriction(restriction_id: str, body: RoomRestriction, request: Reques
+     from .draft_repository import now
+     from .occurrences import ZONE
+ 
++    _, repo = settings_and_repo()
+     value = {
+         **body.model_dump(),
+         "starts_at": start.astimezone(ZONE).isoformat(),
+diff --git a/services/scheduling/app/publication_repository.py b/services/scheduling/app/publication_repository.py
+index ab76abb..e73e063 100644
+--- a/services/scheduling/app/publication_repository.py
++++ b/services/scheduling/app/publication_repository.py
+@@ -339,7 +339,7 @@ class PublicationRepository:
+         if dataset == "institutional" and viewer["role"] != "administrator":
+             eligible = (
+                 any(
+-                    e.student_id == viewer["uid"]
++                    e.student_id == viewer.get("student_id")
+                     for p in decoded
+                     for e in p["draft"].input_snapshot.enrollments
+                 )
+@@ -365,7 +365,13 @@ class PublicationRepository:
+                 if dataset == "synthetic" and viewer.get("mock_section"):
+                     return event["section"]["id"] == viewer["mock_section"]
+                 return any(
+-                    e.student_id == viewer["uid"] and event["offering_id"] in e.offering_ids
++                    e.student_id
++                    == (
++                        viewer.get("student_id")
++                        if dataset == "institutional"
++                        else viewer.get("uid")
++                    )
++                    and event["offering_id"] in e.offering_ids
+                     for e in source.enrollments
+                 )
+ 
+diff --git a/services/scheduling/tests/test_api.py b/services/scheduling/tests/test_api.py
+index 84c7880..d3f7c37 100644
+--- a/services/scheduling/tests/test_api.py
++++ b/services/scheduling/tests/test_api.py
+@@ -90,32 +90,21 @@ def test_preview_role_and_general_dev_bypass_never_authorize_production(app, mon
+     )
+ 
+ 
+-def test_verified_admin_role_is_required(monkeypatch):
+-    from classync_contracts import scheduling_security
+-
+-    monkeypatch.setattr(scheduling_security, "initialize_firebase", lambda *_: None)
+-    monkeypatch.setattr(
+-        scheduling_security.auth,
+-        "verify_id_token",
+-        lambda *_, **__: {"uid": "verified", "role": "teacher"},
+-    )
++def test_verified_admin_role_is_required(identity_adapters):
++    identity_adapters(scheduling, "teacher", uid="verified")
+     response = TestClient(scheduling.app).post(
+         "/api/v1/scheduling/generate",
+         json=tiny().model_dump(mode="json"),
+-        headers={"Authorization": "Bearer verified-test"},
++        headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
+     )
+     assert response.status_code == 403
+-    monkeypatch.setattr(
+-        scheduling_security.auth,
+-        "verify_id_token",
+-        lambda *_, **__: {"uid": "verified", "role": "administrator"},
+-    )
++    identity_adapters(scheduling, "administrator", uid="verified")
+     assert (
+         TestClient(scheduling.app)
+         .post(
+             "/api/v1/scheduling/generate",
+             json=tiny().model_dump(mode="json"),
+-            headers={"Authorization": "Bearer verified-test"},
++            headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
+         )
+         .status_code
+         == 200
+diff --git a/services/scheduling/tests/test_publication.py b/services/scheduling/tests/test_publication.py
+index 4babd96..05eff20 100644
+--- a/services/scheduling/tests/test_publication.py
++++ b/services/scheduling/tests/test_publication.py
+@@ -192,9 +192,9 @@ def test_projection_isolation_irregular_enrollment_and_exception_conflicts(setup
+         )
+ 
+ 
+-def test_api_rejects_preview_and_student_publication_and_production_sandbox(monkeypatch, tmp_path):
+-    from classync_contracts import scheduling_security as security
+-
++def test_api_rejects_preview_and_student_publication_and_production_sandbox(
++    monkeypatch, tmp_path, identity_adapters
++):
+     from services.scheduling.app import main
+ 
+     monkeypatch.setattr(main.settings, "scheduling_database_path", str(tmp_path / "s.db"))
+@@ -209,17 +209,12 @@ def test_api_rejects_preview_and_student_publication_and_production_sandbox(monk
+         "calendar": configuration().calendar.model_dump(mode="json"),
+     }
+     assert client.post("/api/v1/timetables/publish", json=body).status_code == 401
+-    monkeypatch.setattr(security, "initialize_firebase", lambda _: None)
+-    monkeypatch.setattr(
+-        security.auth,
+-        "verify_id_token",
+-        lambda *a, **k: {"uid": "student", "role": "student", "tenant_id": "tenant"},
+-    )
++    identity_adapters(main, "student", uid="student")
+     assert (
+         client.post(
+             "/api/v1/timetables/publish",
+             json=body,
+-            headers={"Authorization": "Bearer verified-test"},
++            headers={"Authorization": "Bearer e30.e30.synthetic-signature"},
+         ).status_code
+         == 403
+     )

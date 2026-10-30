@@ -1,0 +1,70 @@
+C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-d0b35da2403f481eaad68f8bf9b6275d
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "record_references_pkey"
+DETAIL:  Key (tenant_id, owner_uid, period_id, source_kind, source_id, target_kind, target_id)=(tenant-a, uid-admin, 9fb3bcab-e9e5-42e9-ad27-18f0f2cffab6, faculty, teacher-a, subjects, synthetic-absent) already exists.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 315, in expect_sqlstate
+    db.execute(text(statement))
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+           ^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.IntegrityError: (psycopg.errors.UniqueViolation) duplicate key value violates unique constraint "record_references_pkey"
+DETAIL:  Key (tenant_id, owner_uid, period_id, source_kind, source_id, target_kind, target_id)=(tenant-a, uid-admin, 9fb3bcab-e9e5-42e9-ad27-18f0f2cffab6, faculty, teacher-a, subjects, synthetic-absent) already exists.
+[SQL: UPDATE classsync_academic.record_references SET target_id='synthetic-absent']
+(Background on this error at: https://sqlalche.me/e/21/gkpj)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 524, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 518, in main
+    evidence = qualify(args.bin, exercise)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 486, in exercise
+    behavior = check_restored_behavior(connection, restored_owner, restored_runtime,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 353, in check_restored_behavior
+    expect_sqlstate(owner, "UPDATE classsync_academic.record_references "
+  File "C:\Projects\ClassSync\scripts\postgres_academic_restore_qualification.py", line 317, in expect_sqlstate
+    require(error.orig.sqlstate == expected, "Restored constraint returned wrong SQLSTATE")
+  File "C:\Projects\ClassSync\scripts\postgres_driver_qualification.py", line 17, in require
+    raise RuntimeError(description)
+RuntimeError: Restored constraint returned wrong SQLSTATE

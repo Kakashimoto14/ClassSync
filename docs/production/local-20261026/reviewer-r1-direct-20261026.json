@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-25T19:46:00.451Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "../../node_modules/vitest/vitest.mjs",
+    "run",
+    "src/pages/R1Presentation.test.tsx",
+    "--pool=threads",
+    "--maxWorkers=1",
+    "--reporter=verbose"
+  ],
+  "status": 0,
+  "signal": null,
+  "stdout": "\n RUN  v4.1.12 C:/Projects/ClassSync/apps/web\n\n ✓ src/pages/R1Presentation.test.tsx > uses only the reviewed bundled source for stale sessions and hostile connected-source query parameters 667ms\n ✓ src/pages/R1Presentation.test.tsx > recovers an invalid presentation identity deliberately without substituting private data 581ms\n ✓ src/pages/R1Presentation.test.tsx > keeps the loaded agenda when selecting another date within the same sample month 466ms\n ✓ src/pages/R1Presentation.test.tsx > reports only stored conflict validation at export without providing a live validator 47ms\n ✓ src/pages/R1Presentation.test.tsx > does not offer live occupancy even before a returning role context is persisted 8ms\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  03:45:46\n   Duration  13.77s (transform 1.31s, setup 798ms, import 6.70s, tests 1.78s, environment 2.54s)\n\n",
+  "stderr": ""
+}

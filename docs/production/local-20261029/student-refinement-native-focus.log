@@ -1,0 +1,10 @@
+page.goto: net::ERR_BLOCKED_BY_CLIENT at chrome-extension://phcmfffpjngpjdgphmepjooapkakjham/zoom.html
+Call log:
+  - navigating to "chrome-extension://phcmfffpjngpjdgphmepjooapkakjham/zoom.html", waiting until "load"
+
+    at [stdin]:12:177 {
+  log: [
+    '  - navigating to "chrome-extension://phcmfffpjngpjdgphmepjooapkakjham/zoom.html", waiting until "load"'
+  ],
+  name: 'Error'
+}

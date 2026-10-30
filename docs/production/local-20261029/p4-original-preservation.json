@@ -1,0 +1,17 @@
+[
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+    "sha256": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+    "matches": true
+  },
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+    "sha256": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+    "matches": true
+  },
+  {
+    "file": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+    "sha256": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+    "matches": true
+  }
+]

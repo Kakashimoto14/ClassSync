@@ -3,7 +3,8 @@
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from .draft_repository import DraftError
+from .draft_rules import DraftError
+from .readiness import eligible_room
 
 ZONE = ZoneInfo("Asia/Manila")
 
@@ -106,6 +107,7 @@ def dated_occurrences(inputs, assignments, calendar, start, end):
     teachers = {t.id: t for t in inputs.teachers}
     rooms = {r.id: r for r in inputs.rooms}
     offerings = {o.id: o for o in inputs.offerings}
+    sections = {s.id: s for s in inputs.sections}
     for event in events:
         begin = datetime.fromisoformat(event["starts_at"])
         finish = datetime.fromisoformat(event["ends_at"])
@@ -124,11 +126,14 @@ def dated_occurrences(inputs, assignments, calendar, start, end):
             not contains(inputs.operating_windows)
             or not contains(teacher.availability)
             or blocked(teacher.unavailable)
-            or (room.availability and not contains(room.availability))
+            or not contains(room.availability)
             or blocked(room.blocked)
             or room.condition != "operational"
             or not room.schedulable
             or room.id not in offerings[event["offering_id"]].eligible_room_ids
+            or not eligible_room(
+                room, offerings[event["offering_id"]], sections[event["section"]["id"]].program_id
+            )
         ):
             raise DraftError(
                 422,

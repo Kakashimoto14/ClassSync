@@ -13,12 +13,22 @@ import {
 } from '../../routes/route-config';
 import { Drawer } from '../ui/Drawer';
 import { ClassSyncLogo } from '../brand/ClassSyncLogo';
+import { capabilities } from '../../config/runtime-config';
 import { previewProfiles } from '../../data/schedule-preview';
+import { useUniversitySession } from '../../auth/university-session-context';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { role, signOut } = useDevelopmentRole();
+  const preview = useDevelopmentRole();
+  const university = useUniversitySession();
+  const institutional = !capabilities.previewRoles;
+  const role = institutional
+    ? university.state.status === 'authorized'
+      ? university.state.membership.role
+      : null
+    : preview.role;
+  const signOut = institutional ? university.signOut : preview.signOut;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState('');
   const main = useRef<HTMLElement>(null);
@@ -48,9 +58,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [closeMenu]);
 
   if (!role) return <Navigate to="/dev/role-preview" replace />;
-  const profile = previewProfiles[role];
+  const profile = institutional
+    ? { name: 'University account', initials: 'CS', label: role === 'student' ? 'Student' : role }
+    : previewProfiles[role];
+  const availableRoute = (route: RouteDefinition) =>
+    !route.plannedFeature &&
+    (!institutional ||
+      (['dashboard', 'schedule', 'rooms', 'notifications'].includes(route.kind) &&
+        route.roomMode !== 'availability'));
   const groups = navigationForRole(role);
-  const bottomItems = mobileNavigationForRole(role);
+  const bottomItems = mobileNavigationForRole(role).filter(availableRoute);
   const primaryItems = [...bottomItems];
   if (role !== 'student') {
     const requests = routeDefinitions.find((route) => route.path === rolePath(role, 'requests'));
@@ -62,13 +79,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       ...group,
       items: group.items.filter(
         (route) =>
-          !primaryItems.some((primary) => primary.id === route.id) && route.kind !== 'settings',
+          !primaryItems.some((primary) => primary.id === route.id) &&
+          route.kind !== 'settings' &&
+          availableRoute(route),
       ),
     }))
     .filter((group) => group.items.length);
   const roleRoutes = routeDefinitions.filter(
     (route) =>
       route.role === role &&
+      availableRoute(route) &&
       (route.navigationLabel || route.kind === 'profile' || route.kind === 'settings'),
   );
   const results = query.trim()
@@ -112,7 +132,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       open={group.items.some((route) => route.id === owner)}
     >
       <summary>
-        {group.title}
+        {role === 'student' && group.title === 'Rooms' ? 'Room tools' : group.title}
         <ChevronDown size={16} aria-hidden="true" />
       </summary>
       <div>{group.items.map(destination)}</div>
@@ -120,26 +140,32 @@ export function AppShell({ children }: { children: ReactNode }) {
   ));
   const accountLinks = (
     <div className="account-links">
-      <Link className="nav-item" to={rolePath(role, 'profile')} onClick={closeMenu}>
-        <UserRound size={18} aria-hidden="true" />
-        Profile
-      </Link>
-      <Link className="nav-item" to={rolePath(role, 'settings')} onClick={closeMenu}>
-        <Settings size={18} aria-hidden="true" />
-        Settings
-      </Link>
+      {!institutional && (
+        <>
+          <Link className="nav-item" to={rolePath(role, 'profile')} onClick={closeMenu}>
+            <UserRound size={18} aria-hidden="true" />
+            Profile
+          </Link>
+          <Link className="nav-item" to={rolePath(role, 'settings')} onClick={closeMenu}>
+            <Settings size={18} aria-hidden="true" />
+            Settings
+          </Link>
+        </>
+      )}
       <button className="nav-item" onClick={leaveDemo}>
         <LogOut size={18} aria-hidden="true" />
-        Exit demo
+        {institutional ? 'Sign out' : 'Exit demo'}
       </button>
-      <Link className="nav-item" to="/dev/role-preview" onClick={closeMenu}>
-        Switch preview role
-      </Link>
+      {!institutional && (
+        <Link className="nav-item" to="/dev/role-preview" onClick={closeMenu}>
+          Switch preview role
+        </Link>
+      )}
     </div>
   );
 
   return (
-    <div className="app-shell brand-shell">
+    <div className={`app-shell brand-shell ${role === 'student' ? 'student-shell' : ''}`}>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -152,18 +178,30 @@ export function AppShell({ children }: { children: ReactNode }) {
           {secondaryNavigation}
         </nav>
         <div className="sidebar-user">
-          <Link className="sidebar-profile" to={rolePath(role, 'profile')}>
+          <Link
+            className="sidebar-profile"
+            to={institutional ? '/auth/login' : rolePath(role, 'profile')}
+          >
             <span className="avatar">{profile.initials}</span>
             <span>
               <strong>{profile.name}</strong>
-              <small>{profile.label} · Demo</small>
+              <small>
+                {profile.label}
+                {` · ${institutional ? 'University' : 'Demo'}`}
+              </small>
             </span>
           </Link>
           <div className="account-actions">
-            <Link className="icon-button" to={rolePath(role, 'settings')} aria-label="Settings">
-              <Settings size={18} />
-            </Link>
-            <button className="icon-button" onClick={leaveDemo} aria-label="Exit demo">
+            {!institutional && (
+              <Link className="icon-button" to={rolePath(role, 'settings')} aria-label="Settings">
+                <Settings size={18} />
+              </Link>
+            )}
+            <button
+              className="icon-button"
+              onClick={leaveDemo}
+              aria-label={institutional ? 'Sign out' : 'Exit demo'}
+            >
               <LogOut size={18} />
             </button>
           </div>
@@ -185,6 +223,16 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ClassSyncLogo size="small" decorative />
             </Link>
           </div>
+          {role === 'student' && (
+            <div className="student-header-location">
+              <span>Student</span>
+              <span aria-hidden="true">/</span>
+              <strong>
+                {routeDefinitions.find((route) => route.id === owner)?.navigationLabel ??
+                  'Workspace'}
+              </strong>
+            </div>
+          )}
           <div className="semester">
             <details
               className="preview-indicator"
@@ -197,19 +245,28 @@ export function AppShell({ children }: { children: ReactNode }) {
               }}
             >
               <summary>
-                {profile.label} demo <ChevronDown size={14} aria-hidden="true" />
+                {profile.label} {institutional ? 'workspace' : 'demo'}{' '}
+                <ChevronDown size={14} aria-hidden="true" />
               </summary>
               <div className="preview-menu">
                 <p>
-                  Preview role only; no account is authenticated. Synthetic scheduling and published
-                  timetables require the explicitly enabled local services.
+                  {institutional
+                    ? 'Access is checked against your current university membership. Published schedules only.'
+                    : `Preview role only; no account is authenticated. ${capabilities.description}`}
                 </p>
-                <Link className="text-action" to="/dev/role-preview">
-                  Switch preview role
+                <Link
+                  className="text-action"
+                  to={institutional ? '/auth/login' : '/dev/role-preview'}
+                >
+                  {institutional ? 'Check account access' : 'Switch preview role'}
                 </Link>
               </div>
             </details>
-            <strong>Asia/Manila · Preview workspace</strong>
+            {role !== 'student' && (
+              <strong>
+                Asia/Manila · {institutional ? 'University workspace' : 'Preview workspace'}
+              </strong>
+            )}
           </div>
           <div
             className="global-search"
@@ -221,7 +278,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Search size={18} aria-hidden="true" />
               <input
                 aria-label="Search ClassSync"
-                placeholder="Search your workspace"
+                placeholder="Find a page"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -240,13 +297,15 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             )}
           </div>
-          <Link
-            className="icon-button header-alerts"
-            aria-label="Notifications"
-            to={rolePath(role, 'notifications')}
-          >
-            <Bell />
-          </Link>
+          {!institutional && (
+            <Link
+              className="icon-button header-alerts"
+              aria-label="Notifications"
+              to={rolePath(role, 'notifications')}
+            >
+              <Bell />
+            </Link>
+          )}
         </header>
         <main id="main-content" className="main-content" ref={main} tabIndex={-1}>
           {children}

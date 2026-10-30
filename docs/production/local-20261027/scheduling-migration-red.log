@@ -1,0 +1,28 @@
+EE                                                                       [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_wrong_source_name_is_rejected_before_any_sqlite_open _
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-73/test_wrong_source_name_is_reje0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018D7E0EA360>
+
+    @pytest.fixture
+    def connection(tmp_path, monkeypatch):
+>       from scripts import postgres_scheduling_migration_qualification as migration
+E       ImportError: cannot import name 'postgres_scheduling_migration_qualification' from 'scripts' (unknown location)
+
+services\persistence\tests\test_scheduling_migration_boundary.py:12: ImportError
+_ ERROR at setup of test_unmarked_cluster_is_rejected_before_any_source_open __
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-73/test_unmarked_cluster_is_rejec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018D7E0E9880>
+
+    @pytest.fixture
+    def connection(tmp_path, monkeypatch):
+>       from scripts import postgres_scheduling_migration_qualification as migration
+E       ImportError: cannot import name 'postgres_scheduling_migration_qualification' from 'scripts' (unknown location)
+
+services\persistence\tests\test_scheduling_migration_boundary.py:12: ImportError
+=========================== short test summary info ===========================
+ERROR services/persistence/tests/test_scheduling_migration_boundary.py::test_wrong_source_name_is_rejected_before_any_sqlite_open
+ERROR services/persistence/tests/test_scheduling_migration_boundary.py::test_unmarked_cluster_is_rejected_before_any_source_open
+2 errors in 0.60s

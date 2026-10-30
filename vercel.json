@@ -8,6 +8,7 @@
     { "source": "/", "destination": "/index.html" },
     { "source": "/auth/:path*", "destination": "/index.html" },
     { "source": "/dev/role-preview", "destination": "/index.html" },
+    { "source": "/dev/design-system", "destination": "/index.html" },
     { "source": "/forbidden", "destination": "/index.html" },
     { "source": "/student/:path*", "destination": "/index.html" },
     { "source": "/teacher/:path*", "destination": "/index.html" },

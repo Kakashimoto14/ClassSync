@@ -1,0 +1,72 @@
+C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+New disposable PostgreSQL root: C:\Users\lenovo\AppData\Local\Temp\classsync-pg-6bf2410470ed4edca6356309f2d5dc78
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.FeatureNotSupported: cannot truncate a table referenced in a foreign key constraint
+DETAIL:  Table "drafts" references "solver_runs".
+HINT:  Truncate table "drafts" at the same time, or use TRUNCATE ... CASCADE.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 277, in expect_sqlstate
+    db.execute(text(statement), parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+           ^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "C:\Projects\ClassSync\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+sqlalchemy.exc.NotSupportedError: (psycopg.errors.FeatureNotSupported) cannot truncate a table referenced in a foreign key constraint
+DETAIL:  Table "drafts" references "solver_runs".
+HINT:  Truncate table "drafts" at the same time, or use TRUNCATE ... CASCADE.
+[SQL: TRUNCATE classsync_scheduling.solver_runs]
+(Background on this error at: https://sqlalche.me/e/21/tw8g)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 561, in <module>
+    main()
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 555, in main
+    evidence = qualify(args.bin, exercise)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 252, in qualify
+    run_exercise(exercise, DisposableConnection(root, port, owner, runtime, run), evidence)
+  File "C:\Projects\ClassSync\scripts\postgres_disposable.py", line 54, in run_exercise
+    evidence["exercise"] = exercise(connection)
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 522, in exercise
+    scheduling = check_scheduling_behavior(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 328, in check_scheduling_behavior
+    expect_sqlstate(owner, statement, {}, "42501")
+  File "C:\Projects\ClassSync\scripts\postgres_scheduling_restore_qualification.py", line 281, in expect_sqlstate
+    require(error.orig.sqlstate == expected,
+  File "C:\Projects\ClassSync\scripts\postgres_driver_qualification.py", line 17, in require
+    raise RuntimeError(description)
+RuntimeError: Restored Scheduling SQLSTATE 0A000, expected 42501

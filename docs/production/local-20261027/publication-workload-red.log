@@ -1,0 +1,100 @@
+FFFF....                                                                 [100%]
+================================== FAILURES ===================================
+_ test_workload_enforces_every_supplied_cap_independent_of_event_order[False-120-max_daily-2026-10-05] _
+
+limit = 'max_daily', second_day = '2026-10-05', second_cap = 120
+reverse = False
+
+    @pytest.mark.parametrize("limit,second_day", [("max_daily", "2026-10-05"),
+                                                 ("max_weekly", "2026-10-07")])
+    @pytest.mark.parametrize("second_cap", [120, None])
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_workload_enforces_every_supplied_cap_independent_of_event_order(
+        limit, second_day, second_cap, reverse,
+    ):
+        left = event("a")
+        right = event("b", start=f"{second_day}T10:00:00+08:00",
+                      end=f"{second_day}T11:00:00+08:00")
+        share(left, right, "teacher")
+        left[limit], right[limit] = 90, second_cap
+        events = [right, left] if reverse else [left, right]
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_rules.py:238: Failed
+_ test_workload_enforces_every_supplied_cap_independent_of_event_order[False-120-max_weekly-2026-10-07] _
+
+limit = 'max_weekly', second_day = '2026-10-07', second_cap = 120
+reverse = False
+
+    @pytest.mark.parametrize("limit,second_day", [("max_daily", "2026-10-05"),
+                                                 ("max_weekly", "2026-10-07")])
+    @pytest.mark.parametrize("second_cap", [120, None])
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_workload_enforces_every_supplied_cap_independent_of_event_order(
+        limit, second_day, second_cap, reverse,
+    ):
+        left = event("a")
+        right = event("b", start=f"{second_day}T10:00:00+08:00",
+                      end=f"{second_day}T11:00:00+08:00")
+        share(left, right, "teacher")
+        left[limit], right[limit] = 90, second_cap
+        events = [right, left] if reverse else [left, right]
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_rules.py:238: Failed
+_ test_workload_enforces_every_supplied_cap_independent_of_event_order[False-None-max_daily-2026-10-05] _
+
+limit = 'max_daily', second_day = '2026-10-05', second_cap = None
+reverse = False
+
+    @pytest.mark.parametrize("limit,second_day", [("max_daily", "2026-10-05"),
+                                                 ("max_weekly", "2026-10-07")])
+    @pytest.mark.parametrize("second_cap", [120, None])
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_workload_enforces_every_supplied_cap_independent_of_event_order(
+        limit, second_day, second_cap, reverse,
+    ):
+        left = event("a")
+        right = event("b", start=f"{second_day}T10:00:00+08:00",
+                      end=f"{second_day}T11:00:00+08:00")
+        share(left, right, "teacher")
+        left[limit], right[limit] = 90, second_cap
+        events = [right, left] if reverse else [left, right]
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_rules.py:238: Failed
+_ test_workload_enforces_every_supplied_cap_independent_of_event_order[False-None-max_weekly-2026-10-07] _
+
+limit = 'max_weekly', second_day = '2026-10-07', second_cap = None
+reverse = False
+
+    @pytest.mark.parametrize("limit,second_day", [("max_daily", "2026-10-05"),
+                                                 ("max_weekly", "2026-10-07")])
+    @pytest.mark.parametrize("second_cap", [120, None])
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_workload_enforces_every_supplied_cap_independent_of_event_order(
+        limit, second_day, second_cap, reverse,
+    ):
+        left = event("a")
+        right = event("b", start=f"{second_day}T10:00:00+08:00",
+                      end=f"{second_day}T11:00:00+08:00")
+        share(left, right, "teacher")
+        left[limit], right[limit] = 90, second_cap
+        events = [right, left] if reverse else [left, right]
+>       with pytest.raises(DraftError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_rules.py:238: Failed
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_publication_rules.py::test_workload_enforces_every_supplied_cap_independent_of_event_order[False-120-max_daily-2026-10-05]
+FAILED services/scheduling/tests/test_publication_rules.py::test_workload_enforces_every_supplied_cap_independent_of_event_order[False-120-max_weekly-2026-10-07]
+FAILED services/scheduling/tests/test_publication_rules.py::test_workload_enforces_every_supplied_cap_independent_of_event_order[False-None-max_daily-2026-10-05]
+FAILED services/scheduling/tests/test_publication_rules.py::test_workload_enforces_every_supplied_cap_independent_of_event_order[False-None-max_weekly-2026-10-07]
+4 failed, 4 passed, 35 deselected in 1.82s

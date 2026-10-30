@@ -1,0 +1,99 @@
+{
+  "phase": "before",
+  "screenshots": [
+    {
+      "scene": "home",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-home-390.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-schedule-390.png"
+    },
+    {
+      "scene": "options",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-options-390.png"
+    },
+    {
+      "scene": "room-detail",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-room-detail-390.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-schedule-rooms-390.png"
+    },
+    {
+      "scene": "directory",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-directory-390.png"
+    },
+    {
+      "scene": "find-room",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-find-room-390.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-alerts-390.png"
+    },
+    {
+      "scene": "announcements",
+      "width": 390,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-announcements-390.png"
+    },
+    {
+      "scene": "home",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-home-1440.png"
+    },
+    {
+      "scene": "schedule",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-schedule-1440.png"
+    },
+    {
+      "scene": "options",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-options-1440.png"
+    },
+    {
+      "scene": "room-detail",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-room-detail-1440.png"
+    },
+    {
+      "scene": "schedule-rooms",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-schedule-rooms-1440.png"
+    },
+    {
+      "scene": "directory",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-directory-1440.png"
+    },
+    {
+      "scene": "find-room",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-find-room-1440.png"
+    },
+    {
+      "scene": "alerts",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-alerts-1440.png"
+    },
+    {
+      "scene": "announcements",
+      "width": 1440,
+      "file": "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\29\\01a188af-fa90-7501-9d68-4318e4ff47fb\\campus-companion-1793327697175-before-announcements-1440.png"
+    }
+  ],
+  "errors": [],
+  "api": [],
+  "clock": "2026-10-30T08:15:00+08:00",
+  "pass": true
+}

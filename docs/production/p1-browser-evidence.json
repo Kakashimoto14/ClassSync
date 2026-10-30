@@ -1,0 +1,279 @@
+{
+  "browser": "Chrome 155 via existing bundled Playwright; Browser plugin/skill not available",
+  "artifactRoot": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-artifacts-1GKzAZ",
+  "roles": [
+    {
+      "role": "student",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    }
+  ],
+  "boundaries": {
+    "institutional": {
+      "forgedPreviewDenied": true,
+      "allRoles": true,
+      "widths": [
+        390,
+        1440
+      ],
+      "refresh": true
+    },
+    "contrast": {
+      "colors": {
+        "paragraph": "rgb(102, 112, 133)",
+        "title": "rgb(32, 36, 44)",
+        "background": "rgb(255, 255, 255)",
+        "outline": "solid"
+      },
+      "ratios": {
+        "paragraph": 4.974752735406439,
+        "title": 15.55399364339602
+      }
+    },
+    "invalidAndExpiredSession": true,
+    "mountedExpiry": true,
+    "shortDialog": true,
+    "noApi": true,
+    "noPageErrors": true
+  },
+  "nativeZoom": {
+    "nativeZoom": 2,
+    "before": {
+      "innerWidth": 1424,
+      "outerWidth": 1440,
+      "dpr": 1,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "after": {
+      "innerWidth": 712,
+      "outerWidth": 1440,
+      "dpr": 2,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "keyboard": true,
+    "noOverflow": true,
+    "method": "Temporary isolated Chrome extension tabs.setZoom/getZoom via CDP loadUnpacked; no user profile or application source changed"
+  },
+  "emittedModules": {
+    "emittedModules": 173,
+    "excluded": [
+      {
+        "name": "@firebase/firestore",
+        "matches": []
+      },
+      {
+        "name": "@firebase/firestore-compat",
+        "matches": []
+      },
+      {
+        "name": "@grpc/grpc-js",
+        "matches": []
+      },
+      {
+        "name": "vitest",
+        "matches": []
+      },
+      {
+        "name": "@vitest/mocker",
+        "matches": []
+      },
+      {
+        "name": "tinypool",
+        "matches": []
+      },
+      {
+        "name": "tailwindcss",
+        "matches": []
+      },
+      {
+        "name": "braces",
+        "matches": []
+      },
+      {
+        "name": "chokidar",
+        "matches": []
+      },
+      {
+        "name": "fast-glob",
+        "matches": []
+      },
+      {
+        "name": "micromatch",
+        "matches": []
+      },
+      {
+        "name": "postcss-nested",
+        "matches": []
+      },
+      {
+        "name": "postcss-selector-parser",
+        "matches": []
+      }
+    ]
+  },
+  "screenshotDirectory": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-p1-browser",
+  "scope": "Local production artifacts; no hosted or human-participant/accessibility conformance certification",
+  "presentationArtifactMatchesFinalBuildByteForByte": true
+}

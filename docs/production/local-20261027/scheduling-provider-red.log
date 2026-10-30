@@ -1,0 +1,62 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_____ test_unconfigured_institutional_storage_never_opens_original_sqlite _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001618D88FBC0>
+
+    def test_unconfigured_institutional_storage_never_opens_original_sqlite(monkeypatch):
+        monkeypatch.setattr(
+            scheduling, "require_administrator", lambda *args: {"uid": "verified-unit-user"}
+        )
+        monkeypatch.setattr(scheduling.settings, "classsync_env", "production")
+        monkeypatch.setattr(scheduling, "repository", lambda: pytest.fail("Opened SQLite fallback"))
+>       with TestClient(scheduling.app) as client:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\scheduling\tests\test_provider_lifecycle.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:522: in __exit__
+    self.exit_stack.close()
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\contextlib.py:618: in close
+    self.__exit__(None, None, None)
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\contextlib.py:610: in __exit__
+    raise exc_details[1]
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\contextlib.py:595: in __exit__
+    if cb(*exc_details):
+       ^^^^^^^^^^^^^^^^
+C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\contextlib.py:478: in _exit_wrapper
+    callback(*args, **kwds)
+.venv\Lib\site-packages\starlette\testclient.py:515: in wait_shutdown
+    portal.call(self.wait_shutdown)
+.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\anyio\from_thread.py:382: in start_task_soon
+    self._check_running()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <anyio.from_thread.BlockingPortal object at 0x000001618C6BE9C0>
+
+    def _check_running(self) -> None:
+        if self._event_loop_thread_id is None:
+>           raise RuntimeError("This portal is not running")
+E           RuntimeError: This portal is not running
+
+.venv\Lib\site-packages\anyio\from_thread.py:216: RuntimeError
+_________ test_unconfigured_provider_leaves_unrelated_state_untouched _________
+
+    def test_unconfigured_provider_leaves_unrelated_state_untouched():
+>       from services.scheduling.app.authorization import configured_scheduling
+E       ModuleNotFoundError: No module named 'services.scheduling.app.authorization'
+
+services\scheduling\tests\test_provider_lifecycle.py:23: ModuleNotFoundError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Projects\ClassSync\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_provider_lifecycle.py::test_unconfigured_institutional_storage_never_opens_original_sqlite
+FAILED services/scheduling/tests/test_provider_lifecycle.py::test_unconfigured_provider_leaves_unrelated_state_untouched
+2 failed, 1 warning in 0.96s

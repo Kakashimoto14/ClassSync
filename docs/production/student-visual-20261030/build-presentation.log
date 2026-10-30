@@ -1,0 +1,25 @@
+
+> classync@0.1.0 build:presentation
+> node scripts/build-presentation.cjs
+
+vite v6.4.5 building for production...
+transforming...
+✓ 1753 modules transformed.
+rendering chunks...
+[plugin vite:reporter] 
+(!) C:/Projects/ClassSync/apps/web/src/lib/firebase.ts is dynamically imported by C:/Projects/ClassSync/apps/web/src/auth/university-session-driver.ts, C:/Projects/ClassSync/apps/web/src/pages/AuthPage.tsx but also statically imported by C:/Projects/ClassSync/apps/web/src/lib/publication-api.ts, C:/Projects/ClassSync/apps/web/src/lib/student-timetable-api.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/release.json                                    0.25 kB │ gzip:   0.18 kB
+dist/index.html                                      1.26 kB │ gzip:   0.59 kB
+dist/assets/index-DCA2Y7OB.css                      99.95 kB │ gzip:  18.36 kB
+dist/assets/RoleScheduleWorkspace-CAT7oHgf.js       13.29 kB │ gzip:   4.27 kB
+dist/assets/presentation-timetable.v1-Di_g1MY3.js   61.64 kB │ gzip:   3.07 kB
+dist/assets/index.esm-BX3G_ozg.js                  113.12 kB │ gzip:  23.31 kB
+dist/assets/index-C1I5wjV0.js                      550.38 kB │ gzip: 162.07 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 34.80s

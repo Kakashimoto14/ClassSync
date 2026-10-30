@@ -1,0 +1,68 @@
+............FF                                                           [100%]
+================================== FAILURES ===================================
+_ test_transition_buffer_includes_neighboring_iso_week_at_midnight[30-before] _
+
+neighbor = 'before', buffer = 30
+
+    @pytest.mark.parametrize("neighbor", ["before", "after"])
+    @pytest.mark.parametrize("buffer", [0, 30])
+    def test_transition_buffer_includes_neighboring_iso_week_at_midnight(neighbor, buffer):
+        windows = [{"day": 0, "start": 0, "end": 90},
+                   {"day": 2, "start": 480, "end": 570},
+                   {"day": 4, "start": 480, "end": 570},
+                   {"day": 6, "start": 1350, "end": 1440}]
+        sunday = {"days": (4, 6), "start": "2026-10-11", "end": "2026-10-11"}
+        monday = {"days": (0, 2), "start": "2026-10-12", "end": "2026-10-12"}
+        old_placement, new_placement = (sunday, monday) if neighbor == "before" else (monday, sunday)
+        old, _, _ = fixture(version=1, period="period-a", limit=180,
+                            windows=windows, buffer=buffer, **old_placement)
+        new, draft, command = fixture(version=2, period="period-a", limit=180,
+                                      windows=windows, buffer=buffer, **new_placement)
+        rules = EmptyRestrictions()
+        expanded = rules.expanded([old, new], date(2026, 10, 11), date(2026, 10, 12))
+        assert len(expanded) == 2
+        assert expanded[0]["ends_at"] == expanded[1]["starts_at"]
+        if buffer:
+            with pytest.raises(DraftError) as independent:
+                rules.conflicts(expanded)
+            assert independent.value.code == "publication_conflict"
+>           with pytest.raises(DraftError) as denied:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_week_boundaries.py:156: Failed
+_ test_transition_buffer_includes_neighboring_iso_week_at_midnight[30-after] __
+
+neighbor = 'after', buffer = 30
+
+    @pytest.mark.parametrize("neighbor", ["before", "after"])
+    @pytest.mark.parametrize("buffer", [0, 30])
+    def test_transition_buffer_includes_neighboring_iso_week_at_midnight(neighbor, buffer):
+        windows = [{"day": 0, "start": 0, "end": 90},
+                   {"day": 2, "start": 480, "end": 570},
+                   {"day": 4, "start": 480, "end": 570},
+                   {"day": 6, "start": 1350, "end": 1440}]
+        sunday = {"days": (4, 6), "start": "2026-10-11", "end": "2026-10-11"}
+        monday = {"days": (0, 2), "start": "2026-10-12", "end": "2026-10-12"}
+        old_placement, new_placement = (sunday, monday) if neighbor == "before" else (monday, sunday)
+        old, _, _ = fixture(version=1, period="period-a", limit=180,
+                            windows=windows, buffer=buffer, **old_placement)
+        new, draft, command = fixture(version=2, period="period-a", limit=180,
+                                      windows=windows, buffer=buffer, **new_placement)
+        rules = EmptyRestrictions()
+        expanded = rules.expanded([old, new], date(2026, 10, 11), date(2026, 10, 12))
+        assert len(expanded) == 2
+        assert expanded[0]["ends_at"] == expanded[1]["starts_at"]
+        if buffer:
+            with pytest.raises(DraftError) as independent:
+                rules.conflicts(expanded)
+            assert independent.value.code == "publication_conflict"
+>           with pytest.raises(DraftError) as denied:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'services.scheduling.app.draft_rules.DraftError'>
+
+services\scheduling\tests\test_publication_week_boundaries.py:156: Failed
+=========================== short test summary info ===========================
+FAILED services/scheduling/tests/test_publication_week_boundaries.py::test_transition_buffer_includes_neighboring_iso_week_at_midnight[30-before]
+FAILED services/scheduling/tests/test_publication_week_boundaries.py::test_transition_buffer_includes_neighboring_iso_week_at_midnight[30-after]
+2 failed, 12 passed in 1.35s

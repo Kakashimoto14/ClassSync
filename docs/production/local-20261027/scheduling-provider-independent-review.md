@@ -1,0 +1,11 @@
+# Scheduling provider — independent review and proof scope
+
+27 October 2026. Base/current HEAD `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`; local dirty work preserved.
+
+The independent security reviewer (`/root/p2a_security_review`) inspected the new Scheduling authorization/provider modules, main generation/draft bindings, publication guards, requirements/example configuration and fixed emulator selector. It found no actionable bypass: missing configuration/owned lifespan cannot select SQLite; verified UID and server tenant/project bind PG storage; all five publication factory access sites have a guard first; configured PG cannot use a second publication store; source-owned pool/error/cleanup behavior and solver-slot release remain bounded. It separately reviewed the defensive execute guard and the selector's exact flags/prototype-key negatives.
+
+The reviewer also inspected the new qualifier before execution: marked disposable-cluster restart only, provider pools closed before restart, fixed demo Auth/PG boundaries, owner/role checks, persistence failures, revocation and exact durability. After root executed the qualifier, it examined the recorded output and source assertions and found that they supported the bounded claims. Auth child exit was0, outbound attempts0 and both owned services stopped. No further actionable issue was reported.
+
+The reviewer did not run tests, solvers or servers and did not modify files. A separate agent authored portable tests (initial RED2;47 passed, plus4 later execute-guard cases) and the qualifier; root implemented the application and ran full backend492/492, actual emulator/PG HTTP, security/static/dependency checks and preservation checks. Review is not external certification.
+
+Exact execution evidence is in `scheduling-provider-qualification.json`, its log, the portable/full-backend logs, current audit and preservation/source fingerprints. UNKNOWN has portable control-flow coverage in this qualifier; real timed UNKNOWN was not forced. Academic service forwarding, TCP/browser journeys, production TLS/provider/provisioning, publication and full P3b remain unqualified. No original data, real records or production services were used or changed.

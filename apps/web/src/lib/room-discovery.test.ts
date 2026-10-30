@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { schedulePreview } from '../data/schedule-preview';
 import { demoDestination } from '../auth/access';

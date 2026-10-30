@@ -1,0 +1,10 @@
+# P3b academic repository adaptation — acceptance before edits
+
+26 October 2026. Local P3a and isolated metadata gates passed; original SQLite remains untouched. This slice targets real PostgreSQL academic snapshots and mutation parity, not another metadata-only endpoint.
+
+- Reuse current academic record validation, reference rules, catalog provenance, checksums and identity/error contracts across SQLite and PostgreSQL; preserve existing local behavior. No duplicate business-rule implementation, SQL text translation shim or fallback to synthetic data.
+- Extend explicit Alembic migrations for owner-scoped records, references and calendars. Every key/reference includes tenant/owner/period. Enforce JSON/checksum identity, uniqueness, faculty identity and referential integrity, FORCE RLS, least privilege and revision consistency. Preserve current owner isolation, not invented shared administration policy.
+- Implement full period create/list/snapshot, record save and calendar save using PostgreSQL transactions, current active verified administrator membership/project binding, row locks/CAS and private error states. Default SQLite service behavior and unconfigured identity remain unchanged until adapter/provider qualification; no original cutover.
+- Real disposable PG acceptance: defaults and optional catalog/calendar; all record kinds; unchanged readiness contract; stale updates/calendar, bad reference/provenance, duplicate labels/faculty, malformed storage, wrong identity/tenant/project/owner/role, revocation and outage; commit/rollback/restart; competing updates never silently overwrite. Student/Teacher see no drafts. No overlapping solver runs.
+- Rehearse only synthetic SQLite-to-PG records, compare canonical contents and revisions/checksums; explicit rollback/restore evidence before full P3b completion. Do not read original academic records or declare full P3b from this one repository.
+- Run relevant portable/full backend checks, actual PG integration, independent review, package verification and original hashes. No UI source behavior change in this slice; existing rendered evidence cannot prove future connected timetable journeys.

@@ -401,3 +401,10 @@
     transform: none;
   }
 }
+
+.university-session { margin-top: 1.25rem; text-align: left; }
+.university-session__roles { border: 0; padding: 0; margin: 1rem 0; display: grid; gap: .5rem; }
+.university-session__roles legend { font-weight: 600; margin-bottom: .65rem; }
+.university-session__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.university-session .alert { align-items: flex-start; }
+.university-session .button[aria-disabled="true"] { opacity: .65; cursor: wait; }

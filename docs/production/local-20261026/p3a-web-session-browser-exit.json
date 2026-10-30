@@ -1,0 +1,137 @@
+{
+  "project": "demo-classsync-c51d0026850c",
+  "endpoint": "127.0.0.1:62100",
+  "toolsVersion": "15.34.1",
+  "authOnly": true,
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-48db92c0a52244bf8ae985fc6b3e616c",
+  "authStopped": true,
+  "deniedOutbound": 0,
+  "postgres": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-7ff46fa1bb0e4879a28b29b58eb7f63d",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-7ff46fa1bb0e4879a28b29b58eb7f63d/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-7ff46fa1bb0e4879a28b29b58eb7f63d^\\data^\" -l logfile start",
+    "port": 62198,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-7ff46fa1bb0e4879a28b29b58eb7f63d/data",
+      "user": "classsync_qa_eee5339beeab4914acee3bb74d5bdc0f",
+      "port": 62198,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "foundation": {
+        "transactional_migration_rollback": true,
+        "upgrade_downgrade_upgrade": true,
+        "constraint_cases": [
+          "duplicate identity",
+          "missing person",
+          "cross tenant student",
+          "mismatched person",
+          "unknown grant",
+          "empty grants",
+          "duplicate grants",
+          "null grant",
+          "invalid state",
+          "nonpositive revision",
+          "missing student binding",
+          "missing faculty binding",
+          "blank uid"
+        ],
+        "force_rls_all_tables": true,
+        "tenant_uid_project_isolation": true,
+        "record_binding": true,
+        "fresh_revocation": true,
+        "runtime_authority_writes_denied": true,
+        "database_failure_unavailable": true,
+        "second_uid_administrator": true,
+        "pooled_context_reset": true
+      },
+      "browser": {
+        "widths": [
+          360,
+          390,
+          768,
+          1024,
+          1440
+        ],
+        "actualFirebaseEmulatorAndCurrentPostgres": true,
+        "threeRolesAndDeniedAccess": true,
+        "keyboardFocusPreserved": true,
+        "revocationAndOutageRecovery": true,
+        "sdkRefreshAndSignOut": true,
+        "runtimeErrors": [],
+        "unexpectedConsole": [],
+        "blockedExternal": [],
+        "apiStatuses": [
+          403,
+          403,
+          200,
+          200,
+          403,
+          200,
+          403,
+          200,
+          503,
+          200,
+          200,
+          403,
+          200,
+          200,
+          200,
+          403,
+          200,
+          403,
+          200,
+          503
+        ],
+        "screenshots": [
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-before-signed-out-1440.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-role-choice-1440.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-student-verified-360.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-student-verified-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-student-verified-768.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-student-verified-1024.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-student-verified-1440.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-checking-keyboard-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-teacher-verified-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-denied-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-database-unavailable-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-offline-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-administrator-verified-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-native-200-percent.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-identity-unavailable-390.png",
+          "C:\\Users\\lenovo\\.codex\\visualizations\\2026\\10\\25\\01a17489-5bf8-7c93-adb1-44b9f3722009\\p3a-session-6b3e616c-after-sign-out-390.png"
+        ],
+        "zoomEvidence": {
+          "nativeZoom": 2,
+          "before": {
+            "innerWidth": 1424,
+            "dpr": 1,
+            "visualScale": 1,
+            "cssZoom": "1"
+          },
+          "after": {
+            "innerWidth": 712,
+            "dpr": 2,
+            "visualScale": 1,
+            "cssZoom": "1"
+          },
+          "keyboard": true,
+          "noOverflow": true,
+          "panelBounds": {
+            "left": 81,
+            "right": 631,
+            "viewport": 712
+          },
+          "method": "Owned Chrome extension tabs.setZoom/getZoom; no CSS zoom or device emulation"
+        },
+        "manualScreenReader": "unverified",
+        "productionAcceptance": false
+      },
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

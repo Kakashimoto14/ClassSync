@@ -59,7 +59,11 @@ describe('real route tree preview continuity', () => {
         await act(() => restored.router.navigate(path));
         expect(
           restored.router.state.location.pathname + restored.router.state.location.search,
-        ).toBe(path);
+        ).toBe(
+          path === '/student/schedule'
+            ? `${path}?date=${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())}`
+            : path,
+        );
         expectRole(role);
       }
       await act(() => restored.router.navigate(-1));
@@ -75,7 +79,9 @@ describe('real route tree preview continuity', () => {
         nested,
       );
       expectRole(role);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(role === 'student' ? 'PRRC 302' : /Details/);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        role === 'student' ? 'PRRC 302' : /Details/,
+      );
     },
     15000,
   );

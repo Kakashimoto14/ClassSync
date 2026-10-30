@@ -1,0 +1,63 @@
+{
+  "project": "demo-classsync-bf98fceec35e",
+  "endpoint": "127.0.0.1:59362",
+  "toolsVersion": "15.34.1",
+  "authOnly": true,
+  "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-run-cd983135ee54420f87359cd7c98ddab5",
+  "authStopped": true,
+  "deniedOutbound": 0,
+  "postgres": {
+    "root": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-pg-278f8c553b134cbd8f8ed6b1027dd9f6",
+    "authentication": "sspi",
+    "stopped": true,
+    "initdb": "The files belonging to this database system will be owned by user \"lenovo\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are enabled.\n\ncreating directory C:/Users/lenovo/AppData/Local/Temp/classsync-pg-278f8c553b134cbd8f8ed6b1027dd9f6/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... windows\nselecting default \"max_connections\" ... 100\nselecting default \"shared_buffers\" ... 128MB\nselecting default time zone ... Asia/Kuala_Lumpur\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    ^\"C^:^\\Program^ Files^\\PostgreSQL^\\18^\\bin^\\pg^_ctl^\" -D ^\"C^:^\\Users^\\lenovo^\\AppData^\\Local^\\Temp^\\classsync^-pg^-278f8c553b134cbd8f8ed6b1027dd9f6^\\data^\" -l logfile start",
+    "port": 59368,
+    "server": {
+      "version": "18.6",
+      "data_directory": "C:/Users/lenovo/AppData/Local/Temp/classsync-pg-278f8c553b134cbd8f8ed6b1027dd9f6/data",
+      "user": "classsync_qa_de18d7d5625844abaf92f163c799f9ee",
+      "port": 59368,
+      "smoke": 2
+    },
+    "unmapped_role_denied": true,
+    "exercise": {
+      "foundation": {
+        "transactional_migration_rollback": true,
+        "upgrade_downgrade_upgrade": true,
+        "constraint_cases": [
+          "duplicate identity",
+          "missing person",
+          "cross tenant student",
+          "mismatched person",
+          "unknown grant",
+          "empty grants",
+          "duplicate grants",
+          "null grant",
+          "invalid state",
+          "nonpositive revision",
+          "missing student binding",
+          "missing faculty binding",
+          "blank uid"
+        ],
+        "force_rls_all_tables": true,
+        "tenant_uid_project_isolation": true,
+        "record_binding": true,
+        "fresh_revocation": true,
+        "runtime_authority_writes_denied": true,
+        "database_failure_unavailable": true,
+        "second_uid_administrator": true,
+        "pooled_context_reset": true
+      },
+      "actual_auth_sdk_owned_current_pg_http": true,
+      "create_list_snapshot_record_calendar": true,
+      "owner_and_role_isolation": true,
+      "stale_revision_conflicts": true,
+      "guard_to_repository_revocation_403": true,
+      "actual_database_outage_recovery": true,
+      "normal_exceptional_restart_cleanup": true,
+      "no_sqlite_fallback_or_startup_migration": true,
+      "production_acceptance": false
+    },
+    "server_state": "stopped"
+  }
+}

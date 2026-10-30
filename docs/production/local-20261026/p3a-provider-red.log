@@ -1,0 +1,13 @@
+
+=================================== ERRORS ====================================
+___ ERROR collecting services/gateway/tests/test_authorization_lifecycle.py ___
+ImportError while importing test module 'C:\Projects\ClassSync\services\gateway\tests\test_authorization_lifecycle.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+services\gateway\tests\test_authorization_lifecycle.py:7: in <module>
+    from services.gateway.app import authorization as providers
+E   ImportError: cannot import name 'authorization' from 'services.gateway.app' (C:\Projects\ClassSync\services\gateway\app\__init__.py)
+=========================== short test summary info ===========================
+ERROR services/gateway/tests/test_authorization_lifecycle.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 1.41s

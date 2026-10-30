@@ -1,0 +1,54 @@
+{
+  "toolsRoot": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\classsync-auth-tools-6870d797ee2d4df892918ff5c7f875f5",
+  "manifest": {
+    "dependencies": {
+      "classync": "file:../../../../../../Projects/ClassSync",
+      "firebase-tools": "15.34.1"
+    },
+    "overrides": {
+      "gaxios": {
+        "uuid": "11.1.1"
+      },
+      "@opentelemetry/core": "2.8.0"
+    }
+  },
+  "upstreamVersion": "15.34.1",
+  "upstreamOverrides": {
+    "@angular-devkit/core": {
+      "ajv-formats": "3.0.1",
+      "ajv": "^8.17.1"
+    },
+    "hono": "^4.13.5",
+    "@tootallnate/once": "^3.0.1",
+    "protobufjs": "^7.6.5",
+    "serialize-javascript": "^7.0.5",
+    "diff": "^8.0.4",
+    "underscore": "^1.13.8",
+    "brace-expansion": "^1.1.18",
+    "@grpc/grpc-js": "^1.14.4",
+    "rollup": "^3.30.0",
+    "picomatch": "^2.3.2",
+    "qs": "^6.16.0",
+    "tar": "^7.5.21",
+    "@opentelemetry/core": "^2.8.0",
+    "basic-ftp": "^6.2.1",
+    "re2": "1.24.0",
+    "@babel/traverse": "^7.23.2",
+    "gaxios": {
+      "uuid": "^11.1.1"
+    },
+    "firebase-admin": {
+      "uuid": "^11.1.1"
+    },
+    "googleapis": {
+      "uuid": "^11.1.1"
+    },
+    "@google-cloud/cloud-sql-connector": {
+      "uuid": "^11.1.1"
+    }
+  },
+  "lockSha256": "5de7b56e469cfd5e65b7d18ec81a530dce7815195293a24f6838b6b5c1792bf2",
+  "node": "22.23.1",
+  "isApplicationDependency": false,
+  "lifecycleScriptsExecuted": false
+}

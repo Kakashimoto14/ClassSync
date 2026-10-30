@@ -1,0 +1,327 @@
+{
+  "timestamp": "2026-10-30T03:28:28.1109725+08:00",
+  "backendFiles": [
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\__init__.py",
+      "sha256": "0d4208e1ed68a1d75d70519ee15c330ff7f6561583c63ab67dedc8ae2cd06e33",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\academic.py",
+      "sha256": "6d1a07b609b9d1a3f21063a7ad43a2b909b74867028fc9294e16766caab20573",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\calendar.py",
+      "sha256": "341d3cd3bf1edf7305dbc87827f88f628149b3ef5ab0059832507a4e161f07a4",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\firebase.py",
+      "sha256": "4b670cd4e212104dd767ae60e477281add9e100f1aa7e3337d8cccea1686b6f0",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\identity.py",
+      "sha256": "eea036bc25941669bfd4d9bce4234af10a2fb7ca6846a34af7315b418ddad75d",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\models.py",
+      "sha256": "5981302dcf0f18ab79f80fb90cd2779d0d4082d5fc35ad71a80ab34fe61849c0",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\publication.py",
+      "sha256": "2fd3ccb29a86b0cd5ee10f36b6a283595dc944986b424be8806fc02d5d4def05",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\request_authorization.py",
+      "sha256": "743eb210b932c799b69c396fa9d223ac3e529a9ed327047bb06ab2ce617e7b13",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\scheduling.py",
+      "sha256": "c3be7bacc2aa88f553b336867f9351e1e6041369f7bfcf8f9b0bf6aebed69b5a",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\scheduling_security.py",
+      "sha256": "df3dbc2866f106c7e2f2390fa6dd1c23043056e4252f8d23cbe98209f169508d",
+      "matches": true
+    },
+    {
+      "file": "packages\\api-contracts\\classync_contracts\\token_verification.py",
+      "sha256": "0dc12e9e5df819084a50a7e524d3bda9bdc24fe1d96be1ea7c4c888675ab92bf",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\__init__.py",
+      "sha256": "d03e6fd4dbe626141815843dcdbe4c597b03339786f85bd81641fdd7380a00d5",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\academic_periods.py",
+      "sha256": "628fd4bf153ea2a52bfa3729234086f145c4a8a7ae36498c9b8e25fa1dc64758",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\configuration.py",
+      "sha256": "8bcf9d8576eca80e4937468caa87c201bc7b4c0ca33704f5255282a20239e417",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\database.py",
+      "sha256": "b13aa9e05209e80e66afa35685f22fdff21a0b813894495eebb31b50297ed844",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\legacy_publication_archive.py",
+      "sha256": "c3629506c91d993d41815ce0cb3ef6af7c3d07bb1f3c590971aa92ade85e61ac",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\membership_changes.py",
+      "sha256": "affa7f818b3e836f619ab4ecd55fba85ae2d1ec6a7047b2dd36112df6bfb3d4b",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\memberships.py",
+      "sha256": "b42bce222a211b553d6d29ab523dbe65006cfa9ea6601a6876b0e012e445e73b",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\env.py",
+      "sha256": "1ffd96e811f0288c25de06f51e251aea3ab368e9d386441e8578e7f763118c25",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0001_identity.py",
+      "sha256": "a753a38302780f4b99dc3b37bbe1ab228e5df80312a0fee0503548db276a7d18",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0002_membership_revision.py",
+      "sha256": "b949b4f347cbecadb40084a1eb1e4c9de78d8555ab47ed51724bdbc064bbbdbc",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0003_membership_audit.py",
+      "sha256": "078b34c52d5bf1f0819582b871270d857fc5f903bc8ee4d3fac6b6ac0c32500e",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0004_academic_period_metadata.py",
+      "sha256": "ff863ad58c91e5f2212bcb58f672aa8b09bcc77c520eb0e2e4f04fa0f38fe261",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0005_academic_records.py",
+      "sha256": "3c35dc9037bbdc9629fd2e9065d858f6423538c615fb55c05a5722cd550667ea",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0006_scheduling_drafts.py",
+      "sha256": "ff03614edddf7c41378e1128cfe3662f1a9c8ca3279312c4bf9b2e55f0aba78b",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0007_publication_state.py",
+      "sha256": "dc724859542deb76691de0dbc30f15e13c3c893afa6a985ec50263ed1c81f8b8",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0008_publication_transactions.py",
+      "sha256": "36c44becd256286b70d2e703a3b0b898cf2148f3464029f4d097f56bfca4f34e",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0009_publication_record_projection.py",
+      "sha256": "b11def88de1509ee4f8a27548a448836a3726d12c7bd73fd6b60781e36e06d4c",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0010_legacy_publication_archive.py",
+      "sha256": "3368a6fd77c890c3fe8583162a78f0425ad870aa2ec50e46d5ba11b4bf7e739b",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\migrations\\versions\\0011_publication_policy_cycle.py",
+      "sha256": "cff181a0a16fb87fd624e7b25a0a91be7cddaa3cc566f77530b6adf4f8f69150",
+      "matches": true
+    },
+    {
+      "file": "packages\\persistence\\classync_persistence\\schema.py",
+      "sha256": "9dcad78fc79f25d9d4a1b529aa8a1f76e7fb295fb21670f2de33cc9edc0f01d6",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\authorization.py",
+      "sha256": "c98dedc6b04da8cf004eff763818c63005e105c397409c9bcb78fbb32c471f07",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\fixtures.py",
+      "sha256": "0d96ef62eefbae44b34331efa27f79f868dc160a7cd8816249bcdd0f8b245979",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\main.py",
+      "sha256": "93c25cc3b5229b6e733187f93f9d8fba421460b8652a4e9689655ee7945f9332",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\postgres_repository.py",
+      "sha256": "1170e5d1495d6b6b8777b83296cc8e34ac2909c32d8eb05757f8c0469d32ef1a",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\provider.py",
+      "sha256": "895d7cb9fb9536b2bd132aeaff65177fc24de5bfe4480042649130a0d73b4e66",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\record_rules.py",
+      "sha256": "5dbc19185fc7cd80433abf88779329daef3da92b819ef7313c344cc005e49afe",
+      "matches": true
+    },
+    {
+      "file": "services\\academic\\app\\repository.py",
+      "sha256": "853f977f7a967882fe055d552c76466c0038b38fdf058c04efb5cd3a6fc94ec9",
+      "matches": true
+    },
+    {
+      "file": "services\\gateway\\app\\__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "file": "services\\gateway\\app\\authorization.py",
+      "sha256": "7ec8cd97854773ca3ca195f8d76af43a2fbdb743b43fba30ae1a234a8b310015",
+      "matches": true
+    },
+    {
+      "file": "services\\gateway\\app\\main.py",
+      "sha256": "e34b318b01fd74cabf0795516783bc5f0553d780d0035dc3dc478bd944b878c8",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\academic_input.py",
+      "sha256": "e4da6fbb8447cc3ce8e16bb9c623e2cffb70c3c0178f65962d6b4d5cec55a01b",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\authorization.py",
+      "sha256": "dd4244758d5cbf74a7d7444e468d12fce7b35498d6142dc7c134d2347c80e040",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\catalog.py",
+      "sha256": "f7e4a9d9dd1e80db58b172f192d6b19b6bfccfbd3081875131a351a32cb1c618",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\constraint_model.py",
+      "sha256": "2df4e0ed6419a64611ec0d543cc31df0a0b9f53829371f4239099c27f2312e04",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\draft_repository.py",
+      "sha256": "0aa9f05066d12233798f6677a314a96bf18bed556e4f90db2cc81567f9722814",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\draft_rules.py",
+      "sha256": "5356c5ffa13568615367857e5540d66b473bb57024e146e4fb358e8460b826bf",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\engine.py",
+      "sha256": "8b96524adcfc3103eeb6da4fb455a697f891b3b358b2b6e4f5306da538e0608a",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\main.py",
+      "sha256": "1a49e96956d5e5f2303533fedac02b32700ddcd3ff42c673682cec7fcb5bf7b9",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\objectives.py",
+      "sha256": "ee821db713233b97f250acf6b8bddb73dd1d0c563330153f9c521056bfd2650b",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\occurrences.py",
+      "sha256": "94c0ef645c2ae13cfa6b9658bd5b8fca681f2f99c2ad7edfbd7258bfb6dd6386",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\postgres_draft_repository.py",
+      "sha256": "84bf95096d6ba6a53e1b4742a60d19ffff3b2eb489975a24e8ff3144e017ae6e",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\postgres_publication_repository.py",
+      "sha256": "380fe22fec1aa2c6fbbbbc61332badaee808a0f808fadd4c318b9941a8532deb",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\provider.py",
+      "sha256": "f3bcc7561f1f7d4f703a9fadfbbdf6a0fc603fc12df834160df34de44abc4ee6",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\publication_api.py",
+      "sha256": "eec0b684c1f7bd1ee3c77902bc61eae25f60f9f156f06b63658864403fae40f6",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\publication_repository.py",
+      "sha256": "77f9610b62dfb930c59ff2ff345731736d507595e89468ca503ae98b605e2e1e",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\publication_rules.py",
+      "sha256": "b14c0a01bb7df8141d251d3ba321fa48490a01467cad22bc468abf3452df07b4",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\readiness.py",
+      "sha256": "883d337b1baf521b1fc8e5eba9eff1fe1ed33ace0c962bf015ac61bcc0899752",
+      "matches": true
+    },
+    {
+      "file": "services\\scheduling\\app\\validation.py",
+      "sha256": "3a3ae5a1a10cd751f17e9d897f5e8716ed17c4bf839b73436da3bd4551b785bf",
+      "matches": true
+    }
+  ],
+  "originals": [
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+      "sha256": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+      "matches": true
+    },
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+      "sha256": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+      "matches": true
+    },
+    {
+      "file": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+      "sha256": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+      "matches": true
+    }
+  ]
+}

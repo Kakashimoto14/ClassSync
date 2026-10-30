@@ -1,22 +1,31 @@
 import re
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Literal
 from uuid import UUID, uuid4
 
 import httpx
-from classync_contracts.firebase import FirebaseSettings, initialize_firebase
 from classync_contracts.models import HealthResponse
-from classync_contracts.scheduling_security import require_administrator, require_sandbox
+from classync_contracts.request_authorization import install_identity_errors
+from classync_contracts.scheduling_security import (
+    SchedulingSecuritySettings,
+    require_administrator,
+    require_identity,
+    require_sandbox,
+)
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from firebase_admin import auth
+from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
+from starlette.concurrency import run_in_threadpool
+
+from .authorization import configured_authorization
 
 ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
 
 
-class Settings(FirebaseSettings):
+class Settings(SchedulingSecuritySettings):
     model_config = SettingsConfigDict(env_file=ROOT_DIRECTORY / ".env", extra="ignore")
     academic_service_url: str = "http://127.0.0.1:8001"
     scheduling_service_url: str = "http://127.0.0.1:8002"
@@ -24,6 +33,8 @@ class Settings(FirebaseSettings):
     allow_unauthenticated_development: bool = False
     classsync_env: str = "production"
     enable_scheduling_sandbox: bool = False
+    identity_database_url: SecretStr | None = None
+    identity_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
 
 
 settings = Settings()
@@ -35,17 +46,19 @@ SERVICES = {
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
-    yield
+async def lifespan(application: FastAPI):
+    with configured_authorization(application, settings):
+        yield
 
 
 app = FastAPI(title="ClassSync API Gateway", version="1.0.0", lifespan=lifespan)
+install_identity_errors(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-ClassSync-Role"],
 )
 
 
@@ -72,16 +85,7 @@ async def http_error(request: Request, exc: HTTPException):
 
 
 def require_authenticated(request: Request) -> dict:
-    header = request.headers.get("Authorization", "")
-    if settings.classsync_env == "development" and settings.allow_unauthenticated_development:
-        return {"uid": "local-development", "role": "administrator"}
-    if not header.startswith("Bearer "):
-        raise HTTPException(401, "Authentication is required")
-    try:
-        initialize_firebase(settings)
-        return auth.verify_id_token(header.removeprefix("Bearer "))
-    except Exception as error:
-        raise HTTPException(401, "Invalid authentication token") from error
+    return require_identity(request, settings)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -113,7 +117,7 @@ async def scheduling_proxy(operation: str, request: Request, sandbox: bool):
         require_sandbox(settings)
     else:
         # The general development bypass never authorizes production scheduling.
-        require_administrator(request, settings)
+        await run_in_threadpool(require_administrator, request, settings)
     allowed = (
         ({"scenario", "catalogs", "drafts"} if sandbox else {"drafts"})
         if request.method == "GET"
@@ -157,6 +161,11 @@ async def service_proxy(service_name, path, request):
                     "Content-Type": "application/json",
                     "Authorization": request.headers.get("Authorization", ""),
                     "X-Request-ID": request.state.request_id,
+                    **(
+                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
+                        if "X-ClassSync-Role" in request.headers
+                        else {}
+                    ),
                 },
             )
         payload = response.json()
@@ -212,7 +221,7 @@ async def academic_proxy(path, request, sandbox):
     if sandbox:
         require_sandbox(settings)
     else:
-        require_administrator(request, settings)
+        await run_in_threadpool(require_administrator, request, settings)
     return await service_proxy(
         "academic", f"/api/v1/academic/{'sandbox/' if sandbox else ''}{path}", request
     )
@@ -313,9 +322,10 @@ async def timetable_proxy(operation: str, request: Request):
         if request.method != "GET":
             raise HTTPException(404, "No anonymous publication operation exists")
     else:
-        require_identity(request, settings)
         if request.method != "GET" or operation.startswith("history/"):
-            require_administrator(request, settings)
+            await run_in_threadpool(require_administrator, request, settings)
+        else:
+            await run_in_threadpool(require_identity, request, settings)
     if "/events/" not in "/" + operation:
         return await service_proxy("scheduling", "/api/v1/timetables/" + operation, request)
     client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None))
@@ -325,7 +335,14 @@ async def timetable_proxy(operation: str, request: Request):
                 "GET",
                 settings.scheduling_service_url + "/api/v1/timetables/" + operation,
                 params=request.query_params,
-                headers={"Authorization": request.headers.get("Authorization", "")},
+                headers={
+                    "Authorization": request.headers.get("Authorization", ""),
+                    **(
+                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
+                        if "X-ClassSync-Role" in request.headers
+                        else {}
+                    ),
+                },
             ),
             stream=True,
         )

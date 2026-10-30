@@ -1,0 +1,4 @@
+# Targeted security floors, qualified on Python 3.12. No solver dependency changes.
+certifi==2026.10.19
+pytest==9.0.3
+pip==26.2.2

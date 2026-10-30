@@ -48,15 +48,16 @@ describe('presentation journey integrity', () => {
   it('opens the structured Student calendar without legacy published fixtures', async () => {
     open('/student/dashboard', 'student');
     fireEvent.click(screen.getByRole('link', { name: 'View my schedule' }));
-    expect(await screen.findByText('Change context')).toBeInTheDocument();
+    expect(await screen.findByText('Schedule options')).toBeInTheDocument();
     expect(screen.getByRole('main').querySelectorAll('[data-assignment-id]')).toHaveLength(0);
     expect(screen.queryByText('Database Management Systems')).not.toBeInTheDocument();
   });
   it('keeps Student alerts consistent with the dashboard update and provides a working schedule action', () => {
     open('/student/notifications', 'student');
-    expect(screen.getByText(schedulePreview.updates[0].detail)).toBeInTheDocument();
+    expect(screen.queryByText(schedulePreview.updates[0].detail)).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Schedule updates' })).toBeInTheDocument();
     expect(screen.queryByText(/Room 304|hours ago|Unread/)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('link', { name: 'Open my schedule' }));
+    fireEvent.click(screen.getByRole('link', { name: 'View full schedule' }));
     expect(screen.getByRole('heading', { level: 1, name: 'My Schedule' })).toBeInTheDocument();
   });
   it.each(['PRRC', 'New Building', 'Court'])(

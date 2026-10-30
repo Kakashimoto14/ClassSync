@@ -1,0 +1,17 @@
+[
+  {
+    "Path": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+    "SHA256": "4CD5F60DE21BD365C914AC01E5BE692B3BEA1C7A56A7F17A76C6953EF8668738",
+    "Unchanged": true
+  },
+  {
+    "Path": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+    "SHA256": "1848377CC9A9EB656E12B5E58436E81198FEF92F18DD71C1FEA2F6F8B482E400",
+    "Unchanged": true
+  },
+  {
+    "Path": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+    "SHA256": "9EC149413D69C1165B74A75E366FA262417C1ECBF41E7029FDD0D86AC96F395D",
+    "Unchanged": true
+  }
+]

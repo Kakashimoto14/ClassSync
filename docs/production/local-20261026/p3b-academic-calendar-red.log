@@ -1,0 +1,18 @@
+F.                                                                       [100%]
+================================== FAILURES ===================================
+___________ test_initial_calendar_cannot_claim_published_authority ____________
+
+tmp_path = WindowsPath('C:/Users/lenovo/AppData/Local/Temp/pytest-of-lenovo/pytest-58/test_initial_calendar_cannot_c0')
+
+    def test_initial_calendar_cannot_claim_published_authority(tmp_path):
+        repository = AcademicRepository(tmp_path / "synthetic.sqlite3")
+        repository.migrate()
+        calendar = configuration().calendar.model_copy(update={"published_version": "forged"})
+>       with pytest.raises(AcademicError) as denied:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'services.academic.app.record_rules.AcademicError'>
+
+services\academic\tests\test_record_rules.py:13: Failed
+=========================== short test summary info ===========================
+FAILED services/academic/tests/test_record_rules.py::test_initial_calendar_cannot_claim_published_authority
+1 failed, 1 passed in 2.09s

@@ -1,0 +1,2111 @@
+{
+  "date": "2026-10-21",
+  "head": "39200a4f2ef3ec7557bc3c86127e674e260ca4fc",
+  "baselineStatus": " M .github/workflows/quality.yml\n M apps/web/.env.example\n M apps/web/src/auth/preview-session.ts\n M apps/web/src/components/layout/AppShell.tsx\n M apps/web/src/lib/academic-api.ts\n M apps/web/src/lib/presentation-sample.ts\n M apps/web/src/lib/publication-api.ts\n M apps/web/src/lib/sample-calendar-api.ts\n M apps/web/src/lib/scheduling-api.ts\n M apps/web/src/pages/AcademicCalendarEditor.tsx\n M apps/web/src/pages/AcademicFixtureImport.tsx\n M apps/web/src/pages/ProductScreenPage.tsx\n M apps/web/src/pages/PublicationPanel.tsx\n M apps/web/src/routes/RouteGuard.tsx\n M apps/web/src/services/api-client.ts\n M apps/web/vite.config.ts\n M docs/architecture.md\n M docs/releases/r1-public-presentation.md\n M docs/security.md\n M package.json\n M scripts/build-presentation.cjs\n M scripts/preview-presentation.cjs\n?? apps/web/config/\n?? apps/web/src/config/\n?? docs/production/\n?? scripts/lib/\n?? scripts/tests/\n?? services/scheduling/tests/test_mode_boundaries.py\n",
+  "baselineSourceInventorySha256": "19edd4b8f84169c5e3b0b8dc1288664c125f51665fb9ece29bf8286f2e18edc0",
+  "taskChanges": [
+    {
+      "file": ".github/workflows/quality.yml",
+      "before": "41b305551b6d761725dd337dd5ef743e6aa60e9d8f088ab5a4b12805b7bb41d4",
+      "after": "5fc8cbc0f4d0e95f137d9446a72446b0cf745b565df2e7852ec74aaa0939d4f6"
+    },
+    {
+      "file": "apps/web/package.json",
+      "before": "ba2afecf3e6db03107ec61aa9da523737b0df2ceefb2c19533ab0b4a8a8d3388",
+      "after": "bd9e90081b8fcc6be660f3f580b51de3fc5c4f7f7bba790b7dbdd775383b71f7"
+    },
+    {
+      "file": "docs/infrastructure/vercel-backend-deployment-plan.md",
+      "before": "e9ebc70e41205a3fdbc918a5c3a7a6dae5a1796a74053f4b113f00f79046e496",
+      "after": "a974690eb09b4fca2cd1628c8176dd0cfabf76535384650d467f3013d7b981ed"
+    },
+    {
+      "file": "docs/production/dependency-advisory-register.md",
+      "before": "131d9f93582d8703564207f534035f086fef6a2250cab9f5cbd5a5e4a66bb0b8",
+      "after": "2be3f53f85a2305e40c86f34af3c927c42554448bd2d71140bdbfcc1c237cb33"
+    },
+    {
+      "file": "docs/production/p1-gate-closure-report.md",
+      "before": null,
+      "after": "6ad0a88d3b5a68bc674d912b15a04cdffa6b0cdfa63f1162c6c7c8de0886dba0"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/administrator-1440.png",
+      "before": null,
+      "after": "74e5d702875a873c4ebb90e80d238a2730060ce1b2c67afd8e32a671d69094a0"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/hosted-student-390.png",
+      "before": null,
+      "after": "86d1d0cfe50a10f8b0bf7e198f0fadd8fea978e008d7a3f2479b8ffb950f323b"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/native-200-percent.png",
+      "before": null,
+      "after": "dc324f42e17346395ea8f4c9771bf06871648568942feb1385f17d2bce0e8e1f"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/student-390.png",
+      "before": null,
+      "after": "105dfc460f3a9c806605a9196f3ea49938c5330386d0a06456116e1f798a17d9"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/teacher-1440.png",
+      "before": null,
+      "after": "82f622b0f861604b14fc5fefda90700237eb12c9372635ed55135367b9287b9e"
+    },
+    {
+      "file": "docs/security.md",
+      "before": "b41f7e26e0ee353e0a1f0b7f575a4096cfbb4e7d8582327dd20b2800fe2bdb89",
+      "after": "e36b9400eee345a4977e58356c698d3c2ee1d9709fa51af4774d27a69ab7ea8a"
+    },
+    {
+      "file": "package-lock.json",
+      "before": "24584467fdb8cb3e8c4964a4002fdd1f07b7229d702c21c1847e87c48f742c15",
+      "after": "dc801890af742c13ef72eb8d92d494394173166379f87a477660d7464925c01e"
+    },
+    {
+      "file": "package.json",
+      "before": "bcbe6cf445d2c75b76ad538e8581f4ee07a8a91445592d20e9d0938deea85ad5",
+      "after": "3470e5b1073e471faefdc33edc5868b4960d8a8531fe756ae3dd6772df632621"
+    },
+    {
+      "file": "scripts/security/python_audit.py",
+      "before": null,
+      "after": "3650f3c58484a9d934df1f890253a175122a335a7e0fa149968aee84b409fbed"
+    },
+    {
+      "file": "scripts/tests/dependency-security.test.cjs",
+      "before": null,
+      "after": "72ad866453065331c5c01ef6d8f307e5822d6104de3759dbca304717b493a70a"
+    },
+    {
+      "file": "services/academic/requirements.txt",
+      "before": "b51e1546758d174a0623ca39852d37693740f664bd218de8824fc82c37fe3203",
+      "after": "e59c8e8c5eb1677c6b5c6b9b4feee3717d107d63febd55f47ea8a38e4bedc4df"
+    },
+    {
+      "file": "services/gateway/requirements.txt",
+      "before": "61fa3622a3e25f2306fee4eb56800448f63e3baa267bc847b7337d2765aa7edd",
+      "after": "1ecc5274de7176110e595a02d74da33fb3ffb486bb566cff0b795bfd174137f0"
+    },
+    {
+      "file": "services/notification/requirements.txt",
+      "before": "37449e414f82042053480a1654a6c76798428975ad681becbe528e4c43da5c44",
+      "after": "2081877646382bb4c7f7922b9768ce4acc25a67332e0912d0b5216c2c1619f7b"
+    },
+    {
+      "file": "services/scheduling/requirements.txt",
+      "before": "9931b371e7e5c48cc9a33fe4663e8a01369f8c19dc2b42f8bb7c2b1eab834e19",
+      "after": "a5182f45a68492c59de1de32ab09d749bb8376bf2dda7c6e5470370dee89e331"
+    },
+    {
+      "file": "services/scheduling/tests/test_mode_boundaries.py",
+      "before": "afe444340f12661fbfe81892bcfd4a22c6cb3802888198a0a4a37099b7c5f796",
+      "after": "367e833c763523eaecba994f9c703a7d4976007b619e15b907e7e30550c89fa0"
+    },
+    {
+      "file": "services/scheduling/tests/test_security_audit.py",
+      "before": null,
+      "after": "9e2183c3747d61ee94d758a83fbb7cea27fd69fc7a5731bfdbaaee74f8fd550f"
+    },
+    {
+      "file": "services/security-constraints.txt",
+      "before": null,
+      "after": "1875aa89c039dd8e13ccd237c1aae021af4e0cc5737aab971d187c84aae57914"
+    },
+    {
+      "file": "docs/production/p1-gate-closure-evidence.json",
+      "before": null,
+      "after": "self-referential hash omitted"
+    }
+  ],
+  "npmBefore": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "@firebase/firestore": {
+        "name": "@firebase/firestore",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "@grpc/grpc-js"
+        ],
+        "effects": [
+          "@firebase/firestore-compat",
+          "firebase"
+        ],
+        "range": "1.3.1-0 - 1.3.1-canary.df1b588 || 1.3.2-0 - 1.3.3-canary.bc4a844 || 1.13.1-0 - 1.13.1-canary.ce3addba || 1.14.0-0 - 1.15.1 || 3.7.3-20221108184443 - 3.7.3-canary.fde5adf63 || >=3.8.0-20221206221533",
+        "nodes": [
+          "node_modules/@firebase/firestore"
+        ],
+        "fixAvailable": {
+          "name": "firebase",
+          "version": "9.14.0",
+          "isSemVerMajor": true
+        }
+      },
+      "@firebase/firestore-compat": {
+        "name": "@firebase/firestore-compat",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "@firebase/firestore"
+        ],
+        "effects": [
+          "firebase"
+        ],
+        "range": "<=0.0.900-exp.520ca39d0 || 0.2.3-20221108184443 - 0.2.3-canary.fde5adf63 || >=0.3.0-20221206221533",
+        "nodes": [
+          "node_modules/@firebase/firestore-compat"
+        ],
+        "fixAvailable": {
+          "name": "firebase",
+          "version": "9.14.0",
+          "isSemVerMajor": true
+        }
+      },
+      "@grpc/grpc-js": {
+        "name": "@grpc/grpc-js",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240623,
+            "name": "@grpc/grpc-js",
+            "dependency": "@grpc/grpc-js",
+            "title": "@grpc/grpc-js: In certain configurations, getAuthContext can return unauthorized certificates as though they were authorized",
+            "url": "https://github.com/advisories/GHSA-m9gg-hp2v-232j",
+            "severity": "high",
+            "cwe": [
+              "CWE-295"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": "<1.13.6"
+          },
+          {
+            "source": 1240625,
+            "name": "@grpc/grpc-js",
+            "dependency": "@grpc/grpc-js",
+            "title": "@grpc/grpc-js: The server transmits some error messages thrown by method handlers to the client in status messages",
+            "url": "https://github.com/advisories/GHSA-f596-whhp-79r4",
+            "severity": "low",
+            "cwe": [
+              "CWE-550"
+            ],
+            "cvss": {
+              "score": 3.7,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
+            },
+            "range": "<1.13.6"
+          }
+        ],
+        "effects": [
+          "@firebase/firestore"
+        ],
+        "range": "<=1.13.5",
+        "nodes": [
+          "node_modules/@grpc/grpc-js"
+        ],
+        "fixAvailable": {
+          "name": "firebase",
+          "version": "9.14.0",
+          "isSemVerMajor": true
+        }
+      },
+      "@vitest/mocker": {
+        "name": "@vitest/mocker",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1193684,
+            "name": "@vitest/mocker",
+            "dependency": "@vitest/mocker",
+            "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+            "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=2.1.0 <4.1.11"
+          }
+        ],
+        "effects": [
+          "vitest"
+        ],
+        "range": "2.1.0 - 4.1.10",
+        "nodes": [
+          "node_modules/@vitest/mocker"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "5.0.5",
+          "isSemVerMajor": true
+        }
+      },
+      "braces": {
+        "name": "braces",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ],
+        "effects": [
+          "chokidar",
+          "micromatch"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/braces"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "chokidar": {
+        "name": "chokidar",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "tailwindcss"
+        ],
+        "range": "2.0.0 - 3.6.0",
+        "nodes": [
+          "node_modules/chokidar"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "fast-glob": {
+        "name": "fast-glob",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "micromatch"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/fast-glob"
+        ],
+        "fixAvailable": true
+      },
+      "firebase": {
+        "name": "firebase",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "@firebase/firestore",
+          "@firebase/firestore-compat"
+        ],
+        "effects": [],
+        "range": "0.900.22 || 6.0.2-0 - 6.0.2-canary.42eae23 || 6.0.3-0 - 6.0.4-canary.bc4a844 || 7.9.1-0 - 7.9.1-canary.0396117e || 7.13.2-0 - 7.13.2-canary.ce3addba || 7.14.0-0 - 7.15.1 || 8.10.0-20217172214 - 8.10.0-canary.f40c0db53 || 9.0.0-20217250818 - 9.0.0-canary.d0d3acb10 || 9.0.1-2021727231341 - 9.0.1-canary.e039e1472 || 9.0.2-2021891633 - 9.0.2-canary.ff9baf70c || 9.0.3-202181503543 - 9.1.0-canary.f7d8324a1 || 9.1.1-2021830195733 - 9.1.1-canary.e70de6201 || 9.1.2-20219523556 - 9.1.2-canary.fc1d36497 || 9.13.1-20221108184443 - 9.14.0-canary.fde5adf63 || >=9.15.0-20221206221533",
+        "nodes": [
+          "apps/web/node_modules/firebase"
+        ],
+        "fixAvailable": {
+          "name": "firebase",
+          "version": "9.14.0",
+          "isSemVerMajor": true
+        }
+      },
+      "micromatch": {
+        "name": "micromatch",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "fast-glob",
+          "tailwindcss"
+        ],
+        "range": ">=0.2.0",
+        "nodes": [
+          "node_modules/micromatch"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "postcss-nested": {
+        "name": "postcss-nested",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "postcss-selector-parser"
+        ],
+        "effects": [],
+        "range": "2.0.3 - 6.2.0",
+        "nodes": [
+          "node_modules/postcss-nested"
+        ],
+        "fixAvailable": true
+      },
+      "postcss-selector-parser": {
+        "name": "postcss-selector-parser",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1241232,
+            "name": "postcss-selector-parser",
+            "dependency": "postcss-selector-parser",
+            "title": "PostCSS: Quadratic complexity in flat selector parsing allows CPU exhaustion",
+            "url": "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-400",
+              "CWE-407"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<7.1.6"
+          }
+        ],
+        "effects": [
+          "postcss-nested",
+          "tailwindcss"
+        ],
+        "range": "<7.1.6",
+        "nodes": [
+          "node_modules/postcss-selector-parser"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "tailwindcss": {
+        "name": "tailwindcss",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "chokidar",
+          "fast-glob",
+          "micromatch",
+          "postcss-nested",
+          "postcss-selector-parser"
+        ],
+        "effects": [],
+        "range": "<=0.0.0-oxide-insiders.ff2c25f || 0.5.0 - 3.4.19",
+        "nodes": [
+          "node_modules/tailwindcss"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "tinypool": {
+        "name": "tinypool",
+        "severity": "critical",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1241260,
+            "name": "tinypool",
+            "dependency": "tinypool",
+            "title": "Tinypool: Prototype Pollution gadget in worker options leads to Remote Code Execution",
+            "url": "https://github.com/advisories/GHSA-5gmw-xhrv-c9v3",
+            "severity": "critical",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=2.1.0"
+          },
+          {
+            "source": 1241261,
+            "name": "tinypool",
+            "dependency": "tinypool",
+            "title": "Tinypool: Prototype Pollution Gadget to RCE in run() options",
+            "url": "https://github.com/advisories/GHSA-85c8-ppgw-ccpr",
+            "severity": "critical",
+            "cwe": [
+              "CWE-94",
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<2.1.2"
+          }
+        ],
+        "effects": [
+          "vitest"
+        ],
+        "range": "<=2.1.1",
+        "nodes": [
+          "node_modules/tinypool"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "5.0.5",
+          "isSemVerMajor": true
+        }
+      },
+      "vitest": {
+        "name": "vitest",
+        "severity": "critical",
+        "isDirect": true,
+        "via": [
+          "@vitest/mocker",
+          {
+            "source": 1193683,
+            "name": "vitest",
+            "dependency": "vitest",
+            "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+            "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=2.1.0 <4.1.11"
+          },
+          "tinypool"
+        ],
+        "effects": [],
+        "range": "0.0.95 - 4.1.10",
+        "nodes": [
+          "node_modules/vitest"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "5.0.5",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 3,
+        "high": 9,
+        "critical": 2,
+        "total": 14
+      },
+      "dependencies": {
+        "prod": 112,
+        "dev": 361,
+        "optional": 53,
+        "peer": 7,
+        "peerOptional": 0,
+        "total": 472
+      }
+    }
+  },
+  "npmFinal": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "braces": {
+        "name": "braces",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ],
+        "effects": [
+          "chokidar",
+          "micromatch"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/braces"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "chokidar": {
+        "name": "chokidar",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "tailwindcss"
+        ],
+        "range": "2.0.0 - 3.6.0",
+        "nodes": [
+          "node_modules/chokidar"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "fast-glob": {
+        "name": "fast-glob",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "micromatch"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/fast-glob"
+        ],
+        "fixAvailable": true
+      },
+      "micromatch": {
+        "name": "micromatch",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "fast-glob",
+          "tailwindcss"
+        ],
+        "range": ">=0.2.0",
+        "nodes": [
+          "node_modules/micromatch"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      },
+      "tailwindcss": {
+        "name": "tailwindcss",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "chokidar",
+          "fast-glob",
+          "micromatch"
+        ],
+        "effects": [],
+        "range": "<=0.0.0-oxide-insiders.ff2c25f || 2.1.0-canary.1 - 3.4.19",
+        "nodes": [
+          "node_modules/tailwindcss"
+        ],
+        "fixAvailable": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 5,
+        "critical": 0,
+        "total": 5
+      },
+      "dependencies": {
+        "prod": 115,
+        "dev": 352,
+        "optional": 53,
+        "peer": 7,
+        "peerOptional": 0,
+        "total": 466
+      }
+    }
+  },
+  "npmProduction": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {},
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "dependencies": {
+        "prod": 115,
+        "dev": 352,
+        "optional": 53,
+        "peer": 7,
+        "peerOptional": 0,
+        "total": 466
+      }
+    }
+  },
+  "pythonBefore": {
+    "dependencies": [
+      {
+        "name": "cachecontrol",
+        "version": "0.14.4",
+        "vulns": []
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.15.1",
+        "vulns": []
+      },
+      {
+        "name": "pygments",
+        "version": "2.21.0",
+        "vulns": []
+      },
+      {
+        "name": "absl-py",
+        "version": "2.5.1",
+        "vulns": []
+      },
+      {
+        "name": "annotated-doc",
+        "version": "0.0.5",
+        "vulns": []
+      },
+      {
+        "name": "annotated-types",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "anyio",
+        "version": "4.15.1",
+        "vulns": []
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-4320",
+            "fix_versions": [
+              "2026.10.19"
+            ],
+            "aliases": [
+              "GHSA-6q48-6c7w-9gw2"
+            ],
+            "description": "Certifi versions before 2026.10.18 include the `emSign ECC Root CA - G3` root certificate in their bundled CA store. Eight eMudhra intermediate CA certificates that chain to this root have compromised private keys and the CA has revoked them.   An attacker with one of the compromised keys can issue valid-looking certificates for any hostname. If the attacker is also on-path, they can intercept or modify TLS traffic from clients that trust the certifi bundle. Examples include `requests`, `urllib3` and `pip`, and the Python.org macOS installer.  Certifi 2026.10.18 removed all emSign roots from the bundle. Certifi 2026.10.19 restored the emSign roots that are not affected. Upgrade to 2026.10.19 or later, and rebuild container images that vendor certifi."
+          }
+        ]
+      },
+      {
+        "name": "cffi",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "charset-normalizer",
+        "version": "3.5.2",
+        "vulns": []
+      },
+      {
+        "name": "click",
+        "version": "8.5.0",
+        "vulns": []
+      },
+      {
+        "name": "colorama",
+        "version": "0.4.6",
+        "vulns": []
+      },
+      {
+        "name": "cryptography",
+        "version": "50.0.2",
+        "vulns": []
+      },
+      {
+        "name": "fastapi",
+        "version": "0.143.3",
+        "vulns": []
+      },
+      {
+        "name": "firebase-admin",
+        "version": "7.7.0",
+        "vulns": []
+      },
+      {
+        "name": "google-api-core",
+        "version": "2.42.0",
+        "vulns": []
+      },
+      {
+        "name": "google-auth",
+        "version": "2.62.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-core",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-firestore",
+        "version": "2.34.1",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-storage",
+        "version": "3.17.1",
+        "vulns": []
+      },
+      {
+        "name": "google-crc32c",
+        "version": "1.9.0",
+        "vulns": []
+      },
+      {
+        "name": "google-resumable-media",
+        "version": "2.11.0",
+        "vulns": []
+      },
+      {
+        "name": "googleapis-common-protos",
+        "version": "1.75.5",
+        "vulns": []
+      },
+      {
+        "name": "grpcio-status",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "grpcio",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "h11",
+        "version": "0.16.0",
+        "vulns": []
+      },
+      {
+        "name": "h2",
+        "version": "4.4.1",
+        "vulns": []
+      },
+      {
+        "name": "hpack",
+        "version": "4.2.0",
+        "vulns": []
+      },
+      {
+        "name": "httpcore",
+        "version": "1.0.9",
+        "vulns": []
+      },
+      {
+        "name": "httpx",
+        "version": "0.28.1",
+        "vulns": []
+      },
+      {
+        "name": "hyperframe",
+        "version": "6.1.0",
+        "vulns": []
+      },
+      {
+        "name": "idna",
+        "version": "3.20",
+        "vulns": []
+      },
+      {
+        "name": "immutabledict",
+        "version": "4.3.1",
+        "vulns": []
+      },
+      {
+        "name": "iniconfig",
+        "version": "2.3.1",
+        "vulns": []
+      },
+      {
+        "name": "msgpack",
+        "version": "1.2.3",
+        "vulns": []
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.4",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-api",
+        "version": "1.45.1",
+        "vulns": []
+      },
+      {
+        "name": "ortools",
+        "version": "9.15.6755",
+        "vulns": []
+      },
+      {
+        "name": "packaging",
+        "version": "26.3",
+        "vulns": []
+      },
+      {
+        "name": "pandas",
+        "version": "3.0.6",
+        "vulns": []
+      },
+      {
+        "name": "pip",
+        "version": "25.0.1",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-1795",
+            "fix_versions": [
+              "25.3"
+            ],
+            "aliases": [
+              "CVE-2025-8869",
+              "GHSA-4xh5-x5gv-qwph"
+            ],
+            "description": "When extracting a tar archive pip may not check symbolic links point into the extraction directory if the tarfile module doesn't implement PEP 706. Note that upgrading pip to a \"fixed\" version for this vulnerability doesn't fix all known vulnerabilities that are remediated by using a Python version that implements PEP 706. Note that this is a vulnerability in pip's fallback implementation of tar extraction for Python versions that don't implement PEP 706 and therefore are not secure to all vulnerabilities in the Python 'tarfile' module. If you're using a Python version that implements PEP 706 then pip doesn't use the \"vulnerable\" fallback code. Mitigations include upgrading to a version of pip that includes the fix, upgrading to a Python version that implements PEP 706 (Python >=3.9.17, >=3.10.12, >=3.11.4, or >=3.12), applying the linked patch, or inspecting source distributions (sdists) before installation as is already a best-practice."
+          },
+          {
+            "id": "PYSEC-2026-1796",
+            "fix_versions": [
+              "26.0"
+            ],
+            "aliases": [
+              "CVE-2026-1703",
+              "GHSA-6vgw-5pg2-w6jp"
+            ],
+            "description": "When pip is installing and extracting a maliciously crafted wheel archive, files may be extracted outside the installation directory. The path traversal is limited to prefixes of the installation directory, thus isn't able to inject or overwrite executable files in typical situations."
+          },
+          {
+            "id": "PYSEC-2026-2875",
+            "fix_versions": [
+              "26.1"
+            ],
+            "aliases": [
+              "CVE-2026-3219",
+              "GHSA-58qw-9mgm-455v"
+            ],
+            "description": "pip handles concatenated tar and ZIP files as ZIP files regardless of filename or whether a file is both a tar and ZIP file. This behavior could result in confusing installation behavior, such as installing \"incorrect\" files according to the filename of the archive. New behavior only proceeds with installation if the file identifies uniquely as a ZIP or tar archive, not as both."
+          },
+          {
+            "id": "PYSEC-2026-2876",
+            "fix_versions": [
+              "26.1"
+            ],
+            "aliases": [
+              "CVE-2026-6357",
+              "GHSA-jp4c-xjxw-mgf9"
+            ],
+            "description": "pip prior to version 26.1 would run self-update check functionality after installing wheel files which required importing well-known Python modules names. These module imports were intentionally deferred to increase startup time of the pip CLI. The patch changes self-update functionality to run before wheels are installed to prevent newly-installed modules from being imported shortly after the installation of a wheel package. Users should still review package contents prior to installation."
+          },
+          {
+            "id": "PYSEC-2026-196",
+            "fix_versions": [
+              "26.1.2"
+            ],
+            "aliases": [
+              "CVE-2026-8643",
+              "GHSA-wf93-45jw-7689"
+            ],
+            "description": "pip would treat console_scripts and gui_scripts as paths instead of file names without sanitizing the resolved absolute path to the installation directory, leading to entry points being installed outside the installation directory."
+          },
+          {
+            "id": "PYSEC-2026-1795",
+            "fix_versions": [
+              "25.3"
+            ],
+            "aliases": [
+              "CVE-2025-8869",
+              "GHSA-4xh5-x5gv-qwph"
+            ],
+            "description": "When extracting a tar archive pip may not check symbolic links point into the extraction directory if the tarfile module doesn't implement PEP 706. Note that upgrading pip to a \"fixed\" version for this vulnerability doesn't fix all known vulnerabilities that are remediated by using a Python version that implements PEP 706. Note that this is a vulnerability in pip's fallback implementation of tar extraction for Python versions that don't implement PEP 706 and therefore are not secure to all vulnerabilities in the Python 'tarfile' module. If you're using a Python version that implements PEP 706 then pip doesn't use the \"vulnerable\" fallback code. Mitigations include upgrading to a version of pip that includes the fix, upgrading to a Python version that implements PEP 706 (Python >=3.9.17, >=3.10.12, >=3.11.4, or >=3.12), applying the linked patch, or inspecting source distributions (sdists) before installation as is already a best-practice."
+          },
+          {
+            "id": "PYSEC-2026-1796",
+            "fix_versions": [
+              "26.0"
+            ],
+            "aliases": [
+              "CVE-2026-1703",
+              "GHSA-6vgw-5pg2-w6jp"
+            ],
+            "description": "When pip is installing and extracting a maliciously crafted wheel archive, files may be extracted outside the installation directory. The path traversal is limited to prefixes of the installation directory, thus isn't able to inject or overwrite executable files in typical situations."
+          },
+          {
+            "id": "PYSEC-2026-196",
+            "fix_versions": [
+              "26.1.2"
+            ],
+            "aliases": [
+              "CVE-2026-8643",
+              "GHSA-wf93-45jw-7689"
+            ],
+            "description": "pip would treat console_scripts and gui_scripts as paths instead of file names without sanitizing the resolved absolute path to the installation directory, leading to entry points being installed outside the installation directory."
+          },
+          {
+            "id": "PYSEC-2026-2875",
+            "fix_versions": [
+              "26.1"
+            ],
+            "aliases": [
+              "CVE-2026-3219",
+              "GHSA-58qw-9mgm-455v"
+            ],
+            "description": "pip handles concatenated tar and ZIP files as ZIP files regardless of filename or whether a file is both a tar and ZIP file. This behavior could result in confusing installation behavior, such as installing \"incorrect\" files according to the filename of the archive. New behavior only proceeds with installation if the file identifies uniquely as a ZIP or tar archive, not as both."
+          },
+          {
+            "id": "PYSEC-2026-2876",
+            "fix_versions": [
+              "26.1"
+            ],
+            "aliases": [
+              "CVE-2026-6357",
+              "GHSA-jp4c-xjxw-mgf9"
+            ],
+            "description": "pip prior to version 26.1 would run self-update check functionality after installing wheel files which required importing well-known Python modules names. These module imports were intentionally deferred to increase startup time of the pip CLI. The patch changes self-update functionality to run before wheels are installed to prevent newly-installed modules from being imported shortly after the installation of a wheel package. Users should still review package contents prior to installation."
+          },
+          {
+            "id": "PYSEC-2026-3721",
+            "fix_versions": [
+              "26.2"
+            ],
+            "aliases": [
+              "GHSA-qwm4-qh6w-59xr",
+              "CVE-2026-13346"
+            ],
+            "description": "pip would incorrectly handle doubly-encoded package URLs from indexes allowing for files to be installed to arbitrary locations on disk even when installing wheels.     This vulnerability requires downloading or installing a package from a malicious package index to succeed, malicious packages alone are not able to exploit this vulnerability. Note that this vulnerability only materially impacts users running `pip download` with the `--only-binary` option as installing source distributions from an untrusted index is already an unsafe operation that executes code during install time."
+          },
+          {
+            "id": "PYSEC-2026-3721",
+            "fix_versions": [
+              "26.2.0"
+            ],
+            "aliases": [
+              "GHSA-qwm4-qh6w-59xr",
+              "CVE-2026-13346"
+            ],
+            "description": "pip would incorrectly handle doubly-encoded package URLs from indexes allowing for files to be installed to arbitrary locations on disk even when installing wheels.  This vulnerability requires downloading or installing a package from a malicious package index to succeed, malicious packages alone are not able to exploit this vulnerability. Note that this vulnerability only materially impacts users running `pip download` with the `--only-binary` option as installing source distributions from an untrusted index is already an unsafe operation that executes code during install time."
+          }
+        ]
+      },
+      {
+        "name": "pluggy",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "proto-plus",
+        "version": "1.29.0",
+        "vulns": []
+      },
+      {
+        "name": "protobuf",
+        "version": "6.33.6",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1",
+        "version": "0.6.4",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1-modules",
+        "version": "0.4.2",
+        "vulns": []
+      },
+      {
+        "name": "pycparser",
+        "version": "3.11",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-settings",
+        "version": "2.16.0",
+        "vulns": []
+      },
+      {
+        "name": "pydantic",
+        "version": "2.14.1",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-core",
+        "version": "2.50.1",
+        "vulns": []
+      },
+      {
+        "name": "pytest",
+        "version": "8.4.2",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-1845",
+            "fix_versions": [
+              "9.0.3"
+            ],
+            "aliases": [
+              "CVE-2025-71176",
+              "GHSA-6w46-j5rx-g56g"
+            ],
+            "description": "pytest through 9.0.2 on UNIX relies on directories with the `/tmp/pytest-of-{user}` name pattern, which allows local users to cause a denial of service or possibly gain privileges."
+          },
+          {
+            "id": "PYSEC-2026-1845",
+            "fix_versions": [
+              "9.0.3"
+            ],
+            "aliases": [
+              "CVE-2025-71176",
+              "GHSA-6w46-j5rx-g56g"
+            ],
+            "description": "pytest through 9.0.2 on UNIX relies on directories with the `/tmp/pytest-of-{user}` name pattern, which allows local users to cause a denial of service or possibly gain privileges."
+          }
+        ]
+      },
+      {
+        "name": "python-dateutil",
+        "version": "2.9.0.post0",
+        "vulns": []
+      },
+      {
+        "name": "python-dotenv",
+        "version": "1.2.4",
+        "vulns": []
+      },
+      {
+        "name": "requests",
+        "version": "2.34.2",
+        "vulns": []
+      },
+      {
+        "name": "ruff",
+        "version": "0.17.1",
+        "vulns": []
+      },
+      {
+        "name": "six",
+        "version": "1.17.0",
+        "vulns": []
+      },
+      {
+        "name": "starlette",
+        "version": "1.8.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspection",
+        "version": "0.4.4",
+        "vulns": []
+      },
+      {
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "vulns": []
+      },
+      {
+        "name": "tzdata",
+        "version": "2026.5",
+        "vulns": []
+      },
+      {
+        "name": "urllib3",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "uvicorn",
+        "version": "0.54.0",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "pythonFinal": {
+    "dependencies": [
+      {
+        "name": "absl-py",
+        "version": "2.5.1",
+        "vulns": []
+      },
+      {
+        "name": "annotated-doc",
+        "version": "0.0.5",
+        "vulns": []
+      },
+      {
+        "name": "annotated-types",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "anyio",
+        "version": "4.15.1",
+        "vulns": []
+      },
+      {
+        "name": "cachecontrol",
+        "version": "0.14.4",
+        "vulns": []
+      },
+      {
+        "name": "certifi",
+        "version": "2026.10.19",
+        "vulns": []
+      },
+      {
+        "name": "cffi",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "charset-normalizer",
+        "version": "3.5.2",
+        "vulns": []
+      },
+      {
+        "name": "click",
+        "version": "8.5.0",
+        "vulns": []
+      },
+      {
+        "name": "colorama",
+        "version": "0.4.6",
+        "vulns": []
+      },
+      {
+        "name": "cryptography",
+        "version": "50.0.2",
+        "vulns": []
+      },
+      {
+        "name": "fastapi",
+        "version": "0.143.3",
+        "vulns": []
+      },
+      {
+        "name": "firebase-admin",
+        "version": "7.7.0",
+        "vulns": []
+      },
+      {
+        "name": "google-api-core",
+        "version": "2.42.0",
+        "vulns": []
+      },
+      {
+        "name": "google-auth",
+        "version": "2.62.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-core",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-firestore",
+        "version": "2.34.1",
+        "vulns": []
+      },
+      {
+        "name": "google-cloud-storage",
+        "version": "3.17.1",
+        "vulns": []
+      },
+      {
+        "name": "google-crc32c",
+        "version": "1.9.0",
+        "vulns": []
+      },
+      {
+        "name": "google-resumable-media",
+        "version": "2.11.0",
+        "vulns": []
+      },
+      {
+        "name": "googleapis-common-protos",
+        "version": "1.75.5",
+        "vulns": []
+      },
+      {
+        "name": "grpcio",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "grpcio-status",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "h11",
+        "version": "0.16.0",
+        "vulns": []
+      },
+      {
+        "name": "h2",
+        "version": "4.4.1",
+        "vulns": []
+      },
+      {
+        "name": "hpack",
+        "version": "4.2.0",
+        "vulns": []
+      },
+      {
+        "name": "httpcore",
+        "version": "1.0.9",
+        "vulns": []
+      },
+      {
+        "name": "httpx",
+        "version": "0.28.1",
+        "vulns": []
+      },
+      {
+        "name": "hyperframe",
+        "version": "6.1.0",
+        "vulns": []
+      },
+      {
+        "name": "idna",
+        "version": "3.20",
+        "vulns": []
+      },
+      {
+        "name": "immutabledict",
+        "version": "4.3.1",
+        "vulns": []
+      },
+      {
+        "name": "iniconfig",
+        "version": "2.3.1",
+        "vulns": []
+      },
+      {
+        "name": "msgpack",
+        "version": "1.2.3",
+        "vulns": []
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.4",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-api",
+        "version": "1.45.1",
+        "vulns": []
+      },
+      {
+        "name": "ortools",
+        "version": "9.15.6755",
+        "vulns": []
+      },
+      {
+        "name": "packaging",
+        "version": "26.3",
+        "vulns": []
+      },
+      {
+        "name": "pandas",
+        "version": "3.0.6",
+        "vulns": []
+      },
+      {
+        "name": "pip",
+        "version": "26.2.2",
+        "vulns": []
+      },
+      {
+        "name": "pluggy",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "proto-plus",
+        "version": "1.29.0",
+        "vulns": []
+      },
+      {
+        "name": "protobuf",
+        "version": "6.33.6",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1",
+        "version": "0.6.4",
+        "vulns": []
+      },
+      {
+        "name": "pyasn1-modules",
+        "version": "0.4.2",
+        "vulns": []
+      },
+      {
+        "name": "pycparser",
+        "version": "3.11",
+        "vulns": []
+      },
+      {
+        "name": "pydantic",
+        "version": "2.14.1",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-core",
+        "version": "2.50.1",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-settings",
+        "version": "2.16.0",
+        "vulns": []
+      },
+      {
+        "name": "pygments",
+        "version": "2.21.0",
+        "vulns": []
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.15.1",
+        "vulns": []
+      },
+      {
+        "name": "pytest",
+        "version": "9.0.3",
+        "vulns": []
+      },
+      {
+        "name": "python-dateutil",
+        "version": "2.9.0.post0",
+        "vulns": []
+      },
+      {
+        "name": "python-dotenv",
+        "version": "1.2.4",
+        "vulns": []
+      },
+      {
+        "name": "requests",
+        "version": "2.34.2",
+        "vulns": []
+      },
+      {
+        "name": "ruff",
+        "version": "0.17.1",
+        "vulns": []
+      },
+      {
+        "name": "six",
+        "version": "1.17.0",
+        "vulns": []
+      },
+      {
+        "name": "starlette",
+        "version": "1.8.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspection",
+        "version": "0.4.4",
+        "vulns": []
+      },
+      {
+        "name": "tzdata",
+        "version": "2026.5",
+        "vulns": []
+      },
+      {
+        "name": "urllib3",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "uvicorn",
+        "version": "0.54.0",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "pythonScope": {
+    "packages": {
+      "absl-py": "2.5.1",
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.15.1",
+      "cachecontrol": "0.14.4",
+      "certifi": "2026.10.19",
+      "cffi": "2.1.1",
+      "charset-normalizer": "3.5.2",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "cryptography": "50.0.2",
+      "fastapi": "0.143.3",
+      "firebase-admin": "7.7.0",
+      "googleapis-common-protos": "1.75.5",
+      "google-api-core": "2.42.0",
+      "google-auth": "2.62.0",
+      "google-cloud-core": "2.8.0",
+      "google-cloud-firestore": "2.34.1",
+      "google-cloud-storage": "3.17.1",
+      "google-crc32c": "1.9.0",
+      "google-resumable-media": "2.11.0",
+      "grpcio": "1.84.0",
+      "grpcio-status": "1.84.0",
+      "h11": "0.16.0",
+      "h2": "4.4.1",
+      "hpack": "4.2.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "hyperframe": "6.1.0",
+      "idna": "3.20",
+      "immutabledict": "4.3.1",
+      "iniconfig": "2.3.1",
+      "msgpack": "1.2.3",
+      "numpy": "2.5.4",
+      "opentelemetry-api": "1.45.1",
+      "ortools": "9.15.6755",
+      "packaging": "26.3",
+      "pandas": "3.0.6",
+      "pip": "26.2.2",
+      "pluggy": "1.7.0",
+      "protobuf": "6.33.6",
+      "proto-plus": "1.29.0",
+      "pyasn1": "0.6.4",
+      "pyasn1-modules": "0.4.2",
+      "pycparser": "3.11",
+      "pydantic": "2.14.1",
+      "pydantic-core": "2.50.1",
+      "pydantic-settings": "2.16.0",
+      "pygments": "2.21.0",
+      "pyjwt": "2.15.1",
+      "pytest": "9.0.3",
+      "python-dateutil": "2.9.0.post0",
+      "python-dotenv": "1.2.4",
+      "requests": "2.34.2",
+      "ruff": "0.17.1",
+      "six": "1.17.0",
+      "starlette": "1.8.0",
+      "typing-extensions": "4.16.0",
+      "typing-inspection": "0.4.4",
+      "tzdata": "2026.5",
+      "urllib3": "2.8.0",
+      "uvicorn": "0.54.0"
+    },
+    "service_manifests_verified": [
+      "services\\gateway\\requirements.txt",
+      "services\\academic\\requirements.txt",
+      "services\\scheduling\\requirements.txt",
+      "services\\notification\\requirements.txt"
+    ],
+    "source_reviewed": {
+      "classync-api-contracts": "0.1.0"
+    }
+  },
+  "preservation": {
+    "protectedSourceFiles": 208,
+    "sourceDifferences": [],
+    "databases": [
+      {
+        "file": "C:\\Projects\\ClassSync\\var\\academic.sqlite3",
+        "before": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+        "after": "4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738",
+        "integrity": "ok",
+        "foreignKeyIssues": 0,
+        "verifiedPayloads": 567,
+        "checksumErrors": 0
+      },
+      {
+        "file": "C:\\Projects\\ClassSync\\var\\scheduling.sqlite3",
+        "before": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+        "after": "1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400",
+        "integrity": "ok",
+        "foreignKeyIssues": 0,
+        "verifiedPayloads": 25,
+        "checksumErrors": 0
+      },
+      {
+        "file": "C:\\Projects\\ClassSync\\var\\backups\\scheduling-before-s2b-20261018074057.sqlite3",
+        "before": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+        "after": "9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d",
+        "integrity": "ok",
+        "foreignKeyIssues": 0,
+        "verifiedPayloads": 12,
+        "checksumErrors": 0
+      }
+    ]
+  },
+  "browser": [
+    {
+      "role": "student",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 360,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 390,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 768,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1024,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "role": "student",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "teacher",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": true
+    },
+    {
+      "role": "administrator",
+      "width": 1440,
+      "roleSelection": true,
+      "refresh": true,
+      "noOverflow": true,
+      "logos": true,
+      "noApi": true,
+      "noErrors": true,
+      "dialog": false
+    },
+    {
+      "institutional": true,
+      "forgedPreviewDenied": true,
+      "allRoleRoutes": true,
+      "keyboardFocus": {
+        "name": "Return to access",
+        "outline": "solid"
+      },
+      "noApi": true
+    },
+    {
+      "contrast": {
+        "ink": 15.55399364339602,
+        "secondary": 4.974752735406439,
+        "rouge": 8.342651869784216
+      }
+    }
+  ],
+  "boundaries": {
+    "institutional": {
+      "forgedPreviewDenied": true,
+      "allRoles": true,
+      "widths": [
+        390,
+        1440
+      ],
+      "refresh": true
+    },
+    "contrast": {
+      "colors": {
+        "paragraph": "rgb(102, 112, 133)",
+        "title": "rgb(32, 36, 44)",
+        "background": "rgb(255, 255, 255)",
+        "outline": "solid"
+      },
+      "ratios": {
+        "paragraph": 4.974752735406439,
+        "title": 15.55399364339602
+      }
+    },
+    "invalidAndExpiredSession": true,
+    "mountedExpiry": true,
+    "shortDialog": true,
+    "noApi": true,
+    "noPageErrors": true
+  },
+  "nativeZoom": {
+    "nativeZoom": 2,
+    "before": {
+      "innerWidth": 1424,
+      "outerWidth": 1440,
+      "dpr": 1,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "after": {
+      "innerWidth": 712,
+      "outerWidth": 1440,
+      "dpr": 2,
+      "visualScale": 1,
+      "cssZoom": "1"
+    },
+    "keyboard": true,
+    "noOverflow": true,
+    "method": "Temporary isolated Chrome extension tabs.setZoom/getZoom via CDP loadUnpacked; no user profile or application source changed"
+  },
+  "emittedGraph": {
+    "emittedModules": 173,
+    "excluded": [
+      {
+        "name": "@firebase/firestore",
+        "matches": []
+      },
+      {
+        "name": "@firebase/firestore-compat",
+        "matches": []
+      },
+      {
+        "name": "@grpc/grpc-js",
+        "matches": []
+      },
+      {
+        "name": "vitest",
+        "matches": []
+      },
+      {
+        "name": "@vitest/mocker",
+        "matches": []
+      },
+      {
+        "name": "tinypool",
+        "matches": []
+      },
+      {
+        "name": "tailwindcss",
+        "matches": []
+      },
+      {
+        "name": "braces",
+        "matches": []
+      },
+      {
+        "name": "chokidar",
+        "matches": []
+      },
+      {
+        "name": "fast-glob",
+        "matches": []
+      },
+      {
+        "name": "micromatch",
+        "matches": []
+      },
+      {
+        "name": "postcss-nested",
+        "matches": []
+      },
+      {
+        "name": "postcss-selector-parser",
+        "matches": []
+      }
+    ]
+  },
+  "hostedHttp": [
+    {
+      "path": "/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "HTML",
+      "scripts": [
+        "/assets/index-CbQh0kvf.js"
+      ],
+      "icons": [
+        "/branding/classsync-logo-assets/classsync-icon-32.png",
+        "/branding/classsync-logo-assets/classsync-icon-48.png",
+        "/branding/classsync-logo-assets/classsync-icon-192.png"
+      ]
+    },
+    {
+      "path": "/student/dashboard",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::fs84f-1792557060695-3532fea35a8b\n"
+    },
+    {
+      "path": "/teacher/schedule",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::t7nhg-1792557060813-3789f44cc7ad\n"
+    },
+    {
+      "path": "/admin/dashboard",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::84bv7-1792557060928-a33c28cca110\n"
+    },
+    {
+      "path": "/dev/role-preview",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::d55jf-1792557061045-d2bdc8923e1a\n"
+    },
+    {
+      "path": "/release.json",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::rxgv2-1792557061172-0710da40d457\n"
+    },
+    {
+      "path": "/api/v1/timetables/periods",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::l5qnz-1792557061294-6b2f7bf08df2\n"
+    },
+    {
+      "path": "/assets/p1-missing.js",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::d2zr8-1792557061421-f68c1181d65e\n"
+    },
+    {
+      "path": "/p1-unknown",
+      "status": 404,
+      "contentType": "text/plain; charset=utf-8",
+      "vercelId": null,
+      "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nsin1::nx42j-1792557061567-7e46ed366cf2\n"
+    }
+  ],
+  "hostedAssetsAndSettings": [
+    {
+      "url": "https://class-sync-bhiv.vercel.app/assets/index-CbQh0kvf.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "bytes": 498692
+    },
+    {
+      "url": "https://class-sync-bhiv.vercel.app/branding/classsync-logo-assets/classsync-icon-32.png",
+      "status": 200,
+      "contentType": "image/png",
+      "bytes": 1546
+    },
+    {
+      "url": "https://class-sync-bhiv.vercel.app/branding/classsync-logo-assets/classsync-horizontal-light.png",
+      "status": 200,
+      "contentType": "image/png",
+      "bytes": 146238
+    },
+    {
+      "url": "https://class-sync-bhiv.vercel.app/fonts/InterVariable.woff2",
+      "status": 200,
+      "contentType": "font/woff2",
+      "bytes": 352240
+    },
+    {
+      "url": "https://class-sync-bhiv.vercel.app/manifest.webmanifest",
+      "status": 200,
+      "contentType": "application/manifest+json; charset=utf-8",
+      "bytes": 498
+    },
+    {
+      "url": "https://api.vercel.com/v9/projects/class-sync-bhiv",
+      "status": 403,
+      "contentType": "application/json; charset=utf-8"
+    }
+  ],
+  "hostedBrowser": [
+    {
+      "role": "student",
+      "selected": true,
+      "before": "https://class-sync-bhiv.vercel.app/student/dashboard",
+      "content": "Skip to content\nStudent demo\n\nWed, Oct 21\n\nYour day\nUniversity timetable\nChange context\nCouldn't load your timetable.\n\nThe timetable service is unavailable. Check the connection, then retry.\n\nRetry\nTechnical details\nHome\nSchedule\nRooms\nAlerts",
+      "api": [
+        {
+          "path": "/api/v1/timetables/periods",
+          "status": 404,
+          "method": "GET"
+        }
+      ],
+      "pageErrors": [],
+      "refreshStatus": 404,
+      "refreshText": "This page doesn\u2019t exist\n\nIt may have been moved, removed, or never existed.\n\nGo back\n\n404 NOT_FOUND\n\nsin1::w47kg-1792558145708-0e5e96ebf25d\n\nVIEW DOCUMENTATION\n"
+    },
+    {
+      "role": "teacher",
+      "selected": true,
+      "before": "https://class-sync-bhiv.vercel.app/teacher/dashboard",
+      "content": "Skip to content\nTeacher demo\n\nWed, Oct 21\n\nYour teaching day\nUniversity timetable\nChange context\nCouldn't load your timetable.\n\nThe timetable service is unavailable. Check the connection, then retry.\n\nRetry\nTechnical details\nClassroom requests\n\nRequest records are a separate demonstration source; live request submission is not available.\n\nReview requests and status\nHome\nSchedule\nRooms\nRequests",
+      "api": [
+        {
+          "path": "/api/v1/timetables/periods",
+          "status": 404,
+          "method": "GET"
+        }
+      ],
+      "pageErrors": [],
+      "refreshStatus": 404,
+      "refreshText": "This page doesn\u2019t exist\n\nIt may have been moved, removed, or never existed.\n\nGo back\n\n404 NOT_FOUND\n\nsin1::xk85r-1792558148327-4e9d5a7378a8\n\nVIEW DOCUMENTATION\n"
+    },
+    {
+      "role": "administrator",
+      "selected": true,
+      "before": "https://class-sync-bhiv.vercel.app/admin/dashboard",
+      "content": "Skip to content\nAdministrator demo\n\nScheduling workspace\n\nBuild a better campus week.\n\nChoose an academic period, generate a timetable, then review and save a draft.\n\nAcademic setup\nPlan the weekly timetable\n\nConstraint-based scheduling with OR-Tools. Your hard constraints stay in control.\n\nGenerate a schedule\nAcademic Setup\nPeriods, programs and teaching requirements\nSaved Drafts\nReopen the exact validated result\nPublished Timetables\nInspect the current published source\nConflict Center\nRun independent snapshot validation\nHome\nGenerate\nConflicts\nAlerts",
+      "api": [],
+      "pageErrors": [],
+      "refreshStatus": 404,
+      "refreshText": "This page doesn\u2019t exist\n\nIt may have been moved, removed, or never existed.\n\nGo back\n\n404 NOT_FOUND\n\nsin1::xk85r-1792558150495-e15eebc4dcf9\n\nVIEW DOCUMENTATION\n"
+    }
+  ],
+  "verificationSummary": {
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "frontend": {
+      "passed": 664,
+      "files": 36,
+      "seconds": 152.13
+    },
+    "backend": {
+      "passed": 105,
+      "seconds": 59.02
+    },
+    "ruff": "PASS",
+    "dependencySmokePassed": 3,
+    "artifactGroupsPassed": 4,
+    "artifactSeconds": 75.115,
+    "ordinaryBuild": "PASS",
+    "presentationBuild": "PASS",
+    "githubActions": "NOT RUN",
+    "fullNpmAudit": "FAIL: five high entries, one advisory",
+    "npmProductionAudit": "PASS: zero",
+    "npmCompleteTree": "FAIL: pre-existing optional AJV peer mismatch",
+    "pipCheck": "PASS",
+    "pythonScanner": "pip-audit 2.10.1; 62 exact versions; zero findings/skips"
+  },
+  "decisions": {
+    "p1LocalSecurity": "FAIL",
+    "p2Entry": "NO-GO",
+    "institutionalRelease": "NO-GO"
+  },
+  "artifactRoot": "C:/Users/lenovo/AppData/Local/Temp/classsync-p1-artifacts-z1jpJ4",
+  "screenshots": [
+    {
+      "file": "docs/production/p1-gate-closure/administrator-1440.png",
+      "sha256": "74e5d702875a873c4ebb90e80d238a2730060ce1b2c67afd8e32a671d69094a0"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/hosted-student-390.png",
+      "sha256": "86d1d0cfe50a10f8b0bf7e198f0fadd8fea978e008d7a3f2479b8ffb950f323b"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/native-200-percent.png",
+      "sha256": "dc324f42e17346395ea8f4c9771bf06871648568942feb1385f17d2bce0e8e1f"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/student-390.png",
+      "sha256": "105dfc460f3a9c806605a9196f3ea49938c5330386d0a06456116e1f798a17d9"
+    },
+    {
+      "file": "docs/production/p1-gate-closure/teacher-1440.png",
+      "sha256": "82f622b0f861604b14fc5fefda90700237eb12c9372635ed55135367b9287b9e"
+    }
+  ],
+  "finalReview": {
+    "gitDiffCheck": "PASS",
+    "headUnchanged": true,
+    "taskFileInventoryExact": true,
+    "protectedSourceUnchanged": true,
+    "databaseHashesUnchanged": true,
+    "finalDependencySmoke": "3 passed",
+    "finalRuff": "PASS",
+    "newSecretsOrRuntimeChangesIdentified": false,
+    "noCommitPushDeployOrMigration": true
+  }
+}
