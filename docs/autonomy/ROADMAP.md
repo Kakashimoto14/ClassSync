@@ -100,3 +100,7 @@ Student-scoped visual changes are implemented in part. A repeated institutional 
 ## Selected Claude Student implementation — PARTIAL
 
 Prior sidebar recovery passed under explicit approval. Actual selected-design code now spans shell, Home, Schedule, Rooms and Alerts; see CLAUDE_STUDENT_IMPLEMENTATION.md and phase captures. A new month-navigation test failed twice and triggers the persistent-failure gate. Approval needed for bounded correction/retest before final fidelity and acceptance checks. This supersedes only the former unresolved sidebar blocker; no PASS claimed for the new design. Teacher/Admin redesign remains deferred.
+
+## Student Rooms refinement — PASS locally, 30 October 2026
+
+Search-first Student Rooms shipped locally with strict timetable-derived My rooms, preview-only59-space All rooms, honest Labs state and retained-context details. Full frontend752, affected backend125, security17, artifacts4; connected outage/recovery and five-width/native200 acceptance; all64 preservation hashes match. See STUDENT_ROOMS_EVIDENCE.md. Prior visual milestone history remains separate; this bounded Rooms checkpoint is accepted. No Teacher/Admin redesign or deployment. Future separately scoped work: qualified tenant directory/lab metadata/physical availability sources, manual assistive-technology and production acceptance; P4c/P4d require separate authorization. STOP at Student Rooms.

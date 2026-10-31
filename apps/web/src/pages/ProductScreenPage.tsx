@@ -1,4 +1,5 @@
 import { StudentHome } from './StudentHome';
+import { StudentRooms } from './StudentRooms';
 import { presentationOnlyBuild } from '../lib/presentation-sample';
 import { capabilitiesFor } from '../config/app-mode';
 import { PresentationConflictSummary } from '../components/scheduling/PresentationConflictSummary';
@@ -30,6 +31,17 @@ import { rolePath, type RouteDefinition } from '../routes/route-config';
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
   const [params] = useSearchParams();
   const scheduleRooms = params.get('schedule') === '1';
+  if (
+    definition.role === 'student' &&
+    definition.roomMode !== 'availability' &&
+    ((definition.kind === 'rooms' && (!params.has('inventory') || scheduleRooms)) ||
+      (definition.kind === 'room-detail' && scheduleRooms))
+  )
+    return (
+      <AppShell>
+        <StudentRooms key={definition.id} detail={definition.kind === 'room-detail'} />
+      </AppShell>
+    );
   if (
     presentationOnlyBuild &&
     definition.role === 'administrator' &&

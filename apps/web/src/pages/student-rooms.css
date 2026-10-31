@@ -1,0 +1,307 @@
+.student-rooms-page {
+  max-width: 1180px;
+  margin-inline: auto;
+  color: var(--ink, #1c1b22);
+}
+.student-rooms-page .student-page-header {
+  margin-bottom: 4px;
+}
+.student-rooms-intro {
+  margin: 0 0 22px;
+  color: #626575;
+  font-size: 14px;
+}
+.student-rooms-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.student-rooms-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 1px solid #dedfe5;
+  border-radius: 12px;
+  padding: 0 14px;
+  min-height: 48px;
+  flex: 1 1 310px;
+  max-width: 530px;
+  color: #656879;
+}
+.student-rooms-search:focus-within {
+  outline: 2px solid #8a2b45;
+  outline-offset: 2px;
+}
+.student-rooms-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  box-shadow: none;
+}
+.student-rooms-search button {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #5f6472;
+}
+.student-room-categories {
+  display: flex;
+  gap: 8px;
+}
+.student-room-categories button {
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: #eceef1;
+  color: #394454;
+  padding: 9px 17px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 550;
+  cursor: pointer;
+}
+.student-room-categories button[aria-pressed='true'] {
+  background: #f3d6df;
+  color: #7a2540;
+  border-color: #ebbdcd;
+}
+.student-room-categories button:hover {
+  border-color: #a26577;
+}
+.student-rooms-results {
+  color: #656879;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.student-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.student-room-card {
+  min-width: 0;
+  border: 1px solid #e3e4e9;
+  border-radius: 16px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px #1c1b2205;
+}
+.student-room-card-heading {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.student-room-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f8e9ed;
+  color: #8a2b45;
+}
+.student-room-card h2 {
+  font-size: 18px;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+  color: #22232c;
+  overflow-wrap: anywhere;
+}
+.student-room-card-heading p,
+.student-room-muted {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #656879;
+  margin: 0;
+}
+.student-room-alias {
+  font-size: 13px;
+  color: #656879;
+  margin: 12px 0 0;
+}
+.student-rooms-classes {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+.student-rooms-classes strong,
+.student-rooms-classes span {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.student-rooms-classes strong {
+  font-weight: 550;
+  color: #293c50;
+}
+.student-rooms-classes span {
+  color: #626575;
+  font-size: 13px;
+}
+.student-rooms-card-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 14px;
+  border-top: 1px solid #f0ecee;
+  padding-top: 10px;
+  color: #8a2b45;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.student-rooms-card-action:hover {
+  text-decoration: underline;
+}
+.student-room-source {
+  color: #656879;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 18px 0;
+}
+.student-rooms-state {
+  border: 1px solid #e3e4e9;
+  border-radius: 16px;
+  background: white;
+  padding: 28px;
+  max-width: 650px;
+}
+.student-rooms-state > svg {
+  color: #8a2b45;
+  margin-bottom: 12px;
+}
+.student-rooms-state h2 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+.student-rooms-state p {
+  color: #656879;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 50ch;
+}
+.student-rooms-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: #7a2540;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.student-room-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.3fr);
+  gap: 20px;
+  margin-top: 20px;
+  align-items: start;
+}
+.student-room-location > .student-room-icon {
+  margin-bottom: 20px;
+  width: 56px;
+  height: 56px;
+}
+.student-room-location p {
+  margin: 8px 0;
+  color: #626575;
+}
+.student-room-class {
+  width: 100%;
+  position: relative;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #ececf0;
+  padding: 16px 28px 16px 0;
+  background: transparent;
+  cursor: pointer;
+  color: #293c50;
+}
+.student-room-class strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.student-room-class span {
+  font-size: 13px;
+  color: #626575;
+}
+.student-room-class svg {
+  position: absolute;
+  right: 0;
+  top: 19px;
+  color: #8a2b45;
+}
+.student-room-card details,
+.student-room-preview {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #626575;
+}
+.student-room-card summary,
+.student-room-preview summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+}
+.student-room-preview a {
+  display: block;
+  width: fit-content;
+  padding: 12px 0;
+  color: #7a2540;
+}
+@media (max-width: 1100px) {
+  .student-rooms-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .student-rooms-toolbar {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .student-rooms-search {
+    width: 100%;
+    max-width: none;
+  }
+  .student-rooms-grid,
+  .student-room-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .student-room-card {
+    padding: 17px;
+  }
+  .student-rooms-intro {
+    margin-bottom: 16px;
+  }
+  .student-room-categories {
+    gap: 8px;
+  }
+  .student-room-categories button {
+    padding-inline: 15px;
+  }
+  .student-room-card-heading h2 {
+    font-size: 19px;
+  }
+  .student-rooms-state {
+    padding: 24px 20px;
+  }
+}

@@ -12,6 +12,7 @@ import { UniversitySessionProvider } from '../auth/UniversitySessionProvider';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import { StudentHome } from '../pages/StudentHome';
+import { StudentRooms } from '../pages/StudentRooms';
 import { StructuredCalendarPage } from '../pages/StructuredCalendarPage';
 
 function ConnectedStudentRoute({ definition }: { definition: RouteDefinition }) {
@@ -55,7 +56,7 @@ function ConnectedStudentRoute({ definition }: { definition: RouteDefinition }) 
       ) : definition.kind === 'notifications' ? (
         <StudentHome alerts />
       ) : ['rooms', 'room-detail'].includes(definition.kind) ? (
-        <StudentHome key={definition.id} rooms roomDetail={definition.kind === 'room-detail'} />
+        <StudentRooms key={definition.id} detail={definition.kind === 'room-detail'} />
       ) : (
         <section className="workspace-card">
           <h1>This service is not connected</h1>
