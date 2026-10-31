@@ -103,7 +103,7 @@ it('opens the requested day with three classes, details, stable room IDs, week n
     within(screen.getByRole('dialog')).getByRole('link', { name: 'Open Room Details' }),
   ).toHaveAttribute(
     'href',
-    '/student/rooms/detail?id=synthetic-student-room-1&date=2026-10-30&schedule=1',
+    '/student/rooms/detail?id=synthetic-student-room-1&date=2026-10-30&schedule=1&period=p',
   );
   fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
   fireEvent.click(screen.getByRole('link', { name: 'Sat, Oct 31' }));

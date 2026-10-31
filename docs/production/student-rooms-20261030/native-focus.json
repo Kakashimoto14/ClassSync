@@ -1,0 +1,70 @@
+{
+  "nativeZoom": 2,
+  "devicePixelRatio": 2,
+  "checks": [
+    {
+      "control": "My rooms category",
+      "box": {
+        "x": 417.5390625,
+        "y": 183,
+        "width": 103.046875,
+        "height": 44
+      },
+      "nav": {
+        "x": 0,
+        "y": 428,
+        "width": 720,
+        "height": 72
+      },
+      "fullyVisible": true
+    },
+    {
+      "control": "Last assigned room details",
+      "box": {
+        "x": 37,
+        "y": 239.59375,
+        "width": 294,
+        "height": 44
+      },
+      "nav": {
+        "x": 0,
+        "y": 428,
+        "width": 720,
+        "height": 72
+      },
+      "fullyVisible": true
+    }
+  ],
+  "viewport": {
+    "width": 720,
+    "height": 500,
+    "scrollY": 460,
+    "visual": {
+      "height": 500,
+      "offsetTop": 0,
+      "pageTop": 460,
+      "scale": 1
+    },
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 720,
+      "height": 65,
+      "top": 0,
+      "right": 720,
+      "bottom": 65,
+      "left": 0
+    },
+    "active": {
+      "x": 37,
+      "y": 239.59375,
+      "width": 294,
+      "height": 44,
+      "top": 239.59375,
+      "right": 331,
+      "bottom": 283.59375,
+      "left": 37
+    }
+  },
+  "pass": true
+}

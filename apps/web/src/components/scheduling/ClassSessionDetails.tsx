@@ -1,7 +1,7 @@
 import { timeRange } from '../../lib/student-presentation';
 import { facultyDisplayName } from '../../lib/presentation-sample';
 import { sessionRoomPath } from '../../lib/session-room';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { DialogSurface } from '../ui/DialogSurface';
 import { Button } from '../ui/Button';
@@ -23,9 +23,10 @@ export function ClassSessionDetails({
   presentation?: boolean;
   onClose: () => void;
 }) {
+  const [params] = useSearchParams();
   const roomPath =
     role === 'student'
-      ? `/student/rooms/detail?id=${encodeURIComponent(session.room.id)}&date=${encodeURIComponent(session.date)}&schedule=1`
+      ? `/student/rooms/detail?${new URLSearchParams({ id: session.room.id, date: session.date, schedule: '1', ...(params.get('period') ? { period: params.get('period')! } : {}) })}`
       : sessionRoomPath(role, session.room.id);
   const duration = (Date.parse(session.ends_at) - Date.parse(session.starts_at)) / 60000;
   return (

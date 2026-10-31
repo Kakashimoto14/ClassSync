@@ -175,23 +175,34 @@ async function main() {
     await page.locator('.student-next h3 button').click();
     await page.getByRole('link', { name: 'Open Room Details' }).click();
     assert(new URL(page.url()).searchParams.get('id'));
-    await page.getByRole('link', { name: 'All your classrooms' }).waitFor();
+    await page.getByRole('link', { name: 'Back to Rooms' }).waitFor();
     await page.reload();
-    await page.getByRole('link', { name: 'All your classrooms' }).waitFor();
+    await page.getByRole('link', { name: 'Back to Rooms' }).waitFor();
     await page.goBack();
     await page.locator('.student-next h3 button').waitFor();
     await page.getByRole('link', { name: 'Browse rooms' }).click();
-    await page.getByRole('heading', { name: 'Find your room' }).waitFor();
+    await page.getByRole('heading', { name: 'Rooms', exact: true }).waitFor();
     await page
-      .getByText('Rooms in your schedule · Room details are provisional.', {
+      .getByText('Rooms in your selected schedule. Physical availability is not confirmed.', {
         exact: true,
       })
       .first()
       .waitFor();
+    assert((await page.locator('.student-room-card').count()) > 0);
+    assert.equal(await page.getByText('PRRC 101', { exact: true }).count(), 0);
+    await page.getByRole('button', { name: 'All rooms', exact: true }).click();
+    await page.getByRole('heading', { name: 'Room directory unavailable' }).waitFor();
+    assert.equal(await page.getByText('PRRC 101', { exact: true }).count(), 0);
+    await page.getByRole('button', { name: 'My rooms', exact: true }).click();
+    await page.locator('.student-room-card').first().waitFor();
+    await page.goBack();
+    await page.getByRole('heading', { name: 'Room directory unavailable' }).waitFor();
+    await page.goBack();
+    await page.locator('.student-room-card').first().waitFor();
     await page.goBack();
     await page.locator('.student-next h3 button').waitFor();
     await page.goForward();
-    await page.getByRole('heading', { name: 'Find your room' }).waitFor();
+    await page.getByRole('heading', { name: 'Rooms', exact: true }).waitFor();
     await page.goto(origin + '/student/schedule');
     await page
       .locator('[data-published-version]')

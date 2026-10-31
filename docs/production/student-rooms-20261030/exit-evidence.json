@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-10-30T14:58:37.454951+00:00",
+  "status": "PASS-local-Student-Rooms",
+  "baseSha": "8100dba82ed1064a1e26bfb171efed1135d745ea",
+  "currentSha": "8100dba82ed1064a1e26bfb171efed1135d745ea",
+  "frontend": {
+    "passed": 752,
+    "files": 46,
+    "durationSeconds": 179.01
+  },
+  "focusedFinal": 17,
+  "affectedBackend": 125,
+  "security": 17,
+  "artifacts": 4,
+  "npmAuditVulnerabilities": 0,
+  "commandsExit0": [
+    "npm run test:web",
+    "npm run typecheck",
+    "npm run lint",
+    "npm run build",
+    "npm run build:presentation",
+    "npm run test:security",
+    "npm run test:artifacts",
+    "npm audit --audit-level=high"
+  ],
+  "browser": {
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "presentationConsoleErrors": 0,
+    "presentationApiRequests": 0,
+    "nativeZoom": 2,
+    "keyboardClearance": true,
+    "horizontalOverflow": false,
+    "connected": true,
+    "healthy200": 68,
+    "expected403": 7,
+    "intentional503": 3,
+    "unexplained503": 0
+  },
+  "preservedHashes": 64,
+  "release": {
+    "schemaVersion": 1,
+    "mode": "read-only-presentation",
+    "appMode": "presentation",
+    "capabilityVersion": 1,
+    "sampleVersion": "classsync-presentation-v1",
+    "commit": "8100dba82ed1064a1e26bfb171efed1135d745ea",
+    "uncommittedChanges": true
+  },
+  "independentReview": {
+    "findings": 2,
+    "resolved": 2
+  },
+  "manualScreenReader": "unverified",
+  "productionAcceptance": false,
+  "deployed": false
+}
