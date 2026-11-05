@@ -103,6 +103,12 @@ def exercise(connection):
                 )
             )
             identity_context(db, tenant_id="tenant-a", uid="uid-a")
+            db.execute(
+                text(
+                    f"GRANT SELECT,INSERT ON classsync_academic.cohort_bindings "
+                    f"TO {connection.runtime}"
+                )
+            )
             change_membership_state(
                 db,
                 tenant_id="tenant-a",

@@ -27,7 +27,11 @@ def configured_academic(application, settings):
         application_name="classsync-academic",
     )
     engine = postgres_engine(
-        url, connect_args=parameters, pool_timeout=3, pool_size=5, max_overflow=0
+        url,
+        connect_args=parameters,
+        pool_timeout=3,
+        pool_size=settings.database_pool_size,
+        max_overflow=0,
     )
     adapters = None
     try:

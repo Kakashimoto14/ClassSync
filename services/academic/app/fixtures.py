@@ -109,6 +109,7 @@ def fixture_records(body, pid):
             records.append(
                 {
                     "kind": "faculty",
+                    "synthetic": True,
                     "id": tid,
                     "name": f"Sample Instructor {identity.upper()}",
                     "subject_ids": [identity],

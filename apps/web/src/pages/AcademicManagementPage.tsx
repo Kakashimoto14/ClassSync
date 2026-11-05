@@ -13,12 +13,13 @@ import {
   type AcademicSnapshot,
 } from '../lib/academic-api';
 import { academicLabel, academicPath, academicTabs } from '../lib/academic-labels';
-import { schedulingSandboxEnabled } from '../lib/scheduling-api';
+import { appMode } from '../config/runtime-config';
 import { AcademicRecordEditor } from './AcademicRecordEditor';
 import { ReadinessSummary } from './AcademicGenerationPage';
 import { AcademicFixtureImport } from './AcademicFixtureImport';
 import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
+const schedulingSandboxEnabled = appMode !== 'presentation';
 
 export function AcademicManagementPage({
   initialKind = 'programs',
@@ -155,7 +156,7 @@ function ManagementContent({
       </details>
       {location.pathname === '/admin/academic' && (
         <section id="sample-scenario">
-          <AcademicFixtureImport />
+          {appMode === 'sandbox' && <AcademicFixtureImport />}
         </section>
       )}
       {snapshot && (

@@ -9,12 +9,24 @@ import type {
 } from '../../../../packages/shared-types/src/scheduling';
 import { env } from './env';
 import { appMode, requireLiveCapability } from '../config/runtime-config';
+import { institutionalRequest } from './institutional-api';
 
 export type { GenerationInput, GenerationResult, ValidationResult };
 export type { DraftDetail, DraftList, SaveDraftRequest };
 export const schedulingSandboxEnabled = appMode === 'sandbox';
 
 async function request<T>(operation: string, body?: unknown): Promise<T> {
+  if (appMode === 'institutional') {
+    const target = operation.startsWith('academic/drafts')
+      ? operation.slice('academic/'.length)
+      : operation;
+    return institutionalRequest<T>(`scheduling/${target}`, {
+      body,
+      method: body === undefined ? 'GET' : 'POST',
+      role: 'administrator',
+      timeout: 50000,
+    });
+  }
   requireLiveCapability();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 50000);
@@ -43,7 +55,10 @@ async function request<T>(operation: string, body?: unknown): Promise<T> {
     }
     return payload.data as T;
   } catch (error) {
-    if (error instanceof TypeError) throw new Error('Could not reach the scheduling service. No server confirmation was received.');
+    if (error instanceof TypeError)
+      throw new Error(
+        'Could not reach the scheduling service. No server confirmation was received.',
+      );
     if (error instanceof Error && error.name === 'AbortError')
       throw new Error(
         'The request timed out without confirmation. If saving, check Saved Drafts before retrying.',
@@ -65,6 +80,13 @@ export const validateWeeklySchedule = (
   assignments: GenerationResult['assignments'],
 ) => request<ValidationResult>('validate', { inputs: input, assignments });
 
-export const saveSchedulingDraft = (body: SaveDraftRequest, source: 'synthetic' | 'academic' = 'synthetic') => request<DraftDetail>(`${source === 'academic' ? 'academic/' : ''}drafts`, body);
-export const listSchedulingDrafts = (offset = 0, source: 'synthetic' | 'academic' = 'synthetic') => request<DraftList>(`${source === 'academic' ? 'academic/' : ''}drafts?limit=25&offset=${offset}`);
-export const loadSchedulingDraft = (id: string, source: 'synthetic' | 'academic' = 'synthetic') => request<DraftDetail>(`${source === 'academic' ? 'academic/' : ''}drafts/${encodeURIComponent(id)}`);
+export const saveSchedulingDraft = (
+  body: SaveDraftRequest,
+  source: 'synthetic' | 'academic' = 'synthetic',
+) => request<DraftDetail>(`${source === 'academic' ? 'academic/' : ''}drafts`, body);
+export const listSchedulingDrafts = (offset = 0, source: 'synthetic' | 'academic' = 'synthetic') =>
+  request<DraftList>(`${source === 'academic' ? 'academic/' : ''}drafts?limit=25&offset=${offset}`);
+export const loadSchedulingDraft = (id: string, source: 'synthetic' | 'academic' = 'synthetic') =>
+  request<DraftDetail>(
+    `${source === 'academic' ? 'academic/' : ''}drafts/${encodeURIComponent(id)}`,
+  );

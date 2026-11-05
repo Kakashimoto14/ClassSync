@@ -1,12 +1,14 @@
 import { afterEach, expect, it, vi } from 'vitest';
 
+vi.mock('../lib/firebase', () => ({ firebaseApp: null }));
+
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.resetModules();
 });
 it.each(['presentation', 'institutional'])(
-  '%s rejects all live clients before fetch',
+  '%s rejects unsigned clients and all sandbox access before fetch',
   async (mode) => {
     vi.resetModules();
     vi.stubEnv('VITE_CLASSSYNC_MODE', mode);
@@ -16,19 +18,20 @@ it.each(['presentation', 'institutional'])(
     const scheduling = await import('../lib/scheduling-api');
     const sample = await import('../lib/sample-calendar-api');
     const publication = await import('../lib/publication-api');
-    await expect(academic.listAcademicPeriods()).rejects.toMatchObject({ status: 403 });
-    await expect(academic.createAcademicPeriod({} as never)).rejects.toMatchObject({ status: 403 });
-    await expect(scheduling.loadSchedulingScenario()).rejects.toMatchObject({ status: 403 });
+    const status = mode === 'institutional' ? 401 : 403;
+    await expect(academic.listAcademicPeriods()).rejects.toMatchObject({ status });
+    await expect(academic.createAcademicPeriod({} as never)).rejects.toMatchObject({ status });
+    await expect(scheduling.loadSchedulingScenario()).rejects.toMatchObject({ status });
     await expect(scheduling.generateWeeklySchedule({} as never)).rejects.toMatchObject({
-      status: 403,
+      status,
     });
     await expect(scheduling.saveSchedulingDraft({} as never)).rejects.toMatchObject({
-      status: 403,
+      status,
     });
     await expect(sample.listCalendarSamples()).rejects.toMatchObject({ status: 403 });
-    await expect(publication.timetableRequest('periods')).rejects.toMatchObject({ status: 403 });
+    await expect(publication.timetableRequest('periods')).rejects.toMatchObject({ status });
     await expect(publication.timetableRequest('publish', {})).rejects.toMatchObject({
-      status: 403,
+      status,
     });
     expect(() => publication.subscribeTimetable('events?', vi.fn(), vi.fn())).toThrow();
     const { liveFetch } = await import('./runtime-config');

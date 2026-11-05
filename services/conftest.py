@@ -1,5 +1,7 @@
 """Disposable identity adapters for local tests; never imported by service runtime."""
 
+import time
+
 import pytest
 from classync_contracts.identity import MembershipSnapshot, VerifiedPrincipal
 from classync_contracts.models import UserRole
@@ -21,7 +23,8 @@ class SyntheticTokenVerifier:
         self.calls += 1
         if self.error:
             raise self.error
-        return VerifiedPrincipal(uid=self.uid)
+        return VerifiedPrincipal(uid=self.uid, email="synthetic@example.invalid",
+                                 email_verified=True, auth_time=int(time.time()))
 
 
 class SyntheticMembershipLookup:

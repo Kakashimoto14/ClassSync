@@ -1,6 +1,7 @@
 import { firebaseApp } from './firebase';
 import { env } from './env';
-import { requireLiveCapability } from '../config/runtime-config';
+import { appMode, requireLiveCapability } from '../config/runtime-config';
+import { institutionalRequest } from './institutional-api';
 
 export async function timetableHeaders(): Promise<Record<string, string>> {
   requireLiveCapability();
@@ -14,6 +15,14 @@ export async function timetableRequest<T>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
+  if (appMode === 'institutional')
+    return institutionalRequest<T>(`timetables/${path}`, {
+      body,
+      method: body === undefined ? 'GET' : 'POST',
+      signal,
+      role: 'administrator',
+      timeout: 30000,
+    });
   requireLiveCapability();
   const response = await fetch(`${env.apiBaseUrl}/timetables/${path}`, {
     method: body === undefined ? 'GET' : 'POST',

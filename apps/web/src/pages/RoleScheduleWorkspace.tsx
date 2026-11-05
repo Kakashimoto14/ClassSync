@@ -73,7 +73,10 @@ export function RoleScheduleWorkspace({
       ? 'Campus timetable'
       : role === 'teacher'
         ? facultyDisplayName(
-            data?.teachers.find((t) => t.id === context.identity)?.name ?? 'Choose teacher',
+            data?.teachers.find((t) => t.id === context.identity)?.name ??
+              (!isSample
+                ? (data?.teachers[0]?.name ?? 'Your teaching assignments')
+                : 'Choose teacher'),
           )
         : (section?.custom_label ??
           (section
@@ -361,7 +364,13 @@ export function RoleScheduleWorkspace({
               Open Schedule
             </Link>
             {sessionRoomPath(role, next.room.id) && (
-              <Link className="button button--secondary" to={sessionRoomPath(role, next.room.id)!}>
+              <Link
+                className="button button--secondary"
+                to={sessionRoomPath(role, next.room.id, {
+                  period: context.period,
+                  date: next.date,
+                })!}
+              >
                 Room Details
               </Link>
             )}
@@ -570,12 +579,22 @@ export function RoleScheduleWorkspace({
           )}
         </section>
       )}
-      {role === 'teacher' && dashboard && <TeacherRequestOverview />}
+      {role === 'teacher' &&
+        dashboard &&
+        (isSample ? (
+          <TeacherRequestOverview />
+        ) : (
+          <section className="workspace-card">
+            <h2>Classroom requests</h2>
+            <Link to="/teacher/change-requests">View requests and decisions</Link>
+          </section>
+        ))}
       {currentSelection && (
         <ClassSessionDetails
           session={currentSelection}
           role={role}
           sample={isSample}
+          period={context.period}
           presentation={isPresentation}
           published={context.mode === 'published'}
           onClose={() => setSelected(null)}

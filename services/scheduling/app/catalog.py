@@ -33,6 +33,7 @@ def synthetic_scenario(infeasible=False):
     teachers = [
         scheduling.Teacher(
             id=f"synthetic-teacher-{i}",
+            synthetic=True,
             name=f"Example Instructor {chr(65 + i)} (synthetic)",
             availability=windows,
             preferred_days=[0, 2, 4] if i % 2 == 0 else [1, 3],

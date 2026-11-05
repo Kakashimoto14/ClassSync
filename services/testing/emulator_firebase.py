@@ -60,7 +60,11 @@ def emulator_firebase(monkeypatch, *, project: str, endpoint: str):
                             or not isinstance(claims.get("firebase", {}), dict)
                             or claims.get("firebase", {}).get("tenant") is not None):
                         raise ValueError("Invalid emulator identity realm")
-                    return VerifiedPrincipal(uid=claims["uid"])
+                    return VerifiedPrincipal(
+                        uid=claims["uid"], email=claims.get("email"),
+                        email_verified=claims.get("email_verified") is True,
+                        auth_time=claims.get("auth_time"),
+                    )
                 except TokenVerificationError:
                     raise
                 except (auth.UserDisabledError, auth.RevokedIdTokenError) as error:

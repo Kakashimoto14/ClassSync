@@ -23,6 +23,11 @@ test('owned emulator entry selects only fixed qualification modules and exact fl
     '--scheduling': 'scripts.postgres_scheduling_provider_qualification',
     '--publication': 'scripts.postgres_publication_provider_qualification',
     '--student-browser': 'scripts.postgres_student_experience_qualification',
+    '--onboarding': 'scripts.postgres_onboarding_qualification',
+    '--onboarding-browser': 'scripts.postgres_onboarding_browser_qualification',
+    '--scanner-browser': 'scripts.postgres_registration_browser_qualification',
+    '--connected-browser': 'scripts.postgres_connected_browser_qualification',
+    '--postman': 'scripts.postgres_postman_qualification',
   };
   assert.equal(qualificationModule(base), 'scripts.postgres_emulator_qualification');
   for (const [flag, name] of Object.entries(expected)) {

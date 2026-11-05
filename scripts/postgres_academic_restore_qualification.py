@@ -239,7 +239,7 @@ def fingerprint(engine, diagnostics=None):
     return summarize(data, catalog)
 
 
-def prepare_source(connection, owner, runtime):
+def prepare_source(connection, owner, runtime, *, migration_target=MIGRATION, defer_fixture=False):
     migration_owner = "classsync_migrator_" + uuid4().hex
     with transaction(owner) as db:
         db.execute(text(f"CREATE ROLE {migration_owner} NOLOGIN NOSUPERUSER NOCREATEDB "
@@ -247,7 +247,7 @@ def prepare_source(connection, owner, runtime):
         db.execute(text(f"GRANT CREATE ON DATABASE postgres TO {migration_owner}"))
         db.execute(text(f"GRANT USAGE,CREATE ON SCHEMA public TO {migration_owner}"))
         db.execute(text(f"SET LOCAL ROLE {migration_owner}"))
-        migrate(db, target=MIGRATION)
+        migrate(db, target=migration_target)
         # Nonempty defaults ensure the backup actually exercises default ACL restoration.
         db.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA classsync_academic "
                         f"GRANT SELECT ON TABLES TO {connection.runtime}"))
@@ -284,6 +284,8 @@ def prepare_source(connection, owner, runtime):
                             f"TO {connection.runtime}"))
         db.execute(text("GRANT DELETE ON classsync_academic.record_references "
                         f"TO {connection.runtime}"))
+    if defer_fixture:
+        return None, None, migration_owner
     repository = store(runtime)
     original = complete(FixtureCalls(repository))
     require({entry.record.kind for entry in original.records} == {

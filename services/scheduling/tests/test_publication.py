@@ -50,6 +50,9 @@ def setup(tmp_path):
 def test_atomic_publication_idempotency_immutable_history_and_effective_revisions(setup):
     repo, draft, command = setup
     original = draft.model_dump_json()
+    institutional = command.model_copy(update={"dataset": "institutional"})
+    with pytest.raises(DraftError, match="datasets cannot be mixed"):
+        repo.publish(institutional, draft, "tenant", "admin", commit=False)
     reviewed = repo.publish(command, draft, "tenant", "admin", commit=False)
     assert reviewed["status"] == "ready-for-review" and reviewed["sections"] == 1
     v = repo.publish(command, draft, "tenant", "admin", commit=True)
@@ -95,6 +98,33 @@ def test_atomic_publication_idempotency_immutable_history_and_effective_revision
     with repo.drafts.connection(write=True) as db:
         with pytest.raises(Exception, match="immutable"):
             db.execute("UPDATE published_versions SET actor=?", ("attacker",))
+
+
+def test_restore_historical_calendar_creates_new_version_but_current_duplicate_is_denied(setup):
+    repo, draft, command = setup
+    first = repo.publish(command, draft, "tenant", "admin", commit=True)
+    changed = command.calendar.model_copy(deep=True)
+    changed.effective_start = date(2026, 11, 16)
+    changed.phases = []
+    second = command.model_copy(
+        update={"calendar": changed, "expected_version": 1, "idempotency_key": "restore-second"}
+    )
+    repo.publish(second, draft, "tenant", "admin", commit=True)
+    restore = command.model_copy(
+        update={"expected_version": 2, "idempotency_key": "restore-third"}
+    )
+    review = repo.publish(restore, draft, "tenant", "admin", commit=False)
+    assert review["status"] == "ready-for-review"
+    restored = repo.publish(restore, draft, "tenant", "admin", commit=True)
+    assert restored["revision"] == 3 and restored["id"] != first["id"]
+    assert repo.publish(restore, draft, "tenant", "admin", commit=True)["id"] == restored["id"]
+    assert len(repo.history("tenant", "synthetic", draft.period_id)) == 3
+    duplicate = command.model_copy(
+        update={"expected_version": 3, "idempotency_key": "restore-duplicate"}
+    )
+    with pytest.raises(DraftError, match="currently published"):
+        repo.publish(duplicate, draft, "tenant", "admin", commit=True)
+    assert len(repo.history("tenant", "synthetic", draft.period_id)) == 3
 
 
 def test_competing_publications_are_serialized_and_failed_writes_rollback(setup):

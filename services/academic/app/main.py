@@ -23,6 +23,7 @@ from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from .authorization import configured_academic
+from .curriculum_catalog import review_catalog
 from .fixtures import FixtureRequest, import_fixture
 from .provider import institutional_repository
 from .repository import AcademicError, AcademicRepository
@@ -105,6 +106,20 @@ async def membership_error(_: Request, error: MembershipAuthorizationError):
 @app.get("/health", response_model=HealthResponse, tags=["operations"])
 def health() -> HealthResponse:
     return HealthResponse(service="academic")
+
+
+@app.get("/api/v1/academic/curriculum-catalog")
+def curriculum_catalog(request: Request):
+    _, owner = authorize(request, False)
+    # Verify current tenant membership using the same provider as record reads.
+    connected_repository(request, owner).periods()
+    return review_catalog()
+
+
+@app.get("/api/v1/academic/sandbox/curriculum-catalog")
+def sandbox_curriculum_catalog(request: Request):
+    authorize(request, True)
+    return review_catalog()
 
 
 @app.get("/api/v1/academic/sandbox/periods", response_model=AcademicPeriodList)

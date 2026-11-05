@@ -1,6 +1,7 @@
 """Scheduling privilege never comes from the browser's role-preview selection."""
 
 from fastapi import HTTPException, Request
+from pydantic import Field
 
 from .firebase import FirebaseSettings
 from .models import UserRole
@@ -12,6 +13,7 @@ class SchedulingSecuritySettings(FirebaseSettings):
     enable_scheduling_sandbox: bool = False
     institutional_tenant_id: str | None = None
     enable_test_identity_adapters: bool = False
+    database_pool_size: int = Field(default=5, ge=1, le=5)
 
 
 def require_sandbox(settings):

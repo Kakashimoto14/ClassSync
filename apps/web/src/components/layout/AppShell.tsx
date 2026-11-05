@@ -64,14 +64,38 @@ export function AppShell({ children }: { children: ReactNode }) {
   const availableRoute = (route: RouteDefinition) =>
     !route.plannedFeature &&
     (!institutional ||
-      (['dashboard', 'schedule', 'rooms', 'notifications'].includes(route.kind) &&
+      ([
+        'dashboard',
+        'schedule',
+        'calendar',
+        'rooms',
+        'notifications',
+        'announcements',
+        'profile',
+        'settings',
+        'registration-scanner',
+        'academic-manage',
+        'requests',
+        'request-detail',
+        'request-create',
+        'conflicts',
+        'conflict-detail',
+        'schedule-create',
+        'schedule-drafts',
+        'schedule-draft-detail',
+        'audit',
+      ].includes(route.kind) &&
         route.roomMode !== 'availability'));
   const groups = navigationForRole(role);
   const bottomItems = mobileNavigationForRole(role).filter(availableRoute);
   const primaryItems = [...bottomItems];
   if (role !== 'student') {
     const requests = routeDefinitions.find((route) => route.path === rolePath(role, 'requests'));
-    if (requests && !primaryItems.some((item) => item.id === requests.id))
+    if (
+      requests &&
+      availableRoute(requests) &&
+      !primaryItems.some((item) => item.id === requests.id)
+    )
       primaryItems.splice(3, 0, requests);
   }
   const secondaryGroups = groups
@@ -178,10 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {secondaryNavigation}
         </nav>
         <div className="sidebar-user">
-          <Link
-            className="sidebar-profile"
-            to={institutional ? '/auth/login' : rolePath(role, 'profile')}
-          >
+          <Link className="sidebar-profile" to={rolePath(role, 'profile')}>
             <span className="avatar">{profile.initials}</span>
             <span>
               <strong>{profile.name}</strong>

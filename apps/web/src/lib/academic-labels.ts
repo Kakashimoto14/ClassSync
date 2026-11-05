@@ -15,7 +15,7 @@ export function academicLabel(record: AcademicRecord, snapshot: AcademicSnapshot
   if (record.kind === 'subjects') return `${record.code} · ${record.name}`;
   if (record.kind === 'sections') {
     const program = academicRecords(snapshot, 'programs').find(p => p.id === record.program_id);
-    return record.custom_label || `${program?.kind === 'programs' ? program.acronym : record.program_id}-${record.year_level}${record.section_letter}`;
+    return record.custom_label || `${program?.kind === 'programs' ? program.acronym : record.program_id}${record.year_level}${record.section_letter}`;
   }
   if (record.kind === 'offerings') {
     const subject = academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id);

@@ -58,7 +58,7 @@ describe('university access controls', () => {
     expect(button).toHaveFocus();
     expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Connected schedules are not available yet',
+      'Your identity and current university role are verified.',
     );
   });
   it.each(['denied', 'unavailable', 'offline'] as const)(

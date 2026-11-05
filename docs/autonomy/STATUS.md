@@ -1,5 +1,493 @@
 # ClassSync — autonomy status ledger
 
+## 6 November 2026 — release candidate prepared locally
+
+The `release/mvp-staging-qualification` worktree uses base
+`aea9494db46153672a31a2161070e5e4ff713966`. The proposed snapshot includes 193 reviewed
+additions and updates and omits 744 inherited raw evidence paths. The original files and
+shared history are preserved. Original SQLite SHA-256 values match the accepted baseline.
+
+Node 22.23.1 installed the committed npm lockfile from cache. The presentation build
+passed with read-only metadata. Python 3.12.14 collected all 1,063 tests via
+`python -m pytest --collect-only` at the root. The 26 focused fixture, OCR boundary and
+container contract tests and 19 security checks passed in the source-only worktree.
+The prior full suite and 39 Postman assertions remain the accepted evidence for their
+respective scopes. The registry audit failed the existing low threshold with seven
+moderate findings linked to GHSA-g3hv-75wg-m249.
+
+Native Linux and GitHub Actions qualification require an approved push. The public
+GitHub origin has an active Vercel integration. Current Vercel branch and build settings
+require confirmation before publication of the candidate branch. The local index remains
+unstaged. Commit, push, deployment and provider staging require separate authorization.
+
+## 6 November 2026 — publication/Postman PASS; release BLOCKED by external/security gates
+
+Owner explicitly reopened bounded publication diagnosis/correction; no Docker/WSL/BIOS,
+commit/push/cloud changes authorized. Base/current HEAD remains
+aea9494db46153672a31a2161070e5e4ff713966, main/index unchanged. All prior candidate hashes
+matched at entry; original three database SHA-256 checkpoints matched before/after.
+
+Confirmed exact cause: fixture's already-published draft/calendar correctly triggered409
+duplicate_publication after successful auth/revision/review. Reproduced409 on a new
+disposable fixture with no history writes. Corrected only
+scripts/postman_local_qualification.py: Gateway fresh generation/independent valid result,
+new server draft201/current academic and publication revisions/new keys; focused run then
+another fresh draft for full set. No backend/solver/authorization/RLS/schema/guard changes.
+First focused CLI selection failed before HTTP; exact two-request temporary subset fixed
+selection while preserving source requests/auth/scripts/HTTP200 assertions.
+
+Actual focused2requests/2assertions PASS475ms. Then original35requests/39assertions PASS,
+5.5s. History head1→2→3, exactly one version per actual publication; old API-visible
+immutable summaries preserved except expected supersession. Replay200/no additional rows;
+missing token401, Student/Teacher403 and stale409 produce no history writes. Both current
+role timetables reference final publication and contain assigned sessions. Actual guard
+qualification6denied folders/0HTTP hits/effective override denied PASS. Full connected
+browser not repeated; existing service setup reused Auth Emulator and disposable PG/RLS.
+Owned Auth/PG stopped; temp token environment deleted; no cloud reporting/real users/data.
+Receipts `../production/m5-publication-20261106/postman-final-02.json` and focused/full
+console logs; failed selection retained. Independent source review agrees; raw publication
+DB checksums not re-audited because application storage implementation is unchanged.
+
+Fresh security19PASS, container contracts7PASS0.27s, affected Ruff PASS. js-yaml workflow
+parse and Git Bash `bash -n` PASS (syntax only). No redundant full suites/builds. Prior
+1063backend/804frontend/full browser/builds are historical evidence, not new runs.
+
+Fresh npm audit still7moderate nodes/one GHSA-g3hv-75wg-m249, high/critical0. Registry
+current TS-ESLint8.72.1 still requires minimatch^10.2.2; latest10.x10.2.6 affected, fixed
+11.0.1 outside supported range. No compatible fix, major override, force fix, suppression
+or gate waiver; lock/dependencies unchanged. Release security remains BLOCKED.
+
+Owner confirms no existing approved Linux runner, prepare checks for later approved push.
+Added bounded Ubuntu container job to existing .github/workflows/quality.yml and fixed-
+localhost health/auth/Academic outage/recovery checks in scripts/linux_runtime_probe.py.
+Future job builds all3existing images/native probes/OCR with internal/no-network phases,
+non-root/read-only/capability-dropped containers and1CPU/1GiB budgets; no images pushed,
+host ports/mounts/secrets or deploy. No new trigger. Native Linux/OCR/remote Actions remain
+IMPLEMENTED-UNVERIFIED pending separate checkpoint/push approval and actual execution.
+
+M5_PUBLICATION_QUALIFICATION.md records exact changes, current results, preserved hashes,
+checkpoint exclusions and remaining gates; M5_STAGING_ACCEPTANCE.md contains variable
+NAMES/descriptions, resource/cost/IAM/TLS/migration/retention prerequisites and synthetic
+provider checklist. API notes/evidence updated. Production/staging cutover remains NO-GO.
+Next bounded action is reviewed Git checkpoint authorization and supported security fix/
+disposition, followed by approved Linux Actions and separate staging configuration/provider
+acceptance. No pending publication failure/approval gate remains.
+
+## 5 November 2026 15:21 SGT — M5 final qualification PARTIAL; bounded gates open
+
+Exit security review: Postman denied guards now explicitly skipRequest and validate
+effective destinations, preventing script-error fallthrough and iteration-data redirects.
+Actual Postman denial-only check6folders/0HTTP receiver hits PASS, independently of the
+gated publication harness retry. No approval flags, thresholds or assertions relaxed.
+
+Base/current HEAD `aea9494db46153672a31a2161070e5e4ff713966`, branch main/index unchanged.
+Owner approved prerequisite inspection/bounded Docker preparation and synthetic fixture
+replacement. Read-only host checks: Windows10Pro22H2/19045.6466,7.88GiB RAM (~1.21free),
+12.17GiB disk free, SLAT/VM monitor supported, firmware virtualization DISABLED, no active
+hypervisor/Docker/usable WSL. No privileged install/features/BIOS/restart or cloud changes.
+Manual virtualization/restart decision pending; actual Linux/container execution BLOCKED.
+
+Implemented local Linux OCR using Gateway-only Poppler/Tesseract, fixed native arguments,
+bounded dimensions/TSV/files/CPU/address space/deadline, private cleanup and no cloud path.
+Independent review found orphan native-child cleanup; stop_worker now terminates owned
+POSIX groups even after worker exit. Portable regressions cover this, not native execution.
+Dockerfile/native probe/portable synthetic raster generation updated. More stringent new
+Linux FS/FD limits; existing solver/512MiB/15CPU/20wall/page/file guards not raised.
+
+Clean-checkout fixture dependency fixed: test_cohort_curriculum.py,
+test_real_academic_readiness_review.py and new synthetic_review_inputs.py use invented
+CSV/catalog/OOXML/review inputs and outputs in pytest temp storage. No private staging
+reads/original report writes; structural runtime catalog check remains separate. Focused21
+PASS. Final full backend `python -m pytest`1063PASS107.08s, existing Starlette warning.
+Scanner-focused28PASS3.37s; security19, full Ruff/pip check/diff check PASS. Later changes
+are Postman-only qualification tooling, checked separately without another full suite.
+Frontend/lock unchanged in this final scope; prior804/frontend/builds/artifact4 are retained
+historical acceptance, not new executions. No skipped tests or guard relaxations.
+
+Signed official portable Postman CLI1.86.0 used without installer/login/global settings;
+reviewed binary SHA/signature in M5_RELEASE_QUALIFICATION.md. Core/pending13requests/
+13assertions PASS inside actual Auth/Gateway/Academic/Scheduling/new disposablePG journey.
+Connected browser172082ms under180s guard PASS, includes publication/rollback/scanner/
+requests/notices/room/profile/revocation/SQL/5width/native200. Auth and PostgreSQL stopped,
+owned emulator outbound-denied count0; that counter is not whole-machine network telemetry.
+
+Expanded focused Postman mode reuses those service fixtures without browser rerun.
+Latest35requests/39assertions:38PASS,1FAIL publication expected200 got409 using already
+published fixture draft. Verified Student linking, faculty invite/accept/replay, generation,
+review, actual Student/Teacher published classes, PDF/review/match/wrongterm/delete404 and
+role denials passed. Earlier pending-token shadowing was corrected to separate tokens.
+Persistent-failure approval requested before further fresh-draft correction/retry; no
+publication assertion changed. Not full Postman PASS. All receipts retained, no tokens
+or populated environment exported; private runtime environment deleted on exit.
+
+Fresh npm audit7moderate nodes from GHSA-g3hv-75wg-m249/minimatch10.2.6 via TS-ESLint8.71.1;
+production dependency projection empty. Reviewed current parent still needs10.x; no
+supported compatible fix applied/major override/waiver/threshold relaxation. Low audit gate
+BLOCKED. Python dependencies unchanged; prior77-version0-finding audit retained, fresh
+pip check PASS. Remote connector shows old Vercel success and empty PR-filtered runs;
+remote Actions/dirty current candidate UNVERIFIED. No Git/cloud publishing or CI trigger.
+
+Read-only checkpoint review410paths/191candidates/219private-or-raw exclusions; narrow
+secret indicators0, no tracked PDF/DB/workbook/key/populated-env candidates. Exact hashes
+and classifications in `../production/m5-final-20261105/worktree-review.json`. Exclude
+private docs/academic and raw logs/screenshots; preserve all uncommitted work. Original
+three DB hashes freshly match owner-confirmed baselines, including intentional Demo save.
+No original DB connections/migrations/writes, live users, real forms/rosters or deployments.
+
+Deliverables: M5_RELEASE_QUALIFICATION.md (runtime/security/CI/checkpoint/blockers),
+M5_STAGING_ACCEPTANCE.md (variable NAMES/descriptions, resources/budget/IAM/prerequisites
+and15-step actual-provider checklist), updated API collection/README/CLOUD_RUN_STAGING.
+Next: owner-authorized focused Postman harness correction; manually enabled virtualization
+and separately confirmed OS installation; supported npm fix/disposition; approved Git
+checkpoint/push then Actions; separate cloud configuration/deployment/provider acceptance.
+
+## 5 November 2026 14:10 SGT — M5 local implementation qualified; cloud/release BLOCKED
+
+M1–M4 remain PASS for bounded local acceptance. M5 source/delivery work implemented:
+new Gateway coursework.py/coursework_cloud.py/coursework_schema.py, strict CORS/secret
+settings, explicit optional-cloud disable, owner-hashed preference CRUD with revision+
+generation CAS, private synthetic-text Storage and fixed-topic bounded Gemini advice.
+No academic/identity/enrollment/publication authority moved from PostgreSQL. No scanner
+document is sent to cloud. GET/POST/PATCH/DELETE /api/v1/coursework/preferences;
+POST /coursework/files, GET/DELETE /coursework/files/{uuid}, POST /coursework/advisory.
+Bearer Swagger metadata and unique operation IDs added without changing route authority.
+Postman artifacts/generator, Docker/Compose/non-root entrypoint/per-service env templates,
+staging instructions and tutorial map in MVP_M5_TRACEABILITY.md. No deployed changes.
+
+Independent security review identified/fixed absolute advisory deadline, stale generation
+after preference recreation and shared Compose credentials. New regressions and narrow
+source confirmation pass. Instance-local quota/restart limitations and unsupported Linux
+OCR are documented; no cloud readiness is inferred. Cloud providers default disabled.
+Final source/evidence/data hashes: `../production/mvp-20261104/m5-exit-manifest.json`.
+
+Final full backend1048/95.49s; frontend804/58files/274.89s under unchanged300s guard;
+typecheck/lint/Ruff/security19; both builds and artifacts4/79.27s PASS in m5-*-final logs.
+Actual Auth/Gateway/Academic/Scheduling/new-PG browser `m5-connected-final.json`
+PASS144697ms under unchanged180s child guard: all M3/M4 role/request/publication/
+rollback/readiness/notices/rooms/profile/recovery/revocation/SQL cases,5widths/native200,
+errors0/healthy503=0/outbound0; owned services stopped. Cloud not called. Original DB
+checkpoints preserved, including owner's confirmed Demo save. Solver/constraints unchanged.
+
+Python exact-version audit initially could not normalize dotted Windows OCR names;
+corrected to PEP503 names, respected platform requirement markers, retained complete
+installed-package/no-skip coverage. Four pyasn10.6.4 advisories fixed with compatible
+0.6.5 runtime/security constraint. Final77 exact versions/0 findings, pip check PASS.
+Npm audit remains BLOCKED:7 moderate development-tool findings, high0/critical0; inspected
+current/latest TypeScript-ESLint parent still requires affected minimatch^10.2.2.
+No unsupported override, advisory exclusion, threshold change or policy exception.
+
+Postman static artifact2 checks pass and are included in security19. Evaluated isolated
+Newman6.2.3 had19 dependency findings including1 critical; lifecycle scripts disabled,
+runner never executed. Removed only its verified newly created var tool directory;
+audit/install evidence retained. Application dependencies unchanged by that attempt.
+Postman runtime execution NOT qualified. Docker CLI absent: image/run NOT qualified.
+Cloud ADC/project/bucket/model/key/privacy/IAM/retention/quota and staging approval absent:
+Firestore/Storage/Gemini cloud integration IMPLEMENTED-UNVERIFIED. Remote Actions status
+UNVERIFIED (connector PR-filtered only; Vercel success is not Actions/current worktree
+qualification; gh absent, public REST inaccessible). No production readiness claim.
+
+All local source work remains uncommitted, HEAD aea9494db46153672a31a2161070e5e4ff713966;
+pre-existing work preserved. No commit/push/production or staging deployment, live account,
+cloud IAM/rules/resources/secrets changes or original-data migration. M5 overall PARTIAL,
+not accepted as complete. Next bounded action requires an approved credentialed staging
+target and secure execution environment for actual cloud/Postman/container qualification;
+release also requires the unresolved npm/remote-CI gates. Do not weaken them to proceed.
+
+## 5 November 2026 — M4 PASS for bounded local acceptance
+
+New room directory/details, announcements, own profiles/settings and published-change
+screens are connected. Exact source/routes inventory in MVP_EVIDENCE.md and source/data
+hashes in `../production/mvp-20261104/m4-exit-manifest.json`. Current original checkpoints
+match M3 owner-confirmed Demo save; no restoration/migration of originals. All dirty
+user work retained, HEAD unchanged. Requests/decisions retain M3 qualification.
+
+Actual `m4-connected-02.json` PASS122007ms with complete M3 journey plus announcement
+CRUD/audience/stale/unauthorized checks; all-role directory whitelist/wrong-term denial,
+Teacher profile confirmed SDK200 and restoration, actual emulator reset email, room
+detail navigation, three-role revocation,5widths/native200 and five new SQL role/tenant/
+provenance/directory controls. Errors0/healthy503=0/outbound0; owned Auth/PG stopped.
+Independent review's dual-role directory finding corrected and reviewed; unit regression
+and actual SQL selected-role control pass. First01 SQL harness wrapper mismatch preserved
+and corrected without changing the intended23514 guard. No unresolved failure.
+
+Full backend1020/82.50s; frontend804/58files/188.21s; typecheck/lint/Ruff/security17;
+both builds and artifacts4/80.41s PASS (`m4-*-final.log`). Minor final link-spacing/retry
+and honest update-copy changes covered by full frontend/build checks. Manual screen
+reader/cloud/real-institutional provisioning remain unqualified. No remote CI/advisory
+refresh or production certification claimed. Next authorized task M5 tutorial-scoped
+API/cloud adapters/Postman/container/docs and dependency/CI status; actual cloud calls
+remain separately gated by credentials/configuration/approval.
+
+## 5 November 2026 — M4 implemented, connected qualification in progress
+
+Implemented room metadata GET /api/v1/timetables/rooms/{period}, selected-role current
+assignment/enrollment eligibility and verified-only capacity/type/equipment. Student
+Rooms connects its directory/Labs to this data; Teacher/Admin rooms, details, exact-ID
+class links and preserved term/date context connect through new shared hook/page.
+New announcements migration0016, Gateway router/repository reuse existing PG pool:
+GET/POST/PATCH/DELETE /api/v1/community/announcements, audience/current-role/tenant/
+project RLS, revision CAS, archive, immutable creation provenance and bounded create rate.
+New connected notices/profile/settings/update pages and navigation; own SDK name edit,
+recovery/logout and actual published changes; no fake alert-delivery setting.
+
+Independent review found dual-role Admin RLS could expose unrelated room directories
+when selecting Teacher/Student. Added explicit current-snapshot eligibility and negative
+tests; reviewer inspected correction, no remaining narrow finding. Focused backend45,
+existing affected frontend47, new notice/directory6 and profile3 PASS; Ruff/typecheck/lint
+pass before final qualification. Full M4 regression/build exit not yet run.
+
+Connected01 complete browser PASS127352ms: actual notices CRUD/audience/stale denial,
+own profile update/restoration, actual Auth Emulator reset email, all-role directories,
+Teacher rooms5widths and native200 announcement keyboard submission (controls5,
+clipped0), existing M3 journey/revocations, errors0/healthy503=0. Overall01 FAILED only
+after browser exit: SQL provenance attack correctly raised23514, but qualification caught
+DBAPIError outside a service context that translates it to HTTP503. Corrected only the
+test SQL boundary to direct runtime transaction with identical UID/tenant/project/role;
+intended constraint unchanged. Fresh02 includes extra5width captures for notices/profile/
+Student directory; currently running. No original/cloud/Git changes; owner-confirmed
+EDD232195A… checkpoint unchanged. M4 is IMPLEMENTED-UNVERIFIED until exit gates pass.
+
+## 5 November 2026 — M3 PASS for bounded local acceptance
+
+Owner confirmed the unexpected03:42 original SQLite write was their intentional Demo
+save. No restoration or source workaround; preserved owner-confirmed EDD232195A…
+checkpoint and prior historical hash/diagnosis. Current source/qualification manifest
+`../production/mvp-20261104/m3-exit-manifest.json`. HEAD unchanged; dirty work retained.
+
+Actual connected `m3-requests-final.json` PASS: Administrator calendar/readiness/
+generation/draft/review/publish; invited Teacher and approved Student see matching
+current published data; Teacher request/replay/foreign-class/role denials, Admin approve
+or reject, validated room-change publication/fulfillment, version4 restoration,
+incomplete readiness blocks generation/review/publish, revocation403, seven independent
+SQL role/tenant/evidence/transition controls. All5widths/native200; errors0/healthy503=0,
+outbound0, Auth/PG stopped. Current-original checksums unchanged since owner checkpoint.
+
+Final full backend1003/91.94s (`m3-backend-final-03.log`); frontend795/55files/229.33s
+(`m3-frontend-final-02.log`); exit typecheck/lint, full Ruff, security17, both builds
+and artifacts4/87.74s PASS. Existing Starlette/bundle warnings retained. First backend
+1002/1 synthetic8s failure then isolated unchanged PASS; final serial suite PASS. First
+frontend794/1 stale blanket institutional403 expectation corrected to explicit unsigned
+401 with zero-fetch and all sandbox403 checks retained; focused3/final795 PASS. No
+solver/constraint/timeout/guard changes. Independent correction review found no defect.
+
+Source/API inventory in MVP_EVIDENCE.md; request routes plus existing academic,
+generation/draft/publication/calendar endpoints are connected. Manual screen reader,
+cloud staging, institutional data/provisioning remain unqualified; dependency advisories/
+actual remote CI status require M5 refresh. This is local acceptance, not production
+certification. Next authorized bounded task M4 existing supported features, acceptance
+cases in MVP_M4_ACCEPTANCE.md. No additional routine approval required.
+
+## 5 November 2026 — database stop resolved by owner confirmation
+
+Owner confirms the03:42 Demo save was intentional. This explains the new original
+SQLite run/draft and hash change; no application/test defect or restoration is required.
+Preserve the owner's new data. Historical SHA1848377C… remains in prior evidence;
+current owner-confirmed preservation checkpoint is EDD232195A1FCF79389BF633CE3FBDC8
+120705923C5D1441810069A878C1D88D. Academic/backup remain unchanged. Resume M3
+disposable-only backend qualification and pending frontend/build gates; no release,
+cloud, original-data migration or Git authority expanded.
+
+## 5 November 2026 — approved read-only diagnosis; attribution pending
+
+Owner approved bounded read-only diagnosis/correction/qualification with no original DB
+overwrite/restoration. Inspection uses SQLite URI mode=ro&immutable=1 plus query_only;
+SHA256 unchanged before/after. `m3-readonly-schema-diagnostic.json` and
+`m3-readonly-data-diagnostic.json` contain counts/structural evidence, no personal payload.
+One new run03:42:22 and one draft03:42:34 (SGT) in academic-sandbox, all stored payload
+checksums valid, zero publication rows. The new draft's period already exists in original
+academic.sqlite3; its period does not match retained disposable Auth browser fixtures.
+Long-running local Demo service tree started4 November22:51 and its default sandbox
+generation/save paths write this original SQLite file. Caller attribution is NOT proven;
+there is no retained per-request audit establishing user versus automation. No confirmed
+test isolation defect, source correction or original-data restoration is claimed.
+Asked owner whether this was an intentional Demo save; DB-sensitive qualification and
+M3 acceptance remain paused pending that clarification. Independent full frontend run
+started (does not use original DBs). Original historic hash is retained; do not silently
+replace its preservation baseline with the changed hash. No existing process was stopped
+during diagnosis; the bounded source search was interrupted after including too broad
+an apps tree, then repeated only scripts/apps/web/src/docs/autonomy.
+
+## 5 November 2026 — M3 STOP: original database preservation mismatch
+
+HEAD remains aea9494db46153672a31a2161070e5e4ff713966; all dirty work retained.
+Final actual connected qualification `../production/mvp-20261104/m3-requests-final.json`
+PASS: request/replay/isolation/approval/publication/fulfillment/rejection, rollback4
+with matching Student/Teacher rooms, incomplete-readiness generation/review/publish
+denial, revocation, five widths/native200 (clipped controls0), browser errors0,
+healthy503=0, seven SQL RLS/integrity controls. Auth/PG stopped, outbound0.
+Earlier03 rollback409 diagnosed historical duplicate guard; narrowed both adapters
+to current-head duplicate only, preserving CAS/idempotency/readiness/validation.
+04 browser passed, subsequent SQL synthetic tenant-B control insertion failed audit
+RLS because setup retained tenant-A context; corrected test context, final PASS.
+Independent review found no regression. Focused backend19/frontend18, Ruff,
+typecheck02, lint and security17 PASS. New test role-query unsupported exact option
+corrected without changing assertions. Full backend1002 PASS/1 FAIL (8s synthetic
+solver); isolated unchanged failing case then PASS8.59s. Full backend02 was interrupted
+when the preservation gate below was detected; no PASS claimed. Full frontend/build
+and artifact checks remain pending; M3 is NOT accepted.
+
+Preservation check found var/scheduling.sqlite3 SHA256
+EDD232195A1FCF79389BF633CE3FBDC8120705923C5D1441810069A878C1D88D,
+different from recorded original
+1848377CC9A9EB656E12B5E58436E81198FEF92F18DD71C1FEA2F6F8B482E400.
+File last-write metadata reports5 November03:42:34; cause unqualified.
+Academic and backup hashes still match. Current hashes preserved in
+`../production/mvp-20261104/m3-data-preservation-stop.json`. No repair/restore/write
+to the original was attempted. AGENTS.md mandates explicit approval for unexplained
+data changes; stopped owned full-suite session13988 via Ctrl+C. Process inventory via
+Get-CimInstance was denied; no unidentified process was stopped. Pending owner decision:
+bounded read-only provenance diagnosis and disposable-only source/test correction,
+without overwriting original DB or relaxing guards. M4–M5 have not started.
+
+## 5 November 2026 04:08 SGT — M3 core connected journey PASS, requests in progress
+
+HEAD unchanged; all prior dirty work retained. Actual Auth/Gateway/Academic/Scheduling/
+new-PG browser control `../production/mvp-20261104/m3-connected-03.json` passes:
+pending Student/Admin approval, faculty invitation/activation, calendar PUT, readiness,
+generation, immutable draft, independent publication review and version2 publish; both
+role projections have identical session/room/faculty/version data,5widths/refresh,
+cross-role denial and immediate403 reads after both revocations. Services stopped.
+Earlier01 asserted wrong pending copy;02 actual server log proved exhausted connections.
+Shared bounded DATABASE_POOL_SIZE setting preserves default5/max5/overflow0; qualification
+uses2 per service under unchanged PG max_connections10. Lifecycle/auth95 and focused
+frontend29 + later route/input16 (overlap, not summed) pass; reviewer inspected transport
+and removed-period stale-data correction. Full M3 exit not run/accepted.
+
+Implemented current-role routes, bounded same-origin clients, Teacher projection without
+mock request summary, Admin inputs/calendar/drafts/conflicts/publication/history. Now
+implementing required classroom requests: migration0015 and Scheduling module plus
+Gateway Teacher POST exception, own-current-class/eligible-room checks, idempotency,
+RLS/revisions/Admin decisions, approved-change prefill and publish-then-confirm UI.
+New request code IMPLEMENTED-UNVERIFIED, security review/tests/PG/browser pending.
+No original migration, cloud/users/deployment/Git actions. M3 remains PARTIAL until
+requests and full applicable gates pass; M4–M5 remain planned. Next: finish request
+qualification (add disposable alternate room/runtime grants), independent security
+review, negative paths and actual Teacher request→Admin decision→validated publication.
+
+## 5 November 2026 03:34 SGT — M2 PASS for bounded local acceptance
+
+Owner approved bounded diagnosis. Failed timetable assertion expected course codes,
+while actual UI renders course names. Corrected assertion verifies HTTP200/publication
+version/exact subject codes and visible corresponding subject-name buttons, then hidden
+loading. No application loading workaround, solver/constraint/limit or guard change.
+Actual connected final journey PASS: `../production/mvp-20261104/m2-connected-scanner-final.json`.
+Signup/verification, private PDF, corrections/restoration, pending claim/Admin approval,
+published matching/timetable, wrong-term/unmatched, photo OCR correction, deletion and
+keyboard action pass.5widths pass; native200 actual width720/ratio2/clipped-controls0,
+viewport screenshot visually inspected (full-page native screenshot issue avoided).
+Expected403 pending membership only; no browser errors/healthy503, outbound0; services stopped.
+
+Fresh final backend986/94.62s and frontend776/51files/211.68s pass, unchanged guards.
+Typecheck/lint/full Ruff/security17/both builds/artifact4 pass. Existing framework and
+bundle/split warnings remain. Logs `m2-*-final.log`; source/qualification/original hashes
+in `m2-exit-manifest.json`. All3 original SQLite hashes unchanged. Independent corrections
+reviewed; four-format synthetic actual worker passes. Personal PDF inspected locally
+without copies/fixtures/logged values/cloud uploads. Exact files/routes/limits/history in
+MVP_EVIDENCE.md. No commit/push/cloud/settings/deployment/original migration or real users.
+
+M2 locally accepted; Windows OCR qualified, Linux OCR/manual screen reader/cloud not
+qualified. Per-instance ephemeral extracted drafts can disappear on restart; explicit UI
+recovery provided. No institutional identity or schedule authority derived from forms.
+Next authorized bounded work: M3 connect Teacher/Admin journeys to existing APIs and
+prove publication shared by authorized Student/Teacher. M4–M5 remain planned.
+
+## 5 November 2026 03:06 SGT — M2 PARTIAL, persistent-browser-failure gate
+
+Base/current HEAD `aea9494db46153672a31a2161070e5e4ff713966`; prior dirty work retained.
+Private scanner/source/routes and exact limits/files are recorded in `MVP_EVIDENCE.md`.
+Digital PDF + bounded local Windows PDF/PNG/JPEG OCR implemented; private review/manual
+correction, pending verification and exact published enrollment matching implemented.
+No real form copies/fixtures, personal logging or cloud upload. Actual synthetic worker
+four-format qualification passes (`m2-local-ocr-02.json`); OCR I/O ambiguity explicitly
+requires correction. Fresh Gateway scanner18 and frontend scanner8 tests pass, focused
+Ruff/diff checks pass. Independent review corrections inspected, including deferred-match
+discard across authorization loss/restoration. Full M2 regression/static/build exit not run.
+
+Actual connected browser reached signup/email verification, PDF extraction, corrections,
+pending claim, trusted Admin approval, restored corrections, authorized matching, wrong
+term/unmatched denial and all5 matching-screen widths. Still NOT accepted: timetable
+assertion timed out in attempts05 and06 at unchanged30s limit.05 opened empty partial
+first term week; scanner link now uses earliest actual matched published class date,
+covered by passing regression.06 opens Oct5 week and reports2 classes but captured body
+still says Loading your schedule. Expected subject-code assertion also needs diagnosis
+against actual timetable rendering. No complete timetable/photo/native200/deletion journey
+PASS claimed. No more unchanged retries or implementation until bounded approval.
+
+Evidence: `../production/mvp-20261104/m2-connected-06-{failure-dom.txt,
+failure-network.json,auth-cleanup.json,pg-cleanup.json}`. Sanitized request paths/types/
+timings only; no bearer headers/bodies. Auth stopped=true, outbound0; PostgreSQL stopped.
+Original academic/scheduling/backup SHA256 all match M1 exit manifest; no originals
+migrated. All source/tests/evidence uncommitted. No cloud/Git/deployment action.
+Per AGENTS persistent-failure gate, requested bounded diagnosis of connected timetable
+rendering and scanner qualification with all existing guards/constraints preserved.
+M1 local PASS remains dated evidence; M2 PARTIAL; M3–M5 PLANNED. Manual screen reader,
+Linux OCR and cloud qualification remain open. Next bounded action awaits that approval.
+
+## 4 November 2026 23:24 SGT — M1 PASS for bounded local acceptance
+
+Owner explicitly approved bounded diagnosis/qualification. Read current state before
+resuming; HEAD unchanged, prior work preserved. Instrumented CP-SAT run found a validated
+feasible incumbent with unchanged8s limit (satisfaction2.985s under existing4.8s allocation;
+optimization UNKNOWN safely retained incumbent). Synthetic-faculty flag produces identical
+model hashes; prior missing traces prevent exact historical attribution. No solver/model,
+constraint, time limit or test guard changes. Unchanged isolated regression passed; final
+serial backend **968 passed**,88.21s, existing framework warning. Final frontend **768 passed/
+50 files**,203.17s, unchanged300s guard. Focused post-copy UI17 passed. Typecheck caught one
+unused new-test parameter; underscore rename only, final typecheck/lint/full Ruff pass.
+Security17, institutional/presentation builds and artifact4 all pass; existing build warnings.
+
+Final actual emulator/current-PostgreSQL/Gateway/browser acceptance PASS:
+`../production/mvp-20261104/m1-onboarding-browser-final.json`. Includes email/password
+signup/OOB verification and recovery, no implicit grant, pending claim/admin approval,
+Student and Teacher revocation, duplicate linked-record rollback, expired/invalid/replayed/
+revoked/email-bound invitations, RLS and SQL approval-reference denial. Actual browser
+refresh restoration, Administrator approval/private invitation, Teacher activation and
+keyboard logout; verification/Student-claim/Admin-invitation forms at all5 widths and
+native200. Images visually inspected. Healthy503=0; expected403 membership denials only;
+Auth/PG stopped, outbound0. Manual screen reader and live Firebase/MFA remain unqualified.
+
+Current source/qualification hashes and all3 matching original DB hashes are in
+`../production/mvp-20261104/m1-exit-manifest.json`. No real users, cloud/settings/messages,
+original migrations/imports, commit/push or deployment. Earlier failures retained. M1
+is accepted locally, not production/cloud certification. Next authorized task: M2 private
+registration extraction/review with published-only authorized matching; existing local
+Windows OCR en-US availability confirmed without cloud calls. M3–M5 remain planned.
+
+## 4 November 2026 22:58 SGT — functional MVP M1 PARTIAL, mandatory stop
+
+Current owner request authorizes local M1–M5. Base/current HEAD remains
+`aea9494db46153672a31a2161070e5e4ff713966`; pre-existing dirty work preserved.
+Acceptance written first; supplied registration/tutorial PDFs read locally, personal
+values suppressed, no source copy/real-data fixture/cloud upload. Local M1 changes
+implement Firebase signup/verification/recovery, pending claims, private faculty
+invitations, current-Administrator decisions/revocation, email attestation, recent
+privileged sign-in, bounded throttle and PostgreSQL migration0014 with existing audit/RLS.
+Exact files/routes/traceability and limitations: `MVP_EVIDENCE.md`.
+
+Fresh Gateway169 + new API4 tests, frontend account/session19 + panel2 tests, security17,
+typecheck/lint/build and focused Ruff passed. Existing build/framework warnings retained.
+Actual Auth Emulator/Gateway/disposable PostgreSQL API journey PASS in
+`../production/mvp-20261104/m1-onboarding-04.json`; Auth/PG stopped, outbound0.
+Independent reviewer found four issues; all fixed, covered, and correction-inspected.
+Browser acceptance NOT PASSED: first load timeout, then instrumented signup/verification
+hit missing temporary emulator iconv-lite files/500. That test-tool installation was
+repaired and UTF-8 decoding checked; no successful post-repair browser run claimed.
+
+Full backend **959 passed/9 failed**; eight portable conflict-fixture failures corrected
+by constructing an explicit synthetic solver DTO, preserving conflict assertions and
+the actual qualifier's normal readiness path. Affected serial check **34 passed/1 failed**:
+the same solver test again returned UNKNOWN at its unchanged eight-second limit.
+Logs: `../production/mvp-20261104/m1-backend-regression.log` and `m1-backend-affected.log`.
+This is a persistent test failure; implementation/qualification stopped under AGENTS.md
+and explicit bounded diagnosis/resumption approval requested. No assertion/limit/constraint
+or solver change, no green full-suite/M1 claim, no M2–M5 implementation yet.
+
+All3 original SQLite hashes freshly match P1/pre-work values. Latest owned Auth stopped
+and PostgreSQL server_state:stopped; existing user processes preserved. No real accounts,
+original migration, live record import, cloud action, messages, commit/push or deployment.
+Next only after approval: diagnose recurring UNKNOWN without weakening guards, then
+complete M1 browser/final acceptance and continue the authorized five-milestone sequence.
+
 ## Current session — 26–28 October 2026
 
 Latest checkpoint: 29 October00:30 — shared workload/room-move invariants fixed; backend829 prior checkpoint; actual PG per-resource matrix and bounded scale25/250 pass. Remaining adapter race: conflicting publication/restriction winner/loser, then final regressions/review. P3b PARTIAL.
@@ -609,3 +1097,51 @@ Approved Rooms-only implementation accepted at base/current SHA8100dba82ed1064a1
 Fresh final evidence: frontend752/46 PASS179.01s, affected backend125, security17, artifacts4, audit0; typecheck/lint/rootbuild/presentationbuild exit0. Real connected Auth Emulator/disposable PG journey PASS with68 healthy200,7 expected403,3 intentional503,zero unexplained503,zero browser errors. Final presentation browser five widths360/390/768/1024/1440 and actual native200 keyboard/overflow checks PASS; screenshots/reference inspected. Single focused independent review:2 findings resolved. Original3 SQLite +61 P3b hashes unchanged. Earlier whole-run timeout and stale exact-link expectation are retained in STUDENT_ROOMS_EVIDENCE.md and resolved by serial qualification; guards/assertions preserved. No commit/push/deployment. Release remains explicit read-only presentation. Evidence: STUDENT_ROOMS_EVIDENCE.md and ../production/student-rooms-20261030/exit-evidence.json.
 
 Remaining: verified lab/physical occupancy data and tenant-authorized connected full directory are unavailable; manual screen-reader/physical-device/production acceptance unverified. No automatic P4c/P4d or further redesign. Await separate owner release authority for GitHub/Vercel changes.
+
+## 31 October 2026 — bounded CI repair PARTIAL; security BLOCKED; qualification gate
+
+Base/current SHAaea9494db46153672a31a2161070e5e4ff713966 matches failed GitHub run41184643255; all3 remote job logs inspected. Implemented two-file repair: deterministic Date-only clock and explicit Oct/Nov + Dec/Jan calendar tests in StructuredCalendarPage.test.tsx; quality.yml uses python -m pytest. Reproduced reported Web failure once; focused6 PASS. Python console17 collection errors reproduced; module invocation collects947. Fresh npm ci and npm ls --all PASS in source snapshot; npm audit low remains12 moderate due minimatch<11.0.1. Latest stable ESLint10.14/TypeScript-ESLint8.72.1 still require10.x, so no supported upstream fix; no lockfile changes/force/overrides/exceptions.
+
+Full clean frontend run reached unchanged300s guard:750 passing case records, no final suite result. Clean Python install hit180s setup limit twice (one cached continuation), so stop at conservative persistent-qualification gate; no third attempt or weakened guards. Full backend execution and remaining final gates NOT RUN. Evidence and exact attempts: CI_REPAIR_EVIDENCE.md; ../production/ci-repair-20261031/.70 before/after hashes match (3 original DB,61 backend/package,6 Rooms/routing files). Student Rooms/security source intact; no commit/push/deploy. Owner approval required for bounded serial continuation using existing validated runtimes; dependency advisory separately BLOCKED pending compatible upstream release or explicit policy decision. No remote CI PASS claimed.
+
+## 31 October 2026 18:05 SGT — institutional schedule priority corrected; isolated review complete
+
+Owner explicitly authorizes this independent review-only task; CI retry/security blockers remain unchanged. Base/current HEAD aea9494db46153672a31a2161070e5e4ff713966; existing workflow/calendar/CI documentation changes preserved. Acceptance written before implementation in docs/academic/review-20261031/ACCEPTANCE.md; authorization recorded in APPROVALS.md.
+
+VERIFIED: green is owner-confirmed current revised BSIT 3A operational evidence; pink superseded, 3B currency unconfirmed; NB 107 preserved separately with unknown effective date. All three original attachment bytes copied and SHA-256 checked. Twelve raw-code/raw-room sessions file-staged as JSON/CSV; tentative Tue ITOPSYS has null room; no conflicting pink assignments merged. Observed 1620 weekly minutes including180 tentative (1440 without);9 codes each180 observed, not verified curriculum contact requirements. No section overlaps; no candidate-room overlaps within this section. PRC versus PRRC spelling, COMLAB candidate mappings and all exact Registrar codes remain explicitly unverified.
+
+Existing AcademicSnapshot contracts and scheduling Window/intersects/academic_readiness reused without architecture/application changes. Academic snapshot validates; readiness correctly BLOCKED with missing faculty, eligible resources, minutes and operating hours. Full scheduling/student/faculty/cross-section validation and actual PostgreSQL persistence NOT RUN: file-only review has no authorized tenant/principal/term or fabricated Assignments. No institutional identities created. Applicable Registrar version absent; missing-information list and ten-requirement traceability in review README. Self-review compared all twelve rows to green merged boundaries, inspected CSV/readiness, ensured catalog candidates exist and NB/PRRC identities differ. No independent external review claimed.
+
+Fresh final commands: .venv/Scripts/python.exe docs/academic/review-20261031/prepare_review.py exit0 (count/interval/section/minutes/overlap/source hash/contract/blocked readiness/preservation assertions); .venv/Scripts/ruff.exe check docs/academic/review-20261031/prepare_review.py exit0. Initial script formatting findings corrected before final checks. git diff --check exit0 (existing CRLF notices only). Original3 SQLite SHA-256 before/after match each other and P1 baselines; hashes in review validation.json. No original DB connection/write, PG connection/import, cloud, account, publication, Git commit or deployment. No unrelated frontend/backend full regression claimed for review artifacts.
+
+Files: review-20261031 README/acceptance/script,3 preserved sources, source-register.json,current-bsit3a.json/CSV,academic-review-snapshot.json,academic-readiness.json,validation.json; curriculum-source-register.md; APPROVALS/ROADMAP/STATUS. Local staging/transcription COMPLETE; institutional reconciliation and scheduling promotion BLOCKED pending listed Registrar/term/room/faculty/eligibility evidence. STOP at review; next is owner review/missing information, not publication or deployment.
+
+## 31 October 2026 — bounded CI qualification: WEB PASS / PYTHON PARTIAL / security BLOCKED
+
+Explicit owner approval reopened prior gate for one serial full execution each using existing runtimes/guards. Preflight: no stale workers or running review agents; existing preview services preserved. Frontend754/46 PASS219.68s (231.28s wall), unchanged300s guard, no retry. Fresh lint/typecheck/security17/rootbuild/artifacts4/presentationbuild PASS serially; release remains read-only-presentation. Full Python947 executed:934 passed/13 failed in120.08s. Runner mistake: workspace --basetemp violates existing OS-temp-only test provider guard, producing intended503s. No backend relaxation/source change or second full run; correctly configured plain python-mpytest remains pending under one-run cap. Python pip check/Ruff PASS; reused pinned audit tool finds4 pyasn1.6.4 advisories, fixes.6.5, no policy exception/update applied. minimatch compatibility/exposure assessed once: latest supported parents still require affected3.x/10.x; dev-only installed graph, absent production dependency/source/bundle signatures, audit BLOCKED12 moderate. All70 preservation hashes match; unrelated academic-review work retained. CI source still only workflow module invocation and deterministic calendar tests. No commit/push/deployment/remote pass. Latest CI_REPAIR_EVIDENCE.md appendix and approved-qualification-summary.json contain counts/timings/causes. Stop; need authority for further Python run/dependency remediation; do not call this green CI.
+
+## 3 November 2026 — cohort-aware curriculum / synthetic BSIT pilot PASS locally
+
+Base/current HEAD `aea9494db46153672a31a2161070e5e4ff713966` (all work remains uncommitted). Owner-approved bounded pilot implemented after reading `docs/academic/README_START_HERE.md` and `CODEX_IMPLEMENTATION_DIRECTIVE.txt`; acceptance and authorization are in `COHORT_PILOT_ACCEPTANCE.md` and `APPROVALS.md`. Final source changes cover catalog contracts, cohort bindings, PostgreSQL migration/repository, academic API/gateway, Admin workflows, scheduling readiness/publication guards, synthetic pilot, and targeted tests. Requirements and limitations are traced in `COHORT_PILOT_EVIDENCE.md`.
+
+VERIFIED: 39 curriculum source versions / 8 programs / 2,062 source rows retained as unreviewed; 27 hypothetical BSIT first-term offerings and 81 tagged synthetic candidates; no automatic migration from 2024 cohort curriculum; exact codes preserved. Green BSIT3A current sessions remain separate review-only files (12 sessions, 1,620 observed weekly minutes including tentative Tuesday ITOPSYS; no approved-contact-minute claim). Pink is superseded; BSIT3B currency unconfirmed; NB107 remains independent from PRRC107 with unknown effective date. Code and room reconciliation gaps remain explicit.
+
+Fresh gates: `.venv/Scripts/python.exe -m pytest services/academic services/scheduling services/persistence -q` → **790 passed**, one framework deprecation warning, 87.06s. Earlier simultaneous CPU load caused one existing 8s solver test to return UNKNOWN; isolated retry passed, then the serial full suite passed unchanged. `.venv/Scripts/ruff.exe check services packages scripts` passed. `npm run typecheck`, `npm run lint`, `npm run build` passed; build retains existing chunk-size/Firebase split warnings. Focused frontend15 passed; full frontend759 passed / 48 skipped; security17 passed. Updated `node scripts/cohort_pilot_browser.cjs` passed synthetic API-render review, widths360/390/768/1024/1440, native200, keyboard, exact source-code selection, empty contact minutes/readiness blocker, no page/console errors/external calls. It is not connected backend acceptance. Disposable PostgreSQL18.6 qualification passed using `python -m scripts.postgres_cohort_pilot_qualification`; fresh evidence `../production/cohort-pilot-20261031/postgres-pilot-final-20261103.json` covers migrations, atomic seed, feasible54-session OR-Tools solve + independent validation, draft/revision/idempotency, synthetic-only publication, Student/Teacher scoping, role/tenant denials, cohort binding persistence/immutability, clear-metadata denial, rollback, RLS and stopped cluster. `git diff --check` passed (line-ending notices only).
+
+Original SQLite hashes were freshly compared with `docs/production/p1-database-preservation.json` and match exactly: academic `4cd5f60de21bd365c914ac01e5be692b3bea1c7a56a7f17a76c6953ef8668738`; scheduling `1848377cc9a9eb656e12b5e58436e81198fef92f18dd71c1fea2f6f8b482e400`; backup `9ec149413d69c1165b74a75e366fa262417c1ecbf41e7029fdd0d86ac96f395d`. No original DB writes, live imports, accounts, cloud, real timetable publication, commits, pushes or deployment. Prior minimatch/pyasn1 audit blockers remain open. **Milestone PASS locally; stop at bounded first academic pilot.** Next institutional work is blocked pending Registrar-approved version/code mappings and minutes, effective term/calendar, confirmed rooms/room schedules, Tuesday ITOPSYS decision, actual sections/enrollments/faculty/eligibility, and cross-institute room/faculty locks. No real-data acceptance is claimed.
+
+## 3 November 2026 15:52 SGT — real academic-data readiness PASS, real scheduling BLOCKED
+
+Owner-authorized bounded milestone completed at base/current HEAD `aea9494db46153672a31a2161070e5e4ff713966`; no commit/push. Preserved all earlier dirty work and pilot data. Acceptance cases: `REAL_ACADEMIC_READINESS_ACCEPTANCE.md`; full traceability/evidence: `REAL_ACADEMIC_READINESS_EVIDENCE.md`.
+
+Delivered a review-only BSIT Years 1–4 readiness report, input checklist, cohort-version and code candidate reconciliations, and a current Admin data-entry flow using existing contracts/screens. Source inventory is structurally reconciled: 39 versions, 8 programs, 2,062 extracted course rows, 20 distinct PDF hashes, 5 BSIT version candidates, 27 first-semester requirement rows, 36 unresolved code-change candidates, and 12 green BSIT3A sessions. No Registrar approval, actual term offering, or curriculum equivalency is inferred. Green remains owner-confirmed; Tuesday ITOPSYS remains tentative/null-room; pink is superseded; 3B currency remains unconfirmed; NB 107 remains distinct from PRRC 107 with unknown effective date.
+
+Readiness now blocks institutional generation on missing approved calendar, exact cohort/version and section identity, verified aggregate population/source, reviewed exact source/course and approved contact-minute references, actual term offerings, faculty eligibility/availability/workload references, room availability/blocks and institutional room provenance, operating-window approval, complete scope, and same-period ICS/IBE/ITE scope review. Admin edits invalidate related review flags. Fixed assignments use structured saved offering/faculty/room selections. Complete synthetic-only simulation remains isolated to synthetic faculty and rooms, cannot mix with provisioned room/faculty scope, and cannot publish to the institutional dataset.
+
+Fresh verification: `.venv/Scripts/python.exe -m pytest services/academic services/scheduling -q` **393 passed**, 1 existing Starlette/httpx warning, 69.96s; focused `AcademicManagementPage.test.tsx` **11 passed**; web typecheck/lint/build passed; Ruff focused files passed; review builder reported `PASS_REVIEW_ONLY`; `git diff --check` passed with line-ending notices. Build emits existing Firebase dynamic-import and bundle-size warnings. Final disposable PostgreSQL 18.6 evidence: `../production/real-academic-readiness-20261103/postgres-synthetic-final.json` — 27 hypothetical offerings, 81 synthetic candidates, 54 feasible independently validated sessions, draft/revision/role/tenant/RLS/rollback checks, and attempted institutional publication denied with state unchanged. Cluster stopped. Original academic/scheduling/backup SQLite hashes match the P1 baseline; values are in the evidence file. An initial sandboxed `pg_ctl` attempt failed before server startup with restricted-token error; no existing DB was contacted. The successful retry used a new marked temporary cluster. An intermediate readiness assertion exposed the synthetic-only scenario distinction; corrected and retested, no test or solver gate relaxed.
+
+Real-data pilot entry is **BLOCKED** pending Registrar-certified source/version/cohort assignment and code equivalencies/minutes; the official effective calendar; real sections, populations and current offerings; authentic faculty/eligibility/availability/workload; verified physical room identities, restrictions/blocks and NB107 effective date; full ICS/IBE/ITE shared-resource commitments; and named supervised-pilot authority/rollback/publication-stop plan. No student roster, real faculty, room or schedule imported; no account, cloud/deployment or publication action. Stop here; Teacher/Admin visual redesign remains out of scope. Existing CI/dependency security blockers remain separate and unchanged.
+
+### Final verification correction — 3 November 2026
+
+The paragraph above records the initial bounded checks; final evidence supersedes its test count and PostgreSQL artifact path. Added migration `0013_synthetic_review_period_mode`: ordinary periods default to institutional data; only a separately persisted synthetic-review period can contain synthetic faculty and rooms, and it is excluded from the institutional period list. PostgreSQL qualification separately verifies the migration revision/column after downgrade and reapply. Final disposable PostgreSQL 18.6 run **PASS**: 54 independently validated sessions, institutional synthetic-write denials, synthetic period isolation, role/tenant/RLS/rollback and denied publication; cluster stopped. Final backend suite **395 passed** (81.67s; one existing Starlette/httpx deprecation warning); focused Admin UI **11 passed**; web typecheck, lint and build passed (existing Firebase dynamic-import and bundle-size warnings); Ruff and source review builder `PASS_REVIEW_ONLY`; original SQLite hashes match. Evidence: `REAL_ACADEMIC_READINESS_EVIDENCE.md` and `../production/real-academic-readiness-20261103/postgres-synthetic-mode-final.json`. No production action. Stop at this milestone.

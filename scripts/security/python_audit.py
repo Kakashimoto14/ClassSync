@@ -14,6 +14,7 @@ from urllib.parse import unquote, urlparse
 from urllib.request import url2pathname
 
 from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
 
 INTERNAL_PACKAGES = {
     "classync-api-contracts": ("0.1.0", "api-contracts"),
@@ -39,7 +40,7 @@ def inspect_report(report, expected):
     dependencies = report.get("dependencies")
     if not isinstance(dependencies, list):
         raise ValueError("Missing dependency results; scan is NOT VERIFIED")
-    normalized = {d["name"].lower().replace("_", "-"): d for d in dependencies}
+    normalized = {canonicalize_name(d["name"]): d for d in dependencies}
     if len(normalized) != len(dependencies) or set(normalized) != set(expected):
         raise ValueError("Incomplete scan coverage; scan is NOT VERIFIED")
     findings = set()
@@ -64,7 +65,7 @@ def main():
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
     installed = {
-        d.metadata["Name"].lower().replace("_", "-"): d.version
+        canonicalize_name(d.metadata["Name"]): d.version
         for d in importlib.metadata.distributions()
     }
     root = Path(__file__).resolve().parents[2]
@@ -81,7 +82,9 @@ def main():
             if not line.strip() or line.startswith(("#", "-c", "-e")):
                 continue
             requirement = Requirement(line)
-            name = requirement.name.lower().replace("_", "-")
+            if requirement.marker and not requirement.marker.evaluate():
+                continue
+            name = canonicalize_name(requirement.name)
             if name not in installed or installed[name] not in requirement.specifier:
                 raise ValueError(f"Installed version does not satisfy {service}: {name}")
         verified_requirements.append(str(manifest.relative_to(root)))

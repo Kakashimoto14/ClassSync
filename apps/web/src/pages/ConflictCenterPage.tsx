@@ -9,6 +9,8 @@ import {
 import { IndependentValidation } from './TimetableValidation';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { Button } from '../components/ui/Button';
+import { appMode } from '../config/runtime-config';
+const connectedWorkspace = appMode === 'institutional' || schedulingSandboxEnabled;
 export function ConflictCenterPage() {
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Array<{ id: string; title: string }>>([]),
@@ -17,7 +19,7 @@ export function ConflictCenterPage() {
     [error, setError] = useState(''),
     [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!schedulingSandboxEnabled) return;
+    if (!connectedWorkspace) return;
     let ignore = false;
     setLoading(true);
     listSchedulingDrafts(0, 'academic')
@@ -38,7 +40,7 @@ export function ConflictCenterPage() {
     };
   }, [retry]);
   useEffect(() => {
-    if (!id || !schedulingSandboxEnabled) return;
+    if (!id || !connectedWorkspace) return;
     let ignore = false;
     setDraft(null);
     setError('');
@@ -53,7 +55,7 @@ export function ConflictCenterPage() {
       ignore = true;
     };
   }, [id, retry]);
-  if (!schedulingSandboxEnabled)
+  if (!connectedWorkspace)
     return (
       <p>
         Verified Administrator access is required. Local snapshot validation is disabled in this

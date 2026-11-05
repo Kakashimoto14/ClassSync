@@ -25,6 +25,11 @@ function qualificationModule(args) {
     '--scheduling': 'scripts.postgres_scheduling_provider_qualification',
     '--publication': 'scripts.postgres_publication_provider_qualification',
     '--student-browser': 'scripts.postgres_student_experience_qualification',
+    '--onboarding': 'scripts.postgres_onboarding_qualification',
+    '--onboarding-browser': 'scripts.postgres_onboarding_browser_qualification',
+    '--scanner-browser': 'scripts.postgres_registration_browser_qualification',
+    '--connected-browser': 'scripts.postgres_connected_browser_qualification',
+    '--postman': 'scripts.postgres_postman_qualification',
   };
   const selected = args.length === 6 ? 'scripts.postgres_emulator_qualification'
     : args.length === 7 && Object.hasOwn(modes, args[6]) ? modes[args[6]] : undefined;

@@ -30,6 +30,7 @@ from .record_rules import (
     timestamp,
     unique_label,
     validate_calendar,
+    validate_period_data_mode,
     validate_record,
 )
 from .repository import AcademicRepository
@@ -116,7 +117,7 @@ class PostgresAcademicRepository:
             db.execute(
                 text(
                     """
-            SELECT id,title,revision,created_at FROM classsync_academic.period_metadata
+            SELECT id,title,revision,created_at,data_mode FROM classsync_academic.period_metadata
             WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:period
         """
                     + (" FOR UPDATE" if lock else "")
@@ -145,13 +146,19 @@ class PostgresAcademicRepository:
         )
         try:
             value = None
+            period = dict(row)
+            data_mode = period.pop("data_mode")
             if calendar is not None:
                 if checksum(calendar["payload"]) != calendar["checksum"]:
                     raise ValueError("Checksum mismatch")
                 value = AcademicCalendar.model_validate(json.loads(calendar["payload"]))
             return AcademicPeriod(
-                **{**row, "created_at": utc_timestamp(row["created_at"])},
-                source="institutional",
+                **{**period, "created_at": utc_timestamp(row["created_at"])},
+                source=(
+                    "synthetic-review"
+                    if data_mode == "synthetic-review"
+                    else "institutional"
+                ),
                 calendar=value,
             )
         except ValueError as error:
@@ -185,7 +192,8 @@ class PostgresAcademicRepository:
             ids = db.scalars(
                 text("""
                 SELECT id FROM classsync_academic.period_metadata
-                WHERE tenant_id=:tenant AND owner_uid=:owner ORDER BY created_at DESC,id
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND data_mode='institutional'
+                ORDER BY created_at DESC,id
             """),
                 self.keys,
             ).all()
@@ -205,6 +213,35 @@ class PostgresAcademicRepository:
             if body.calendar:
                 self.calendar_in(db, period_id, body.calendar)
             for record in initial_records(body.include_cdm_catalog):
+                self.write_in(db, period_id, RecordWrite(expected_revision=0, record=record))
+            return self.snapshot_in(db, period_id)
+
+    def create_synthetic_review_period(self, body, records):
+        """Atomic synthetic-only pilot import using existing scoped records/audit/RLS."""
+        if (
+            any(r.kind == "faculty" and (not r.synthetic or r.institutional_id) for r in records)
+            or (any(r.kind == "resources" and r.source != "synthetic" for r in records))
+            or not any(r.kind == "resources" for r in records)
+        ):
+            raise AcademicError(
+                422, "synthetic_only", "Pilot requires synthetic rooms and faculty."
+            )
+        validate_calendar(body.calendar)
+        period_id = str(uuid4())
+        with self.session(write=True) as db:
+            db.execute(
+                text("""
+                INSERT INTO classsync_academic.period_metadata
+                    (tenant_id,owner_uid,id,title,data_mode)
+                VALUES (:tenant,:owner,:period,:title,'synthetic-review')
+            """),
+                self.params(period_id, title=body.title),
+            )
+            if body.calendar:
+                self.calendar_in(db, period_id, body.calendar)
+            for record in records:
+                if record.kind == "sections":
+                    record = record.model_copy(update={"period_id": period_id})
                 self.write_in(db, period_id, RecordWrite(expected_revision=0, record=record))
             return self.snapshot_in(db, period_id)
 
@@ -272,6 +309,16 @@ class PostgresAcademicRepository:
 
     def write_in(self, db, period_id, body):
         record = body.record
+        data_mode = db.scalar(
+            text("""
+                SELECT data_mode FROM classsync_academic.period_metadata
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:period
+            """),
+            self.params(period_id),
+        )
+        if data_mode not in {"institutional", "synthetic-review"}:
+            raise AcademicError(404, "period_not_found", "Academic period does not exist.")
+        validate_period_data_mode(record, data_mode)
         existing = self.record_in(db, period_id, record.kind, record.id)
         revision = existing["revision"] if existing else 0
         if body.expected_revision != revision:
@@ -286,6 +333,61 @@ class PostgresAcademicRepository:
             return self.envelope(row).record if row else None
 
         validate_record(record, period_id, lookup)
+        if record.kind == "constraints":
+            has_registry = (
+                db.scalar(
+                    text("SELECT to_regclass('classsync_academic.cohort_bindings') IS NOT NULL")
+                )
+                if any(not e.curriculum_version_id for e in record.enrollments)
+                else True
+            )
+            for enrollment in record.enrollments:
+                if not enrollment.curriculum_version_id:
+                    if has_registry and db.scalar(
+                        text("""
+                        SELECT 1 FROM classsync_academic.cohort_bindings
+                        WHERE tenant_id=:tenant AND owner_uid=:owner AND student_id=:student
+                    """),
+                        {**self.keys, "student": enrollment.student_id},
+                    ):
+                        raise AcademicError(
+                            409,
+                            "cohort_immutable",
+                            "An assigned student curriculum cannot be cleared.",
+                        )
+                    continue
+                binding = {
+                    **self.keys,
+                    "student": enrollment.student_id,
+                    "cohort": enrollment.entry_cohort_year,
+                    "version": enrollment.curriculum_version_id,
+                }
+                db.execute(
+                    text("""
+                    INSERT INTO classsync_academic.cohort_bindings
+                        (tenant_id,owner_uid,student_id,entry_cohort_year,curriculum_version_id)
+                    VALUES (:tenant,:owner,:student,:cohort,:version)
+                    ON CONFLICT DO NOTHING
+                """),
+                    binding,
+                )
+                existing_binding = db.execute(
+                    text("""
+                    SELECT entry_cohort_year,curriculum_version_id
+                    FROM classsync_academic.cohort_bindings
+                    WHERE tenant_id=:tenant AND owner_uid=:owner AND student_id=:student
+                """),
+                    binding,
+                ).one()
+                if tuple(existing_binding) != (
+                    enrollment.entry_cohort_year,
+                    enrollment.curriculum_version_id,
+                ):
+                    raise AcademicError(
+                        409,
+                        "cohort_immutable",
+                        "Student curriculum binding survives term/enrollment changes.",
+                    )
         payload = encode(record.model_dump(mode="json"))
         params = self.params(
             period_id,

@@ -12,7 +12,14 @@ ZONE = ZoneInfo("Asia/Manila")
 def occurrences(inputs, assignments, calendar, start, end):
     if start > end or (end - start).days > 62:
         raise DraftError(422, "calendar_range", "Choose a date range of at most 63 days.")
-    subjects = {o.subject_id: (o.subject_id, o.subject_name) for o in inputs.offerings}
+    subjects = {
+        o.subject_id: (
+            o.subject_code or o.subject_id,
+            o.subject_name,
+            "academic-record" if o.subject_code else "legacy-identifier",
+        )
+        for o in inputs.offerings
+    }
     sections = {s.id: s for s in inputs.sections}
     programs = {p.id: p for p in inputs.programs}
     teachers = {t.id: t for t in inputs.teachers}
@@ -81,6 +88,7 @@ def occurrences(inputs, assignments, calendar, start, end):
                         "id": a.subject_id,
                         "code": subjects[a.subject_id][0],
                         "name": subjects[a.subject_id][1],
+                        "code_source": subjects[a.subject_id][2],
                     },
                     "section": {
                         "id": section.id,

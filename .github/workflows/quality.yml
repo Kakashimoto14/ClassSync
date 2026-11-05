@@ -3,6 +3,48 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  linux-containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - name: Qualify three Linux images, local OCR, health, denial and recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="classsync-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          network="${prefix}-network"
+          cleanup() {
+            for service in gateway scheduling academic; do
+              docker rm -f "${prefix}-${service}" >/dev/null 2>&1 || true
+            done
+            docker network rm "$network" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for service in gateway academic scheduling; do
+            image="${prefix}-${service}:local"
+            docker build --build-arg "SERVICE=$service" -t "$image" .
+            docker image inspect --format '{{.Id}}' "$image"
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m \
+              --memory 1g --cpus 1 --cap-drop ALL --security-opt no-new-privileges:true \
+              "$image" python -m scripts.linux_runtime_probe
+          done
+          docker network create --internal "$network"
+          for service in academic scheduling gateway; do
+            docker run -d --name "${prefix}-${service}" --network "$network" \
+              --network-alias "$service" --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m \
+              --memory 1g --cpus 1 --cap-drop ALL --security-opt no-new-privileges:true \
+              -e ACADEMIC_SERVICE_URL=http://academic:8080 \
+              -e SCHEDULING_SERVICE_URL=http://scheduling:8080 \
+              -e ENABLE_TEST_IDENTITY_ADAPTERS=false -e COURSE_CLOUD_ENABLED=false \
+              "${prefix}-${service}:local"
+          done
+          docker exec "${prefix}-gateway" python -m scripts.linux_runtime_probe --health
+          docker stop "${prefix}-academic"
+          docker exec "${prefix}-gateway" python -m scripts.linux_runtime_probe --academic-outage
+          docker start "${prefix}-academic"
+          docker exec "${prefix}-gateway" python -m scripts.linux_runtime_probe --health
   web:
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +83,8 @@ jobs:
       - run: pip install -r requirements.txt
         working-directory: services/persistence
       - run: ruff check scripts/security scripts/postgres_disposable.py scripts/postgres_driver_qualification.py scripts/postgres_identity_qualification.py scripts/postgres_restore_qualification.py scripts/postgres_revision_qualification.py scripts/postgres_audit_qualification.py scripts/postgres_identity_http_qualification.py scripts/postgres_emulator_qualification.py scripts/postgres_provider_qualification.py scripts/postgres_web_session_qualification.py scripts/postgres_academic_period_qualification.py scripts/postgres_academic_repository_qualification.py scripts/postgres_academic_migration_qualification.py scripts/postgres_academic_provider_qualification.py scripts/postgres_academic_restore_qualification.py scripts/postgres_draft_qualification.py scripts/postgres_scheduling_provider_qualification.py scripts/postgres_scheduling_migration_qualification.py scripts/postgres_scheduling_restore_qualification.py scripts/postgres_publication_state_qualification.py scripts/postgres_publication_repository_qualification.py scripts/postgres_publication_resource_qualification.py scripts/postgres_publication_scale_qualification.py services packages
-      - run: pytest
+      - run: ruff check scripts/container_entrypoint.py scripts/build_mvp_postman.py
+      - run: python -m pytest
       - name: Create isolated pinned security scanner
         run: |
           python -m venv "${RUNNER_TEMP}/classsync-audit-tools"

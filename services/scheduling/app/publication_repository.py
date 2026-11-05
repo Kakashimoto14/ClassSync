@@ -105,15 +105,15 @@ class PublicationRepository(PublicationRules):
                 return report
             duplicate = db.execute(
                 "SELECT * FROM published_versions WHERE tenant=? AND dataset=? "
-                "AND period_id=? AND draft_id=?",
-                (tenant, command.dataset, draft.period_id, draft.id),
+                "AND period_id=? AND draft_id=? AND revision=?",
+                (tenant, command.dataset, draft.period_id, draft.id, revision),
             ).fetchall()
             for old in duplicate:
                 if self.decode(old)["calendar"] == command.calendar:
                     raise DraftError(
                         409,
                         "duplicate_publication",
-                        "This draft and effective calendar have already been published.",
+                        "This draft and effective calendar are currently published.",
                     )
             identity = str(uuid4())
             created = now()

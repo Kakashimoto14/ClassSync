@@ -6,7 +6,7 @@ import {
   type UniversitySessionDriver,
 } from './university-session';
 
-function identityEndpoint() {
+export function identityEndpoint(path = '/auth/me') {
   const base = env.apiBaseUrl;
   if (base.includes('\\')) throw new UniversitySessionError('unavailable');
   if (!base.startsWith('/') && !/^https?:\/\//.test(base))
@@ -25,7 +25,7 @@ function identityEndpoint() {
   ) {
     throw new UniversitySessionError('unavailable');
   }
-  url.pathname = url.pathname.replace(/\/$/, '') + '/auth/me';
+  url.pathname = url.pathname.replace(/\/$/, '') + path;
   return url.toString();
 }
 

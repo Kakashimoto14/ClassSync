@@ -69,6 +69,8 @@ def readiness(inputs: GenerationInput):
         if any(day not in range(7) for day in section.preferred_days):
             issue("invalid_preference", f"Section {section.id} has an invalid preferred day.")
     for teacher in inputs.teachers:
+        if teacher.synthetic and not inputs.synthetic:
+            issue("synthetic_faculty", "Synthetic faculty cannot serve institutional scheduling.")
         if not teacher.availability:
             issue("teacher_availability_missing", f"Supply availability for {teacher.name}.")
         if any(day not in range(7) for day in teacher.preferred_days):

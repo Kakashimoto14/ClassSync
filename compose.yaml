@@ -1,0 +1,50 @@
+services:
+  gateway:
+    build:
+      context: .
+      args: { SERVICE: gateway }
+    env_file: .env.container.gateway
+    environment:
+      CLASSSYNC_ENV: production
+      ENABLE_SCHEDULING_SANDBOX: "false"
+      ENABLE_TEST_IDENTITY_ADAPTERS: "false"
+      COURSE_CLOUD_ENABLED: "false"
+      ACADEMIC_SERVICE_URL: http://academic:8080
+      SCHEDULING_SERVICE_URL: http://scheduling:8080
+    ports: ["127.0.0.1:8000:8080"]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [backend]
+  academic:
+    build:
+      context: .
+      args: { SERVICE: academic }
+    env_file: .env.container.academic
+    environment:
+      CLASSSYNC_ENV: production
+      ENABLE_SCHEDULING_SANDBOX: "false"
+      ENABLE_TEST_IDENTITY_ADAPTERS: "false"
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [backend]
+  scheduling:
+    build:
+      context: .
+      args: { SERVICE: scheduling }
+    env_file: .env.container.scheduling
+    environment:
+      CLASSSYNC_ENV: production
+      ENABLE_SCHEDULING_SANDBOX: "false"
+      ENABLE_TEST_IDENTITY_ADAPTERS: "false"
+      ACADEMIC_SERVICE_URL: http://academic:8080
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [backend]
+networks:
+  backend: {}

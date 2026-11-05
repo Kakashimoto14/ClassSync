@@ -1,5 +1,29 @@
 # ClassSync — execution roadmap and dependency gates
 
+## 4 November 2026 — functional MVP M1–M5
+
+Owner authorizes the local five-milestone implementation sequence in APPROVALS.md.
+M1 account lifecycle/onboarding PASS for bounded local acceptance,4 November23:24 SGT.
+Owner-approved diagnosis retained all solver/model limits/constraints/guards; final
+backend968/frontend768, security17/artifact4, static/build and real emulator/PG/browser
+journey pass. See STATUS.md, MVP_M1_ACCEPTANCE.md, MVP_EVIDENCE.md and final qualification.
+M2 scanner PASS for bounded local acceptance,5 November03:34 SGT. Full backend986,
+frontend776, static/build/security17/artifact4 and actual scanner/emulator/PG/browser
+journey pass; Windows OCR only, no cloud/manual-screen-reader certification.
+M3 connected schedules PASS for bounded local acceptance,5 November: full backend1003,
+frontend795, static/security17/builds/artifacts4 and actual three-role publication,
+request/decision/room change/rollback/readiness/revocation/SQL/browser journey pass.
+Original hash mismatch explained by owner-confirmed intentional Demo save; preserved.
+M4 existing features PASS locally: backend1020/frontend804/static/security/builds/
+artifacts4 and connected notices/rooms/profiles/recovery/SQL/browser journey.
+M5 local implementation/delivery qualified: backend1048/frontend804/security19/builds/
+artifacts4 and final actual connected journey. Cloud integration, container execution,
+Postman runtime and remote Actions remain unqualified; npm audit release gate BLOCKED7
+moderate findings. M5 overall PARTIAL pending approved staging configuration/credentials
+and secure runner/platform qualification. See MVP_M5_TRACEABILITY.md; no production release.
+Supplied PDFs have been read locally.
+No cloud/Git/original-data authority is expanded.
+
 Status at harness creation is a historical snapshot, not a new repository audit. Continue only authorized work. Keep a requirement-to-test evidence matrix in `STATUS.md` or a linked file.
 
 | Phase | Definition of demonstrably done | Requires |
@@ -104,3 +128,24 @@ Prior sidebar recovery passed under explicit approval. Actual selected-design co
 ## Student Rooms refinement — PASS locally, 30 October 2026
 
 Search-first Student Rooms shipped locally with strict timetable-derived My rooms, preview-only59-space All rooms, honest Labs state and retained-context details. Full frontend752, affected backend125, security17, artifacts4; connected outage/recovery and five-width/native200 acceptance; all64 preservation hashes match. See STUDENT_ROOMS_EVIDENCE.md. Prior visual milestone history remains separate; this bounded Rooms checkpoint is accepted. No Teacher/Admin redesign or deployment. Future separately scoped work: qualified tenant directory/lab metadata/physical availability sources, manual assistive-technology and production acceptance; P4c/P4d require separate authorization. STOP at Student Rooms.
+
+## Three-job CI repair — PARTIAL / dependency security BLOCKED, 31 October2026
+
+Web test clock and Python module invocation corrections implemented. Focused6 pass;947 backend cases collected; clean npm ci/npm ls pass. Full qualification incomplete: frontend300s guard, fresh Python setup180s twice. Stop at gate; see CI_REPAIR_EVIDENCE.md for bounded continuation requiring owner approval. minimatch advisory remains12 moderate with no compatible stable parent upgrade; security policy unchanged. No GitHub pass/commit/deployment. Preserve accepted Student Rooms; no new product scope.
+
+## 31 October 2026 — institutional schedule review checkpoint
+
+Owner-confirmed green BSIT 3A priority correction and twelve-session isolated file staging COMPLETE; pink superseded,3B currency unconfirmed, NB107 separate/undated. See ../academic/review-20261031/README.md for current dataset/source register/missing information and STATUS for fresh checks. Contract validation/observed minutes/within-section overlaps VERIFIED; Registrar reconciliation, full scheduling acceptance and PG import BLOCKED on missing authorized inputs. STOP before institutional accounts/import/publication/deployment; CI repair gate remains separate and unchanged.
+
+## Approved CI qualification outcome — 31 October2026
+WEB PASS754/46 in219.68s; web gates/security17/artifacts4/builds green. PYTHON PARTIAL934 pass/13 fail of947 in120.08s due runner's non-OS-temp basetemp; guards unchanged, no second full run. New local audit:4 pyasn1.6.4 advisories with.6.5 fix. minimatch remains separately BLOCKED; bounded assessment found no supported parent upgrade and no production dependency path. All70 hashes preserved. See latest CI_REPAIR_EVIDENCE.md appendix. Stop; next separately authorized work is compatible Python dependency remediation plus plain python-mpytest qualification; Node audit remains blocking until upstream support or explicit policy decision. No remote-green/commit/deployment claim.
+
+## Cohort-aware curriculum and synthetic BSIT pilot — PASS locally, 3 November 2026
+
+Implemented the versioned 39-source catalog, immutable entry-cohort bindings, structured sections, Administrator review/readiness, and synthetic-only BSIT Years 1–4 pilot using existing PostgreSQL, OR-Tools, independent validation and publication safeguards. Final serial backend suite **790 passed**; disposable PostgreSQL end-to-end synthetic qualification, frontend typecheck/lint/build, five-width/native200 browser fixture, focused/full frontend results, security suite and original-database preservation are recorded in [COHORT_PILOT_EVIDENCE.md](COHORT_PILOT_EVIDENCE.md). Green BSIT3A remains separately file-staged current evidence; pink is superseded; Registrar codes, active term/sections, Tuesday room, room identities, faculty, contact minutes and campus-wide locks remain unresolved. Stop at this first pilot. Do not promote it into institutional records or publication; later approved import requires the evidence listed in the pilot report. Existing dependency audit blockers remain separate.
+
+## Real academic-data readiness — PASS bounded local, 3 November 2026
+
+Administrator data capture, verification references, institutional readiness blockers, same-period ICS/IBE/ITE scope review, structured fixed assignments, and the BSIT Years 1–4 readiness report are complete. Final academic/scheduling regression: **395 passed**; focused Admin **11 passed**; typecheck/lint/build/Ruff and review-only source reconciliation passed. Migration `0013_synthetic_review_period_mode` keeps synthetic reviews isolated from institutional periods; final disposable PostgreSQL qualification passed with **54 independently validated sessions**, institutional synthetic-write denials, role/tenant/RLS/rollback checks, and synthetic-to-institutional publication denial. Evidence: [REAL_ACADEMIC_READINESS_EVIDENCE.md](REAL_ACADEMIC_READINESS_EVIDENCE.md), [BSIT readiness report](../academic/real-academic-readiness-20261103/BSIT_YEARS_1_TO_4_READINESS.md), and [PostgreSQL evidence](../production/real-academic-readiness-20261103/postgres-synthetic-mode-final.json).
+
+Real scheduling remains BLOCKED pending the Registrar-approved cohort/source/code/minute decisions, actual period/calendar, sections/populations/offerings, authentic faculty, verified rooms, effective NB 107 date, cross-institute commitment inventory, and supervised-pilot authority listed in the report. No institutional import, account provisioning, publication, deployment, commit or push. STOP at this milestone; Teacher/Admin visual redesign is out of scope.

@@ -8,7 +8,7 @@ import hashlib
 import json
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 
 class Contract(BaseModel):
@@ -49,6 +49,7 @@ class Section(Contract):
 class Teacher(Contract):
     id: str = Field(min_length=1, max_length=80)
     name: str
+    synthetic: bool = False
     availability: list[Window] = Field(default_factory=list)
     unavailable: list[Window] = Field(default_factory=list)
     preferred_days: list[int] = Field(default_factory=list)
@@ -94,6 +95,7 @@ class Offering(Contract):
     id: str = Field(min_length=1, max_length=80)
     subject_id: str = Field(min_length=1)
     subject_name: str = Field(min_length=1)
+    subject_code: str | None = Field(default=None, min_length=1, max_length=80)
     section_id: str
     eligible_teacher_ids: list[str] = Field(default_factory=list)
     eligible_room_ids: list[str] = Field(default_factory=list)
@@ -111,6 +113,13 @@ class Offering(Contract):
     minimum_capacity: int | None = Field(default=None, gt=0)
     allowed_buildings: list[str] | None = None
 
+    @model_serializer(mode="wrap")
+    def preserve_legacy_snapshot(self, handler):
+        value = handler(self)
+        if value.get("subject_code") is None:
+            value.pop("subject_code", None)
+        return value
+
     @model_validator(mode="after")
     def exact_minutes(self):
         if any(sum(p.durations) != self.required_weekly_minutes for p in self.patterns):
@@ -125,6 +134,8 @@ class Offering(Contract):
 class Enrollment(Contract):
     student_id: str = Field(min_length=1)
     offering_ids: list[str] = Field(min_length=1)
+    entry_cohort_year: int | None = Field(default=None, ge=1900, le=2200)
+    curriculum_version_id: str | None = None
 
 
 class Assignment(Contract):
@@ -301,9 +312,15 @@ def scheduling_input_hash(inputs: GenerationInput):
     """Preserve S1 hashes when optional S2B workload constraints are absent."""
     value = inputs.model_dump(mode="json")
     for teacher in value["teachers"]:
+        if not teacher.get("synthetic"):
+            teacher.pop("synthetic", None)
         for key in ("max_weekly_minutes", "max_daily_minutes"):
             if teacher.get(key) is None:
                 teacher.pop(key, None)
+    for enrollment in value["enrollments"]:
+        for key in ("entry_cohort_year", "curriculum_version_id"):
+            if enrollment.get(key) is None:
+                enrollment.pop(key, None)
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()

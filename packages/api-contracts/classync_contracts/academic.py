@@ -35,6 +35,12 @@ class AcademicSubject(Identity):
     kind: Literal["subjects"] = "subjects"
     code: str = Field(min_length=1, max_length=80)
     name: str = Field(min_length=1, max_length=200)
+    curriculum_version_id: str | None = None
+    curriculum_course_id: str | None = None
+    curriculum_review_verified: bool = False
+    curriculum_review_reference: str | None = Field(default=None, max_length=160)
+    contact_minutes_verified: bool = False
+    contact_minutes_reference: str | None = Field(default=None, max_length=160)
     year_level: int | None = Field(default=None, ge=1, le=4)
     semester: Literal["first", "second"] | None = None
     provenance: Literal["synthetic", "administrator-entered", "source-supplied"] = (
@@ -55,6 +61,11 @@ class AcademicSubject(Identity):
 
     @model_validator(mode="after")
     def exact_patterns(self):
+        if self.curriculum_version_id:
+            if "required_weekly_minutes" not in self.model_fields_set:
+                self.required_weekly_minutes = None
+            if "patterns" not in self.model_fields_set:
+                self.patterns = []
         if self.required_weekly_minutes is not None and any(
             sum(p.durations) != self.required_weekly_minutes for p in self.patterns
         ):
@@ -68,8 +79,13 @@ class AcademicSection(Section):
     kind: Literal["sections"] = "sections"
     active: bool = True
     period_id: str
+    entry_cohort_year: int | None = Field(default=None, ge=1900, le=2200)
+    curriculum_version_id: str | None = None
+    cohort_assignment_verified: bool = False
+    identity_verified: bool = False
     population: int | None = Field(default=None, gt=0)
     population_verified: bool = False
+    verification_reference: str | None = Field(default=None, max_length=160)
 
     @model_validator(mode="after")
     def known_population(self):
@@ -83,6 +99,10 @@ class AcademicFaculty(Teacher):
     active: bool = True
     subject_ids: list[str] = Field(default_factory=list)
     institutional_id: str | None = None
+    eligibility_verified: bool = False
+    availability_verified: bool = False
+    workload_verified: bool = False
+    verification_reference: str | None = Field(default=None, max_length=160)
 
 
 class AcademicResource(Room):
@@ -92,6 +112,7 @@ class AcademicResource(Room):
         "administrator-supplied"
     )
     verification_note: str = Field(default="", max_length=1000)
+    availability_verified: bool = False
     alias: str | None = None
     alias_unconfirmed: bool = False
 
@@ -126,6 +147,9 @@ class AcademicOffering(Identity):
     required_equipment: list[str] = Field(default_factory=list)
     minimum_capacity: int | None = Field(default=None, gt=0)
     allowed_buildings: list[str] | None = None
+    term_offering_verified: bool = False
+    override_requirements_verified: bool = False
+    verification_reference: str | None = Field(default=None, max_length=160)
 
 
 class AcademicConstraints(Contract):
@@ -137,6 +161,10 @@ class AcademicConstraints(Contract):
     enrollments: list[Enrollment] = Field(default_factory=list)
     options: SolverOptions = Field(default_factory=SolverOptions)
     all_intended_offerings_supplied: bool = False
+    operating_windows_verified: bool = False
+    shared_scope_verified: bool = False
+    shared_scope_reference: str | None = Field(default=None, max_length=160)
+    verification_reference: str | None = Field(default=None, max_length=160)
 
 
 AcademicRecord = Annotated[
@@ -186,7 +214,7 @@ class AcademicPeriod(Contract):
     title: str
     revision: int
     created_at: str
-    source: Literal["development-entered", "institutional"]
+    source: Literal["development-entered", "institutional", "synthetic-review"]
     calendar: AcademicCalendar | None = None
 
 

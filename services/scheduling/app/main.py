@@ -36,6 +36,7 @@ from pydantic_settings import SettingsConfigDict
 from .academic_input import academic_readiness
 from .authorization import configured_scheduling
 from .catalog import catalogs, synthetic_scenario
+from .classroom_requests import router as classroom_requests_router
 from .draft_repository import DraftError, DraftRepository, calendar_review_allowed
 from .engine import generate_week
 from .occurrences import occurrences
@@ -72,6 +73,7 @@ def connected_repository(request, owner):
 app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0", lifespan=lifespan)
 install_identity_errors(app)
 app.include_router(publication_router)
+app.include_router(classroom_requests_router)
 
 
 @app.get("/api/v1/scheduling/sandbox/calendar-samples", response_model=DraftList)

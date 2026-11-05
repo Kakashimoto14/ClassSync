@@ -1,0 +1,2194 @@
+{
+  "info": {
+    "name": "ClassSync MVP \u2014 verified core and optional course APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "No stored credentials. Core reads require approved memberships. Cloud is UNQUALIFIED until approved staging execution. Mocks are not cloud evidence."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{id_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Core authorized reads and explicit401",
+      "item": [
+        {
+          "name": "Reject missing token",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Current verified membership",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/me",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Onboarding status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/onboarding",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Permitted published periods",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/periods",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Permitted current timetable",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/calendar/{{academic_period_id}}?start={{week_start}}&end={{week_end}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Permitted room metadata",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/rooms/{{academic_period_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audience-scoped notices",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/community/announcements",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Approved cloud qualification \u2014 not run locally",
+      "item": [
+        {
+          "name": "Create private preferences",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendar_view\": \"week\",\n  \"compact\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('preference_revision', d.revision);",
+                  "pm.environment.set('preference_generation', d.generation);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate preferences are rejected",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendar_view\": \"week\",\n  \"compact\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read own preferences",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update the current generation",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expected_revision\": {{preference_revision}},\n  \"expected_generation\": \"{{preference_generation}}\",\n  \"compact\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('preference_revision', d.revision);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete current preference generation",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/coursework/preferences?expected_revision={{preference_revision}}&expected_generation={{preference_generation}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted preferences are absent",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/coursework/preferences",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload synthetic private text",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/coursework/files",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purpose\": \"synthetic-course-demo\",\n  \"text\": \"Synthetic coursework text. No personal academic data.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('file_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download own private attachment",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/coursework/files/{{file_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete own private attachment",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/coursework/files/{{file_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted attachment is absent",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/coursework/files/{{file_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fixed-topic advisory only",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/coursework/advisory",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"study-planning\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('approved_cloud_qualification') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Approved cloud configuration and credentials are required.');",
+              "}",
+              "const approvedBase = pm.environment.get('base_url');",
+              "const actualTarget = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (pm.variables.get('base_url') !== approvedBase ||",
+              "!actualTarget.startsWith(approvedBase + '/')) {",
+              "pm.execution.skipRequest(); throw new Error('Approved destination required'); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disposable emulator pending-account boundaries",
+      "item": [
+        {
+          "name": "Create disposable pending account",
+          "request": {
+            "method": "POST",
+            "url": "{{auth_emulator_url}}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=local-emulator-only",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{synthetic_email}}\",\n  \"password\": \"{{synthetic_password}}\",\n  \"returnSecureToken\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {pm.variables.set('pending_token', pm.response.json().idToken); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate emulator email rejected",
+          "request": {
+            "method": "POST",
+            "url": "{{auth_emulator_url}}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=local-emulator-only",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{synthetic_email}}\",\n  \"password\": \"{{synthetic_password}}\",\n  \"returnSecureToken\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400 duplicate', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pending account status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/onboarding",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pending identity has no institutional role",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/me",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unverified claim is denied",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/student-claims",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"synthetic-postman-student\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Public faculty escalation is denied",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"faculty_id\": \"synthetic-faculty\",\n  \"email\": \"synthetic@example.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unverified scanner access is denied",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/manual",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{pending_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('approved_disposable_qualification') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Disposable qualification approval required'); }",
+              "for (const name of ['base_url', 'auth_emulator_url']) {",
+              "if (!/^http:\\/\\/127\\.0\\.0\\.1:\\d+$/.test(pm.variables.get(name))) {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Owned loopback services required'); }",
+              "}",
+              "const destination = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (!/^http:\\/\\/127\\.0\\.0\\.1:\\d+\\//.test(destination)) {",
+              "pm.execution.skipRequest(); throw new Error('Owned loopback destination required'); }",
+              "const ownedOrigins = ['base_url', 'auth_emulator_url'].map(n => pm.environment.get(n));",
+              "if (!ownedOrigins.some(origin => destination.startsWith(origin + '/'))) {",
+              "pm.execution.skipRequest(); throw new Error('Exact owned destination required'); }",
+              "if (!pm.variables.get('synthetic_email')) {",
+              "const id = pm.variables.replaceIn('{{$guid}}');",
+              "pm.variables.set('synthetic_email', 'postman-' + id + '@example.test');",
+              "pm.variables.set('synthetic_password', 'Local-only-' + id + '!'); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administrator synthetic workflow \u2014 run selected steps",
+      "item": [
+        {
+          "name": "Academic inputs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/academic/periods/{{academic_period_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Readiness blockers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/scheduling/academic/{{academic_period_id}}/readiness",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate validated timetable",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/scheduling/academic/{{academic_period_id}}/generate",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expected_revision\": {{academic_revision}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publication history",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/history/{{academic_period_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve verified student claim",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/v1/auth/student-claims/{{student_uid}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true,\n  \"verification_reference\": \"{{approved_verification_reference}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Issue scoped faculty invitation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"faculty_id\": \"{{faculty_id}}\",\n  \"email\": \"{{teacher_email}}\",\n  \"expires_in_hours\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('invitation_id', d.id);",
+                  "pm.environment.set('invitation_token', d.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke unused invitation",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations/{{invitation_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publication review",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/timetables/review",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{publication_command}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publication publish",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/timetables/publish",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{publication_command}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('approved_synthetic_journey') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Approved synthetic journey required'); }",
+              "const approvedBase = pm.environment.get('base_url');",
+              "const actualTarget = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (pm.variables.get('base_url') !== approvedBase ||",
+              "!actualTarget.startsWith(approvedBase + '/')) {",
+              "pm.execution.skipRequest(); throw new Error('Approved destination required'); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student synthetic scanner and enrollment matching",
+      "item": [
+        {
+          "name": "Scan synthetic PDF",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/pdf"
+              }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": "{{synthetic_pdf_path}}"
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('scan_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create manual review",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/manual",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('scan_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read own extraction",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review and match published enrollment",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}/review",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academic_year\": \"{{academic_year}}\",\n  \"semester\": \"first\",\n  \"student_identifier\": \"{{synthetic_student_id}}\",\n  \"program\": \"Synthetic\",\n  \"courses\": [\n    {\n      \"code\": \"{{synthetic_course_code}}\",\n      \"section\": \"2\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete private extraction",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted extraction denied",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('approved_synthetic_journey') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Approved synthetic journey required'); }",
+              "const approvedBase = pm.environment.get('base_url');",
+              "const actualTarget = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (pm.variables.get('base_url') !== approvedBase ||",
+              "!actualTarget.startsWith(approvedBase + '/')) {",
+              "pm.execution.skipRequest(); throw new Error('Approved destination required'); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disposable connected HTTP acceptance",
+      "item": [
+        {
+          "name": "Verified Student submits claim",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/student-claims",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{synthetic_student_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate claim denied",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/student-claims",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{synthetic_student_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve verified student claim",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/v1/auth/student-claims/{{student_uid}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true,\n  \"verification_reference\": \"{{approved_verification_reference}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Issue scoped faculty invitation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"faculty_id\": \"{{faculty_id}}\",\n  \"email\": \"{{teacher_email}}\",\n  \"expires_in_hours\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('invitation_id', d.id);",
+                  "pm.environment.set('invitation_token', d.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher accepts approved invitation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations/accept",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "teacher"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{invitation_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacher_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invitation replay denied",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations/accept",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "teacher"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{invitation_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacher_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Academic inputs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/academic/periods/{{academic_period_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Readiness blockers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/scheduling/academic/{{academic_period_id}}/readiness",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate validated timetable",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/scheduling/academic/{{academic_period_id}}/generate",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expected_revision\": {{academic_revision}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publication review",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/timetables/review",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{publication_command}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publication publish",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/timetables/publish",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "{{workspace_role}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{publication_command}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "student published classes",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/calendar/{{academic_period_id}}?start={{week_start}}&end={{week_end}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Published assigned classes', () => { const d=pm.response.json().data;pm.expect(d.status).to.eql('published');pm.expect(d.occurrences.length).to.be.above(0);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "teacher published classes",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/timetables/calendar/{{academic_period_id}}?start={{week_start}}&end={{week_end}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "teacher"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacher_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Published assigned classes', () => { const d=pm.response.json().data;pm.expect(d.status).to.eql('published');pm.expect(d.occurrences.length).to.be.above(0);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Scan synthetic PDF",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/pdf"
+              }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": "{{synthetic_pdf_path}}"
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) { const d = pm.response.json().data;",
+                  "pm.environment.set('scan_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read own extraction",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review and match published enrollment",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}/review",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academic_year\": \"{{academic_year}}\",\n  \"semester\": \"first\",\n  \"student_identifier\": \"{{synthetic_student_id}}\",\n  \"program\": \"Synthetic\",\n  \"courses\": [\n    {\n      \"code\": \"{{synthetic_course_code}}\",\n      \"section\": \"2\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Verified enrollment matched', () => { const d=pm.response.json().data;pm.expect(d.status).to.eql('matched'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Wrong term never invents schedule",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}/review",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academic_year\": \"2025-2026\",\n  \"semester\": \"first\",\n  \"student_identifier\": \"{{synthetic_student_id}}\",\n  \"program\": \"Synthetic\",\n  \"courses\": [\n    {\n      \"code\": \"{{synthetic_course_code}}\",\n      \"section\": \"2\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Wrong term pending', () => { const d=pm.response.json().data;pm.expect(d.status).to.eql('wrong-term'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete private extraction",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted extraction denied",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/registration-documents/{{scan_id}}",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student cannot create Teacher invitation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/faculty-invitations",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "student"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"faculty_id\": \"{{faculty_id}}\",\n  \"email\": \"{{teacher_email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher cannot review Student claims",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/student-claims",
+            "header": [
+              {
+                "key": "X-ClassSync-Role",
+                "value": "teacher"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacher_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('approved_disposable_qualification') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Disposable qualification approval required'); }",
+              "for (const name of ['base_url', 'auth_emulator_url']) {",
+              "if (!/^http:\\/\\/127\\.0\\.0\\.1:\\d+$/.test(pm.variables.get(name))) {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Owned loopback services required'); }",
+              "}",
+              "const destination = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (!/^http:\\/\\/127\\.0\\.0\\.1:\\d+\\//.test(destination)) {",
+              "pm.execution.skipRequest(); throw new Error('Owned loopback destination required'); }",
+              "const ownedOrigins = ['base_url', 'auth_emulator_url'].map(n => pm.environment.get(n));",
+              "if (!ownedOrigins.some(origin => destination.startsWith(origin + '/'))) {",
+              "pm.execution.skipRequest(); throw new Error('Exact owned destination required'); }",
+              "if (!pm.variables.get('synthetic_email')) {",
+              "const id = pm.variables.replaceIn('{{$guid}}');",
+              "pm.variables.set('synthetic_email', 'postman-' + id + '@example.test');",
+              "pm.variables.set('synthetic_password', 'Local-only-' + id + '!'); }",
+              "if (pm.environment.get('approved_synthetic_journey') !== 'true') {",
+              "pm.execution.skipRequest();",
+              "throw new Error('Approved synthetic journey required'); }",
+              "const approvedBase = pm.environment.get('base_url');",
+              "const actualTarget = pm.variables.replaceIn(pm.request.url.toString());",
+              "if (pm.variables.get('base_url') !== approvedBase ||",
+              "!actualTarget.startsWith(approvedBase + '/')) {",
+              "pm.execution.skipRequest(); throw new Error('Approved destination required'); }"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -34,7 +34,11 @@ def test_offline_sdk_setup_failure_removes_its_named_app(monkeypatch):
 
 def test_real_sdk_signature_and_claim_verification_returns_identity_only(offline_sdk):
     verifier, encoded, _, _ = offline_sdk
-    assert verifier.verify(encoded()).model_dump() == {"uid": "synthetic-uid"}
+    principal = verifier.verify(encoded())
+    assert principal.uid == "synthetic-uid"
+    assert principal.email == "synthetic@example.invalid"
+    assert principal.email_verified is True
+    assert principal.auth_time is not None
 
 
 @pytest.mark.parametrize(

@@ -2,11 +2,12 @@ import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
 import httpx
-from classync_contracts.models import HealthResponse
-from classync_contracts.request_authorization import install_identity_errors
+from classync_contracts.models import HealthResponse, UserRole
+from classync_contracts.request_authorization import install_identity_errors, request_identity
 from classync_contracts.scheduling_security import (
     SchedulingSecuritySettings,
     require_administrator,
@@ -16,11 +17,16 @@ from classync_contracts.scheduling_security import (
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
+from .announcements import announcement_router
 from .authorization import configured_authorization
+from .coursework import coursework_router
+from .onboarding import onboarding_router
+from .openapi import install_openapi
+from .registration import registration_router
 
 ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
 
@@ -35,6 +41,31 @@ class Settings(SchedulingSecuritySettings):
     enable_scheduling_sandbox: bool = False
     identity_database_url: SecretStr | None = None
     identity_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
+    registration_max_bytes: int = Field(default=5_000_000, ge=1024, le=10_000_000)
+    registration_max_pages: int = Field(default=5, ge=1, le=8)
+    registration_timeout_seconds: int = Field(default=20, ge=5, le=30)
+    registration_retention_seconds: int = Field(default=900, ge=60, le=900)
+    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    course_cloud_enabled: bool = False
+    course_storage_bucket: str = Field(default="", max_length=222)
+    course_gemini_model: str = Field(default="", pattern=r"^[a-z0-9.-]{0,80}$")
+    gemini_api_key: SecretStr | None = None
+
+    @field_validator("cors_origins")
+    @classmethod
+    def exact_origins(cls, values):
+        if len(values) > 20:
+            raise ValueError("At most twenty explicit CORS origins are allowed")
+        for value in values:
+            parsed = urlsplit(value)
+            if (parsed.scheme not in {"https", "http"} or not parsed.hostname
+                    or "*" in value or parsed.username or parsed.password or parsed.path
+                    or parsed.query or parsed.fragment
+                    or (parsed.scheme == "http" and parsed.hostname not in {
+                        "localhost", "127.0.0.1", "::1"})):
+                raise ValueError("Use exact HTTPS origins or explicit loopback development origins")
+            _ = parsed.port
+        return values
 
 
 settings = Settings()
@@ -48,14 +79,21 @@ SERVICES = {
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     with configured_authorization(application, settings):
-        yield
+        with registration_routes.registration_store.lifecycle():
+            yield
 
 
 app = FastAPI(title="ClassSync API Gateway", version="1.0.0", lifespan=lifespan)
+install_openapi(app)
+app.include_router(onboarding_router(lambda: settings))
+app.include_router(announcement_router(lambda: settings))
+app.include_router(coursework_router(lambda: settings))
+registration_routes = registration_router(lambda: settings)
+app.include_router(registration_routes)
 install_identity_errors(app)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-ClassSync-Role"],
@@ -67,6 +105,9 @@ async def request_context(request: Request, call_next):
     request.state.request_id = request.headers.get("X-Request-ID", str(uuid4()))
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
+    if request.url.path.startswith(("/api/v1/auth/", "/api/v1/timetables/",
+                                    "/api/v1/community/", "/api/v1/coursework/")):
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -74,6 +115,7 @@ async def request_context(request: Request, call_next):
 async def http_error(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
+        headers=exc.headers,
         content={
             "error": {
                 "code": "request_rejected",
@@ -232,6 +274,16 @@ async def sandbox_academic_periods(request: Request):
     return await academic_proxy("periods", request, True)
 
 
+@app.get("/api/v1/academic/sandbox/curriculum-catalog")
+async def sandbox_curriculum_catalog(request: Request):
+    return await academic_proxy("curriculum-catalog", request, True)
+
+
+@app.get("/api/v1/academic/curriculum-catalog")
+async def curriculum_catalog(request: Request):
+    return await academic_proxy("curriculum-catalog", request, False)
+
+
 @app.post("/api/v1/academic/sandbox/fixtures")
 async def academic_fixture(request: Request):
     return await academic_proxy("fixtures", request, True)
@@ -322,7 +374,9 @@ async def timetable_proxy(operation: str, request: Request):
         if request.method != "GET":
             raise HTTPException(404, "No anonymous publication operation exists")
     else:
-        if request.method != "GET" or operation.startswith("history/"):
+        if operation == "requests" and request.method == "POST":
+            await run_in_threadpool(request_identity, request, settings, UserRole.TEACHER)
+        elif request.method != "GET" or operation.startswith("history/"):
             await run_in_threadpool(require_administrator, request, settings)
         else:
             await run_in_threadpool(require_identity, request, settings)

@@ -290,6 +290,9 @@ class PublicationRules:
                 "Declare the complete intended offering scope before publication.",
             )
         synthetic = draft.input_snapshot.synthetic
+        if not synthetic and any(t.synthetic for t in draft.input_snapshot.teachers):
+            raise DraftError(422, "synthetic_faculty",
+                             "Synthetic faculty cannot serve institutional publication.")
         if (
             synthetic != (command.dataset == "synthetic")
             or (synthetic and any(r.source != "synthetic" for r in draft.input_snapshot.rooms))

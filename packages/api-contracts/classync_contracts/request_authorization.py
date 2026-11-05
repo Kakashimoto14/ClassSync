@@ -70,7 +70,8 @@ def _unavailable():
     return IdentityAccessError(503, "identity_unavailable", "University access is unavailable")
 
 
-def request_identity(request: Request, settings, required_role: UserRole | None = None) -> dict:
+def request_principal(request: Request, settings) -> VerifiedPrincipal:
+    """Verify Firebase identity only, including pending users; grants no membership."""
     header = request.headers.get("Authorization", "")
     if not header:
         raise IdentityAccessError(401, "authentication_required", "Authentication is required")
@@ -113,6 +114,20 @@ def request_identity(request: Request, settings, required_role: UserRole | None 
         raise IdentityAccessError(401, error.code.value, "Invalid authentication token") from error
     except Exception as error:
         raise _unavailable() from error
+    return principal
+
+
+def request_identity(request: Request, settings, required_role: UserRole | None = None) -> dict:
+    principal = request_principal(request, settings)
+    adapters = getattr(request.app.state, "authorization_adapters", None)
+    if not principal.email_verified:
+        raise IdentityAccessError(
+            403, "email_verification_required", "Verify your email to continue"
+        )
+    if adapters is None:
+        adapters = AuthorizationAdapters(
+            FirebaseTokenVerifier(settings), UnconfiguredMembershipLookup()
+        )
     tenant = getattr(settings, "institutional_tenant_id", None)
     if not isinstance(tenant, str) or not tenant.strip():
         raise _unavailable()

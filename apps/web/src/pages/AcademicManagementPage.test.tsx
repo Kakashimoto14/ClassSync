@@ -3,13 +3,15 @@ import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-d
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AcademicManagementPage } from './AcademicManagementPage';
 import { AcademicRecordEditor } from './AcademicRecordEditor';
-import { SchedulingSourcePage } from './AcademicGenerationPage';
+import { ReadinessSummary, SchedulingSourcePage } from './AcademicGenerationPage';
+import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import * as api from '../lib/academic-api';
 import type { AcademicSnapshot, AcademicReadiness } from '../lib/academic-api';
 import { appRoutes } from '../routes/app-routes';
 import { writePreviewSession } from '../auth/preview-session';
 
 vi.mock('../lib/academic-api', () => ({
+  loadCurriculumCatalog: vi.fn().mockResolvedValue({ versions: [], courses: [], program_ids: {} }),
   listAcademicPeriods: vi.fn(),
   createAcademicPeriod: vi.fn(),
   loadAcademicPeriod: vi.fn(),
@@ -84,6 +86,7 @@ const missing: AcademicReadiness = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(api.loadCurriculumCatalog).mockResolvedValue({ status: 'unreviewed', versions: [], courses: [], program_ids: {} });
   sessionStorage.clear();
   HTMLElement.prototype.scrollIntoView = vi.fn();
   vi.mocked(api.listAcademicPeriods).mockResolvedValue({ periods: [period] });
@@ -93,6 +96,28 @@ beforeEach(() => {
 });
 
 describe('persisted academic data management', () => {
+  it('starts a missing academic calendar blank and does not invent dates or teaching days', () => {
+    render(<AcademicCalendarEditor snapshot={snapshot} onSaved={vi.fn()} />);
+    expect(screen.getByRole('textbox', { name: 'Academic year' })).toHaveValue('');
+    expect(screen.getByLabelText('Effective start')).toHaveValue('');
+    expect(screen.getByLabelText('Effective end')).toHaveValue('');
+    for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) {
+      expect(screen.getByRole('checkbox', { name: day })).not.toBeChecked();
+    }
+    expect(screen.getByRole('button', { name: 'Save academic calendar' })).toBeDisabled();
+  });
+  it('routes calendar and shared-scope blockers to the Administrator input screens', () => {
+    const checked = {
+      ...missing,
+      issues: [
+        { severity: 'blocking' as const, code: 'missing_academic_calendar', message: 'Enter calendar.' },
+        { severity: 'blocking' as const, code: 'scope_not_complete', message: 'Review scope.' },
+      ],
+    };
+    render(<MemoryRouter><ReadinessSummary checked={checked} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Review academic calendar' })).toHaveAttribute('href', '/admin/academic?period=period-a');
+    expect(screen.getByRole('link', { name: 'Review period scope and fixed assignments' })).toHaveAttribute('href', '/admin/scheduling-constraints?period=period-a');
+  });
   it('creates a period with explicit catalog inclusion and keeps the selected period in its URL', async () => {
     vi.mocked(api.listAcademicPeriods).mockResolvedValueOnce({ periods: [] });
     vi.mocked(api.createAcademicPeriod).mockResolvedValue(snapshot);

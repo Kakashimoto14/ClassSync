@@ -3,19 +3,20 @@ import { Button } from '../components/ui/Button';
 import { useUniversitySession } from './university-session-context';
 import { Link, useLocation, useInRouterContext } from 'react-router-dom';
 
-function StudentWorkspaceLink() {
+function WorkspaceLink({ role }: { role: 'student' | 'teacher' | 'administrator' }) {
   const location = useLocation();
   const target = new URLSearchParams(location.search).get('returnTo');
+  const base = role === 'administrator' ? '/admin' : `/${role}`;
   return (
     <Link
       className="button"
       to={
-        target && /^\/student\/(dashboard|schedule|calendar|rooms)(\?|$)/.test(target)
+        target && target.startsWith(base + '/') && !target.includes('\\')
           ? target
-          : '/student/dashboard'
+          : base + '/dashboard'
       }
     >
-      Open Student workspace
+      Open {roles.find(([value]) => value === role)?.[1]} workspace
     </Link>
   );
 }
@@ -33,8 +34,8 @@ const messages = {
     'Only roles granted by your university can be used.',
   ],
   denied: [
-    'Current membership required',
-    'Access could not be verified. Check another role or contact your university.',
+    'University access is not active',
+    'Complete account setup below, check an existing workspace, or contact your university.',
   ],
   unavailable: [
     'Access check unavailable',
@@ -65,7 +66,7 @@ export function UniversitySessionPanel() {
         `${roles.find(([role]) => role === state.membership.role)?.[1]} membership verified`,
         state.membership.role === 'student'
           ? 'Your identity and current Student role are verified.'
-          : 'Your identity and current role are verified. Connected schedules are not available yet.',
+          : 'Your identity and current university role are verified.',
       ]
     : messages[state.status];
   return (
@@ -75,30 +76,30 @@ export function UniversitySessionPanel() {
       ref={section}
       tabIndex={-1}
     >
-      <Alert
-        tone={authorized ? 'success' : state.status === 'denied' ? 'danger' : 'info'}
-        title={title}
-      >
+      <Alert tone={authorized ? 'success' : 'info'} title={title}>
         {message}
       </Alert>
-      {authorized && state.membership.role === 'student' && inRouter && <StudentWorkspaceLink />}
+      {authorized && inRouter && <WorkspaceLink role={state.membership.role} />}
       {state.status !== 'signed-out' && (
-        <fieldset className="university-session__roles" aria-busy={checking}>
-          <legend>Check a workspace role</legend>
-          {roles.map(([role, label]) => (
-            <Button
-              key={role}
-              variant="secondary"
-              aria-pressed={authorized && state.membership.role === role}
-              aria-disabled={roleDisabled}
-              onClick={() => {
-                if (!roleDisabled) refresh(role);
-              }}
-            >
-              Check {label} access
-            </Button>
-          ))}
-        </fieldset>
+        <details open={state.status !== 'denied'}>
+          <summary>Check an existing workspace</summary>
+          <fieldset className="university-session__roles" aria-busy={checking}>
+            <legend>Check a workspace role</legend>
+            {roles.map(([role, label]) => (
+              <Button
+                key={role}
+                variant="secondary"
+                aria-pressed={authorized && state.membership.role === role}
+                aria-disabled={roleDisabled}
+                onClick={() => {
+                  if (!roleDisabled) refresh(role);
+                }}
+              >
+                Check {label} access
+              </Button>
+            ))}
+          </fieldset>
+        </details>
       )}
       {state.status !== 'signed-out' && (
         <div className="university-session__actions">

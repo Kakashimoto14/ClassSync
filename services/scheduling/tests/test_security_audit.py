@@ -6,6 +6,13 @@ import pytest
 from scripts.security.python_audit import inspect_report, verify_local_contracts
 
 
+def test_audit_uses_pep503_package_identity_without_excluding_windows_ocr_packages():
+    report = {"dependencies": [{"name": "winrt-Windows.Media.Ocr", "version": "1", "vulns": []}]}
+    assert inspect_report(report, {"winrt-windows-media-ocr": "1"}) == []
+    with pytest.raises(ValueError, match="coverage"):
+        inspect_report(report, {"winrt-windows-media-ocr": "1", "another-package": "1"})
+
+
 @pytest.mark.parametrize(
     "editable,location", [(True, "local"), (False, "local"), (True, "remote"), (True, "elsewhere")]
 )

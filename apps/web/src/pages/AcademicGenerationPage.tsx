@@ -9,7 +9,9 @@ import {
   type AcademicReadiness,
   type AcademicPeriod,
 } from '../lib/academic-api';
-import { schedulingSandboxEnabled, type GenerationResult } from '../lib/scheduling-api';
+import { type GenerationResult } from '../lib/scheduling-api';
+import { appMode } from '../config/runtime-config';
+const schedulingSandboxEnabled = appMode !== 'presentation';
 import {
   defaultPeriod,
   periodLabel,
@@ -29,7 +31,7 @@ export function SchedulingSourcePage() {
         Constraint-based automated scheduling · OR-Tools. Language-model recommendations are
         planned.
       </p>
-      {search.get('source') === 'synthetic' ? (
+      {appMode === 'sandbox' && search.get('source') === 'synthetic' ? (
         <>
           <p>Explicit synthetic engine test scenario</p>
           <WeeklySchedulingPage />
@@ -41,21 +43,32 @@ export function SchedulingSourcePage() {
   );
 }
 function fixPath(code: string, period: string) {
-  const path = /faculty|teacher|workload/.test(code)
-    ? '/admin/teachers'
-    : /room|resource/.test(code)
-      ? '/admin/academic/resources'
-      : /section/.test(code)
-        ? '/admin/sections'
-        : /operating|scope|constraint/.test(code)
-          ? '/admin/scheduling-constraints'
-          : '/admin/offerings';
+  if (/curriculum|cohort/.test(code)) return '/admin/subjects?period=' + encodeURIComponent(period);
+  const path = /calendar/.test(code)
+    ? '/admin/academic'
+    : /faculty|teacher|workload/.test(code)
+      ? '/admin/teachers'
+      : /room|resource/.test(code)
+        ? '/admin/academic/resources'
+        : /section/.test(code)
+          ? '/admin/sections'
+          : /operating|scope|constraint/.test(code)
+            ? '/admin/scheduling-constraints'
+            : '/admin/offerings';
   return path + '?period=' + encodeURIComponent(period);
 }
 export function ReadinessSummary({ checked }: { checked: AcademicReadiness }) {
   const blocking = checked.issues.filter((i) => i.severity === 'blocking');
   const warnings = checked.issues.filter((i) => i.severity !== 'blocking');
   const groups = [
+    {
+      name: 'Curriculum and cohort',
+      test: /curriculum|cohort/,
+      action: 'Review curriculum sources',
+      path: '/admin/subjects',
+      reason:
+        'Confirm the assigned cohort, exact prospectus codes and source review before generation.',
+    },
     {
       name: 'Classroom requirements',
       test: /room|resource/,
@@ -77,6 +90,21 @@ export function ReadinessSummary({ checked }: { checked: AcademicReadiness }) {
       action: 'Review teaching windows',
       path: '/admin/scheduling-constraints',
       reason: 'Recorded teaching windows must support every required meeting.',
+    },
+    {
+      name: 'Academic period and calendar',
+      test: /calendar/,
+      action: 'Review academic calendar',
+      path: '/admin/academic',
+      reason: 'Enter the approved academic year, semester, effective dates and instructional days.',
+    },
+    {
+      name: 'Scope and shared commitments',
+      test: /scope|locked|commitment/,
+      action: 'Review period scope and fixed assignments',
+      path: '/admin/scheduling-constraints',
+      reason:
+        'Include all intended ICS, IBE and ITE offerings, shared rooms, faculty and locked sessions in this same period.',
     },
     {
       name: 'Subject offerings',
@@ -309,7 +337,7 @@ function AcademicGenerationPage() {
         </label>
         {loading && <p role="status">Loading academic periods…</p>}
         {!loading && !periods.length && !error && (
-          <p>No academic periods yet. Set up academic data or explicitly import a sample below.</p>
+          <p>No academic periods yet. Set up your academic inputs to begin.</p>
         )}
         {checked && <ReadinessSummary checked={checked} />}
         <Button
@@ -388,7 +416,14 @@ function AcademicGenerationPage() {
           </Button>
         </div>
       )}
-      {!result && <Link className="button button--secondary" to="/admin/academic#sample-scenario">Set up a sample scenario</Link>}
+      {!result && (
+        <Link
+          className="button button--secondary"
+          to={appMode === 'institutional' ? '/admin/academic' : '/admin/academic#sample-scenario'}
+        >
+          {appMode === 'institutional' ? 'Manage academic inputs' : 'Set up a sample scenario'}
+        </Link>
+      )}
       {result && (
         <section className="scheduler-result">
           <h2 ref={heading} tabIndex={-1}>

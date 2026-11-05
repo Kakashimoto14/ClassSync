@@ -5,7 +5,8 @@ from urllib.parse import urlparse
 
 import httpx
 import pytest
-from classync_contracts.academic import PeriodCreate, RecordWrite
+from classync_contracts.academic import AcademicFaculty, AcademicResource, PeriodCreate, RecordWrite
+from classync_contracts.calendar import AcademicCalendar
 from classync_contracts.scheduling import scheduling_input_hash
 from fastapi.testclient import TestClient
 
@@ -34,8 +35,17 @@ def add(repo, period, data, revision=0):
 
 
 def complete(repo):
+    calendar = AcademicCalendar(
+        academic_year="2026-2027",
+        semester="first",
+        effective_start="2026-10-01",
+        effective_end="2026-12-31",
+        instructional_days=[0, 2, 4],
+    )
     snapshot = repo.create_period(
-        PeriodCreate(title="Entered test period"), "sandbox", "development-academic-sandbox"
+        PeriodCreate(title="Entered test period", calendar=calendar),
+        "sandbox",
+        "development-academic-sandbox",
     )
     pid = snapshot.period.id
     windows = [{"day": day, "start": 480, "end": 840} for day in (0, 2, 4)]
@@ -48,6 +58,8 @@ def complete(repo):
             "program_ids": ["bsit"],
             "required_weekly_minutes": 180,
             "patterns": [{"id": "single", "durations": [180]}],
+            "curriculum_review_verified": True,
+            "contact_minutes_verified": True,
         },
         {
             "kind": "subjects",
@@ -57,6 +69,8 @@ def complete(repo):
             "program_ids": ["bsit"],
             "required_weekly_minutes": 180,
             "patterns": [{"id": "split", "durations": [90, 90]}],
+            "curriculum_review_verified": True,
+            "contact_minutes_verified": True,
         },
         {
             "kind": "sections",
@@ -379,6 +393,8 @@ def test_workload_is_hard_and_old_hash_remains_compatible():
     for teacher in baseline["teachers"]:
         teacher.pop("max_weekly_minutes")
         teacher.pop("max_daily_minutes")
+        # This is the historical wire shape, before the optional provenance field.
+        teacher.pop("synthetic")
     import hashlib
 
     old_hash = hashlib.sha256(
@@ -488,6 +504,11 @@ def test_real_gateway_entered_generation_save_and_isolation(api):
 
 
 def test_api_authorization_and_catalog_write(api, monkeypatch):
+    assert api.get("/api/v1/academic/curriculum-catalog").status_code == 401
+    catalog = api.get("/api/v1/academic/sandbox/curriculum-catalog")
+    assert catalog.status_code == 200
+    assert len(catalog.json()["data"]["versions"]) == 39
+    assert len(catalog.json()["data"]["courses"]) == 2062
     assert api.post("/api/v1/academic/periods", json={"title": "Unauthorized"}).status_code == 401
     created = api.post("/api/v1/academic/sandbox/periods", json={"title": "Actual entered period"})
     assert created.status_code == 201, created.text
@@ -509,6 +530,7 @@ def test_api_authorization_and_catalog_write(api, monkeypatch):
     for config in (gateway.settings, academic.settings, scheduling.settings):
         monkeypatch.setattr(config, "classsync_env", "production")
     assert api.get("/api/v1/academic/sandbox/periods").status_code == 403
+    assert api.get("/api/v1/academic/sandbox/curriculum-catalog").status_code == 403
     assert api.get(f"/api/v1/scheduling/sandbox/academic/{pid}/readiness").status_code == 403
 
 
@@ -520,7 +542,12 @@ def test_protected_records_and_generation_require_verified_owner(
     headers = {"Authorization": "Bearer e30.e30.synthetic-signature"}
     source = complete(academic.repository())
     saved = api.post(
-        "/api/v1/academic/periods", headers=headers, json={"title": "Authorized entered period"}
+        "/api/v1/academic/periods",
+        headers=headers,
+        json={
+            "title": "Authorized entered period",
+            "calendar": source.period.calendar.model_dump(mode="json"),
+        },
     ).json()["data"]
     pid = saved["period"]["id"]
     # Persist related records in dependency order; no synthetic scenario is used.
@@ -531,6 +558,8 @@ def test_protected_records_and_generation_require_verified_owner(
                 continue
             if kind == "sections":
                 record["period_id"] = pid
+            if kind == "resources":
+                record["source"] = "administrator-supplied"
             response = api.put(
                 f"/api/v1/academic/periods/{pid}/records/{kind}/{record['id']}",
                 headers=headers,
@@ -539,25 +568,23 @@ def test_protected_records_and_generation_require_verified_owner(
             assert response.status_code == 200, response.text
             saved = response.json()["data"]
     ready = api.get(f"/api/v1/scheduling/academic/{pid}/readiness", headers=headers)
-    assert ready.json()["data"]["ready"], ready.text
+    assert not ready.json()["data"]["ready"], ready.text
+    issue_codes = {item["code"] for item in ready.json()["data"]["issues"]}
+    assert {
+        "cohort_assignment_unverified",
+        "curriculum_reference_missing",
+        "term_offering_unverified",
+        "faculty_verification_missing",
+        "room_availability_unverified",
+        "operating_windows_unverified",
+        "shared_scope_unverified",
+    } <= issue_codes
     run = api.post(
         f"/api/v1/scheduling/academic/{pid}/generate",
         headers=headers,
         json={"expected_revision": saved["period"]["revision"]},
-    ).json()["data"]
-    assert run["validation"]["valid"]
-    draft = api.post(
-        "/api/v1/scheduling/drafts",
-        headers=headers,
-        json={
-            "run_id": run["run_id"],
-            "input_hash": run["input_hash"],
-            "title": "Protected draft",
-            "idempotency_key": "protected-entered-key",
-        },
     )
-    assert draft.status_code == 201, draft.text
-    assert draft.json()["data"]["source"] == "institutional"
+    assert run.status_code == 422, run.text
     with monkeypatch.context() as sandbox_settings:
         for module in (gateway, academic, scheduling):
             sandbox_settings.setattr(module.settings, "classsync_env", "development")
@@ -571,6 +598,38 @@ def test_protected_records_and_generation_require_verified_owner(
         api.post("/api/v1/academic/periods", headers=headers, json={"title": "Denied"}).status_code
         == 403
     )
+
+
+def test_institutional_record_scope_rejects_synthetic_faculty_and_rooms(tmp_path):
+    repo = AcademicRepository(tmp_path / "institutional-isolation.sqlite3")
+    repo.migrate()
+    period = repo.create_period(
+        PeriodCreate(title="Institutional boundary test", include_cdm_catalog=False),
+        "administrator",
+        "test-admin",
+    )
+    records = [
+        AcademicFaculty(id="synthetic-faculty", name="Synthetic candidate", synthetic=True),
+        AcademicResource(
+            id="synthetic-room",
+            name="Synthetic room",
+            building="Synthetic campus",
+            source="synthetic",
+        ),
+    ]
+    for record in records:
+        with pytest.raises(AcademicError, match="Synthetic") as caught:
+            repo.save(
+                "administrator",
+                "test-admin",
+                period.period.id,
+                record.kind,
+                record.id,
+                RecordWrite(expected_revision=0, record=record),
+            )
+        assert caught.value.code == "synthetic_isolation"
+    saved = repo.snapshot("administrator", "test-admin", period.period.id)
+    assert all(e.record.kind not in {"faculty", "resources"} for e in saved.records)
 
 
 def test_required_equipment_cannot_be_inferred_from_resource_name(repo):
@@ -690,7 +749,11 @@ def test_academic_v1_migration_preserves_records_and_rejects_future_schema(repo)
             )
         ]
         assert not db.execute("PRAGMA foreign_key_check").fetchall()
-    assert repo.snapshot("sandbox", "development-academic-sandbox", snapshot.period.id) == snapshot
+    # The v1 schema has no calendar table; migration restores schema without inventing one.
+    assert (
+        repo.snapshot("sandbox", "development-academic-sandbox", snapshot.period.id).period.calendar
+        is None
+    )
     with repo.connection(True) as db:
         db.execute("PRAGMA user_version=99")
     with pytest.raises(AcademicError) as caught:

@@ -15,6 +15,7 @@ import { studentOccurrence, timeRange } from '../lib/student-presentation';
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
 import { Button } from '../components/ui/Button';
+import { usePublishedRoomDirectory } from '../lib/use-published-room-directory';
 import './student-rooms.css';
 
 export function StudentRooms({ detail = false }: { detail?: boolean }) {
@@ -26,6 +27,11 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
     : 'my';
   const query = params.get('q') ?? '';
   const ready = !w.loading && !w.error && w.data && w.data.status !== 'not-published';
+  const publishedDirectory = usePublishedRoomDirectory(
+    'student',
+    w.context.period,
+    ready ? w.data?.version : null,
+  );
   const mine = studentRooms(ready ? w.records : []).sort((a, b) => {
     const next = (item: StudentRoom) =>
       item.classes.find((session) => session.date >= w.date)?.starts_at ?? '9999';
@@ -34,8 +40,14 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
   // The owner-supplied catalog is available in preview, never injected into an institutional tenant.
   const directory: StudentRoom[] = presentationEnabled
     ? provisionalCdmRooms.map((room) => ({ ...room, classes: [] }))
-    : [];
-  const rooms = category === 'my' ? mine : category === 'all' ? directory : [];
+    : publishedDirectory.rooms.map((room) => ({
+        ...room,
+        classes: ready ? w.records.filter((item) => item.room.id === room.id) : [],
+      }));
+  const labs = directory.filter((room) =>
+    /(^|[\s_-])(lab|laboratory)([\s_-]|$)/i.test(room.room_type ?? ''),
+  );
+  const rooms = category === 'my' ? mine : category === 'all' ? directory : labs;
   const filtered = rooms.filter((room) => matchesRoom(room, query));
   const room = (params.get('directory') === '1' ? directory : mine).find(
     (item) => item.id === params.get('id'),
@@ -204,16 +216,20 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
                   <section className="student-room-card">
                     <h2>Room information</h2>
                     <p>
-                      This room is in the provisional directory. It is not linked to your current
-                      schedule.
+                      {presentationEnabled
+                        ? 'This room is in the provisional directory.'
+                        : 'This room is in the published university directory.'}{' '}
+                      It is not linked to your current schedule.
                     </p>
                   </section>
                 )}
               </div>
               <p className="student-room-source">
                 {room.classes.length
-                  ? 'Room details are provisional. Physical availability is not confirmed.'
-                  : 'Provisional room information. Facilities and physical availability are not confirmed.'}
+                  ? 'Room details from your schedule. Physical availability is not confirmed.'
+                  : presentationEnabled
+                    ? 'Provisional room information. Facilities and physical availability are not confirmed.'
+                    : 'Published university room information. Physical availability is not confirmed.'}
               </p>
             </>
           ) : (
@@ -263,7 +279,7 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
           </div>
           {category === 'my' && state ? (
             state
-          ) : category === 'labs' ? (
+          ) : category === 'labs' && !labs.length ? (
             <div className="student-rooms-state">
               <Building2 aria-hidden="true" />
               <h2>Lab information is not confirmed</h2>
@@ -272,11 +288,28 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
                 Browse all rooms
               </Button>
             </div>
-          ) : category === 'all' && !presentationEnabled ? (
+          ) : category === 'all' && !presentationEnabled && !publishedDirectory.available ? (
             <div className="student-rooms-state">
               <Building2 aria-hidden="true" />
-              <h2>Room directory unavailable</h2>
-              <p>You can still find rooms assigned in your schedule under My rooms.</p>
+              <h2>
+                {publishedDirectory.loading
+                  ? 'Loading room directory…'
+                  : 'Room directory unavailable'}
+              </h2>
+              <p>
+                {publishedDirectory.error ||
+                  'Rooms become available with your authorized published schedule.'}
+              </p>
+              {publishedDirectory.error && (
+                <Button
+                  onClick={() => {
+                    w.retry();
+                    publishedDirectory.retry();
+                  }}
+                >
+                  Try again
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -286,7 +319,9 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
               </div>
               {category === 'all' && (
                 <p className="student-room-source">
-                  Owner-supplied provisional directory · Room details have not been verified.
+                  {presentationEnabled
+                    ? 'Owner-supplied provisional directory · Room details have not been verified.'
+                    : 'Rooms from your current published university timetable. Physical availability is not confirmed.'}
                 </p>
               )}
               {filtered.length ? (

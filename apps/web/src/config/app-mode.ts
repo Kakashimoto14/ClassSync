@@ -55,6 +55,6 @@ export function capabilitiesFor(mode: AppMode) {
         ? 'Read-only presentation. Generation, saving and publishing require a connected authorized backend.'
         : mode === 'sandbox'
           ? 'Local development sandbox. Every request remains subject to backend authorization.'
-          : 'University identity and current permissions are required. Connected Student timetable reads are available through the authorized Gateway.',
+          : 'University identity and current permissions are required. Your classes and approved university workflows connect through the authorized Gateway.',
   });
 }

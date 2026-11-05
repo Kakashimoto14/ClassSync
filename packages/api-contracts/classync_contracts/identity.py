@@ -31,6 +31,10 @@ class _SubjectContract(_ImmutableContract):
 class VerifiedPrincipal(_SubjectContract):
     """Trusted verifier output, never a source of tenant roles or record membership."""
 
+    email: str | None = Field(default=None, strict=True, max_length=320)
+    email_verified: bool = Field(default=False, strict=True)
+    auth_time: int | None = Field(default=None, strict=True, ge=0)
+
 
 class MembershipState(StrEnum):
     ACTIVE = "active"

@@ -20,6 +20,7 @@ import {
 import type { UserRole } from '../types/ui';
 
 export type ScreenKind =
+  | 'registration-scanner'
   | 'dashboard'
   | 'schedule'
   | 'schedule-create'
@@ -106,12 +107,11 @@ export const routeDefinitions = [
     role: 'student',
     title: 'Registration Form Scanner',
     description:
-      'Planned OVRF and registration-form scanning with reviewable subject and section extraction.',
-    kind: 'coming-soon',
+      'Privately review your registration form and match your verified published classes.',
+    kind: 'registration-scanner',
     navigationGroup: 'Academic',
     navigationLabel: 'Registration Form Scanner',
     icon: FileSearch,
-    plannedFeature: 'registration-scanner',
   }),
   make({
     id: 'student.rooms',

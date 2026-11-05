@@ -17,7 +17,11 @@ def tiny(patterns=None, *, count=1):
         :1
     ]
     raw["rooms"] = [raw["rooms"][0]]
-    raw["teachers"] = [raw["teachers"][0]]
+    # Contract-control faculty are separate from application demo candidates. Some
+    # authorization tests deliberately use this DTO to model institutional shapes;
+    # never untag a persisted synthetic candidate to create such a control.
+    raw["teachers"] = [{**raw["teachers"][0], "id": "contract-control-teacher",
+                        "name": "Disposable contract control", "synthetic": False}]
     raw["enrollments"] = []
     first = deepcopy(raw["offerings"][0])
     first.update(

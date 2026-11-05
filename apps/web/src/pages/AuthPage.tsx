@@ -11,6 +11,9 @@ import { EntranceTimetable } from '../components/brand/EntranceTimetable';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import { appMode } from '../config/runtime-config';
+import { createStudentAccount, recoverPassword, accountError } from '../auth/account-actions';
+import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
+import { AccountAdministrationPanel } from '../auth/AccountAdministrationPanel';
 
 export function AuthPage() {
   const { role } = useDevelopmentRole();
@@ -23,6 +26,8 @@ export function AuthPage() {
   const [unavailable, setUnavailable] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [signInError, setSignInError] = useState('');
+  const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'recovery'>('login');
+  const [accountMessage, setAccountMessage] = useState('');
   const emailInput = useRef<HTMLInputElement>(null);
   const passwordInput = useRef<HTMLInputElement>(null);
   const returnTo = searchParams.get('returnTo');
@@ -33,6 +38,9 @@ export function AuthPage() {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validation = validateLogin(email, password);
+    if (accountMode === 'recovery') delete validation.password;
+    if (accountMode === 'signup' && password.length < 12)
+      validation.password = 'Use at least 12 characters for your password.';
     setErrors(validation);
     setUnavailable(false);
     if (validation.email) {
@@ -46,14 +54,31 @@ export function AuthPage() {
     if (appMode === 'institutional' && university.available) {
       setSigningIn(true);
       setSignInError('');
+      setAccountMessage('');
       try {
+        if (accountMode === 'recovery') {
+          await recoverPassword(email);
+          setAccountMessage(
+            'If an account can receive recovery email, a reset link has been requested. Check your inbox.',
+          );
+          return;
+        }
+        if (accountMode === 'signup') {
+          await createStudentAccount(email, password);
+          setPassword('');
+          return;
+        }
         const { firebaseApp } = await import('../lib/firebase');
         const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
         if (!firebaseApp) throw new Error('Provider unavailable');
         await signInWithEmailAndPassword(getAuth(firebaseApp), email.trim(), password);
         setPassword('');
-      } catch {
-        setSignInError('Sign-in failed. Check your details and connection, then try again.');
+      } catch (error) {
+        setSignInError(
+          accountMode === 'login'
+            ? 'Sign-in failed. Check your details and connection, then try again.'
+            : accountError(error),
+        );
       } finally {
         setSigningIn(false);
       }
@@ -129,6 +154,10 @@ export function AuthPage() {
             </>
           )}
           {appMode === 'institutional' && <UniversitySessionPanel />}
+          {appMode === 'institutional' && university.available && <AccountOnboardingPanel />}
+          {appMode === 'institutional' &&
+            university.state.status === 'authorized' &&
+            university.state.membership.role === 'administrator' && <AccountAdministrationPanel />}
           {(!university.available || university.state.status === 'signed-out') && (
             <details
               className="university-access"
@@ -145,6 +174,37 @@ export function AuthPage() {
                     : 'Production authentication is not connected. No credentials are sent or stored.'}
                 </p>
                 <form noValidate onSubmit={submit}>
+                  {university.available && (
+                    <fieldset disabled={signingIn}>
+                      <legend>Account access</legend>
+                      {(['login', 'signup', 'recovery'] as const).map((mode) => (
+                        <Button
+                          key={mode}
+                          type="button"
+                          variant="secondary"
+                          aria-pressed={accountMode === mode}
+                          onClick={() => {
+                            setAccountMode(mode);
+                            setErrors({});
+                            setSignInError('');
+                            setAccountMessage('');
+                          }}
+                        >
+                          {mode === 'login'
+                            ? 'Existing account'
+                            : mode === 'signup'
+                              ? 'Create account'
+                              : 'Forgot password'}
+                        </Button>
+                      ))}
+                    </fieldset>
+                  )}
+                  {accountMode === 'signup' && (
+                    <p>
+                      Create your account, verify your email, then request university access.
+                      Faculty access requires an invitation.
+                    </p>
+                  )}
                   <div className="auth-field">
                     <label htmlFor="email">University email</label>
                     <input
@@ -168,14 +228,16 @@ export function AuthPage() {
                       </p>
                     )}
                   </div>
-                  <div className="auth-field">
+                  <div className="auth-field" hidden={accountMode === 'recovery'}>
                     <label htmlFor="password">Password</label>
                     <div className="password-field">
                       <input
                         ref={passwordInput}
                         id="password"
                         type={showPassword ? 'text' : 'password'}
-                        autoComplete="current-password"
+                        autoComplete={
+                          accountMode === 'signup' ? 'new-password' : 'current-password'
+                        }
                         value={password}
                         onChange={(event) => {
                           setPassword(event.target.value);
@@ -208,11 +270,16 @@ export function AuthPage() {
                     {signingIn
                       ? 'Signing in…'
                       : university.available
-                        ? 'Sign in'
+                        ? accountMode === 'signup'
+                          ? 'Create account'
+                          : accountMode === 'recovery'
+                            ? 'Send reset link'
+                            : 'Sign in'
                         : 'Check sign-in availability'}{' '}
                     <ArrowRight size={17} aria-hidden="true" />
                   </Button>
                   {signInError && <p role="alert">{signInError}</p>}
+                  {accountMessage && <p role="status">{accountMessage}</p>}
                   {unavailable && (
                     <Alert tone="warning" title="Sign-in unavailable">
                       {previewEnabled

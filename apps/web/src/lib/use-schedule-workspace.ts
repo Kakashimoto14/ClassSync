@@ -21,10 +21,13 @@ import {
 import type { UserRole } from '../types/ui';
 import { appMode } from '../config/runtime-config';
 import { studentTimetableRequest } from './student-timetable-api';
+import { institutionalRequest } from './institutional-api';
 
-function readTimetable<T>(path: string, signal?: AbortSignal) {
+function readTimetable<T>(path: string, role: UserRole, signal?: AbortSignal) {
   return appMode === 'institutional'
-    ? studentTimetableRequest<T>(path, signal)
+    ? role === 'student'
+      ? studentTimetableRequest<T>(path, signal)
+      : institutionalRequest<T>(`timetables/${path}`, { signal, role })
     : timetableRequest<T>(path, undefined, signal);
 }
 
@@ -200,7 +203,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
                 });
               }
             })
-          : readTimetable<{ periods: WorkspacePeriod[] }>(prefix + 'periods').then((p) => {
+          : readTimetable<{ periods: WorkspacePeriod[] }>(prefix + 'periods', role).then((p) => {
               if (!ignore) {
                 setPeriods(p.periods);
                 setContext((c) => ({ ...c, period: defaultPeriod(p.periods, c.period) }));
@@ -220,7 +223,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     return () => {
       ignore = true;
     };
-  }, [mode, prefix, refresh, draft]);
+  }, [mode, prefix, refresh, draft, role]);
   useEffect(() => {
     if (mode !== 'published' || !period) return;
     if (appMode === 'institutional') {
@@ -239,7 +242,22 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
     );
   }, [mode, period, prefix, query]);
   useEffect(() => {
+    if (
+      appMode === 'institutional' &&
+      mode === 'published' &&
+      !periods.some((item) => item.id === period)
+    ) {
+      setData(null);
+      previous.current = null;
+      setLoading(false);
+      return;
+    }
     if (mode === 'review' ? !draft || !drafts.some((d) => d.id === draft) : !period) return;
+    const scope = [mode, period, draft, role, identity, start, end].join(':');
+    if (appMode === 'institutional' && previous.current?.scope !== scope) {
+      setData(null);
+      previous.current = null;
+    }
     const controller = new AbortController();
     setLoading(true);
     setError('');
@@ -250,6 +268,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
           ? loadSampleCalendar(draft, query, controller.signal)
           : readTimetable<CalendarData>(
               `${prefix}calendar/${encodeURIComponent(period)}?${query}`,
+              role,
               controller.signal,
             );
     load
@@ -265,7 +284,6 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
             setContext((c) => ({ ...c, identity: choice.id }));
           }
         }
-        const scope = [mode, period, draft, role, identity, start, end].join(':');
         const sequence = value.sequence ?? 0;
         if (previous.current?.scope === scope && sequence < previous.current.sequence) return;
         const hash = JSON.stringify(value.occurrences.map((o) => ({ ...o, version: undefined })));
@@ -290,7 +308,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [draft, drafts, end, identity, mode, period, prefix, query, refresh, role, start]);
+  }, [draft, drafts, end, identity, mode, period, periods, prefix, query, refresh, role, start]);
   const records =
     data?.occurrences.filter(
       (o) =>
