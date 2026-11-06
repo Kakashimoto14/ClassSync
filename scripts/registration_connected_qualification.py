@@ -157,8 +157,7 @@ def run(
                         "gateway": gateway_url,
                         "fixture": fixture,
                         "adminEmail": admin_email,
-                        "imageRoot": "C:/Users/lenovo/.codex/visualizations/2026/11/04/"
-                        "01a1a6f1-45f4-76b0-8871-98908c92db98",
+                        "imageRoot": str(root),
                     }
                 )
             )

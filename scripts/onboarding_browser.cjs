@@ -3,9 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const assert = require('node:assert/strict');
-const {
-  chromium,
-} = require('C:/Users/lenovo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const loadPlaywright = require('./qualification_playwright.cjs');
 
 async function main() {
   const config = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
@@ -16,6 +14,7 @@ async function main() {
   assert.equal(marker.endpoint, config.authEndpoint);
   assert.equal(marker.project, config.project);
   assert.match(config.gateway, /^http:\/\/127\.0\.0\.1:[0-9]+$/);
+  const { chromium } = loadPlaywright();
   const repo = path.resolve(__dirname, '..');
   Object.assign(process.env, {
     VITE_CLASSSYNC_MODE: 'institutional',

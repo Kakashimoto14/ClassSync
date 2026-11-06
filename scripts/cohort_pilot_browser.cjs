@@ -3,13 +3,18 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const {
-  chromium,
-} = require('C:/Users/lenovo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const loadPlaywright = require('./qualification_playwright.cjs');
 async function main() {
   const root = path.resolve(__dirname, '..');
-  const out = path.join(root, 'docs/production/cohort-pilot-20261031');
-  const fixture = JSON.parse(fs.readFileSync(path.join(out, 'browser-fixture.json'), 'utf8'));
+  const fixturePath = process.argv[2]
+    ? path.resolve(process.argv[2])
+    : path.join(root, 'docs/production/cohort-pilot-20261031/browser-fixture.json');
+  if (!fs.existsSync(fixturePath)) {
+    throw new Error('Supply a local synthetic browser fixture JSON as the first argument.');
+  }
+  const out = path.dirname(fixturePath);
+  const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
+  const { chromium } = loadPlaywright();
   const catalog = JSON.parse(
     fs.readFileSync(
       path.join(root, 'packages/api-contracts/classync_contracts/catalogs/curriculum-review.json'),

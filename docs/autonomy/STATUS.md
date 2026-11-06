@@ -1,5 +1,27 @@
 # ClassSync — autonomy status ledger
 
+## 6 November 2026 — release candidate portability review
+
+Local checkpoint `a54b53343bed00fbbdfdeacf511889213f3eac98` on
+`release/mvp-staging-qualification`. The six identified paths belonged to manual
+qualification. Four browser scripts now resolve Playwright locally or through
+`CLASSSYNC_PLAYWRIGHT_MODULE`. These checks use installed Chrome. The cohort browser
+accepts a local synthetic fixture JSON as its first argument. The two Python launchers
+store screenshots in their owned run directory.
+
+The Windows cohort qualifier requires `--preservation-receipt` and supports
+`--database-root` for relative receipt paths. Supply a current, reviewed local receipt
+covering the original databases. It accepts `original_database_sha256` mappings and
+legacy `file`/`sha256` rows. It verifies all listed files before execution and checks
+them again before writing success evidence. The receipt and output remain local.
+
+Source-only export collected 1,063 tests. Targeted module resolution and receipt
+checks passed with synthetic files and a stubbed qualification run. Node syntax,
+Ruff, `git diff --check` and 19 security checks passed. The three original SQLite
+hashes match the checkpoint. Older diagnostic scripts outside these six retain
+workstation paths. The portability edits await a separate local commit. Native Linux
+and remote Actions qualification remain pending.
+
 ## 6 November 2026 — release candidate prepared locally
 
 The `release/mvp-staging-qualification` worktree uses base

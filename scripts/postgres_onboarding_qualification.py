@@ -502,8 +502,7 @@ def qualify_browser(application, project, endpoint, admin_email):
                     "authEndpoint": endpoint,
                     "gateway": f"http://127.0.0.1:{listener.getsockname()[1]}",
                     "adminEmail": admin_email,
-                    "imageRoot": "C:/Users/lenovo/.codex/visualizations/2026/11/04/"
-                    "01a1a6f1-45f4-76b0-8871-98908c92db98",
+                    "imageRoot": str(root),
                 }
             )
         )

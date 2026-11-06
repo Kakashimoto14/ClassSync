@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import time
 from datetime import date
 from pathlib import Path
@@ -314,23 +315,81 @@ def exercise(connection):
         owner.dispose()
 
 
+def preservation_baseline(receipt: Path, database_root: Path) -> dict[Path, str]:
+    try:
+        value = json.loads(receipt.read_text(encoding="utf-8-sig"))
+    except OSError:
+        raise ValueError("Cannot read the local --preservation-receipt file.") from None
+    except (UnicodeError, json.JSONDecodeError):
+        raise ValueError("The preservation receipt must contain valid JSON.") from None
+    try:
+        if isinstance(value, list):
+            entries = [(row["file"], row["sha256"]) for row in value]
+        else:
+            entries = list(value["original_database_sha256"].items())
+    except (AttributeError, KeyError, TypeError):
+        raise ValueError(
+            "The preservation receipt must list original database paths and hashes."
+        ) from None
+    baseline = {}
+    for name, digest in entries:
+        if not isinstance(name, str) or not name.strip() or not isinstance(digest, str):
+            raise ValueError("Invalid path or hash in the preservation receipt.")
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+            raise ValueError("Each preservation receipt hash must be a SHA-256 digest.")
+        path = (database_root / name).resolve()
+        if path in baseline:
+            raise ValueError("The preservation receipt contains a duplicate database path.")
+        baseline[path] = digest.lower()
+    if not baseline:
+        raise ValueError("The preservation receipt must list at least one original database.")
+    return baseline
+
+
+def database_hashes(paths):
+    result = {}
+    for path in paths:
+        with path.open("rb") as stream:
+            result[path] = hashlib.file_digest(stream, "sha256").hexdigest()
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--preservation-receipt",
+        type=Path,
+        required=True,
+        help="Private local JSON receipt of reviewed original database SHA-256 values.",
+    )
+    parser.add_argument(
+        "--database-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="Directory for receipt paths that are relative. Defaults to this checkout.",
+    )
     args = parser.parse_args()
-    baseline = json.loads(Path("docs/production/p1-database-preservation.json").read_text())
-    before = {r["file"]: hashlib.sha256(Path(r["file"]).read_bytes()).hexdigest() for r in baseline}
+    try:
+        baseline = preservation_baseline(args.preservation_receipt, args.database_root)
+        before = database_hashes(baseline)
+    except ValueError as error:
+        parser.error(str(error))
+    except OSError:
+        parser.error("Cannot read an original database listed in the preservation receipt.")
+    if before != baseline:
+        parser.error("Original database hashes differ from the reviewed preservation receipt.")
     try:
         evidence = qualify(args.bin, exercise)
-        evidence["original_database_hashes"] = before
-        write_new_evidence(args.output, evidence)
-        print("Synthetic cohort PG qualification PASS; owned cluster stopped")
     finally:
         require(
-            before == {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in before},
+            before == database_hashes(before),
             "Original database hashes changed",
         )
+    evidence["original_database_hashes"] = {str(path): digest for path, digest in before.items()}
+    write_new_evidence(args.output, evidence)
+    print("Synthetic cohort PG qualification PASS; owned cluster stopped")
 
 
 if __name__ == "__main__":

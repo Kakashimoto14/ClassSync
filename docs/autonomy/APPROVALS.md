@@ -1,5 +1,12 @@
 # ClassSync autonomy — authority and approvals
 
+## 6 November 2026 — release candidate portability review
+
+Owner authorizes portability edits to the six identified qualification scripts and the
+manual Windows database preservation receipt prerequisite. Preserve historical evidence
+and existing verification guards. Use synthetic files for targeted tests. Commit and
+push remain separate approval gates for the portability changes.
+
 ## 6 November 2026 — final M5 publication qualification
 
 Owner explicitly reopens persistent Postman failure gate for bounded diagnosis and the
