@@ -43,15 +43,44 @@ test('actual Vite builds reject unsafe configuration before emitting artifacts',
     [{ CLASSSYNC_BUILD_TARGET: 'presentation', VITE_CLASSSYNC_MODE: 'institutional' }],
     [{ CLASSSYNC_BUILD_TARGET: 'presentation', VITE_ENABLE_PRESENTATION_SAMPLE: 'false' }],
     [{ VERCEL_GIT_COMMIT_SHA: '0'.repeat(40) }],
+    [{ CLASSSYNC_BUILD_TARGET: 'connected', VITE_API_BASE_URL: 'https://wrong.invalid/api/v1' }],
+    [
+      {
+        CLASSSYNC_BUILD_TARGET: 'connected',
+        VITE_API_BASE_URL: '/api/v1',
+        VITE_FIREBASE_API_KEY: '',
+      },
+    ],
   ];
   cases.forEach(([env, args], i) => {
     const result = build(env, `rejected-${i}`, args);
     assert.notEqual(result.status, 0, JSON.stringify(env));
     assert.match(
       result.stderr + result.stdout,
-      /Sandbox|Invalid VITE|Legacy ClassSync|Contradictory|Institutional|Presentation|Release commit/,
+      /Sandbox|Invalid VITE|Legacy ClassSync|Contradictory|Institutional|Presentation|Release commit|[Cc]onnected/,
     );
   });
+});
+
+test('connected build uses institutional mode without requiring a Storage bucket', () => {
+  const built = build(
+    {
+      CLASSSYNC_BUILD_TARGET: 'connected',
+      VITE_CLASSSYNC_MODE: 'institutional',
+      VITE_API_BASE_URL: '/api/v1',
+      VITE_FIREBASE_API_KEY: 'synthetic-browser-configuration-only',
+      VITE_FIREBASE_PROJECT_ID: 'classsync-hosting-probe',
+      VITE_FIREBASE_AUTH_DOMAIN: 'classsync-hosting-probe.firebaseapp.com',
+      VITE_FIREBASE_APP_ID: '1:1234:web:abcde',
+      VITE_FIREBASE_STORAGE_BUCKET: '',
+      VITE_FIREBASE_MESSAGING_SENDER_ID: '',
+    },
+    'connected',
+  );
+  assert.equal(built.status, 0, built.stderr + built.stdout);
+  const release = JSON.parse(readFileSync(join(built.directory, 'release.json'), 'utf8'));
+  assert.equal(release.appMode, 'institutional');
+  assert.notEqual(release.mode, 'read-only-presentation');
 });
 
 for (const [name, env, expected] of [

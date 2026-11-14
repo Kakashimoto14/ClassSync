@@ -39,9 +39,9 @@ const scan = () => ({
   ],
   warnings: [],
 });
-function page(state?: UniversitySession) {
+function page(state?: UniversitySession, path = '/student/registration-scanner') {
   return (
-    <MemoryRouter initialEntries={['/student/registration-scanner']}>
+    <MemoryRouter initialEntries={[path]}>
       <UniversitySessionContext.Provider
         value={{
           available: true,
@@ -95,6 +95,31 @@ beforeEach(() => {
       };
     return undefined;
   });
+});
+
+it('restores reviewed courses without restoring the student number or raw extraction', async () => {
+  const restored = scan();
+  const request = source.request.getMockImplementation();
+  source.request.mockImplementation(async (path, method) => {
+    if (path === `registration-documents/${restored.id}`) {
+      return {
+        ...restored,
+        method: 'reviewed',
+        fields: {},
+        courses: [],
+        reviewed: {
+          academic_year: '2026-2027', semester: 'first', student_identifier: '',
+          program: 'SYNTHETIC', year_level: 2,
+          courses: [{ code: 'TEST101', description: 'Invented seminar', section: '2' }],
+        },
+      };
+    }
+    return request?.(path, method);
+  });
+  render(page(undefined, `/student/registration-scanner?scan=${restored.id}`));
+  await screen.findByText(/Re-enter your student number/);
+  expect(screen.getByLabelText('Student number')).toHaveValue('');
+  expect(screen.getByLabelText('Course code')).toHaveValue('TEST101');
 });
 
 it('uploads privately, accepts corrections and links only a confirmed published result', async () => {

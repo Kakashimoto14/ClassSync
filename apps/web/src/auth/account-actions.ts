@@ -11,6 +11,11 @@ async function provider() {
   return { auth: sdk.getAuth(firebaseApp), sdk };
 }
 
+export async function signInToAccount(email: string, password: string) {
+  const { auth, sdk } = await provider();
+  await sdk.signInWithEmailAndPassword(auth, email.trim(), password);
+}
+
 export async function createStudentAccount(email: string, password: string) {
   const { auth, sdk } = await provider();
   const result = await sdk.createUserWithEmailAndPassword(auth, email.trim(), password);
@@ -28,17 +33,25 @@ export async function recoverPassword(email: string) {
   }
 }
 
-export async function resendVerification() {
+export async function resendVerification(expectedUid?: string) {
   const { auth, sdk } = await provider();
-  if (!auth.currentUser) throw new Error('Sign in to continue.');
-  await sdk.sendEmailVerification(auth.currentUser);
+  await sdk.sendEmailVerification(currentAccount(auth, expectedUid));
 }
 
-export async function refreshVerifiedAccount() {
+export async function refreshVerifiedAccount(expectedUid?: string) {
   const { auth, sdk } = await provider();
-  if (!auth.currentUser) throw new Error('Sign in to continue.');
-  await sdk.reload(auth.currentUser);
-  await auth.currentUser.getIdToken(true);
+  const user = currentAccount(auth, expectedUid);
+  await sdk.reload(user);
+  if (auth.currentUser !== user) throw new Error('Your account changed. Sign in again.');
+  await user.getIdToken(true);
+}
+
+function currentAccount(auth: import('firebase/auth').Auth, expectedUid?: string) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Sign in to continue.');
+  if (expectedUid && user.uid !== expectedUid)
+    throw new Error('Your account changed. Sign in again.');
+  return user;
 }
 
 export function accountError(error: unknown) {
@@ -82,10 +95,12 @@ export async function observeAccountProfile(next: (profile: AccountProfile | nul
   const { auth, sdk } = await provider();
   return sdk.onAuthStateChanged(auth, (user) => next(user ? profileOf(user) : null));
 }
-export async function updateAccountName(name: string): Promise<AccountProfile> {
+export async function updateAccountName(
+  name: string,
+  expectedUid?: string,
+): Promise<AccountProfile> {
   const { auth, sdk } = await provider();
-  const user = auth.currentUser;
-  if (!user) throw new Error('Sign in to continue.');
+  const user = currentAccount(auth, expectedUid);
   const displayName = name.trim();
   if (!displayName || displayName.length > 100)
     throw new Error('Enter a name of up to 100 characters.');
@@ -99,10 +114,10 @@ export async function accountRequest<T>(
   method = 'GET',
   body?: unknown,
   timeoutMs = 10_000,
+  expectedUid?: string,
 ): Promise<T> {
   const { auth } = await provider();
-  const user = auth.currentUser;
-  if (!user) throw new Error('Sign in to continue.');
+  const user = currentAccount(auth, expectedUid);
   let timeout: ReturnType<typeof setTimeout> | undefined;
   let token: string;
   try {

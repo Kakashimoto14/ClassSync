@@ -115,23 +115,23 @@ async function main() {
     const auth = origin + '/auth/login';
     const login = async (email) => {
       await page.goto(auth);
-      await visible('Signed out');
-      await page.getByRole('button', { name: 'Existing account', exact: true }).click();
-      await page.getByLabel('University email', { exact: true }).fill(email);
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+      await page.getByLabel('Email', { exact: true }).fill(email);
       await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
       await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     };
     const logout = async () => {
-      await page.goto(auth);
+      await page.goto(origin + '/auth/account');
       await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-      await visible('Signed out');
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     };
     const email = 'scanner-student@synthetic.invalid';
     await page.goto(auth);
-    await visible('Signed out');
-    await page.getByRole('button', { name: 'Create account', exact: true }).first().click();
-    await page.getByLabel('University email', { exact: true }).fill(email);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+    await page.getByRole('link', { name: 'Create an account', exact: true }).click();
+    await page.getByLabel('Email', { exact: true }).fill(email);
     await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
+    await page.getByLabel('Confirm password', { exact: true }).fill('Local-emulator-password-42!');
     await page.locator('button[type=submit]').click();
     await page.getByRole('button', { name: 'I verified my email', exact: true }).waitFor();
     let code;
@@ -177,6 +177,8 @@ async function main() {
       .waitFor();
     await logout();
     await login(config.adminEmail);
+    await page.waitForURL('**/admin/dashboard');
+    await page.goto(origin + '/auth/account');
     await visible('Administrator membership verified');
     await page.getByRole('button', { name: 'Load account requests', exact: true }).click();
     await page
@@ -186,7 +188,7 @@ async function main() {
     await visible('No pending student requests.');
     await logout();
     await login(email);
-    await visible('Student membership verified');
+    await page.waitForURL('**/student/dashboard');
     await page.goto(scanUrl);
     await page.getByLabel('Course code', { exact: true }).first().waitFor();
     assert.equal(

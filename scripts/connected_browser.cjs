@@ -172,25 +172,27 @@ async function main() {
     };
     const login = async (email) => {
       await page.goto(auth);
-      await visible('Signed out');
-      await page.getByRole('button', { name: 'Existing account', exact: true }).click();
-      await page.getByLabel('University email', { exact: true }).fill(email);
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+      await page.getByLabel('Email', { exact: true }).fill(email);
       await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
       await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     };
     const logout = async () => {
-      await page.goto(auth);
+      await page.goto(origin + '/auth/account');
       await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-      await visible('Signed out');
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     };
 
     const password = 'Local-emulator-password-42!';
     const signup = async (email) => {
       await page.goto(auth);
-      await visible('Signed out');
-      await page.getByRole('button', { name: 'Create account', exact: true }).first().click();
-      await page.getByLabel('University email', { exact: true }).fill(email);
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+      await page.getByRole('link', { name: 'Create an account', exact: true }).click();
+      await page.getByLabel('Email', { exact: true }).fill(email);
       await page.getByLabel('Password', { exact: true }).fill(password);
+      await page
+        .getByLabel('Confirm password', { exact: true })
+        .fill('Local-emulator-password-42!');
       await page.locator('button[type=submit]').click();
       await page.getByRole('button', { name: 'I verified my email', exact: true }).waitFor();
       const codes = await (
@@ -217,10 +219,14 @@ async function main() {
     const teacherEmail = 'connected-teacher@synthetic.invalid';
     const studentUid = await signup(studentEmail);
     await page.getByLabel('Student number', { exact: true }).fill('SYN-001');
+    await page.getByLabel('Account name', { exact: true }).fill('Synthetic Student');
+    await page.getByRole('button', { name: 'Review student record', exact: true }).click();
     await page.getByRole('button', { name: 'Request student access', exact: true }).click();
     await visible('Your request is waiting for university verification.');
     await logout();
     await login(config.adminEmail);
+    await page.waitForURL('**/admin/dashboard');
+    await page.goto(origin + '/auth/account');
     await visible('Administrator membership verified');
     await page.getByRole('button', { name: 'Load account requests', exact: true }).click();
     await page
@@ -274,11 +280,41 @@ async function main() {
       .waitFor();
     await shot('administrator-published');
     await logout();
-    const teacherUid = await signup(teacherEmail);
-    await page.getByText('Have a Teacher invitation?', { exact: true }).click();
+    const teacherAccount = await fetch(
+      `http://${config.authEndpoint}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=synthetic-emulator-key`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: teacherEmail, password, returnSecureToken: true }),
+      },
+    );
+    assert.equal(teacherAccount.status, 200);
+    const teacherUid = (await teacherAccount.json()).localId;
+    await page.goto(origin + '/auth/teacher-invite');
+    await page.getByLabel('Email', { exact: true }).fill(teacherEmail);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await page.getByRole('button', { name: 'Resend verification email' }).click();
+    const codes = await (
+      await fetch(`http://${config.authEndpoint}/emulator/v1/projects/${config.project}/oobCodes`)
+    ).json();
+    const teacherCode = codes.oobCodes.find(
+      (item) => item.email === teacherEmail && item.requestType === 'VERIFY_EMAIL',
+    );
+    assert(teacherCode, 'Teacher verification email missing');
+    const verifiedTeacher = await fetch(
+      `http://${config.authEndpoint}/identitytoolkit.googleapis.com/v1/accounts:update?key=synthetic-emulator-key`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oobCode: teacherCode.oobCode }),
+      },
+    );
+    assert.equal(verifiedTeacher.status, 200);
+    await page.getByRole('button', { name: 'I verified my email', exact: true }).click();
     await page.getByLabel('Invitation code', { exact: true }).fill(invitation);
     await page.getByRole('button', { name: 'Accept invitation', exact: true }).click();
-    await visible('Teacher membership verified');
+    await page.waitForURL('**/teacher/dashboard');
     const projections = {};
     const tokens = {};
     let currentPublishedId = published.id;
@@ -396,7 +432,7 @@ async function main() {
     await visible('This page requires your university to grant the matching workspace role.');
     await logout();
     await login(studentEmail);
-    await visible('Student membership verified');
+    await page.waitForURL('**/student/dashboard');
     await inspectCalendar('student');
     assert.deepEqual(projections.student, projections.teacher);
     const initialProjections = JSON.parse(JSON.stringify(projections));
@@ -409,7 +445,7 @@ async function main() {
     await visible('This page requires your university to grant the matching workspace role.');
     await logout();
     await login(config.adminEmail);
-    await visible('Administrator membership verified');
+    await page.waitForURL('**/admin/dashboard');
     await page.goto(origin + '/admin/requests');
     await page
       .getByLabel('Decision note for ' + requestedClass.subject.code, { exact: true })
@@ -441,7 +477,7 @@ async function main() {
     await shot('administrator-classroom-published');
     await logout();
     await login(teacherEmail);
-    await visible('Teacher membership verified');
+    await page.waitForURL('**/teacher/dashboard');
     const changedTeaching = await inspectCalendar('teacher', 'changed');
     assert.equal(
       changedTeaching.occurrences.find((item) => item.id === requestedClass.id).room.id,
@@ -463,12 +499,12 @@ async function main() {
     const declinedRequestId = (await declineCandidate.json()).data.id;
     await logout();
     await login(studentEmail);
-    await visible('Student membership verified');
+    await page.waitForURL('**/student/dashboard');
     await inspectCalendar('student', 'changed');
     assert.deepEqual(projections.student, projections.teacher);
     await logout();
     await login(config.adminEmail);
-    await visible('Administrator membership verified');
+    await page.waitForURL('**/admin/dashboard');
     await page.goto(origin + '/admin/requests');
     const declinedCard = page
       .locator('article')
@@ -597,7 +633,7 @@ async function main() {
       teacherEmail,
       studentEmail,
     });
-    await page.goto(auth);
+    await page.goto(origin + '/auth/account');
     await visible('Administrator membership verified');
     for (const uid of [teacherUid, studentUid]) {
       await page.getByText('Revoke university membership', { exact: true }).click();

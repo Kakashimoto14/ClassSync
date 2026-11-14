@@ -11,13 +11,28 @@ export interface UniversityMembership {
   membership_revision: number;
   student_id?: string;
   faculty_id?: string;
+  available_roles?: UserRole[];
 }
 export type UniversitySession =
-  | { status: 'checking' | 'signed-out' | 'role-required' | 'denied' | 'unavailable' | 'offline' }
+  | {
+      status:
+        | 'checking'
+        | 'signed-out'
+        | 'verification-required'
+        | 'expired'
+        | 'denied'
+        | 'unavailable'
+        | 'offline';
+    }
+  | { status: 'role-required'; availableRoles?: UserRole[] }
   | { status: 'authorized'; membership: UniversityMembership };
-export type SessionIssue = 'role-required' | 'denied' | 'unavailable' | 'offline';
+export type SessionIssue =
+  'role-required' | 'verification-required' | 'expired' | 'denied' | 'unavailable' | 'offline';
 export class UniversitySessionError extends Error {
-  constructor(public readonly issue: SessionIssue) {
+  constructor(
+    public readonly issue: SessionIssue,
+    public readonly availableRoles?: UserRole[],
+  ) {
     super(issue);
   }
 }
@@ -85,8 +100,14 @@ export function createUniversitySession(
       const membership = parseUniversityMembership({ data: result }, identity.uid, role);
       if (current === generation && !disposed) emit({ status: 'authorized', membership });
     } catch (error) {
-      if (current === generation && !disposed)
-        emit({ status: error instanceof UniversitySessionError ? error.issue : 'unavailable' });
+      if (current === generation && !disposed) {
+        const status = error instanceof UniversitySessionError ? error.issue : 'unavailable';
+        if (status === 'denied') selected = undefined;
+        if (status === 'role-required') {
+          const availableRoles = (error as UniversitySessionError).availableRoles;
+          emit({ status, ...(availableRoles ? { availableRoles } : {}) });
+        } else emit({ status });
+      }
     } finally {
       if (current === generation) clearTimeout(timeout);
     }
@@ -155,6 +176,11 @@ export function createUniversitySession(
   };
 }
 
+export function parseAvailableRoles(value: unknown): UserRole[] {
+  const roles: UserRole[] = ['student', 'teacher', 'administrator'];
+  return Array.isArray(value) ? roles.filter((role) => value.includes(role)) : [];
+}
+
 function nonblank(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -178,7 +204,11 @@ export function parseUniversityMembership(
   ) {
     throw new UniversitySessionError('unavailable');
   }
+  const availableRoles = parseAvailableRoles(value.available_roles);
   return {
+    ...(availableRoles.length > 1 && availableRoles.includes(value.role)
+      ? { available_roles: availableRoles }
+      : {}),
     uid: value.uid,
     tenant_id: value.tenant_id,
     role: value.role,

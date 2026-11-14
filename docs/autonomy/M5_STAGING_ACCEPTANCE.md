@@ -1,8 +1,11 @@
 # M5 controlled staging prerequisites and acceptance
 
 Preparation only. No resources, users, secrets, DNS, billing or deployment settings have
-been created/changed. PostgreSQL retains academic, enrollment, membership and publication
-authority. Existing presentation and original databases remain separate and preserved.
+been created/changed. The historical M5 baseline retains PostgreSQL membership. The
+[10 November authority decision](../production/firestore-authority.md) supersedes that
+release target: operational Firestore is required before connected staging qualification.
+PostgreSQL retains canonical academic, enrollment and publication authority. The existing
+presentation and original databases remain separate.
 
 ## Minimum resources and decisions before deployment
 
@@ -33,10 +36,10 @@ authority. Existing presentation and original databases remain separate and pres
   on restart. A private writable temporary filesystem is required. Start with one Gateway
   instance; verify restart/expired-review messaging before changing scaling. No durable
   raw-document bucket is required. No public URL or third-party document upload.
-- Optional course-only Firestore database/collection, private Storage bucket with enforced
-  public-access prevention/uniform access/lifecycle, and approved Gemini model/key/quota.
-  Default off; no institutional records or registration documents in these integrations.
-  Require provider quotas and budget monitoring: process-local counters reset on restart.
+- Required Firestore Native database for access and onboarding with approved region,
+  index configuration, dedicated server IAM, deny-by-default client Rules, tested
+  migration/rollback and real hosted durability/outage checks. Optional coursework
+  integrations are separately scoped and cannot satisfy this operational gate.
 - Signed-off Linux/container acceptance, security disposition, authorized Git checkpoint,
   real Actions evidence, then explicit provisioning/deployment authorization. Production
   cutover is separately gated even after staging passes.

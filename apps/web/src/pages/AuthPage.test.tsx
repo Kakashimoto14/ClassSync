@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { DevelopmentRoleProvider } from '../auth/DevelopmentRoleProvider';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -34,57 +34,23 @@ describe('honest sign-in entry', () => {
     );
     expect(screen.queryByRole('link', { name: 'Explore ClassSync' })).not.toBeInTheDocument();
   });
-  it('focuses the first invalid field and links its error', () => {
-    render(
-      <MemoryRouter>
-        <DevelopmentRoleProvider>
-          <AuthPage />
-        </DevelopmentRoleProvider>
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByText('University sign-in'));
-    fireEvent.click(screen.getByRole('button', { name: 'Check sign-in availability' }));
-    expect(screen.getByLabelText('University email')).toHaveFocus();
-    expect(screen.getByLabelText('University email')).toHaveAttribute(
-      'aria-describedby',
-      'email-error',
-    );
-    fireEvent.change(screen.getByLabelText('University email'), {
-      target: { value: 'sample@example.edu' },
-    });
-    expect(screen.queryByText('Enter your university email address.')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Check sign-in availability' }));
-    expect(screen.getByLabelText('Password')).toHaveFocus();
-  });
-  it('reveals the password accessibly and never simulates a successful connection', () => {
+  it('provides sample navigation without requesting credentials or live identity', () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
     try {
       render(
-        <MemoryRouter initialEntries={['/auth/login?returnTo=%2Fteacher%2Fschedule']}>
+        <MemoryRouter>
           <DevelopmentRoleProvider>
             <AuthPage />
           </DevelopmentRoleProvider>
         </MemoryRouter>,
       );
-      fireEvent.click(screen.getByText('University sign-in'));
-      fireEvent.change(screen.getByLabelText('University email'), {
-        target: { value: 'sample@example.edu' },
-      });
-      fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'example-only' } });
-      fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
-      expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
-      expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
-      fireEvent.click(screen.getByRole('button', { name: 'Check sign-in availability' }));
-      expect(screen.getByText('Sign-in unavailable')).toBeInTheDocument();
-      expect(screen.queryByText(/Connecting/)).not.toBeInTheDocument();
-      expect(fetchSpy).not.toHaveBeenCalled();
       expect(screen.getByRole('link', { name: 'Explore ClassSync' })).toHaveAttribute(
         'href',
-        '/dev/role-preview?returnTo=%2Fteacher%2Fschedule',
+        '/dev/role-preview',
       );
+      expect(screen.getByText('Sample preview · You are not signed in.')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
+      expect(fetchSpy).not.toHaveBeenCalled();
     } finally {
       fetchSpy.mockRestore();
     }

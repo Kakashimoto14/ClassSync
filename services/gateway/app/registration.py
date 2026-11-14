@@ -10,6 +10,7 @@ from urllib.parse import quote
 from uuid import UUID, uuid4
 
 import httpx
+from classync_contracts.cloud_run import service_headers
 from classync_contracts.models import UserRole
 from classync_contracts.request_authorization import request_identity, request_principal
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -228,7 +229,7 @@ def fetch_matches(request, settings, review, principal):
                 "courses": [],
                 "message": "Your university must verify your student record "
                 "before classes can be matched.",
-            }
+            }, None
         raise
     if identity["role"] != "student":
         raise HTTPException(403, "Student access is required to match enrollment")
@@ -238,10 +239,13 @@ def fetch_matches(request, settings, review, principal):
             "courses": [],
             "message": "The document identifier does not match your verified student record. "
             "Contact your university; this document cannot change your record link.",
-        }
-    headers = {"Authorization": request.headers["Authorization"], "X-ClassSync-Role": "student"}
+        }, identity
     deadline = time.monotonic() + 15
     try:
+        headers = service_headers(
+            settings.cloud_run_iam_enabled, settings.scheduling_service_url,
+            {"Authorization": request.headers["Authorization"], "X-ClassSync-Role": "student"},
+        )
         with httpx.Client(
             base_url=settings.scheduling_service_url, timeout=4, trust_env=False
         ) as client:
@@ -295,9 +299,7 @@ def fetch_matches(request, settings, review, principal):
                         )
                     start = end + timedelta(days=1)
                 calendars[period["id"]] = {"occurrences": events}
-        # A revocation during upstream reads cannot return a completed match.
-        request_identity(request, settings, required_role=UserRole.STUDENT)
-        return match_review(review, periods=periods, calendars=calendars)
+        return match_review(review, periods=periods, calendars=calendars), identity
     except httpx.HTTPStatusError as error:
         if error.response.status_code in {401, 403}:
             raise HTTPException(
@@ -316,6 +318,13 @@ def registration_router(settings):
     router = APIRouter(prefix="/api/v1/auth/registration-documents", tags=["Registration scanner"])
     store = RegistrationStore()
     router.registration_store = store
+
+    def read_scan(key, tenant, uid, reviews):
+        if reviews is not None:
+            reviewed = reviews.read(key, tenant, uid)
+            if reviewed is not None:
+                return reviewed
+        return store.read(key, tenant, uid)
 
     def context(request, *, erase=False):
         current = settings()
@@ -420,13 +429,27 @@ def registration_router(settings):
     @router.get("/{scan_id}")
     def read(scan_id: UUID, request: Request, response: Response):
         principal, current = context(request)
+        reviews = getattr(request.app.state, "registration_review_repository", None)
         response.headers["Cache-Control"] = "no-store"
-        return {"data": store.read(scan_id, current.institutional_tenant_id, principal.uid)}
+        return {"data": read_scan(scan_id, current.institutional_tenant_id, principal.uid, reviews)}
 
     @router.delete("/{scan_id}", status_code=204)
     def erase(scan_id: UUID, request: Request):
         principal, current = context(request, erase=True)
-        store.read(scan_id, current.institutional_tenant_id, principal.uid, delete=True)
+        tenant = current.institutional_tenant_id
+        reviews = getattr(request.app.state, "registration_review_repository", None)
+        if reviews is None:
+            store.read(scan_id, tenant, principal.uid, delete=True)
+        else:
+            scan = read_scan(scan_id, tenant, principal.uid, reviews)
+            reviews.erase(
+                scan_id, tenant, principal.uid, datetime.fromisoformat(scan["expires_at"])
+            )
+            try:
+                store.read(scan_id, tenant, principal.uid, delete=True)
+            except HTTPException as error:
+                if error.status_code != 404:
+                    raise
         return Response(status_code=204, headers={"Cache-Control": "no-store"})
 
     @router.post(
@@ -440,8 +463,10 @@ def registration_router(settings):
     )
     async def review(scan_id: UUID, request: Request, response: Response):
         principal, current = await run_in_threadpool(context, request)
-        store.read(scan_id, current.institutional_tenant_id, principal.uid)
+        tenant = current.institutional_tenant_id
         store.throttle(principal.uid, kind="review", window=60, limit=10)
+        reviews = getattr(request.app.state, "registration_review_repository", None)
+        scan = await run_in_threadpool(read_scan, scan_id, tenant, principal.uid, reviews)
         if request.headers.get("Content-Type", "").split(";", 1)[0] != "application/json":
             raise HTTPException(415, "Submit the reviewed academic fields as JSON")
         chunks, size = [], 0
@@ -468,8 +493,25 @@ def registration_router(settings):
                 429, "Scanner is busy. Try again shortly.", headers={"Retry-After": "5"}
             )
         try:
-            result = await run_in_threadpool(fetch_matches, request, current, body, principal)
-            store.record_review(scan_id, current.institutional_tenant_id, principal.uid, body)
+            result, binding = await run_in_threadpool(
+                fetch_matches, request, current, body, principal,
+            )
+            if reviews is None:
+                store.record_review(scan_id, tenant, principal.uid, body)
+            else:
+                await run_in_threadpool(context, request)
+                await run_in_threadpool(
+                    reviews.save, scan_id, tenant, principal.uid,
+                    datetime.fromisoformat(scan["expires_at"]), body,
+                )
+            if binding is not None:
+                current_binding = await run_in_threadpool(
+                    request_identity, request, current, required_role=UserRole.STUDENT,
+                )
+                if current_binding != binding:
+                    raise HTTPException(
+                        403, "Your student access changed. Review your classes again."
+                    )
             return {"data": result}
         finally:
             store.processing.release()

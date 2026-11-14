@@ -28,8 +28,9 @@ from .token_verification import (
 
 
 class IdentityAccessError(HTTPException):
-    def __init__(self, status: int, code: str, message: str):
+    def __init__(self, status: int, code: str, message: str, *, available_roles=()):
         self.code = code
+        self.available_roles = available_roles
         super().__init__(
             status, message, headers={"WWW-Authenticate": "Bearer"} if status == 401 else None
         )
@@ -44,6 +45,7 @@ async def identity_error_response(request: Request, error: IdentityAccessError):
                 "code": error.code,
                 "message": error.detail,
                 "requestId": getattr(request.state, "request_id", None),
+                **({"available_roles": error.available_roles} if error.available_roles else {}),
             }
         },
     )
@@ -87,8 +89,11 @@ def request_principal(request: Request, settings) -> VerifiedPrincipal:
     )
     # Only explicitly injected local-test emulator verification accepts unsigned
     # emulator JWTs. Ambient environment variables cannot enable this parsing.
-    if match is None and test_allowed and isinstance(adapters, AuthorizationAdapters) and (
-        getattr(adapters.verifier, "trust", None) is AdapterTrust.EMULATOR
+    if (
+        match is None
+        and test_allowed
+        and isinstance(adapters, AuthorizationAdapters)
+        and (getattr(adapters.verifier, "trust", None) is AdapterTrust.EMULATOR)
     ):
         match = re.fullmatch(r"(?i:Bearer) ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.)", header)
     if match is None or len(header) > 16_384:
@@ -117,7 +122,13 @@ def request_principal(request: Request, settings) -> VerifiedPrincipal:
     return principal
 
 
-def request_identity(request: Request, settings, required_role: UserRole | None = None) -> dict:
+def request_identity(
+    request: Request,
+    settings,
+    required_role: UserRole | None = None,
+    *,
+    include_workspaces: bool = False,
+) -> dict:
     principal = request_principal(request, settings)
     adapters = getattr(request.app.state, "authorization_adapters", None)
     if not principal.email_verified:
@@ -139,11 +150,34 @@ def request_identity(request: Request, settings, required_role: UserRole | None 
             "University access is unavailable" if status == 503 else "Current membership required"
         )
         raise IdentityAccessError(status, error.code.value, message) from error
+    workspaces = (
+        sorted(
+            role.value
+            for role in membership.roles
+            if (role != UserRole.STUDENT or membership.student_id)
+            and (role != UserRole.TEACHER or membership.faculty_id)
+        )
+        if include_workspaces
+        else []
+    )
+    if include_workspaces and not workspaces:
+        raise IdentityAccessError(
+            403, "record_membership_required", "Current academic membership required"
+        )
     selected = required_role or request.headers.get("X-ClassSync-Role")
     if selected is None:
         if len(membership.roles) != 1:
-            raise IdentityAccessError(403, "role_selection_required", "Select an authorized role")
-        selected = next(iter(membership.roles))
+            if include_workspaces and len(workspaces) == 1:
+                selected = workspaces[0]
+            else:
+                raise IdentityAccessError(
+                    403,
+                    "role_selection_required",
+                    "Select an authorized role",
+                    available_roles=workspaces,
+                )
+        else:
+            selected = next(iter(membership.roles))
     try:
         role = UserRole(selected)
     except ValueError as error:
@@ -163,6 +197,7 @@ def request_identity(request: Request, settings, required_role: UserRole | None 
         "tenant_id": membership.tenant_id,
         "role": role.value,
         "membership_revision": membership.revision,
+        **({"available_roles": workspaces} if len(workspaces) > 1 else {}),
         **({"student_id": membership.student_id} if role == UserRole.STUDENT else {}),
         **({"faculty_id": membership.faculty_id} if role == UserRole.TEACHER else {}),
     }

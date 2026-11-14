@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import socket
+import sqlite3
 import subprocess
 import tempfile
 import threading
@@ -15,6 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from uuid import uuid4
 
+import httpx
 import pytest
 import uvicorn
 from classync_contracts.identity import MembershipState, VerifiedPrincipal
@@ -33,6 +35,7 @@ from sqlalchemy.engine import URL
 from scripts.postgres_disposable import qualify
 from scripts.postgres_driver_qualification import engine_for, require
 from scripts.postgres_identity_qualification import exercise as identity_exercise
+from scripts.registration_connected_qualification import server as service_server
 from services.testing.emulator_firebase import emulator_firebase
 
 
@@ -44,8 +47,12 @@ def write_new_evidence(path, evidence):
 
 def exercise(connection, root, marker):
     foundation = identity_exercise(connection)
+    from services.academic.app import authorization as academic_auth
+    from services.academic.app import main as academic
     from services.gateway.app import authorization as providers
     from services.gateway.app import main as gateway
+    from services.scheduling.app import authorization as scheduling_auth
+    from services.scheduling.app import main as scheduling
 
     project, endpoint = marker["project"], marker["endpoint"]
     owner = engine_for(connection, bootstrap=True)
@@ -75,10 +82,31 @@ def exercise(connection, root, marker):
                 "UPDATE classsync_identity.tenants SET firebase_project_id=:project "
                 "WHERE id='tenant-a'"
             ), {"project": project})
+            # Dashboard reads use real providers, without granting runtime data writes.
+            for namespace in ("classsync_academic", "classsync_scheduling"):
+                session.execute(text(f"GRANT USAGE ON SCHEMA {namespace} TO {connection.runtime}"))
+                session.execute(text(
+                    f"GRANT SELECT ON ALL TABLES IN SCHEMA {namespace} TO {connection.runtime}"
+                ))
+            session.execute(text(
+                f"GRANT SELECT ON classsync_identity.account_claims TO {connection.runtime}"
+            ))
+            privileges = session.execute(text("""
+                SELECT has_table_privilege(:runtime, 'classsync_identity.account_claims', 'SELECT'),
+                       has_table_privilege(:runtime, 'classsync_identity.account_claims', 'INSERT'),
+                       has_table_privilege(:runtime, 'classsync_identity.account_claims', 'UPDATE'),
+                       has_table_privilege(:runtime, 'classsync_identity.account_claims', 'DELETE')
+            """), {"runtime": connection.runtime}).one()
+            require(tuple(privileges) == (True, False, False, False),
+                    "Session onboarding status must have SELECT-only runtime access")
+            policy = session.execute(text("""
+                SELECT relrowsecurity, relforcerowsecurity FROM pg_class
+                WHERE oid = 'classsync_identity.account_claims'::regclass
+            """)).one()
+            require(all(policy), "Session onboarding status must retain ENABLE/FORCE RLS")
         with pytest.MonkeyPatch.context() as patch, emulator_firebase(
             patch, project=project, endpoint=endpoint,
         ) as sdk, ExitStack() as teardown:
-            teardown.callback(stop_services)
             verifier, _ = sdk
             parameters = connection.parameters()
             url = URL.create("postgresql+psycopg", username=parameters["user"],
@@ -91,8 +119,41 @@ def exercise(connection, root, marker):
                 enable_test_identity_adapters=True,
                 identity_database_url=SecretStr(url.render_as_string(hide_password=False)),
                 identity_database_transport="loopback-sspi-test",
+                database_pool_size=2,
+                course_cloud_enabled=False, course_storage_bucket="", course_gemini_model="",
+                gemini_api_key=None,
             ))
             patch.setattr(providers, "FirebaseTokenVerifier", lambda _: verifier)
+            patch.setattr(academic_auth, "FirebaseTokenVerifier", lambda _: verifier)
+            patch.setattr(scheduling_auth, "FirebaseTokenVerifier", lambda _: verifier)
+            common = dict(
+                _env_file=None, classsync_env="test", institutional_tenant_id="tenant-a",
+                firebase_project_id=project, enable_test_identity_adapters=True,
+                database_pool_size=2,
+            )
+            database_url = SecretStr(url.render_as_string(hide_password=False))
+            patch.setattr(academic, "settings", academic.Settings(
+                **common, academic_database_url=database_url,
+                academic_database_transport="loopback-sspi-test",
+            ))
+            patch.setattr(scheduling, "settings", scheduling.Settings(
+                **common, scheduling_database_url=database_url,
+                scheduling_database_transport="loopback-sspi-test",
+            ))
+
+            def no_sqlite(*_args, **_kwargs):
+                raise RuntimeError("SQLite fallback attempted by session qualification")
+
+            patch.setattr(sqlite3, "connect", no_sqlite)
+            academic_url = teardown.enter_context(service_server(academic.app))
+            patch.setattr(scheduling.settings, "academic_service_url", academic_url)
+            scheduling_url = teardown.enter_context(service_server(scheduling.app))
+            patch.setattr(gateway.settings, "academic_service_url", academic_url)
+            patch.setattr(gateway.settings, "scheduling_service_url", scheduling_url)
+            patch.setattr(gateway, "SERVICES", {
+                "academic": academic_url, "scheduling": scheduling_url,
+            })
+            teardown.callback(stop_services)
 
             class Control(BaseHTTPRequestHandler):
                 """Fixture-only control socket; never mounted in the product API."""
@@ -138,12 +199,37 @@ def exercise(connection, root, marker):
                                     roles = ["administrator"] if action == "administrator" else [
                                         "student", "teacher",
                                     ]
+                                    # Each emulator account gets its own disposable records.
+                                    # Foundation records already belong to other verified UIDs.
+                                    record = "synthetic-session-" + uuid4().hex
+                                    bindings = {
+                                        "uid": uid, "roles": roles, "person": record + "-person",
+                                        "student": record + "-student" if action == "register"
+                                        else None,
+                                        "faculty": record + "-faculty" if action == "register"
+                                        else None,
+                                    }
+                                    session.execute(text("""
+                                        INSERT INTO classsync_identity.people VALUES
+                                        ('tenant-a', :person)
+                                    """), bindings)
+                                    if action == "register":
+                                        session.execute(text("""
+                                            INSERT INTO classsync_identity.students VALUES
+                                            ('tenant-a', :student, :person)
+                                        """), bindings)
+                                        session.execute(text("""
+                                            INSERT INTO classsync_identity.faculty VALUES
+                                            ('tenant-a', :faculty, :person)
+                                        """), bindings)
                                     audit_actor(session, actor)
                                     session.execute(text("""
-                                        INSERT INTO classsync_identity.memberships VALUES
-                                        ('tenant-a', :uid, 'person-a', 'student-a', 'faculty-a',
+                                        INSERT INTO classsync_identity.memberships
+                                        (tenant_id, uid, person_id, student_id, faculty_id,
+                                         roles, state, revision)
+                                        VALUES ('tenant-a', :uid, :person, :student, :faculty,
                                          CAST(:roles AS text[]), 'active', 1)
-                                    """), {"uid": uid, "roles": roles})
+                                    """), bindings)
                                 elif action == "student-only":
                                     change_membership_grants(
                                         session, tenant_id="tenant-a", uid=uid,
@@ -180,6 +266,12 @@ def exercise(connection, root, marker):
             while not server.started and worker.is_alive() and time.monotonic() < deadline:
                 time.sleep(0.05)
             require(server.started, "Owned Gateway startup failed")
+            with httpx.Client(timeout=5, trust_env=False) as client:
+                for service_url in (academic_url, scheduling_url, gateway_url):
+                    require(client.get(service_url + "/health").status_code == 200,
+                            "Owned session service health check failed")
+                require(client.get(gateway_url + "/api/v1/auth/me").status_code == 401,
+                        "Gateway must deny unauthenticated identity requests")
             config = root / "browser-fixture.json"
             write_new_evidence(config, {"root": str(root), "project": project,
                               "authEndpoint": endpoint, "gateway": gateway_url,
@@ -191,7 +283,8 @@ def exercise(connection, root, marker):
                                     check=False)
             require(result.returncode == 0, "Actual browser session qualification failed")
             browser = json.loads((root / "browser-result.json").read_text(encoding="utf-8"))
-            return {"foundation": foundation, "browser": browser, "production_acceptance": False}
+            return {"foundation": foundation, "browser": browser,
+                    "onboarding_read_only_privileges": True, "production_acceptance": False}
     finally:
         try:
             stop_services()

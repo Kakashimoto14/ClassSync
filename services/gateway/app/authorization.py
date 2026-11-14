@@ -20,6 +20,7 @@ def connection_configuration(settings):
         firebase_project_id=settings.firebase_project_id,
         tenant_id=settings.institutional_tenant_id,
         application_name="classsync-gateway-identity",
+        tls_root_cert=settings.postgres_tls_root_cert,
     )
 
 

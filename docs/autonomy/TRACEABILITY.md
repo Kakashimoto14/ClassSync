@@ -1,6 +1,18 @@
 # Requirements -> implementation -> evidence
 
-Current evidence: docs/production/local-20261026 and local-20261027. Production NO-GO. Synthetic local tests do not establish institutional authority. Reconstructed 26 October after a documentation encoding failure truncated this index; detailed historical evidence remains in STATUS.md and dated acceptance/review files. No application or database content was lost. Earlier index wording is not claimed verbatim preserved.
+Current November evidence is in [STATUS.md](STATUS.md) and the
+[operational authority contract](../production/firestore-authority.md).
+The October rows below are historical. Production remains NO-GO.
+
+| Current requirement | Implementation and fresh evidence | Decision |
+| --- | --- | --- |
+| Required Native Firestore operational access | Firestore access/claim/invitation adapters, actual Auth and Firestore emulators, Gateway and direct Scheduling on disposable PostgreSQL; `production-firestore-role-5.json` | PASS for isolated local role slice. Normal runtime cutover, hosted durability and IAM remain unverified. |
+| Pending claim and one-use invitation | Verified Student claim and Administrator approval, exact replay, Teacher invite head/reservation, concurrent accept 200/403, denied wrong email/expired/replaced/revoked/revoked issuer | PASS locally with preloaded synthetic SQL projection; production roster verification, projection writer, MFA and real email delivery pending. |
+| Fail-closed access and direct Rules | SQL-only/pending/shadow/revoked 403 at both boundaries, mismatch/outage 503, matching recovery 200, direct Firestore client denials 403 | PASS locally. Hosted outage recovery and in-flight privileged-write fencing are unverified. |
+| Resumable dry run and shadow parity | `firestore_shadow_import.py`; bounded plan, duplicate/orphan rejection, interrupted/concurrent replay, exact reservation parity; two synthetic rows and a redacted checksum | PASS for bounded rehearsal; full export/cutover/restore/rollback are pending. |
+| Scheduling and OCR | `production-directive-focused.log` 142 passes including synthetic shared institute locks, publication and parser/limit regressions; Windows OCR receipt for four input types | PASS for focused synthetic Windows checks. No native Linux image, real forms or institutional coverage claim. |
+| Private durable registration review | Gateway review routes, Firestore Native emulator and a fresh Gateway/client; exact binding check on timetable responses; erase vs. in-flight review, expiry, outage, and user/tenant denials | PASS locally with synthetic identity. Hosted composition, physical TTL cleanup and authorization cutover remain pending. |
+| Release security | Fresh npm audit: seven moderate dependency entries tied to GHSA-g3hv-75wg-m249; current lint dependency range excludes patched major | BLOCKED under the unchanged audit policy; resolve with a supported release or separately authorized policy disposition. |
 
 | Requirement | Implementation | Fresh evidence | Status / limit |
 |---|---|---|---|

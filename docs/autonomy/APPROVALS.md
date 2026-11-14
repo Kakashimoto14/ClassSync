@@ -156,3 +156,45 @@ Owner explicitly reopens the recorded CI gate for one serial full frontend run w
 ## 3 November 2026 — real academic-data readiness milestone
 
 Owner explicitly authorizes local source/document/test improvements for BSIT Years 1–4 Administrator academic-data entry, source/curriculum reconciliation, readiness reporting and isolated synthetic/disposable PostgreSQL functional verification. Acceptance cases are recorded in `REAL_ACADEMIC_READINESS_ACCEPTANCE.md`. Preserve completed curriculum/cohort pilot, green BSIT3A current-source priority, all prior user changes and original SQLite databases. Use existing contracts, Admin screens, PostgreSQL persistence, OR-Tools, independent validation, tenant/RLS and publication authorization. No architecture rewrite. No real institutional import, student rosters, production identities/accounts, real publication, cloud changes, deployment, commit or push. Synthetic faculty/rooms/sections must remain ineligible for institutional readiness/publication. Stop after this bounded milestone; Teacher/Admin visual redesign is out of scope.
+
+## Auth and SaaS onboarding feature
+
+Owner authorizes isolated local React, CSS and focused qualification on feature/auth-onboarding-saas from the reviewed release checkpoint. Reuse Firebase identity, current PostgreSQL membership, faculty invitations, student claims and scanner review. Acceptance covers Student signup, verification, profile review, pending and approved access, recovery and refresh, Teacher invitation and revocation, Admin isolation, role and tenant denials, matched and unmatched scanner review, responsive and keyboard behavior, and presentation isolation. Release ref, SQLite databases and current gates stay intact. Commit, push and hosted changes require separate approval.
+
+## Local SaaS entrance correction
+
+Owner authorizes a bounded fix in the existing feature worktree. Acceptance covers the default Vite mode and all four public entry routes in Chromium, unavailable and connected states, synthetic Student and Teacher activation, Admin denial, two screenshot widths, read-only presentation isolation and unchanged database digests. Local services must use the owned emulator and disposable PostgreSQL.
+
+## 7 November 2026 — Universal SaaS authentication
+
+Owner authorizes local implementation on feature/auth-onboarding-saas. Acceptance covers one signed-out credential form, server-confirmed membership routing and switching, signup, verification, claim approval, invite return, recovery, denial paths, and isolated presentation. Verify real Chromium widths and native zoom, reduced motion, disposable providers, and unchanged original SQLite hashes. Preserve release refs. Commit, push and hosted changes require separate approval.
+
+## Persistent connected development and entrance refinement
+
+Owner authorizes local launcher, configuration diagnostics and React entrance changes. Acceptance covers an intentional start/stop lifecycle, loopback-only owned emulator and disposable PostgreSQL, real Student/Teacher/Admin journeys, missing-provider and outage states, presentation isolation, screenshots, focused checks and original database hashes. Hosted changes remain separately gated.
+
+## 7 November 2026 — Bounded regression diagnosis and read-only hosted inspection
+
+Owner explicitly approves bounded diagnosis and qualification of the repeated frontend whole-run timeout. Preserve the 300-second wrapper guard, two-worker cap, per-file isolation, assertions and security checks. Use retained timing evidence and focused probes before one relevant full qualification.
+
+Owner confirms Firebase project classsync-f444c and Vercel project class-sync-bhiv (the current public presentation). Read-only inspection of project configuration is authorized; staging exclusivity is not established. Preserve Firebase users and all hosted configuration. Hosted changes, cloud provisioning, Git actions and deployment remain separately gated. Never request credentials in chat.
+
+## 7 November 2026 — Legacy session fixture correction approved
+
+Owner explicitly approves bounded correction of the nonce-protected legacy session fixture control followed by one session-journey qualification. Acceptance: distinct disposable person/Student/faculty bindings for each synthetic account; Administrator has only its required binding; successful control actions retain HTTP200; verified server workspace choices, denial, revocation, refresh, logout, outage recovery and native zoom pass unchanged assertions; owned qualification services stop; original SQLite hashes and release/main refs match. Preserve unique-account constraints, RLS, expected responses, all limits and existing feature work. No commit, push, hosted change or original database writes.
+
+## 7 November 2026 — Legacy connected service qualification approved
+
+Owner approves connecting the legacy session harness to existing real Academic/Scheduling test services on the same marked disposable PostgreSQL database, then one qualification run. Acceptance: owned loopback service health, real authorized empty timetable responses, existing role/session/outage/zoom/browser assertions unchanged, strict no-SQLite fallback, read-only least-privileged data grants, clean service teardown, unchanged original hashes and release refs. Keep all guards/limits; no commit, push, cloud change or original data writes.
+
+## 7 November 2026 — Exact onboarding read grant approved
+
+Owner approves SELECT-only access to classsync_identity.account_claims for the generated disposable session runtime, a privilege preflight, and one session qualification. Acceptance: required read succeeds; INSERT/UPDATE/DELETE remain denied; ENABLE/FORCE RLS remain enabled; unchanged browser console, authorization, lifecycle, zoom assertions and test/service limits pass; owned services stop; original hashes and release refs match. No institutional data, cloud, Git or production authority is added.
+
+## 10 November 2026 — Production MVP directive, first local bridge gate
+
+Owner requires Firestore Native mode for operational institutional access/onboarding; PostgreSQL remains canonical for academic data and publication. Authorized now: local implementation and disposable qualification. First acceptance: verified Firebase account with only an SQL projection is denied; Firestore activation enables Gateway and direct Scheduling reads of the same real PostgreSQL publication; Firestore revocation, inconsistent projection, and Firestore outage deny without SQL fallback; duplicate bindings and stale mutations fail; direct client Firestore reads/writes are denied. Record the authority and rollback contract before enabling any release path. Preserve both dirty worktrees, release ref, original databases and presentation. Hosted resources, real data/accounts, Git publication and authority cutover require separate approval.
+
+## Hosting automation — local preparation
+
+Owner authorizes local environment generation, deployment preparation, provider read-only discovery and emulator/local checks from feature/auth-onboarding-saas. Acceptance: keep presentation configuration intact; render a separate connected Vercel overlay and Cloud Run service/secret references from validated metadata; match settings to runtime consumers; test keyless Firebase ADC and private Cloud Run transport without replacing user authorization. Do not stage, commit, push, deploy, change provider settings, create resources/users or spend. Confirm original database hashes. Hosted approval requires a verified target and one reviewable proposal.

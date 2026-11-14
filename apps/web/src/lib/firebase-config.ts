@@ -1,12 +1,5 @@
 import { getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
-const fields = [
-  'apiKey',
-  'authDomain',
-  'projectId',
-  'storageBucket',
-  'messagingSenderId',
-  'appId',
-] as const;
+const fields = ['apiKey', 'authDomain', 'projectId', 'appId'] as const;
 export function configuredFirebase(config: FirebaseOptions) {
   const missing = fields.filter((key) => !config[key]);
   if (missing.length)

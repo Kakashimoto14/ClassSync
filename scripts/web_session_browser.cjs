@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/lenovo/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./qualification_playwright.cjs')();
 const net = require('node:net');
 const { validateFixture } = require('./lib/web-session-fixture.cjs');
 
@@ -13,9 +13,10 @@ async function main() {
   const helperRoot = path.join(repo, 'var', 'web-session-' + path.basename(root));
   fs.mkdirSync(helperRoot);
   const helper = path.join(helperRoot, 'identity-helper.js');
-  fs.writeFileSync(helper, `import {getAuth,signInAnonymously} from 'firebase/auth';
+  fs.writeFileSync(helper, `import {getAuth,signInWithEmailAndPassword} from 'firebase/auth';
 import {firebaseApp} from '/src/lib/firebase.ts';
-export async function signin(){return (await signInAnonymously(getAuth(firebaseApp))).user.uid;}
+export async function signin(email,password){return (await signInWithEmailAndPassword(getAuth(firebaseApp),email,password)).user.uid;}
+export async function token(){return getAuth(firebaseApp).currentUser.getIdToken();}
 `, { flag: 'wx' });
   Object.assign(process.env, {
     VITE_CLASSSYNC_MODE: 'institutional', VITE_ENABLE_ROLE_PREVIEW: 'false',
@@ -87,20 +88,45 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
       assert.match(await page.title(), /ClassSync/);
       assert.equal(await page.locator('vite-error-overlay').count(), 0);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Horizontal overflow');
-      const file = path.join('C:/Users/lenovo/.codex/visualizations/2026/10/25/01a17489-5bf8-7c93-adb1-44b9f3722009',
+      const file = path.join(root,
         `p3a-session-${path.basename(root).slice(-8)}-${label}-${page.viewportSize().width}.png`);
       await page.screenshot({ path: file, fullPage: true }); screenshots.push(file);
     };
-    const signin = async () => page.evaluate(async (url) => (await import(url)).signin(),
-      '/@fs/' + helper.replaceAll('\\', '/'));
-    await page.goto(origin + '/auth/login');
-    await text('Signed out'); await shot('before-signed-out');
-    const uid = await signin();
-    await text('Current membership required');
+    const helperUrl = '/@fs/' + helper.replaceAll('\\', '/');
+    const auth = origin + '/auth/login';
+    const account = origin + '/auth/account';
+    const signedOut = () => page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+    const recheck = () => page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    const retry = () => page.getByRole('button', { name: 'Retry access check' }).click();
+    const firebase = async (action, body) => {
+      const response = await fetch(
+        `http://${config.authEndpoint}/identitytoolkit.googleapis.com/v1/accounts:${action}?key=synthetic-emulator-key`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
+      );
+      assert.equal(response.status, 200);
+      return response.json();
+    };
+    const signin = async (name) => {
+      const email = `${name}@synthetic.invalid`;
+      const password = 'Local-emulator-password-42!';
+      const identity = await firebase('signUp', { email, password, returnSecureToken: true });
+      await firebase('sendOobCode', { requestType: 'VERIFY_EMAIL', idToken: identity.idToken });
+      const codes = await (await fetch(`http://${config.authEndpoint}/emulator/v1/projects/${config.project}/oobCodes`)).json();
+      const code = codes.oobCodes.find(item => item.email === email && item.requestType === 'VERIFY_EMAIL');
+      assert(code, 'Synthetic verification code missing');
+      await firebase('update', { oobCode: code.oobCode });
+      return page.evaluate(async ({ url, email, password }) => (await import(url)).signin(email, password),
+        { url: helperUrl, email, password });
+    };
+    await page.goto(auth);
+    await signedOut(); await shot('before-signed-out');
+    const uid = await signin('multi-workspace');
+    await text('University access is not active');
     await control('register', uid);
-    await page.getByRole('button', { name: 'Retry access check' }).click();
-    await text('Choose a role to verify'); await shot('role-choice');
-    await page.getByRole('button', { name: 'Check Student access' }).click();
+    await retry();
+    await text('Choose a workspace'); await shot('role-choice');
+    assert.equal(await page.getByRole('button', { name: 'Administrator', exact: true }).count(), 0);
+    await page.getByRole('button', { name: 'Student', exact: true }).click();
     await text('Student membership verified');
     for (const width of [360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 }); await shot('student-verified');
@@ -113,41 +139,43 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
       if (once) { once = false; await held; }
       await route.continue();
     });
-    const teacher = page.getByRole('button', { name: 'Check Teacher access' });
+    const teacher = page.getByRole('button', { name: 'Teacher', exact: true });
     await teacher.focus(); await teacher.press('Enter'); await text('Checking university access');
-    assert(await teacher.evaluate((button) => document.activeElement === button));
+    assert.equal(await teacher.count(), 0);
     await shot('checking-keyboard'); release();
     await text('Teacher membership verified');
-    assert(await teacher.evaluate((button) => document.activeElement === button));
+    assert(await page.getByRole('region', { name: 'University access' }).evaluate(el => el === document.activeElement));
     await page.unroute(origin + '/api/v1/auth/me'); await shot('teacher-verified');
-    await page.getByRole('button', { name: 'Check Administrator access' }).click();
-    await text('Current membership required'); await shot('denied');
-    await page.getByRole('button', { name: 'Check Teacher access' }).click(); await text('Teacher membership verified');
+    const token = await page.evaluate(async (url) => (await import(url)).token(), helperUrl);
+    const denied = await page.request.get(origin + '/api/v1/auth/me', {
+      headers: { Authorization: 'Bearer ' + token, 'X-ClassSync-Role': 'administrator' },
+    });
+    assert.equal(denied.status(), 403); await shot('denied');
     await control('student-only', uid);
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Current membership required');
-    await page.getByRole('button', { name: 'Check Student access' }).click(); await text('Student membership verified');
+    await recheck(); await text('University access is not active');
+    await retry(); await page.waitForURL('**/student/dashboard');
+    await page.goto(account); await text('Student membership verified');
     await control('outage');
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Access check unavailable'); await shot('database-unavailable');
+    await recheck(); await text('Access check unavailable'); await shot('database-unavailable');
     await control('recover');
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Student membership verified');
+    await retry(); await text('Student membership verified');
     await context.setOffline(true); await text('You are offline'); await shot('offline');
     assert.equal(await page.getByText('Student membership verified', { exact: true }).count(), 0);
     await context.setOffline(false); await text('Student membership verified');
     await control('revoke', uid);
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Current membership required');
+    await recheck(); await text('University access is not active');
     await control('activate', uid);
-    await page.getByRole('button', { name: 'Check Student access' }).click(); await text('Student membership verified');
-    await page.reload(); await text('Student membership verified');
-    await page.goto(origin + '/student/dashboard'); await text('University access unavailable');
+    await retry(); await page.waitForURL('**/student/dashboard');
+    await page.reload(); await page.locator('.app-shell').waitFor();
     assert.equal(await page.getByText('Sample preview', { exact: false }).count(), 0);
-    await page.goto(origin + '/auth/login'); await text('Student membership verified');
-    await page.getByRole('button', { name: 'Sign out', exact: true }).click(); await text('Signed out');
-    assert(await page.getByRole('region', { name: 'University access' }).evaluate((element) => document.activeElement === element));
-    const administrator = await signin(); await text('Current membership required');
+    await page.goto(account); await text('Student membership verified');
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click(); await signedOut();
+    assert(await page.getByRole('heading', { name: 'Welcome back' }).evaluate(el => document.activeElement === el));
+    const administrator = await signin('single-administrator'); await text('University access is not active');
     await control('administrator', administrator);
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Administrator membership verified'); await shot('administrator-verified');
-    await page.getByRole('button', { name: 'Check Student access' }).click(); await text('Current membership required');
-    await page.getByRole('button', { name: 'Check Administrator access' }).click(); await text('Administrator membership verified');
+    await retry(); await page.waitForURL('**/admin/dashboard');
+    await page.goto(account); await text('Administrator membership verified'); await shot('administrator-verified');
+    assert.equal(await page.getByRole('button', { name: 'Teacher', exact: true }).count(), 0);
     const extension = path.join(root, 'owned-zoom-extension');
     fs.mkdirSync(extension);
     fs.writeFileSync(path.join(extension, 'manifest.json'), JSON.stringify({ manifest_version: 3,
@@ -155,7 +183,7 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
       host_permissions: ['http://127.0.0.1/*'] }), { flag: 'wx' });
     fs.writeFileSync(path.join(extension, 'zoom.html'), '<!doctype html><title>Owned QA zoom</title>', { flag: 'wx' });
     const nativePage = await context.newPage();
-    await nativePage.goto(origin + '/auth/login');
+    await nativePage.goto(account);
     await nativePage.getByText('Administrator membership verified', { exact: true }).waitFor();
     const metrics = () => nativePage.evaluate(() => ({ innerWidth, dpr: devicePixelRatio,
       visualScale: visualViewport.scale, cssZoom: getComputedStyle(document.documentElement).zoom }));
@@ -165,7 +193,7 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
     const zoomControl = await context.newPage();
     await zoomControl.goto(`chrome-extension://${loaded.id}/zoom.html`);
     const nativeZoom = await zoomControl.evaluate(async (target) => {
-      const tabs = await chrome.tabs.query({ url: target + '/auth/login' });
+      const tabs = await chrome.tabs.query({ url: target + '/auth/account' });
       for (const tab of tabs) await chrome.tabs.setZoom(tab.id, 2);
       return chrome.tabs.getZoom(tabs[0].id);
     }, origin);
@@ -176,11 +204,12 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
     assert.equal(afterZoom.dpr, 2); assert.equal(afterZoom.visualScale, 1); assert.equal(afterZoom.cssZoom, '1');
     assert(afterZoom.innerWidth <= beforeZoom.innerWidth * 0.51);
     assert(await nativePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    const nativeTeacher = nativePage.getByRole('button', { name: 'Check Teacher access' });
-    await nativeTeacher.focus(); await nativeTeacher.press('Enter');
-    await nativePage.getByText('Current membership required', { exact: true }).waitFor();
-    assert(await nativeTeacher.evaluate((button) => document.activeElement === button));
-    const zoomScreenshot = path.join('C:/Users/lenovo/.codex/visualizations/2026/10/25/01a17489-5bf8-7c93-adb1-44b9f3722009',
+    const openAdmin = nativePage.getByRole('link', { name: 'Open Administrator workspace' });
+    await openAdmin.focus(); await openAdmin.press('Enter');
+    await nativePage.waitForURL('**/admin/dashboard');
+    await nativePage.goto(account);
+    await nativePage.getByText('Administrator membership verified', { exact: true }).waitFor();
+    const zoomScreenshot = path.join(root,
       `p3a-session-${path.basename(root).slice(-8)}-native-200-percent.png`);
     // Native zoom doubles physical pixels; Playwright's CSS-sized screenshot clips them.
     const nativePixels = await (await context.newCDPSession(nativePage)).send('Page.captureScreenshot', {
@@ -188,7 +217,7 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
     });
     fs.writeFileSync(zoomScreenshot, Buffer.from(nativePixels.data, 'base64'), { flag: 'wx' });
     screenshots.push(zoomScreenshot);
-    const panelBounds = await nativePage.locator('[aria-label="University access"]').evaluate((panel) => {
+    const panelBounds = await nativePage.getByRole('region', { name: 'ClassSync account access' }).evaluate((panel) => {
       const bounds = panel.getBoundingClientRect();
       return { left: bounds.left, right: bounds.right, viewport: innerWidth };
     });
@@ -204,8 +233,8 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
     await page.waitForFunction(() => devicePixelRatio === 1);
     await text('Administrator membership verified');
     await control('stop-auth');
-    await page.getByRole('button', { name: 'Retry access check' }).click(); await text('Access check unavailable'); await shot('identity-unavailable');
-    await page.getByRole('button', { name: 'Sign out', exact: true }).click(); await text('Signed out'); await shot('after-sign-out');
+    await recheck(); await text('Access check unavailable'); await shot('identity-unavailable');
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click(); await signedOut(); await shot('after-sign-out');
     assert.deepEqual(runtimeErrors, []); assert.deepEqual(unexpectedConsole, []);
     assert(blockedExternal.every((entry) => /fonts\.(googleapis|gstatic)\.com/.test(entry.host)), 'Unexpected nonloopback browser request');
     assert(apiStatuses.includes(200) && apiStatuses.includes(403) && apiStatuses.includes(503));
@@ -221,7 +250,7 @@ if(firebaseApp)__qaConnect(__qaAuth(firebaseApp),${JSON.stringify('http://' + co
     }), runtimeErrors, unexpectedConsole, blockedExternal, apiStatuses };
     if (page && !page.isClosed()) {
       failure.visibleText = await page.locator('body').innerText().catch(() => 'unavailable');
-      const file = path.join('C:/Users/lenovo/.codex/visualizations/2026/10/25/01a17489-5bf8-7c93-adb1-44b9f3722009',
+      const file = path.join(root,
         `p3a-session-${path.basename(root).slice(-8)}-failure.png`);
       await page.screenshot({ path: file, fullPage: true }).catch(() => {});
       failure.screenshot = file;

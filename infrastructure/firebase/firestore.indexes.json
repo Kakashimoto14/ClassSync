@@ -1,0 +1,17 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {"collectionGroup": "memberships", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "reservations", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "revocations", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "facultyInvitations", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "facultyInviteHeads", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "shadowImports", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "registrationReviews", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "registrationReviews", "fieldPath": "expires_at", "ttl": true,
+     "indexes": []},
+    {"collectionGroup": "studentClaims", "fieldPath": "*", "indexes": []},
+    {"collectionGroup": "studentClaims", "fieldPath": "state",
+     "indexes": [{"order": "ASCENDING", "queryScope": "COLLECTION"}]}
+  ]
+}

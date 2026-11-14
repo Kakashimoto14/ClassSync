@@ -14,14 +14,25 @@ async function main() {
   assert.equal(marker.endpoint, config.authEndpoint);
   assert.equal(marker.project, config.project);
   assert.match(config.gateway, /^http:\/\/127\.0\.0\.1:[0-9]+$/);
-  const { chromium } = loadPlaywright();
+  const preview = config.preview === true;
+  const persistent = preview && config.persistent === true;
+  const supervisor = Number(process.env.CLASSSYNC_DEV_SUPERVISOR_PID);
+  if (persistent) assert(Number.isSafeInteger(supervisor) && supervisor > 0);
+  assert.match(config.project, /^demo-classsync-[a-f0-9]{12}$/);
+  assert.match(config.authEndpoint, /^127\.0\.0\.1:[0-9]+$/);
   const repo = path.resolve(__dirname, '..');
   Object.assign(process.env, {
     VITE_CLASSSYNC_MODE: 'institutional',
+    VITE_CLASSSYNC_SYNTHETIC_PREVIEW: preview ? 'true' : 'false',
+    VITE_CLASSSYNC_PRESENTATION_URL: preview
+      ? (process.env.VITE_CLASSSYNC_PRESENTATION_URL ?? '')
+      : 'https://presentation.synthetic.invalid/',
     VITE_ENABLE_ROLE_PREVIEW: 'false',
     VITE_ENABLE_PRESENTATION_SAMPLE: 'false',
     VITE_API_BASE_URL: '/api/v1',
-    VITE_FIREBASE_API_KEY: 'synthetic-emulator-key',
+    VITE_FIREBASE_API_KEY: persistent
+      ? 'synthetic-emulator-key-' + config.project
+      : 'synthetic-emulator-key',
     VITE_FIREBASE_AUTH_DOMAIN: config.project + '.firebaseapp.com',
     VITE_FIREBASE_PROJECT_ID: config.project,
     VITE_FIREBASE_STORAGE_BUCKET: config.project + '.appspot.com',
@@ -35,7 +46,11 @@ async function main() {
   const vite = await createServer({
     root: path.join(repo, 'apps/web'),
     configFile: path.join(repo, 'apps/web/vite.config.ts'),
-    server: { host: '127.0.0.1', port: 0, strictPort: false },
+    server: {
+      host: '127.0.0.1',
+      port: persistent ? Number(process.env.CLASSSYNC_DEV_PORT) : preview ? 5191 : 0,
+      strictPort: preview,
+    },
     logLevel: 'error',
     plugins: [
       {
@@ -62,6 +77,45 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
   try {
     await vite.listen();
     const origin = `http://127.0.0.1:${vite.httpServer.address().port}`;
+    if (preview) {
+      const stop = path.join(root, 'stop-preview');
+      console.log(`Connected synthetic preview: ${origin}/`);
+      console.log(
+        `Auth Emulator: http://${config.authEndpoint} (verification codes: /emulator/v1/projects/${config.project}/oobCodes)`,
+      );
+      console.log(`API through Vite: ${origin}/api/v1`);
+      console.log(
+        `Verification and reset links: http://${config.authEndpoint}/emulator/v1/projects/${config.project}/oobCodes`,
+      );
+      if (persistent) {
+        console.log(
+          `Synthetic credentials and record IDs: ${path.join(root, 'dev-accounts.json')}`,
+        );
+        console.log('Type stop and press Enter to shut down this session.');
+      } else {
+        console.log(
+          `Synthetic Admin: ${config.adminEmail} | Teacher: browser-faculty@synthetic.invalid | Student record: SYN-001`,
+        );
+      }
+      console.log(`Alternate stop command: New-Item -ItemType File -Path "${stop}"`);
+      const deadline = persistent ? Infinity : Date.now() + 600_000;
+      while (!fs.existsSync(stop) && Date.now() < deadline) {
+        if (persistent) {
+          try {
+            process.kill(supervisor, 0);
+          } catch {
+            break;
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      fs.writeFileSync(
+        path.join(root, 'onboarding-browser-result.json'),
+        JSON.stringify({ preview: true }),
+      );
+      return;
+    }
+    const { chromium } = loadPlaywright();
     const profile = path.join(root, 'onboarding-chrome');
     browser = await chromium.launchPersistentContext(profile, {
       channel: 'chrome',
@@ -117,7 +171,7 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
       await page.screenshot({ path: file, fullPage: true });
       screenshots.push(file);
     };
-    const verify = async (email) => {
+    const verify = async (email, nextAction = 'Review student record') => {
       const response = await fetch(
         `http://${config.authEndpoint}/emulator/v1/projects/${config.project}/oobCodes`,
       );
@@ -136,36 +190,117 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
       );
       assert.equal(update.status, 200);
       await page.getByRole('button', { name: 'I verified my email', exact: true }).click();
-      await page.getByRole('button', { name: 'Request student access', exact: true }).waitFor();
+      await page.getByRole('button', { name: nextAction, exact: true }).waitFor();
     };
     const signout = async () => {
       await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-      await visible('Signed out');
+      await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     };
-    const login = async (email) => {
-      await page.getByRole('button', { name: 'Existing account', exact: true }).click();
-      await page.getByLabel('University email', { exact: true }).fill(email);
-      await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
+    const login = async (email, password = 'Local-emulator-password-42!') => {
+      await page.getByRole('heading', { name: 'Welcome back', exact: true }).waitFor();
+      await page.getByLabel('Email', { exact: true }).fill(email);
+      await page.getByLabel('Password', { exact: true }).fill(password);
       await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     };
-    await page.goto(origin + '/auth/login');
-    await visible('Signed out');
-    await page.getByRole('button', { name: 'Create account', exact: true }).first().click();
+    const entries = [
+      ['/', 'Welcome back'],
+      ['/auth/login', 'Welcome back'],
+      ['/auth/signup', 'Create your account'],
+      ['/auth/forgot-password', 'Reset your password'],
+      ['/auth/verify', 'Welcome back'],
+      ['/auth/student-onboarding', 'Welcome back'],
+      ['/auth/teacher-invite', 'Welcome back'],
+    ];
+    for (const [route, title] of entries) {
+      await page.goto(origin + route);
+      await page.getByRole('heading', { name: title, exact: true }).waitFor();
+      assert.equal(await page.locator('.connected-entrance').count(), 1);
+      for (const role of ['Student', 'Teacher', 'Admin'])
+        assert.equal(await page.getByRole('button', { name: role, exact: true }).count(), 0);
+    }
+    await page.goto(origin + '/');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+    assert.equal(
+      await page.getByRole('link', { name: 'Explore the sample workspace' }).getAttribute('href'),
+      'https://presentation.synthetic.invalid/',
+    );
+    for (const width of [360, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const form = await page.getByRole('button', { name: 'Sign in', exact: true }).boundingBox();
+      assert(
+        form && form.y + form.height < 900 && form.height >= 44,
+        'Sign-in must fit the first viewport',
+      );
+      assert(
+        await page
+          .locator('.entrance-preview')
+          .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+        'Illustrative schedule must fit',
+      );
+      await shot('entrance-' + width);
+    }
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    assert.equal(
+      await page.locator('.entrance-preview').evaluate((el) => getComputedStyle(el).animationName),
+      'none',
+    );
+    assert.equal(
+      await page
+        .getByRole('button', { name: 'Sign in', exact: true })
+        .evaluate((el) => getComputedStyle(el).transitionDuration),
+      '0s',
+    );
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.getByRole('heading', { name: 'Welcome back' }).focus();
+    await page.keyboard.press('Tab');
+    assert(
+      await page
+        .getByLabel('Email', { exact: true })
+        .evaluate((el) => el === document.activeElement),
+    );
+    await page.keyboard.press('Tab');
+    assert(
+      await page
+        .getByLabel('Password', { exact: true })
+        .evaluate((el) => el === document.activeElement),
+    );
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.getByLabel('Password', { exact: true }).getAttribute('type'), 'text');
+    await page.keyboard.press('Enter');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    assert.equal(
+      await page.getByLabel('Email', { exact: true }).getAttribute('aria-describedby'),
+      'entrance-email-error',
+    );
+    await login('unknown@synthetic.invalid', 'Invalid-password-42!');
+    await page.getByText(/We could not sign you in/).waitFor();
+    assert.equal(
+      await page.getByLabel('Password', { exact: true }).inputValue(),
+      'Invalid-password-42!',
+    );
+    await page.getByRole('link', { name: 'Create an account', exact: true }).click();
+    await page.waitForURL('**/auth/signup');
     const studentEmail = 'browser-student@synthetic.invalid';
-    await page.getByLabel('University email', { exact: true }).fill(studentEmail);
+    await page.getByLabel('Email', { exact: true }).fill(studentEmail);
     await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
+    await page.getByLabel('Confirm password', { exact: true }).fill('Local-emulator-password-42!');
     await page.locator('button[type=submit]').click();
+    await page.waitForURL('**/auth/verify');
     await page.getByRole('button', { name: 'I verified my email', exact: true }).waitFor();
     for (const width of [360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await shot('verify-' + width);
     }
     await verify(studentEmail);
+    await page.waitForURL('**/auth/student-onboarding');
     for (const width of [360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await shot('student-claim-' + width);
     }
     await page.getByLabel('Student number', { exact: true }).fill('browser-student');
+    await page.getByLabel('Account name', { exact: true }).fill('Synthetic Student');
+    await page.getByRole('button', { name: 'Review student record', exact: true }).click();
     await page.getByRole('button', { name: 'Request student access', exact: true }).click();
     await page
       .getByText(/awaiting university verification|waiting for university verification/)
@@ -175,6 +310,8 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
     await shot('restored-pending');
     await signout();
     await login(config.adminEmail);
+    await page.waitForURL('**/admin/dashboard');
+    await page.goto(origin + '/auth/account');
     await visible('Administrator membership verified');
     await page.getByRole('button', { name: 'Load account requests', exact: true }).click();
     await page
@@ -198,24 +335,78 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
       await shot('admin-invitation-' + width);
     }
     await signout();
+    await page.getByRole('link', { name: 'Forgot password?', exact: true }).click();
+    await page.getByLabel('Email', { exact: true }).fill(studentEmail);
+    await page.getByRole('button', { name: 'Send reset link', exact: true }).click();
+    await page.getByText(/check your email for the next steps/).waitFor();
+    const recovery = await fetch(
+      `http://${config.authEndpoint}/emulator/v1/projects/${config.project}/oobCodes`,
+    ).then((response) => response.json());
+    assert(
+      recovery.oobCodes.some(
+        (code) => code.email === studentEmail && code.requestType === 'PASSWORD_RESET',
+      ),
+    );
+    await page.getByRole('link', { name: 'Back to sign in', exact: true }).click();
+    await page.goto(
+      origin +
+        '/auth/login?returnTo=' +
+        encodeURIComponent('https://untrusted.invalid/admin/dashboard'),
+    );
     await login(studentEmail);
-    await visible('Student membership verified');
+    await page.waitForURL(origin + '/student/dashboard');
     await page.reload();
+    await page.locator('.app-shell').waitFor();
+    await page.goto(origin + '/admin/dashboard');
+    await page.getByRole('heading', { name: 'University access unavailable' }).waitFor();
+    assert.equal(await page.getByRole('heading', { name: 'University accounts' }).count(), 0);
+    await page.goto(origin + '/auth/account');
     await visible('Student membership verified');
+    await page.route('**/api/v1/auth/me', (route) =>
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'expired_token' } }),
+      }),
+    );
+    await page.reload();
+    await visible('Session expired');
+    await page.unroute('**/api/v1/auth/me');
     await signout();
-    await page.getByRole('button', { name: 'Create account', exact: true }).first().click();
+    const teacherEmail = 'browser-faculty@synthetic.invalid';
+    const provisionedTeacher = await fetch(
+      `http://${config.authEndpoint}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=synthetic-emulator-key`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: teacherEmail, password: 'Local-emulator-password-42!' }),
+      },
+    );
+    assert.equal(provisionedTeacher.status, 200);
+    await page.goto(origin + '/auth/teacher-invite');
+    await page.waitForURL(
+      (url) =>
+        url.pathname === '/auth/login' &&
+        url.searchParams.get('returnTo') === '/auth/teacher-invite',
+    );
+    await login(teacherEmail);
+    await page.getByRole('button', { name: 'Resend verification email', exact: true }).click();
     await page
-      .getByLabel('University email', { exact: true })
-      .fill('browser-faculty@synthetic.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('Local-emulator-password-42!');
-    await page.locator('button[type=submit]').click();
-    await page.getByRole('button', { name: 'I verified my email', exact: true }).waitFor();
-    await verify('browser-faculty@synthetic.invalid');
-    await page.getByText('Have a Teacher invitation?', { exact: true }).click();
+      .getByText('Verification email requested. Check your inbox.', { exact: true })
+      .waitFor();
+    await verify(teacherEmail, 'Accept invitation');
+    await page.waitForURL((url) => url.pathname === '/auth/teacher-invite');
     await page.getByLabel('Invitation code', { exact: true }).fill(token);
     await page.getByRole('button', { name: 'Accept invitation', exact: true }).click();
+    await page.waitForURL('**/teacher/dashboard');
+    await page.goto(origin + '/student/dashboard');
+    await page.getByRole('heading', { name: 'University access unavailable' }).waitFor();
+    await page.goto(origin + '/auth/account');
     await visible('Teacher membership verified');
-    await shot('teacher-accepted');
+    await page.getByRole('button', { name: 'Sign out', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForURL((url) => url.pathname === '/auth/login');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     // Native Chrome origin zoom, not a CSS transform or device-scale substitution.
     const extension = path.join(root, 'onboarding-zoom');
     fs.mkdirSync(extension);
@@ -242,17 +433,14 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
     assert.equal(factor, 2);
     await page.bringToFront();
     await page.waitForFunction(() => devicePixelRatio === 2);
-    await shot('native200');
-    await page.getByRole('button', { name: 'Sign out', exact: true }).focus();
-    await page.keyboard.press('Enter');
-    await visible('Signed out');
+    await shot('entrance-native200');
     assert(
       await page
-        .getByRole('region', { name: 'University access' })
+        .getByRole('heading', { name: 'Welcome back' })
         .evaluate((el) => document.activeElement === el),
     );
     const unexpectedErrors = errors.filter(
-      (message) => !/Failed to load resource.*(?:403|400|ERR_FAILED)/.test(message),
+      (message) => !/Failed to load resource.*(?:403|401|400|ERR_FAILED)/.test(message),
     );
     assert.equal(unexpectedErrors.length, 0, JSON.stringify(unexpectedErrors));
     assert(!statuses.includes(503), 'Unexpected healthy 503');
@@ -262,9 +450,14 @@ if(firebaseApp)__connect(__auth(firebaseApp),${JSON.stringify('http://' + config
         {
           browserPlugin: 'unavailable',
           runtime: 'existing Playwright/Chrome',
-          flow: 'signup -> verify -> claim -> admin approve -> restored Student -> invited Teacher -> logout',
+          flow: 'signup -> verify -> claim -> admin approve -> recovery -> restored Student -> invited Teacher -> logout',
+          origin,
+          entries,
           widths: [360, 390, 768, 1024, 1440],
           nativeZoom: factor,
+          reducedMotion: true,
+          safeReturn: true,
+          expiredSession: true,
           screenshots,
           errors,
           statuses,

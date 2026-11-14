@@ -25,6 +25,7 @@ def configured_academic(application, settings):
         firebase_project_id=settings.firebase_project_id,
         tenant_id=settings.institutional_tenant_id,
         application_name="classsync-academic",
+        tls_root_cert=settings.postgres_tls_root_cert,
     )
     engine = postgres_engine(
         url,

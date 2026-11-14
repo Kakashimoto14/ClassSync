@@ -26,12 +26,9 @@ export function resolveAppMode(input: ModeInput): AppMode {
     mode = 'presentation';
   }
   if (!mode) {
-    if (input.command === 'serve' && input.nodeEnv !== 'production') mode = 'sandbox';
-    else {
-      if (flags.includes('true') && flags.includes('false'))
-        throw new Error('Contradictory legacy ClassSync flags.');
-      mode = flags.includes('true') ? 'presentation' : 'institutional';
-    }
+    if (flags.includes('true') && flags.includes('false'))
+      throw new Error('Contradictory legacy ClassSync flags.');
+    mode = flags.includes('true') ? 'presentation' : 'institutional';
   }
   if (mode === 'presentation' && flags.includes('false'))
     throw new Error('Presentation requires preview and sample capabilities.');

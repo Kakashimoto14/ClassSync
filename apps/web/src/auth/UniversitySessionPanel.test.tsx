@@ -23,7 +23,7 @@ describe('university access controls', () => {
     expect(screen.getByRole('region', { name: 'University access' })).toHaveFocus();
     expect(screen.getByRole('status')).toHaveTextContent('Signed out');
   });
-  it('keeps the selected role button focused while access is checked and announced', () => {
+  it('offers only server-verified workspaces and hides choices while checking access', () => {
     const refresh = vi.fn();
     const panel = (state: UniversitySession) => (
       <UniversitySessionContext.Provider
@@ -32,17 +32,13 @@ describe('university access controls', () => {
         <UniversitySessionPanel />
       </UniversitySessionContext.Provider>
     );
-    const view = render(panel({ status: 'role-required' }));
-    const button = screen.getByRole('button', { name: 'Check Teacher access' });
-    button.focus();
-    fireEvent.click(button);
+    const view = render(panel({ status: 'role-required', availableRoles: ['student', 'teacher'] }));
+    expect(screen.queryByRole('button', { name: 'Administrator' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Teacher' }));
     expect(refresh).toHaveBeenCalledWith('teacher');
     view.rerender(panel({ status: 'checking' }));
-    expect(button).toHaveFocus();
-    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.queryByRole('button', { name: 'Teacher' })).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Checking university access');
-    fireEvent.click(button);
-    expect(refresh).toHaveBeenCalledOnce();
     view.rerender(
       panel({
         status: 'authorized',
@@ -52,14 +48,12 @@ describe('university access controls', () => {
           role: 'teacher',
           faculty_id: 'f',
           membership_revision: 2,
+          available_roles: ['student', 'teacher'],
         },
       }),
     );
-    expect(button).toHaveFocus();
-    expect(button).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Your identity and current university role are verified.',
-    );
+    expect(screen.getByRole('region', { name: 'University access' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Teacher' })).toHaveAttribute('aria-pressed', 'true');
   });
   it.each(['denied', 'unavailable', 'offline'] as const)(
     'does not show prior membership during %s',

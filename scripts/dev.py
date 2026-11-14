@@ -38,6 +38,7 @@ def main():
     env = {
         **os.environ,
         "CLASSSYNC_ENV": "development",
+        "VITE_CLASSSYNC_MODE": "sandbox",
         "ENABLE_SCHEDULING_SANDBOX": "true",
         "ACADEMIC_SERVICE_URL": f"http://127.0.0.1:{args.base_port + 1}",
         "SCHEDULING_SERVICE_URL": f"http://127.0.0.1:{args.base_port + 2}",

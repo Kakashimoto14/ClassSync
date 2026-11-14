@@ -1,6 +1,8 @@
 # ClassSync
 
-ClassSync is a university classroom scheduling, availability, and conflict-management application. The role-aware React frontend retains representative dashboard data. S1 adds a real Python OR-Tools weekly batch generator, independent timetable validator, and an Administrator development sandbox through the API Gateway. Production academic records and university sign-in are not configured.
+ClassSync supports university scheduling, conflict checks, room discovery and published timetables. The connected local application uses Firebase Auth Emulator, FastAPI, disposable PostgreSQL and OR-Tools. See [local connected development](docs/infrastructure/local-connected-development.md) for startup and test accounts. The public presentation is a separate read-only build.
+
+The [operational authority contract](docs/production/firestore-authority.md) requires Firestore Native mode for access and onboarding. PostgreSQL remains the authority for academic data and publication. The local Firestore bridge is a qualification slice; it does not switch the running application or establish production readiness.
 
 ## Workspace
 
@@ -38,4 +40,4 @@ See [the frontend audit and route matrix](docs/frontend-audit.md), [architecture
 
 Run `npm run lint`, `npm run typecheck`, `npm run test:web`, and `npm run build` from the repository root. Use `npm run dev:web` to start the client.
 
-University sign-in, schedule publication, and deployment with approved institutional data remain outside S2B. Academic and scheduling endpoints independently verify administrative authorization; frontend route guards and preview selections are not a security boundary. See [rules and assumptions](docs/scheduling/rules-and-assumptions.md) before supplying institutional data.
+Academic and scheduling endpoints independently enforce authorization. The S1/S2 examples above describe historical sandbox milestones. Connected local sign-in and publication use isolated synthetic records; hosting, approved academic inputs and institutional release remain separately gated. See [rules and assumptions](docs/scheduling/rules-and-assumptions.md) before supplying institutional data.

@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev:connected": "node scripts/auth_emulator_qualification.cjs --development",
     "dev:web": "npm run dev --workspace=@classync/web",
     "build": "npm run build --workspace=@classync/web",
     "build:presentation": "node scripts/build-presentation.cjs",

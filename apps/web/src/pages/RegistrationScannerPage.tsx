@@ -366,9 +366,11 @@ function PrivateScanner() {
                 Review your classes
               </h2>
               <p>
-                {scan.method === 'manual'
-                  ? 'Enter the academic details from your form.'
-                  : 'Check every extracted field against your form. Extraction confidence is unavailable; your review is required.'}
+                {scan.method === 'reviewed'
+                  ? 'Your reviewed courses are saved. Re-enter your student number to check your matches again.'
+                  : scan.method === 'manual'
+                    ? 'Enter the academic details from your form.'
+                    : 'Check every extracted field against your form. Extraction confidence is unavailable; your review is required.'}
               </p>
               {scan.warnings.map((warning) => (
                 <p key={warning} className="muted">

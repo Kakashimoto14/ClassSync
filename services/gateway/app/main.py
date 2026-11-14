@@ -6,12 +6,12 @@ from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
 import httpx
+from classync_contracts.cloud_run import service_headers
 from classync_contracts.models import HealthResponse, UserRole
 from classync_contracts.request_authorization import install_identity_errors, request_identity
 from classync_contracts.scheduling_security import (
     SchedulingSecuritySettings,
     require_administrator,
-    require_identity,
     require_sandbox,
 )
 from fastapi import FastAPI, HTTPException, Request
@@ -105,8 +105,7 @@ async def request_context(request: Request, call_next):
     request.state.request_id = request.headers.get("X-Request-ID", str(uuid4()))
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
-    if request.url.path.startswith(("/api/v1/auth/", "/api/v1/timetables/",
-                                    "/api/v1/community/", "/api/v1/coursework/")):
+    if request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/"):
         response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -127,7 +126,7 @@ async def http_error(request: Request, exc: HTTPException):
 
 
 def require_authenticated(request: Request) -> dict:
-    return require_identity(request, settings)
+    return request_identity(request, settings, include_workspaces=True)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -141,16 +140,19 @@ def current_user(request: Request) -> dict:
 
 
 @app.get("/api/v1/services/{service_name}/health")
-async def service_health(service_name: str) -> dict:
+async def service_health(service_name: str, request: Request) -> dict:
     target = SERVICES.get(service_name)
-    if target is None:
+    if target is None or (settings.cloud_run_iam_enabled and service_name == "notification"):
         raise HTTPException(404, "Unknown service")
+    if settings.cloud_run_iam_enabled:
+        await run_in_threadpool(require_administrator, request, settings)
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            response = await client.get(f"{target}/health")
+        headers = await run_in_threadpool(service_headers, settings.cloud_run_iam_enabled, target)
+        async with httpx.AsyncClient(timeout=2.0, trust_env=False) as client:
+            response = await client.get(f"{target}/health", headers=headers)
         response.raise_for_status()
         return {"data": response.json()}
-    except httpx.HTTPError as error:
+    except (httpx.HTTPError, ValueError) as error:
         raise HTTPException(503, "Service unavailable") from error
 
 
@@ -193,22 +195,19 @@ async def service_proxy(service_name, path, request):
     if len(body) > 2_000_000:
         raise HTTPException(413, "Input exceeds the 2 MB request limit")
     try:
-        async with httpx.AsyncClient(timeout=45.0) as client:
+        target = getattr(settings, f"{service_name}_service_url")
+        headers = await run_in_threadpool(
+            service_headers, settings.cloud_run_iam_enabled, target,
+            forwarded_headers(request) | {"Content-Type": "application/json",
+                                           "X-Request-ID": request.state.request_id},
+        )
+        async with httpx.AsyncClient(timeout=45.0, trust_env=False) as client:
             response = await client.request(
                 request.method,
-                getattr(settings, f"{service_name}_service_url") + path,
+                target + path,
                 params=request.query_params,
                 content=body,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": request.headers.get("Authorization", ""),
-                    "X-Request-ID": request.state.request_id,
-                    **(
-                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
-                        if "X-ClassSync-Role" in request.headers
-                        else {}
-                    ),
-                },
+                headers=headers,
             )
         payload = response.json()
         if response.is_error:
@@ -232,6 +231,14 @@ async def service_proxy(service_name, path, request):
         raise HTTPException(
             503, f"{service_name.capitalize()} service unavailable; no server confirmation received"
         ) from error
+
+
+def forwarded_headers(request):
+    return {
+        "Authorization": request.headers.get("Authorization", ""),
+        **({"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
+           if "X-ClassSync-Role" in request.headers else {}),
+    }
 
 
 @app.api_route("/api/v1/scheduling/sandbox/{operation}", methods=["GET", "POST"])
@@ -382,25 +389,22 @@ async def timetable_proxy(operation: str, request: Request):
             await run_in_threadpool(require_identity, request, settings)
     if "/events/" not in "/" + operation:
         return await service_proxy("scheduling", "/api/v1/timetables/" + operation, request)
-    client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None))
+    client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None), trust_env=False)
     try:
+        headers = await run_in_threadpool(
+            service_headers, settings.cloud_run_iam_enabled, settings.scheduling_service_url,
+            forwarded_headers(request),
+        )
         upstream = await client.send(
             client.build_request(
                 "GET",
                 settings.scheduling_service_url + "/api/v1/timetables/" + operation,
                 params=request.query_params,
-                headers={
-                    "Authorization": request.headers.get("Authorization", ""),
-                    **(
-                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
-                        if "X-ClassSync-Role" in request.headers
-                        else {}
-                    ),
-                },
+                headers=headers,
             ),
             stream=True,
         )
-    except httpx.HTTPError as error:
+    except (httpx.HTTPError, ValueError) as error:
         await client.aclose()
         raise HTTPException(503, "Timetable update service unavailable; reconnect later") from error
     if upstream.is_error:

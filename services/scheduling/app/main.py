@@ -10,6 +10,7 @@ from classync_contracts.academic import (
     AcademicReadiness,
     AcademicSnapshot,
 )
+from classync_contracts.cloud_run import service_headers
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.models import HealthResponse
 from classync_contracts.request_authorization import install_identity_errors
@@ -294,10 +295,14 @@ def persisted_academic_snapshot(period_id, request, sandbox):
         raise HTTPException(422, "Invalid academic period ID")
     path = f"/api/v1/academic/{'sandbox/' if sandbox else ''}periods/{period_id}"
     try:
-        with httpx.Client(timeout=10) as client:
+        headers = service_headers(
+            settings.cloud_run_iam_enabled, settings.academic_service_url,
+            {"Authorization": request.headers.get("Authorization", "")},
+        )
+        with httpx.Client(timeout=10, trust_env=False) as client:
             response = client.get(
                 settings.academic_service_url + path,
-                headers={"Authorization": request.headers.get("Authorization", "")},
+                headers=headers,
             )
         if response.is_error:
             message = (

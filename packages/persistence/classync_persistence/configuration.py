@@ -10,7 +10,8 @@ from sqlalchemy.engine import make_url
 
 
 def postgres_configuration(
-    database_url, *, transport, environment, firebase_project_id, tenant_id, application_name
+    database_url, *, transport, environment, firebase_project_id, tenant_id, application_name,
+    tls_root_cert=None,
 ):
     """Explicit libpq target/transport; never inherit service/password-file defaults."""
     try:
@@ -45,13 +46,18 @@ def postgres_configuration(
                 or url.port <= 1024
                 or url.port == 5432
                 or url.password is not None
+                or tls_root_cert is not None
             ):
                 raise ValueError()
             parameters.update(sslmode="disable", gssencmode="disable", require_auth="sspi")
         elif transport == "verify-full":
+            if tls_root_cert is not None:
+                root_cert = Path(tls_root_cert)
+                if not root_cert.is_absolute() or not root_cert.is_file():
+                    raise ValueError()
             parameters.update(
                 sslmode="verify-full",
-                sslrootcert="system",
+                sslrootcert=tls_root_cert or "system",
                 gssencmode="disable",
                 require_auth="scram-sha-256",
             )

@@ -22,12 +22,7 @@ describe('operating mode exhaustive compatibility matrix', () => {
                 const both = [rolePreview, presentationSample];
                 const expected: AppMode = presentationTarget
                   ? 'presentation'
-                  : (mode ??
-                    (command === 'serve' && nodeEnv !== 'production'
-                      ? 'sandbox'
-                      : both.includes('true')
-                        ? 'presentation'
-                        : 'institutional'));
+                  : (mode ?? (both.includes('true') ? 'presentation' : 'institutional'));
                 const invalid =
                   (presentationTarget && mode !== undefined && mode !== 'presentation') ||
                   (expected === 'presentation' && both.includes('false')) ||

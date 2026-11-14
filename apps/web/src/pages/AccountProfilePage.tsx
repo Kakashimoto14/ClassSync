@@ -56,7 +56,7 @@ export function AccountProfilePage({
     setError('');
     setNotice('');
     try {
-      const updated = await updateAccountName(name);
+      const updated = await updateAccountName(name, profile.uid);
       setProfile(updated);
       setName(updated.name);
       setNotice('Account name saved.');
@@ -113,6 +113,12 @@ export function AccountProfilePage({
                   : 'Student'}{' '}
               · Active
             </dd>
+            {role === 'student' && university.state.status === 'authorized' && (
+              <>
+                <dt>Linked student record</dt>
+                <dd>{university.state.membership.student_id}</dd>
+              </>
+            )}
           </dl>
           <form onSubmit={save} className="academic-create-period">
             <label htmlFor="account-display-name">Account name</label>

@@ -78,6 +78,14 @@ describe('current university session authority', () => {
     value.session.refresh('administrator');
     await settle();
     expect(value.last()).toEqual({ status: 'denied' });
+    value.session.refresh();
+    await settle();
+    expect(value.driver.lookup).toHaveBeenLastCalledWith(
+      expect.objectContaining({ uid: 'uid-a' }),
+      undefined,
+      expect.any(AbortSignal),
+    );
+    expect(value.last()).toEqual({ status: 'authorized', membership });
     value.session.dispose();
   });
   it('cannot revive the previous UID after a later identity callback', async () => {

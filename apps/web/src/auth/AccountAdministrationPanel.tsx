@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
-import { accountRequest } from './account-actions';
+import { accountRequest as requestAccount } from './account-actions';
 
 interface Claim {
   uid: string;
@@ -13,7 +14,9 @@ interface Invitation {
   expires_in_hours: number;
 }
 
-export function AccountAdministrationPanel() {
+export function AccountAdministrationPanel({ uid }: { uid: string }) {
+  const accountRequest = <T,>(path: string, method = 'GET', body?: unknown) =>
+    requestAccount<T>(path, method, body, undefined, uid);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [faculty, setFaculty] = useState<{ id: string }[]>([]);
   const [selected, setSelected] = useState('');
@@ -160,6 +163,9 @@ export function AccountAdministrationPanel() {
           <p>
             This code expires in {invitation.expires_in_hours} hours and can be accepted once by the
             approved email account.
+          </p>
+          <p>
+            <Link to="/auth/teacher-invite">Open the invitation sign-in page</Link>
           </p>
           <label htmlFor="private-invitation">Private invitation code</label>
           <input id="private-invitation" readOnly value={invitation.token} />

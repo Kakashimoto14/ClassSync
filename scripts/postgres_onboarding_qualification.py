@@ -4,7 +4,9 @@ import argparse
 import json
 import os
 import re
+import secrets
 import shutil
+import signal
 import socket
 import subprocess
 import tempfile
@@ -41,9 +43,13 @@ def exercise(
     scanner=False,
     connected=False,
     postman_only=False,
+    firestore_probe=None,
 ):
     from services.gateway.app import main as gateway
 
+    persistent = connected and os.environ.get("CLASSSYNC_PERSISTENT_DEV") == "true"
+    preview = connected and os.environ.get("CLASSSYNC_ONBOARDING_PREVIEW") == "true"
+    password = secrets.token_urlsafe(24) if persistent else "Local-emulator-password-42!"
     owner, runtime = engine_for(connection, bootstrap=True), engine_for(connection)
     migrator = "classsync_onboarding_" + uuid4().hex
     checks = []
@@ -54,8 +60,9 @@ def exercise(
             db.execute(text(f"GRANT USAGE,CREATE ON SCHEMA public TO {migrator}"))
             db.execute(text(f"SET LOCAL ROLE {migrator}"))
             migrate(db)
-            migrate(db, target="0013_synthetic_review_period_mode", downgrade=True)
-            migrate(db)
+            if not persistent:
+                migrate(db, target="0013_synthetic_review_period_mode", downgrade=True)
+                migrate(db)
         with transaction(owner) as db:
             db.execute(
                 text(
@@ -98,7 +105,11 @@ def exercise(
                     f"TO {connection.runtime}"
                 )
             )
-        checks.append("migration_upgrade_downgrade_upgrade")
+        checks.append(
+            "migrate_disposable_development_database"
+            if persistent
+            else "migration_upgrade_downgrade_upgrade"
+        )
         with (
             pytest.MonkeyPatch.context() as patch,
             emulator_firebase(
@@ -127,7 +138,7 @@ def exercise(
                     "signUp",
                     {
                         "email": name + "@synthetic.invalid",
-                        "password": "Local-emulator-password-42!",
+                        "password": password,
                         "returnSecureToken": True,
                     },
                 )
@@ -149,23 +160,11 @@ def exercise(
                     "signInWithPassword",
                     {
                         "email": identity["email"],
-                        "password": "Local-emulator-password-42!",
+                        "password": password,
                         "returnSecureToken": True,
                     },
                 )
 
-            student, teacher, other, admin = [
-                signup(x) for x in ["student", "faculty", "other", "admin"]
-            ]
-            firebase(
-                "signUp",
-                {
-                    "email": student["email"],
-                    "password": "Duplicate-not-created!",
-                    "returnSecureToken": True,
-                },
-                expected=400,
-            )
             settings = gateway.Settings(
                 _env_file=None,
                 classsync_env="test",
@@ -173,6 +172,13 @@ def exercise(
                 enable_test_identity_adapters=True,
                 firebase_project_id=project,
                 identity_database_url=None,
+                course_cloud_enabled=False,
+                course_storage_bucket="",
+                course_gemini_model="",
+                gemini_api_key=None,
+                academic_service_url="http://127.0.0.1:0",
+                scheduling_service_url="http://127.0.0.1:0",
+                notification_service_url="http://127.0.0.1:0",
             )
             patch.setattr(gateway, "settings", settings)
             patch.setattr(
@@ -188,6 +194,129 @@ def exercise(
                 "onboarding_repository",
                 OnboardingRepository(runtime, tenant="tenant-a", project=project),
                 raising=False,
+            )
+
+            def launch_browser(rejected_uid=None):
+                browser_admin = verify(signup("browser-admin"))
+                with transaction(owner) as db:
+                    identity_context(db, tenant_id="tenant-a", uid=browser_admin["localId"])
+                    audit_actor(db, VerifiedPrincipal(uid="synthetic-provisioner"))
+                    db.execute(
+                        text(
+                            "INSERT INTO classsync_identity.memberships VALUES "
+                            "('tenant-a',:uid,'admin',NULL,NULL,ARRAY['administrator'],'active',1)"
+                        ),
+                        {"uid": browser_admin["localId"]},
+                    )
+                    if rejected_uid is not None:
+                        db.execute(
+                            text(
+                                "UPDATE classsync_identity.account_claims "
+                                "SET state='rejected',decided_by='synthetic-provisioner' "
+                                "WHERE tenant_id='tenant-a' AND uid=:uid"
+                            ),
+                            {"uid": rejected_uid},
+                        )
+                    db.execute(
+                        text(
+                            "INSERT INTO classsync_identity.people VALUES "
+                            "('tenant-a','browser-student'),('tenant-a','browser-faculty')"
+                        )
+                    )
+                    db.execute(
+                        text(
+                            "INSERT INTO classsync_identity.students VALUES "
+                            "('tenant-a','browser-student','browser-student')"
+                        )
+                    )
+                    db.execute(
+                        text(
+                            "INSERT INTO classsync_identity.faculty VALUES "
+                            "('tenant-a','browser-faculty','browser-faculty')"
+                        )
+                    )
+                if preview:
+                    teacher = verify(signup("browser-faculty"))
+                    if persistent:
+                        accounts = Path(os.environ["CLASSSYNC_AUTH_RUN_ROOT"]) / "dev-accounts.json"
+                        with accounts.open("x", encoding="utf-8") as output:
+                            json.dump(
+                                {
+                                    "administrator": browser_admin["email"],
+                                    "teacher": teacher["email"],
+                                    "password": password,
+                                    "student_record": "SYN-001",
+                                    "faculty_record": "SYN-CONTROL-FACULTY",
+                                },
+                                output,
+                                indent=2,
+                            )
+                if scanner or connected:
+                    from scripts.registration_connected_qualification import run
+                    from scripts.registration_published_fixture import prepare
+
+                    fixture = prepare(
+                        connection,
+                        owner,
+                        runtime,
+                        uid=browser_admin["localId"],
+                        project=project,
+                        requests=connected,
+                    )
+                    if firestore_probe is not None:
+                        return firestore_probe(
+                            connection, patch, verifier, project=project,
+                            student=verify(signup("firestore-student")),
+                            teacher=verify(signup("firestore-teacher")),
+                            secondary_admin=verify(signup("firestore-issuer")),
+                            administrator=browser_admin, fixture=fixture,
+                            owner=owner, runtime=runtime,
+                        )
+                    browser_result = run(
+                        connection,
+                        patch,
+                        verifier,
+                        postman_only=postman_only,
+                        project=project,
+                        endpoint=endpoint,
+                        admin_email=browser_admin["email"],
+                        fixture=fixture,
+                        owner=owner,
+                        runtime=runtime,
+                        connected=connected,
+                        preview=preview,
+                    )
+                else:
+                    browser_result = qualify_browser(
+                        gateway.app, project, endpoint, browser_admin["email"]
+                    )
+                return browser_result
+
+            if firestore_probe is not None:
+                require(
+                    scanner and not persistent and not preview, "Isolated Firestore probe required"
+                )
+                return {"firestore": launch_browser(), "production_acceptance": False}
+
+            if persistent:
+                return {
+                    "checks": checks,
+                    "cloud_qualified": False,
+                    "browser_qualified": False,
+                    "browser": launch_browser(),
+                }
+
+            student, teacher, other, admin = [
+                signup(x) for x in ["student", "faculty", "other", "admin"]
+            ]
+            firebase(
+                "signUp",
+                {
+                    "email": student["email"],
+                    "password": "Duplicate-not-created!",
+                    "returnSecureToken": True,
+                },
+                expected=400,
             )
             with TestClient(gateway.app) as client:
 
@@ -402,78 +531,11 @@ def exercise(
             checks.append("runtime_cross_tenant_rls_and_database_null_reference_denial")
             browser_result = None
             if browser:
-                browser_admin = verify(signup("browser-admin"))
-                with transaction(owner) as db:
-                    identity_context(db, tenant_id="tenant-a", uid=browser_admin["localId"])
-                    audit_actor(db, VerifiedPrincipal(uid="synthetic-provisioner"))
-                    db.execute(
-                        text(
-                            "INSERT INTO classsync_identity.memberships VALUES "
-                            "('tenant-a',:uid,'admin',NULL,NULL,ARRAY['administrator'],'active',1)"
-                        ),
-                        {"uid": browser_admin["localId"]},
-                    )
-                    # The API's duplicate-record fixture deliberately remains pending;
-                    # decide it explicitly before the independent browser review flow.
-                    db.execute(
-                        text(
-                            "UPDATE classsync_identity.account_claims "
-                            "SET state='rejected',decided_by='synthetic-provisioner' "
-                            "WHERE tenant_id='tenant-a' AND uid=:uid"
-                        ),
-                        {"uid": other["localId"]},
-                    )
-                    db.execute(
-                        text(
-                            "INSERT INTO classsync_identity.people VALUES "
-                            "('tenant-a','browser-student'),('tenant-a','browser-faculty')"
-                        )
-                    )
-                    db.execute(
-                        text(
-                            "INSERT INTO classsync_identity.students VALUES "
-                            "('tenant-a','browser-student','browser-student')"
-                        )
-                    )
-                    db.execute(
-                        text(
-                            "INSERT INTO classsync_identity.faculty VALUES "
-                            "('tenant-a','browser-faculty','browser-faculty')"
-                        )
-                    )
-                if scanner or connected:
-                    from scripts.registration_connected_qualification import run
-                    from scripts.registration_published_fixture import prepare
-
-                    fixture = prepare(
-                        connection,
-                        owner,
-                        runtime,
-                        uid=browser_admin["localId"],
-                        project=project,
-                        requests=connected,
-                    )
-                    browser_result = run(
-                        connection,
-                        patch,
-                        verifier,
-                        postman_only=postman_only,
-                        project=project,
-                        endpoint=endpoint,
-                        admin_email=browser_admin["email"],
-                        fixture=fixture,
-                        owner=owner,
-                        runtime=runtime,
-                        connected=connected,
-                    )
-                else:
-                    browser_result = qualify_browser(
-                        gateway.app, project, endpoint, browser_admin["email"]
-                    )
+                browser_result = launch_browser(other["localId"])
         return {
             "checks": checks,
             "cloud_qualified": False,
-            "browser_qualified": browser_result is not None,
+            "browser_qualified": browser_result is not None and not browser_result.get("preview"),
             "browser": browser_result,
         }
     finally:
@@ -520,7 +582,9 @@ def qualify_browser(application, project, endpoint, admin_email):
         require(not worker.is_alive(), "Owned account Gateway did not stop")
 
 
-def main(*, browser=False, scanner=False, connected=False, postman_only=False):
+def main(
+    *, browser=False, scanner=False, connected=False, postman_only=False, firestore_probe=None
+):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -538,22 +602,40 @@ def main(*, browser=False, scanner=False, connected=False, postman_only=False):
     require(
         os.environ.get("FIREBASE_AUTH_EMULATOR_HOST") == marker["endpoint"], "Auth target mismatch"
     )
-    evidence = qualify(
-        args.bin,
-        lambda connection: exercise(
-            connection,
-            marker["project"],
-            marker["endpoint"],
-            browser=browser,
-            scanner=scanner,
-            connected=connected,
-            postman_only=postman_only,
-        ),
-    )
+    persistent = os.environ.get("CLASSSYNC_PERSISTENT_DEV") == "true"
+    previous = {}
+    if persistent:
+
+        def request_stop(*_args):
+            (root / "stop-preview").touch()
+
+        for kind in (signal.SIGINT, signal.SIGTERM):
+            previous[kind] = signal.signal(kind, request_stop)
+    try:
+        evidence = qualify(
+            args.bin,
+            lambda connection: exercise(
+                connection,
+                marker["project"],
+                marker["endpoint"],
+                browser=browser,
+                scanner=scanner,
+                connected=connected,
+                postman_only=postman_only,
+                firestore_probe=firestore_probe,
+            ),
+        )
+    finally:
+        for kind, handler in previous.items():
+            signal.signal(kind, handler)
     args.output.write_text(json.dumps(evidence, indent=2) + "\n")
     print(
-        "Synthetic onboarding Auth/Gateway/PostgreSQL qualification passed; "
-        "owned PostgreSQL stopped"
+        "Connected local services and disposable PostgreSQL stopped"
+        if persistent
+        else (
+            "Synthetic onboarding Auth/Gateway/PostgreSQL qualification passed; "
+            "owned PostgreSQL stopped"
+        )
     )
 
 

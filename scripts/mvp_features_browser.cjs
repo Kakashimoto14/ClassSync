@@ -124,7 +124,7 @@ module.exports = async function qualifyFeatures({
   assert((await teacherOnly.json()).data.announcements.some((item) => item.id === created.id));
   await logout();
   await login(teacherEmail);
-  await visible('Teacher membership verified');
+  await page.waitForURL('**/teacher/dashboard');
   await page.goto(origin + '/teacher/profile');
   await page.getByLabel('Account name', { exact: true }).fill('Synthetic Faculty Account');
   const profileResponse = page.waitForResponse(
@@ -180,7 +180,7 @@ module.exports = async function qualifyFeatures({
   assert.equal(await page.getByRole('button', { name: /^Archive / }).count(), 0);
   await logout();
   await login(studentEmail);
-  await visible('Student membership verified');
+  await page.waitForURL('**/student/dashboard');
   await page.goto(
     origin + `/student/rooms?period=${config.fixture.period}&date=2026-10-05&category=all`,
   );
@@ -196,7 +196,7 @@ module.exports = async function qualifyFeatures({
   await visible('No announcements yet.');
   await logout();
   await login(config.adminEmail);
-  await visible('Administrator membership verified');
+  await page.waitForURL('**/admin/dashboard');
   await page.goto(origin + '/admin/announcements');
   const archiveResponse = page.waitForResponse(
     (response) =>

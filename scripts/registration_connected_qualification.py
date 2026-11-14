@@ -11,6 +11,7 @@ import time
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
+import httpx
 import uvicorn
 from pydantic import SecretStr
 from sqlalchemy.engine import URL
@@ -54,6 +55,7 @@ def run(
     runtime,
     connected=False,
     postman_only=False,
+    preview=False,
 ):
     from services.academic.app import authorization as academic_auth
     from services.academic.app import main as academic
@@ -62,6 +64,8 @@ def run(
     from services.scheduling.app import authorization as scheduling_auth
     from services.scheduling.app import main as scheduling
 
+    require(not preview or (connected and not postman_only), "Full connected preview required")
+    persistent = preview and os.environ.get("CLASSSYNC_PERSISTENT_DEV") == "true"
     root = Path(os.environ["CLASSSYNC_AUTH_RUN_ROOT"])
     root.joinpath("synthetic-registration.pdf").write_bytes(pdf_bytes())
     fixture_images(root)
@@ -127,9 +131,35 @@ def run(
             patch.setattr(gateway.settings, "academic_service_url", academic_url)
         schedule_url = services.enter_context(server(scheduling.app))
         patch.setattr(gateway.settings, "scheduling_service_url", schedule_url)
+        patch.setattr(
+            gateway,
+            "SERVICES",
+            {
+                "academic": academic_url if connected else "http://127.0.0.1:0",
+                "scheduling": schedule_url,
+            },
+        )
         with server(gateway.app) as gateway_url:
+            if persistent:
+                with httpx.Client(timeout=5, trust_env=False) as client:
+                    for service_name, service_url in {
+                        "Gateway": gateway_url,
+                        "Academic": academic_url,
+                        "Scheduling": schedule_url,
+                    }.items():
+                        require(
+                            client.get(service_url + "/health").status_code == 200,
+                            f"{service_name} health check failed",
+                        )
+                        print(f"{service_name}: {service_url}/health", flush=True)
+                    require(
+                        client.get(gateway_url + "/api/v1/auth/me").status_code == 401,
+                        "Gateway auth boundary not ready",
+                    )
             postman = None
-            if postman_only or os.environ.get("CLASSSYNC_QUALIFY_POSTMAN") == "true":
+            if not preview and (
+                postman_only or os.environ.get("CLASSSYNC_QUALIFY_POSTMAN") == "true"
+            ):
                 from scripts.postman_local_qualification import qualify as qualify_postman
 
                 postman = qualify_postman(
@@ -158,26 +188,34 @@ def run(
                         "fixture": fixture,
                         "adminEmail": admin_email,
                         "imageRoot": str(root),
+                        "preview": preview,
+                        "persistent": persistent,
                     }
                 )
             )
             result = subprocess.run(
                 [
                     shutil.which("node"),
-                    "scripts/connected_browser.cjs"
-                    if connected
-                    else "scripts/registration_browser.cjs",
+                    (
+                        "scripts/onboarding_browser.cjs"
+                        if preview
+                        else "scripts/connected_browser.cjs"
+                        if connected
+                        else "scripts/registration_browser.cjs"
+                    ),
                     str(config),
                 ],
                 check=False,
-                timeout=180,
+                timeout=None if persistent else 630 if preview else 180,
             )
             require(result.returncode == 0, "Connected scanner browser qualification failed")
             evidence = json.loads(
                 (
                     root
                     / (
-                        "connected-browser-result.json"
+                        "onboarding-browser-result.json"
+                        if preview
+                        else "connected-browser-result.json"
                         if connected
                         else "registration-browser-result.json"
                     )
@@ -185,7 +223,7 @@ def run(
             )
             if postman:
                 evidence["postman"] = postman
-    if connected:
+    if connected and not preview:
         from scripts.classroom_request_qualification import qualify as qualify_requests
 
         evidence["request_database"] = qualify_requests(

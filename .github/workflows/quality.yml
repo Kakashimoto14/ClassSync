@@ -83,7 +83,7 @@ jobs:
       - run: pip install -r requirements.txt
         working-directory: services/persistence
       - run: ruff check scripts/security scripts/postgres_disposable.py scripts/postgres_driver_qualification.py scripts/postgres_identity_qualification.py scripts/postgres_restore_qualification.py scripts/postgres_revision_qualification.py scripts/postgres_audit_qualification.py scripts/postgres_identity_http_qualification.py scripts/postgres_emulator_qualification.py scripts/postgres_provider_qualification.py scripts/postgres_web_session_qualification.py scripts/postgres_academic_period_qualification.py scripts/postgres_academic_repository_qualification.py scripts/postgres_academic_migration_qualification.py scripts/postgres_academic_provider_qualification.py scripts/postgres_academic_restore_qualification.py scripts/postgres_draft_qualification.py scripts/postgres_scheduling_provider_qualification.py scripts/postgres_scheduling_migration_qualification.py scripts/postgres_scheduling_restore_qualification.py scripts/postgres_publication_state_qualification.py scripts/postgres_publication_repository_qualification.py scripts/postgres_publication_resource_qualification.py scripts/postgres_publication_scale_qualification.py services packages
-      - run: ruff check scripts/container_entrypoint.py scripts/build_mvp_postman.py
+      - run: ruff check scripts/container_entrypoint.py scripts/build_mvp_postman.py scripts/hosting_plan.py
       - run: python -m pytest
       - name: Create isolated pinned security scanner
         run: |

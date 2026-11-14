@@ -4,6 +4,7 @@ import { loadUniversitySessionDriver } from './university-session-driver';
 
 const sdk = vi.hoisted(() => ({
   mode: 'institutional',
+  dev: false,
   base: '/api/v1',
   app: {} as object | null,
   auth: { currentUser: { uid: 'uid-a' } as { uid: string } | null },
@@ -12,6 +13,9 @@ const sdk = vi.hoisted(() => ({
   getAuth: vi.fn(),
 }));
 vi.mock('../config/runtime-config', () => ({
+  get devServer() {
+    return sdk.dev;
+  },
   get appMode() {
     return sdk.mode;
   },
@@ -24,6 +28,7 @@ vi.mock('../lib/env', () => ({
   },
 }));
 vi.mock('../lib/firebase', () => ({
+  firebaseReadiness: { status: 'not-configured', missing: [] },
   get firebaseApp() {
     return sdk.app;
   },
@@ -48,6 +53,7 @@ const user = { uid: 'uid-a', getIdToken: vi.fn() };
 beforeEach(() => {
   vi.clearAllMocks();
   sdk.mode = 'institutional';
+  sdk.dev = false;
   sdk.base = '/api/v1';
   sdk.app = {};
   sdk.auth.currentUser = { uid: 'uid-a' };
@@ -90,7 +96,8 @@ it('uses only current server membership with explicit safe request options', asy
   );
 });
 it.each([
-  [401, 'invalid_token', 'denied'],
+  [401, 'invalid_token', 'expired'],
+  [403, 'email_verification_required', 'verification-required'],
   [403, 'membership_denied', 'denied'],
   [403, 'role_selection_required', 'role-required'],
   [503, 'membership_unavailable', 'unavailable'],
@@ -155,4 +162,28 @@ it('rejects HTML fallback and wrong response UID', async () => {
   await expect(driver.lookup(user, undefined, new AbortController().signal)).rejects.toMatchObject({
     issue: 'unavailable',
   });
+});
+
+it('requires the Gateway auth boundary before showing local credential controls', async () => {
+  sdk.dev = true;
+  request.mockResolvedValueOnce(
+    Response.json({ error: { code: 'authentication_required' } }, { status: 401 }),
+  );
+  expect(await loadUniversitySessionDriver()).not.toBeNull();
+  expect(request).toHaveBeenCalledWith(
+    'http://127.0.0.1:5173/api/v1/auth/me',
+    expect.objectContaining({ credentials: 'omit', redirect: 'error' }),
+  );
+});
+it('withholds the SDK after a failed local Gateway probe', async () => {
+  sdk.dev = true;
+  const diagnostic = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  request.mockRejectedValueOnce(new TypeError('network unavailable'));
+  try {
+    expect(await loadUniversitySessionDriver()).toBeNull();
+    expect(sdk.getAuth).not.toHaveBeenCalled();
+    expect(diagnostic).toHaveBeenCalledOnce();
+  } finally {
+    diagnostic.mockRestore();
+  }
 });

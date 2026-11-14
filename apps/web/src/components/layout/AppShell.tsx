@@ -164,6 +164,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   ));
   const accountLinks = (
     <div className="account-links">
+      {institutional && (
+        <Link className="nav-item" to="/auth/account" onClick={closeMenu}>
+          {role === 'administrator' ? 'University accounts' : 'Account access'}
+        </Link>
+      )}
       {!institutional && (
         <>
           <Link className="nav-item" to={rolePath(role, 'profile')} onClick={closeMenu}>
@@ -277,9 +282,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </p>
                 <Link
                   className="text-action"
-                  to={institutional ? '/auth/login' : '/dev/role-preview'}
+                  to={institutional ? '/auth/account' : '/dev/role-preview'}
                 >
-                  {institutional ? 'Check account access' : 'Switch preview role'}
+                  {institutional
+                    ? role === 'administrator'
+                      ? 'University accounts'
+                      : 'Account access'
+                    : 'Switch preview role'}
                 </Link>
               </div>
             </details>

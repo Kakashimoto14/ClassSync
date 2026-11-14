@@ -22,10 +22,9 @@ class ReviewedCourse(PrivateInput):
     section: str = Field(default="", max_length=80)
 
 
-class RegistrationReview(PrivateInput):
+class ReviewedAcademicFields(PrivateInput):
     academic_year: str = Field(pattern=r"^\d{4}-\d{4}$")
     semester: Literal["first", "second"]
-    student_identifier: str = Field(min_length=1, max_length=128)
     program: str = Field(default="", max_length=160)
     year_level: int | None = Field(default=None, strict=True, ge=1, le=20)
     courses: list[ReviewedCourse] = Field(min_length=1, max_length=60)
@@ -36,6 +35,10 @@ class RegistrationReview(PrivateInput):
         if second != first + 1:
             raise ValueError("Academic year must contain consecutive years")
         return self
+
+
+class RegistrationReview(ReviewedAcademicFields):
+    student_identifier: str = Field(min_length=1, max_length=128)
 
 
 def review_openapi_schema():

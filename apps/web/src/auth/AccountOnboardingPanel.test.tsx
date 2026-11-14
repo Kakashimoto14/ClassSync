@@ -7,12 +7,14 @@ import { MemoryRouter } from 'react-router-dom';
 const source = vi.hoisted(() => ({
   request: vi.fn(),
   observe: vi.fn(),
+  updateName: vi.fn(),
   resend: vi.fn(),
   refresh: vi.fn(),
 }));
 vi.mock('./account-actions', () => ({
   accountRequest: source.request,
-  observeAccount: source.observe,
+  observeAccountProfile: source.observe,
+  updateAccountName: source.updateName,
   resendVerification: source.resend,
   refreshVerifiedAccount: source.refresh,
   accountError: () => 'Request failed.',
@@ -25,6 +27,13 @@ beforeEach(() => {
     membership_state: null,
     status: 'unlinked',
   });
+});
+
+const profile = (uid: string) => ({
+  uid,
+  name: '',
+  email: 'student@synthetic.invalid',
+  emailVerified: true,
 });
 
 function panel() {
@@ -40,10 +49,10 @@ function panel() {
 }
 
 it('clears student numbers and invitation codes when the Firebase account changes', async () => {
-  let next!: (uid: string | null) => void;
+  let next!: (account: ReturnType<typeof profile> | null) => void;
   source.observe.mockImplementation(async (listener) => {
     next = listener;
-    listener('student-a');
+    listener(profile('student-a'));
     return vi.fn();
   });
   render(panel());
@@ -57,7 +66,7 @@ it('clears student numbers and invitation codes when the Firebase account change
   });
   act(() => next(null));
   expect(screen.queryByLabelText('Student number')).not.toBeInTheDocument();
-  act(() => next('student-b'));
+  act(() => next(profile('student-b')));
   await screen.findByLabelText('Student number');
   expect(screen.getByLabelText('Student number')).toHaveValue('');
   expect(screen.getByLabelText('Invitation code')).toHaveValue('');
@@ -65,7 +74,7 @@ it('clears student numbers and invitation codes when the Firebase account change
 
 it('submits only a pending claim and announces confirmation from the server', async () => {
   source.observe.mockImplementation(async (listener) => {
-    listener('student-a');
+    listener(profile('student-a'));
     return vi.fn();
   });
   source.request.mockImplementation(async (_path, method) =>
@@ -78,12 +87,25 @@ it('submits only a pending claim and announces confirmation from the server', as
   fireEvent.change(screen.getByLabelText('Student number'), {
     target: { value: 'synthetic-student' },
   });
+  fireEvent.change(screen.getByLabelText('Account name'), {
+    target: { value: 'Synthetic Student' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Review student record' }));
+  expect(screen.getByRole('heading', { name: 'Review your student record claim' })).toHaveFocus();
+  expect(source.request.mock.calls.some(([, method]) => method === 'POST')).toBe(false);
   fireEvent.click(screen.getByRole('button', { name: 'Request student access' }));
   await waitFor(() =>
-    expect(source.request).toHaveBeenCalledWith('student-claims', 'POST', {
-      student_id: 'synthetic-student',
-    }),
+    expect(source.request).toHaveBeenCalledWith(
+      'student-claims',
+      'POST',
+      {
+        student_id: 'synthetic-student',
+      },
+      undefined,
+      'student-a',
+    ),
   );
+  expect(source.updateName).toHaveBeenCalledWith('Synthetic Student', 'student-a');
   expect(
     await screen.findByText('Your request is waiting for university verification.'),
   ).toBeInTheDocument();

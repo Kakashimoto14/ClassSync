@@ -276,6 +276,81 @@ def test_review_json_is_bounded_before_parsing(api):
     )
 
 
+def test_review_repository_restores_review_without_extraction_and_fails_closed(api, monkeypatch):
+    client, _, _ = api
+    reviews = Mock()
+    reviews.read.return_value = None
+    monkeypatch.setattr(main.app.state, "registration_review_repository", reviews, raising=False)
+    start = client.post("/api/v1/auth/registration-documents/manual", headers=HEADERS)
+    assert start.status_code == 201
+    scan = start.json()["data"]
+    path = f"/api/v1/auth/registration-documents/{scan['id']}"
+    payload = reviewed().model_dump(mode="json")
+    assert client.post(f"{path}/review", headers=HEADERS, json=payload).status_code == 200
+    key, tenant, uid, deadline, submitted = reviews.save.call_args.args
+    assert (str(key), tenant, uid, deadline.isoformat(), submitted.model_dump()) == (
+        scan["id"], main.settings.institutional_tenant_id, "scanner-route-fixture",
+        scan["expires_at"], payload,
+    )
+
+    unavailable = HTTPException(503, "Reviewed scans are temporarily unavailable.")
+    reviews.read.side_effect = unavailable
+    assert client.get(path, headers=HEADERS).status_code == 503
+    assert client.delete(path, headers=HEADERS).status_code == 503
+    reviews.erase.assert_not_called()
+
+    main.registration_routes.registration_store.entries.clear()
+    reviews.read.side_effect = None
+    reviews.read.return_value = {**scan, "method": "reviewed", "reviewed": {
+        **payload, "student_identifier": "",
+    }}
+    restored = client.get(path, headers=HEADERS)
+    assert restored.status_code == 200
+    assert restored.json()["data"]["reviewed"]["student_identifier"] == ""
+    assert client.delete(path, headers=HEADERS).status_code == 204
+    reviews.erase.assert_called_once_with(key, tenant, uid, deadline)
+
+
+@pytest.mark.parametrize("change", [None, {"revision": 2}, {"student_id": "OTHER-STUDENT"}])
+def test_match_response_requires_the_original_student_binding(
+    api, identity_adapters, monkeypatch, change,
+):
+    client, _, onboarding = api
+    _, memberships = identity_adapters(main, role="student", student_id="SYN-001")
+    onboarding.status.return_value = {"membership_state": "active"}
+    start = client.post("/api/v1/auth/registration-documents/manual", headers=HEADERS)
+    assert start.status_code == 201
+    scan_id = start.json()["data"]["id"]
+    periods, calendars = published()
+    periods[0]["calendar"].update(effective_start="2026-10-01", effective_end="2026-10-05")
+
+    def upstream(path, **kwargs):
+        if path == "/api/v1/timetables/periods":
+            return Mock(**{"json.return_value": {"periods": periods}})
+        assert path == "/api/v1/timetables/calendar/synthetic-period"
+        if change is not None:
+            memberships.membership = memberships.membership.model_copy(update=change)
+        return Mock(**{"json.return_value": {
+            "status": "published", "version": 1, **calendars["synthetic-period"],
+        }})
+
+    transport = Mock()
+    transport.__enter__ = Mock(return_value=transport)
+    transport.__exit__ = Mock(return_value=False)
+    transport.get.side_effect = upstream
+    monkeypatch.setattr("services.gateway.app.registration.httpx.Client", lambda **_: transport)
+    response = client.post(
+        f"/api/v1/auth/registration-documents/{scan_id}/review", headers=HEADERS,
+        json=reviewed().model_dump(mode="json"),
+    )
+    if change is None:
+        assert response.status_code == 200
+        assert response.json()["data"]["status"] == "matched"
+    else:
+        assert response.status_code == 403
+        assert "synthetic-offering" not in response.text
+
+
 def test_mixed_pdf_with_selectable_header_still_attempts_local_ocr(tmp_path, monkeypatch):
     from services.gateway.app import registration_worker as worker
 

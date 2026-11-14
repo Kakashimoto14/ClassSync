@@ -26,6 +26,16 @@ it('reuses the existing registration across module reloads', () => {
   expect(configuredFirebase(config).app).toBe(app);
   expect(sdk.initializeApp).not.toHaveBeenCalled();
 });
+it('initializes Auth without requiring a Storage bucket or Messaging setup', () => {
+  const authRegistration = {
+    apiKey: config.apiKey,
+    authDomain: config.authDomain,
+    projectId: config.projectId,
+    appId: config.appId,
+  };
+  expect(configuredFirebase(authRegistration).status).toBe('initialized');
+  expect(sdk.initializeApp).toHaveBeenCalledWith(authRegistration);
+});
 it('does not initialize a second application on a project/app mismatch', () => {
   sdk.getApps.mockReturnValue([{ name: '[DEFAULT]', options: { ...config, projectId: 'other' } }]);
   expect(configuredFirebase(config).status).toBe('configuration-mismatch');
