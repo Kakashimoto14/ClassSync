@@ -1,10 +1,12 @@
 # Architecture
 
-**10 November 2026 decision:** [the operational authority contract](production/firestore-authority.md)
-supersedes older statements that Firestore is optional. Firebase Auth owns identity, Firestore
-Native mode is required for operational access and onboarding, and PostgreSQL retains canonical
-academic records and publication. This is the target; the current release checkpoint still
-authorizes from PostgreSQL. No hosted or production cutover has been approved.
+**15 November 2026 decision:** PostgreSQL is the authoritative relational store for identity
+membership, academic records, schedules, drafts and publication. Firebase Authentication
+proves identity; the backend checks current PostgreSQL membership and role/record grants.
+Firestore is optional and must not become a second writable authority unless a verified
+coursework rubric or later owner decision explicitly requires it. This supersedes the 10
+November Firestore authority proposal in [the historical contract](production/firestore-authority.md).
+The current project is not production-qualified; no hosted cutover is approved.
 
 ```text
 Current connected runtime
@@ -25,7 +27,7 @@ drafts, immutable publication versions and role projections. Public contracts ar
 `packages/api-contracts`. The notification service is not an established delivery path.
 
 Presentation uses a fixed versioned sample with no live requests. The development sandbox
-has separate capability and backend gates. The current connected local app uses synthetic
-accounts and records. The isolated Firestore qualification composes real account endpoints
-with the new store and read-only schedule access; the normal runtime remains on its
-existing SQL authorization path until the complete authority switch is qualified.
+has separate capability and backend gates. Local connected acceptance uses synthetic
+accounts and records. Historical Firestore bridge qualification remains historical evidence;
+it does not change the selected PostgreSQL authority or justify a dual-writer design. Live
+provider behavior, real institutional data and production recovery remain unverified.

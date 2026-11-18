@@ -19,7 +19,13 @@ from sqlalchemy.exc import DBAPIError
 from scripts.postgres_academic_repository_qualification import FixtureCalls, must_fail
 from scripts.postgres_disposable import checked_root, qualify
 from scripts.postgres_driver_qualification import denied, engine_for, require
-from scripts.postgres_identity_qualification import TABLES, seed
+from scripts.postgres_identity_qualification import (
+    TABLES,
+    add_synthetic_faculty,
+    add_synthetic_student,
+    require_unique_student_bindings,
+    seed,
+)
 from scripts.postgres_restore_qualification import digest, restore_name, restored_engine
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.academic.app.postgres_repository import PostgresAcademicRepository
@@ -251,8 +257,24 @@ def prepare_source(connection, owner, runtime, *, migration_target=MIGRATION, de
         # Nonempty defaults ensure the backup actually exercises default ACL restoration.
         db.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA classsync_academic "
                         f"GRANT SELECT ON TABLES TO {connection.runtime}"))
+    if defer_fixture:
+        return None, None, migration_owner
+    seed_source(connection, owner)
+    original, other = create_source_fixture(runtime)
+    return original, other, migration_owner
+
+
+def seed_source(connection, owner):
     with transaction(owner) as db:
         seed(db)
+        add_synthetic_student(
+            db, tenant="tenant-a", person_id="person-restore-student",
+            student_id="student-restore",
+        )
+        add_synthetic_faculty(
+            db, tenant="tenant-a", person_id="person-restore-student",
+            faculty_id="faculty-restore",
+        )
         identity_context(db, tenant_id="tenant-a", uid="uid-admin-other")
         audit_actor(db, VerifiedPrincipal(uid="synthetic-operator"))
         db.execute(text("""
@@ -260,16 +282,20 @@ def prepare_source(connection, owner, runtime, *, migration_target=MIGRATION, de
               ('tenant-a','uid-admin-other','person-other',NULL,NULL,
                ARRAY['administrator'],'active',1)
         """))
-        for uid, roles, student, faculty in (
-            ("uid-student", ["student"], "student-a", None),
-            ("uid-teacher", ["teacher"], None, "faculty-a"),
+        for uid, roles, person, student, faculty in (
+            ("uid-student", ["student"], "person-restore-student", "student-restore", None),
+            ("uid-teacher", ["teacher"], "person-restore-student", None, "faculty-restore"),
         ):
             identity_context(db, tenant_id="tenant-a", uid=uid)
             audit_actor(db, VerifiedPrincipal(uid="synthetic-operator"))
             db.execute(text("""
                 INSERT INTO classsync_identity.memberships VALUES
-                  ('tenant-a',:uid,'person-a',:student,:faculty,CAST(:roles AS text[]),'active',1)
-            """), {"uid": uid, "student": student, "faculty": faculty, "roles": roles})
+                  ('tenant-a',:uid,:person,:student,:faculty,CAST(:roles AS text[]),'active',1)
+            """), {"uid": uid, "person": person, "student": student,
+                    "faculty": faculty, "roles": roles})
+        require_unique_student_bindings([
+            ("uid-a", "student-a"), ("uid-student", "student-restore"),
+        ])
         for schema in ("classsync_identity", "classsync_academic"):
             db.execute(text(f"GRANT USAGE ON SCHEMA {schema} TO {connection.runtime}"))
         db.execute(text("GRANT SELECT ON classsync_identity.memberships,"
@@ -284,8 +310,9 @@ def prepare_source(connection, owner, runtime, *, migration_target=MIGRATION, de
                             f"TO {connection.runtime}"))
         db.execute(text("GRANT DELETE ON classsync_academic.record_references "
                         f"TO {connection.runtime}"))
-    if defer_fixture:
-        return None, None, migration_owner
+
+
+def create_source_fixture(runtime):
     repository = store(runtime)
     original = complete(FixtureCalls(repository))
     require({entry.record.kind for entry in original.records} == {
@@ -303,7 +330,7 @@ def prepare_source(connection, owner, runtime, *, migration_target=MIGRATION, de
         PeriodCreate(title="Synthetic other administrator private period",
                      include_cdm_catalog=False)
     )
-    return expected, other, migration_owner
+    return expected, other
 
 
 def store(engine, *, uid="uid-admin", tenant="tenant-a", project="synthetic-project"):

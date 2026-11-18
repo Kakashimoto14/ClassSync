@@ -1,19 +1,24 @@
 import { appMode } from '../config/runtime-config';
+import { firebaseApp } from '../lib/firebase';
 import { identityEndpoint } from './university-session-driver';
 
 async function provider() {
   if (appMode !== 'institutional') throw new Error('University access is not connected.');
-  const [{ firebaseApp }, sdk] = await Promise.all([
-    import('../lib/firebase'),
-    import('firebase/auth'),
-  ]);
   if (!firebaseApp) throw new Error('University access is not connected.');
+  const sdk = await import('firebase/auth');
   return { auth: sdk.getAuth(firebaseApp), sdk };
 }
 
 export async function signInToAccount(email: string, password: string) {
   const { auth, sdk } = await provider();
   await sdk.signInWithEmailAndPassword(auth, email.trim(), password);
+}
+
+export async function signInWithGoogle() {
+  const { auth, sdk } = await provider();
+  const google = new sdk.GoogleAuthProvider();
+  google.setCustomParameters({ prompt: 'select_account' });
+  return sdk.signInWithPopup(auth, google);
 }
 
 export async function createStudentAccount(email: string, password: string) {
@@ -64,6 +69,8 @@ export function accountError(error: unknown) {
   if (code === 'auth/invalid-email') return 'Enter a valid email address.';
   if (code === 'auth/operation-not-allowed')
     return 'Account creation is unavailable. Contact your university.';
+  if (code === 'auth/popup-closed-by-user') return 'Sign-in was cancelled. You can try again.';
+  if (code === 'auth/popup-blocked') return 'Allow the sign-in window, then try again.';
   return 'The request could not be confirmed. Check your connection and try again.';
 }
 
@@ -157,6 +164,8 @@ export async function accountRequest<T>(
     throw new Error(
       typeof payload?.error?.message === 'string'
         ? payload.error.message
+        : typeof payload?.detail === 'string'
+          ? payload.detail
         : 'Account request could not be confirmed.',
     );
   return payload.data as T;

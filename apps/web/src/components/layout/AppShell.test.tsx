@@ -62,21 +62,37 @@ describe('workspace navigation', () => {
     expect(navigationOwner('/teacher/room-availability', true)).toBe('teacher.find-room');
     expect(navigationOwner('/teacher/rooms/detail', true)).toBe('teacher.find-room');
   });
-  it('searches entry pages without offering record details that have no selection', () => {
+  it('offers a selection-only Administrator page menu without record details', () => {
     renderShell('administrator', '/admin/dashboard');
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search ClassSync' }), {
-      target: { value: 'Room' },
-    });
-    const results = within(screen.getByRole('navigation', { name: 'Search destinations' }));
-    expect(results.getByRole('link', { name: 'Room Directory' })).toHaveAttribute(
+    expect(screen.queryByRole('textbox', { name: 'Search ClassSync' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open page menu' }));
+    const menu = within(screen.getByRole('menu', { name: 'Administrator destinations' }));
+    expect(menu.getByRole('menuitem', { name: 'Room Directory' })).toHaveAttribute(
       'href',
       '/admin/rooms',
     );
-    expect(results.queryByRole('link', { name: 'Room Details' })).not.toBeInTheDocument();
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search ClassSync' }), {
-      target: { value: 'Details' },
-    });
-    expect(screen.getByText('No matching pages in your workspace.')).toBeInTheDocument();
+    expect(menu.queryByRole('menuitem', { name: 'Room Details' })).not.toBeInTheDocument();
+    expect(menu.queryByRole('menuitem', { name: 'Conflict Details' })).not.toBeInTheDocument();
+  });
+
+  it('supports arrow navigation and Escape focus restoration in the Administrator menu', () => {
+    renderShell('administrator', '/admin/dashboard');
+    const trigger = screen.getByRole('button', { name: 'Open page menu' });
+    fireEvent.click(trigger);
+    const menu = screen.getByRole('menu', { name: 'Administrator destinations' });
+    const first = within(menu).getAllByRole('menuitem')[0];
+    const second = within(menu).getAllByRole('menuitem')[1];
+    expect(first).toHaveFocus();
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    expect(second).toHaveFocus();
+    fireEvent.keyDown(menu, { key: 'End' });
+    expect(within(menu).getAllByRole('menuitem').at(-1)).toHaveFocus();
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Tab' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
   it('focuses the destination and returns to its heading after navigation', () => {
     renderShell('student', '/student/dashboard');
@@ -140,13 +156,31 @@ describe('workspace navigation', () => {
     renderShell('administrator', '/admin/schedule-manager/create');
     expect(
       within(screen.getByRole('navigation', { name: 'Primary navigation' })).getByRole('link', {
-        name: 'AI-Powered Scheduling',
+        name: 'Schedule Generation',
       }),
     ).toHaveAttribute('aria-current', 'location');
   });
 
-  it('uses ordinary accessible links for destination search', () => {
+  it('condenses academic data entry in the sidebar while keeping category destinations searchable', () => {
     renderShell('administrator', '/admin/dashboard');
+    const navigation = screen.getByRole('navigation', { name: 'Primary navigation' });
+    expect(within(navigation).getByRole('link', { name: 'Academic Setup' })).toHaveAttribute(
+      'href',
+      '/admin/academic',
+    );
+    for (const label of ['Faculty', 'Subjects', 'Sections', 'Programs', 'Subject Offerings']) {
+      expect(within(navigation).queryByRole('link', { name: label })).not.toBeInTheDocument();
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Open page menu' }));
+    expect(
+      within(screen.getByRole('menu', { name: 'Administrator destinations' })).getByRole('menuitem', {
+        name: 'Faculty',
+      }),
+    ).toHaveAttribute('href', '/admin/teachers');
+  });
+
+  it('preserves ordinary accessible destination search for non-Administrator roles', () => {
+    renderShell('student', '/student/dashboard');
     fireEvent.change(screen.getByRole('textbox', { name: 'Search ClassSync' }), {
       target: { value: 'Profile' },
     });
@@ -154,7 +188,7 @@ describe('workspace navigation', () => {
       within(screen.getByRole('navigation', { name: 'Search destinations' })).getByRole('link', {
         name: 'Profile',
       }),
-    ).toHaveAttribute('href', '/admin/profile');
+    ).toHaveAttribute('href', '/student/profile');
     fireEvent.keyDown(screen.getByRole('textbox', { name: 'Search ClassSync' }), { key: 'Escape' });
     expect(
       screen.queryByRole('navigation', { name: 'Search destinations' }),

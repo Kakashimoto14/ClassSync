@@ -4,12 +4,20 @@ import argparse
 import json
 from pathlib import Path
 
+from alembic.script import ScriptDirectory
+from classync_persistence import schema
 from classync_persistence.database import postgres_engine, transaction
 from sqlalchemy import text
 from sqlalchemy.engine import URL
 from sqlalchemy.exc import DBAPIError
 
 from scripts.postgres_disposable import DisposableConnection, qualify
+
+
+def current_migration_head():
+    """Resolve the single current Alembic head rather than pinning stale revisions."""
+    graph = ScriptDirectory(str(Path(schema.__file__).parent / "migrations"))
+    return graph.get_current_head()
 
 
 def require(condition, description):

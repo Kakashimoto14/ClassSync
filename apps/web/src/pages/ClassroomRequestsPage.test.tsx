@@ -68,7 +68,8 @@ it('records an Administrator decision without claiming a classroom is already pu
       },
     }),
   );
-  expect(screen.queryByText('Classroom change published')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Classroom change published/ })).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent('Approved · awaiting publication');
 });
 it('clears the previous request list when refreshed access is denied', async () => {
   render(
@@ -96,6 +97,15 @@ it('keeps a failed decision unconfirmed and permits a deliberate reload', async 
   await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('request changed'));
   expect(screen.queryByRole('link', { name: 'Review classroom change' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Reload requests' })).toBeEnabled();
+});
+
+it('filters Administrator requests with counted status pills', async () => {
+  render(<MemoryRouter><ClassroomRequestsPage role="administrator" /></MemoryRouter>);
+  await screen.findByText('Invented classroom request');
+  expect(screen.getByRole('button', { name: /All 1/ })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: /Not approved 0/ }));
+  expect(await screen.findByText('No requests match this status.')).toBeInTheDocument();
+  expect(screen.queryByText('Invented classroom request')).not.toBeInTheDocument();
 });
 
 it('labels the classroom selector exactly and waits for confirmed submission before navigating', async () => {

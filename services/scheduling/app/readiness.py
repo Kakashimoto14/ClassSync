@@ -14,6 +14,9 @@ def intersects(windows, day, start, end):
 def eligible_room(room, offering, program_id):
     if not room.schedulable or room.condition != "operational":
         return False
+    if room.allowed_activity_types is not None:
+        if not room.type_verified or offering.activity_type not in room.allowed_activity_types:
+            return False
     if offering.required_room_type and (
         not room.type_verified or room.room_type != offering.required_room_type
     ):

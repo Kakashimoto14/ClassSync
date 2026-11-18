@@ -17,7 +17,7 @@ from classync_contracts.scheduling_security import (
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import Field, SecretStr, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
@@ -32,7 +32,9 @@ ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
 
 
 class Settings(SchedulingSecuritySettings):
-    model_config = SettingsConfigDict(env_file=ROOT_DIRECTORY / ".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=ROOT_DIRECTORY / ".env", extra="ignore", populate_by_name=True
+    )
     academic_service_url: str = "http://127.0.0.1:8001"
     scheduling_service_url: str = "http://127.0.0.1:8002"
     notification_service_url: str = "http://127.0.0.1:8003"
@@ -45,7 +47,10 @@ class Settings(SchedulingSecuritySettings):
     registration_max_pages: int = Field(default=5, ge=1, le=8)
     registration_timeout_seconds: int = Field(default=20, ge=5, le=30)
     registration_retention_seconds: int = Field(default=900, ge=60, le=900)
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    cors_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:5173"],
+        validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CORS_ORIGINS"),
+    )
     course_cloud_enabled: bool = False
     course_storage_bucket: str = Field(default="", max_length=222)
     course_gemini_model: str = Field(default="", pattern=r"^[a-z0-9.-]{0,80}$")
@@ -383,7 +388,7 @@ async def timetable_proxy(operation: str, request: Request):
     else:
         if operation == "requests" and request.method == "POST":
             await run_in_threadpool(request_identity, request, settings, UserRole.TEACHER)
-        elif request.method != "GET" or operation.startswith("history/"):
+        elif request.method != "GET" or operation.startswith(("history/", "audit/")):
             await run_in_threadpool(require_administrator, request, settings)
         else:
             await run_in_threadpool(require_identity, request, settings)

@@ -32,7 +32,9 @@ with no machine-specific path. `SCHEDULING_DATABASE_PATH` remains unchanged. Dat
 files, sidecars and local backups are Git-ignored.
 
 Choose Administrator → Schedule Manager → Manage Academic Data. Create a period,
-optionally including only the owner-supplied nine-program/59-space catalogs. Then
+optionally including the owner-supplied nine-program catalog and 53-space November
+2026 CdM inventory. The inventory remains provisional and room eligibility remains
+blocked until operational condition and room type are verified. Then
 enter Subjects → Sections → Faculty → Resource Metadata → Subject Offerings →
 Scheduling Constraints. Validate Readiness, generate from that saved period, review
 the real solver result and explicitly Save as Draft. The generation source selector
@@ -71,13 +73,13 @@ The 180-minute requirement is an editable proposed default, not a verified unive
 institutional rule or a credit-unit conversion. Both 180 and distinct-day 90+90
 patterns work; nonstandard patterns must total the explicitly required minutes.
 
-The 59 CdM spaces retain their supplied IDs, floors and labels, including the
-unconfirmed PRRC 302 alias. PRRC 304–306 are not created. Their capacities, equipment,
-operating state and suitability start unknown. Function Hall and Court are not
-automatically eligible classrooms. New user-entered resources use separate
-administrator-supplied provenance. Metadata assertions on a CdM resource require a
-source note and preserve its supplied identity/location; they apply to the selected
-period and never rewrite the canonical provisional inventory or existing drafts.
+The earlier 59-space catalog is superseded by the November 2026 row list; see
+[`ROOM_INVENTORY_UPDATE.md`](../audit/ROOM_INVENTORY_UPDATE.md) for the 53 canonical IDs
+and source restrictions. Capacity, equipment, operational condition and suitability
+remain unverified. New user-entered resources use separate administrator-supplied
+provenance. Metadata assertions on a CdM resource require a source note and preserve
+canonical identity, location, schedulability and activity restrictions; they apply to
+the selected period and never rewrite existing drafts.
 
 Only verified population/minimum-capacity requirements impose capacity constraints.
 If none is supplied, readiness warns that capacity suitability is not asserted.

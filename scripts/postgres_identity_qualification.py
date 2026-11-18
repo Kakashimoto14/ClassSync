@@ -63,6 +63,30 @@ def seed(session):
                 "faculty": faculty, "roles": roles})
 
 
+def require_unique_student_bindings(bindings):
+    """Reject duplicate synthetic account-to-student assignments before SQL insertion."""
+    student_ids = [student_id for _uid, student_id in bindings if student_id is not None]
+    if len(student_ids) != len(set(student_ids)):
+        raise RuntimeError("Qualification fixtures require distinct synthetic student IDs")
+
+
+def add_synthetic_student(session, *, tenant, person_id, student_id):
+    session.execute(text(
+        "INSERT INTO classsync_identity.people (tenant_id,id) VALUES (:tenant,:person)"
+    ), {"tenant": tenant, "person": person_id})
+    session.execute(text(
+        "INSERT INTO classsync_identity.students (tenant_id,id,person_id) "
+        "VALUES (:tenant,:student,:person)"
+    ), {"tenant": tenant, "student": student_id, "person": person_id})
+
+
+def add_synthetic_faculty(session, *, tenant, person_id, faculty_id):
+    session.execute(text(
+        "INSERT INTO classsync_identity.faculty (tenant_id,id,person_id) "
+        "VALUES (:tenant,:faculty,:person)"
+    ), {"tenant": tenant, "faculty": faculty_id, "person": person_id})
+
+
 def constraint_cases(owner):
     # Isolate binding/check constraints from the newer one-account-per-record index.
     # student-a is already linked, so reusing it would fail uniqueness before the FK.

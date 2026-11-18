@@ -208,6 +208,7 @@ def test_general_development_bypass_is_not_an_authenticated_identity(monkeypatch
         (scheduling, "/api/v1/scheduling/drafts"),
         (scheduling, "/api/v1/timetables/periods"),
         (scheduling, "/api/v1/timetables/history/synthetic-period"),
+        (scheduling, "/api/v1/timetables/audit/00000000-0000-0000-0000-000000000001"),
     ],
 )
 def test_denied_service_calls_never_open_repository(module, path, monkeypatch):

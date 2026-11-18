@@ -50,6 +50,10 @@ def configuration(environ):
 
 
 if __name__ == "__main__":
+    if os.environ.get("CLASSSYNC_SERVICE", "gateway") == "all":
+        from scripts.render_entrypoint import main as render_main
+
+        raise SystemExit(render_main())
     application, port = configuration(os.environ)
     uvicorn.run(
         application, host="0.0.0.0", port=port, workers=1, proxy_headers=False, access_log=False

@@ -7,6 +7,8 @@ import { ReadinessSummary, SchedulingSourcePage } from './AcademicGenerationPage
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import * as api from '../lib/academic-api';
 import type { AcademicSnapshot, AcademicReadiness } from '../lib/academic-api';
+import type { ActivityType } from '../../../../packages/shared-types/src/scheduling';
+import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
 import { appRoutes } from '../routes/app-routes';
 import { writePreviewSession } from '../auth/preview-session';
 
@@ -86,7 +88,12 @@ const missing: AcademicReadiness = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(api.loadCurriculumCatalog).mockResolvedValue({ status: 'unreviewed', versions: [], courses: [], program_ids: {} });
+  vi.mocked(api.loadCurriculumCatalog).mockResolvedValue({
+    status: 'unreviewed',
+    versions: [],
+    courses: [],
+    program_ids: {},
+  });
   sessionStorage.clear();
   HTMLElement.prototype.scrollIntoView = vi.fn();
   vi.mocked(api.listAcademicPeriods).mockResolvedValue({ periods: [period] });
@@ -96,12 +103,206 @@ beforeEach(() => {
 });
 
 describe('persisted academic data management', () => {
+  it('keeps period setup compact with a counted category selector and opens editors inline', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Set up Entered term' });
+    expect(screen.getByText('Calendar setup')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Programs 1/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Subjects 1/ })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByRole('heading', { name: 'Subjects', level: 3 })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Subjects 1/ }));
+    expect(screen.getByRole('heading', { name: 'Subjects', level: 3 })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Programs', level: 3 })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add subject' }));
+    expect(screen.getByRole('form', { name: 'New subjects record' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save Record' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+  });
+
+  it('uses fixed year and letter menus for degree sections', () => {
+    render(
+      <AcademicRecordEditor
+        kind="sections"
+        snapshot={snapshot}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('combobox', { name: 'Year level' })).toHaveValue('');
+    expect(
+      within(screen.getByRole('combobox', { name: 'Year level' })).getAllByRole('option'),
+    ).toHaveLength(5);
+    expect(screen.getByRole('combobox', { name: 'Section identifier' })).toHaveValue('');
+    expect(
+      within(screen.getByRole('combobox', { name: 'Section identifier' })).getAllByRole('option'),
+    ).toHaveLength(27);
+  });
+
+  it('creates a period program from the supplied catalog instead of typed labels', async () => {
+    render(
+      <AcademicRecordEditor
+        kind="programs"
+        snapshot={snapshot}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    const program = screen.getByRole('combobox', { name: 'Program from supplied catalog' });
+    expect(within(program).queryByRole('option', { name: /BSIT/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'Program acronym' })).not.toBeInTheDocument();
+    fireEvent.change(program, { target: { value: 'bscpe' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Record' }));
+    await waitFor(() => expect(api.saveAcademicRecord).toHaveBeenCalled());
+    expect(api.saveAcademicRecord).toHaveBeenCalledWith(
+      'period-a',
+      expect.objectContaining({
+        record: expect.objectContaining({
+          kind: 'programs',
+          id: 'bscpe',
+          acronym: 'BSCPE',
+          name: 'Computer Engineering',
+        }),
+      }),
+    );
+  });
+
+  it('disables catalog program creation when every supplied entry is already saved', async () => {
+    vi.mocked(api.loadAcademicPeriod).mockResolvedValueOnce({
+      ...snapshot,
+      records: [
+        ...snapshot.records.filter((entry) => entry.record.kind !== 'programs'),
+        ...suppliedAcademicProgramCatalog.map((record) => ({
+          revision: 1,
+          updated_at: period.created_at,
+          updated_by: 'development-academic-sandbox',
+          record: { ...record, kind: 'programs' as const, active: true },
+        })),
+      ],
+    });
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Set up Entered term' });
+    expect(screen.getByRole('button', { name: 'All supplied programs added' })).toBeDisabled();
+  });
+
+  it('offers only activity and program compatible schedulable rooms', () => {
+    const catalogSnapshot: AcademicSnapshot = {
+      ...snapshot,
+      records: [
+        ...snapshot.records,
+        {
+          revision: 1,
+          updated_at: period.created_at,
+          updated_by: 'development-academic-sandbox',
+          record: {
+            kind: 'sections',
+            id: 'section-a',
+            period_id: period.id,
+            program_id: 'bsit',
+            year_level: 1,
+            section_letter: 'A',
+            active: true,
+          },
+        },
+        ...(
+          [
+            {
+              id: 'cdm-prrc-101',
+              name: 'PRRC 101',
+              schedulable: true,
+              allowed_activity_types: ['academic_instruction'],
+            },
+            {
+              id: 'cdm-prrc-302',
+              name: 'PRRC 302',
+              alias: 'COMLAB1',
+              schedulable: true,
+              allowed_activity_types: ['computer_lab_instruction'],
+            },
+            {
+              id: 'cdm-prrc-108',
+              name: 'PRRC 108',
+              alias: 'ITE Science Lab',
+              schedulable: true,
+              allowed_activity_types: ['bse_science_instruction'],
+              allowed_program_ids: ['bsed-sci'],
+            },
+            {
+              id: 'cdm-prrc-204',
+              name: 'PRRC 204',
+              schedulable: false,
+              allowed_activity_types: ['academic_instruction'],
+            },
+          ] as Array<{
+            id: string;
+            name: string;
+            alias?: string;
+            schedulable: boolean;
+            allowed_activity_types: ActivityType[];
+            allowed_program_ids?: string[];
+          }>
+        ).map((room) => ({
+          revision: 1,
+          updated_at: period.created_at,
+          updated_by: 'development-academic-sandbox',
+          record: {
+            ...room,
+            kind: 'resources' as const,
+            building: 'PRRC',
+            source: 'cdm-provisional' as const,
+            active: true,
+            condition: 'unknown' as const,
+            room_type: room.id === 'cdm-prrc-302' ? 'computer_lab' : 'lecture_classroom',
+            type_verified: false,
+            verification_note: 'Inventory row designation only.',
+          },
+        })),
+      ],
+    };
+    render(
+      <AcademicRecordEditor
+        kind="offerings"
+        snapshot={catalogSnapshot}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    fireEvent.change(screen.getByRole('combobox', { name: 'Subject' }), {
+      target: { value: 'subject-a' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Section' }), {
+      target: { value: 'section-a' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Activity type' }), {
+      target: { value: 'computer_lab_instruction' },
+    });
+    fireEvent.click(screen.getByText('Activity-compatible schedulable rooms · 0 selected'));
+    expect(screen.getByRole('checkbox', { name: /PRRC 302/ })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /PRRC 101/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /PRRC 108/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /PRRC 204/ })).not.toBeInTheDocument();
+  });
   it('starts a missing academic calendar blank and does not invent dates or teaching days', () => {
     render(<AcademicCalendarEditor snapshot={snapshot} onSaved={vi.fn()} />);
     expect(screen.getByRole('textbox', { name: 'Academic year' })).toHaveValue('');
     expect(screen.getByLabelText('Effective start')).toHaveValue('');
     expect(screen.getByLabelText('Effective end')).toHaveValue('');
-    for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) {
+    for (const day of [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ]) {
       expect(screen.getByRole('checkbox', { name: day })).not.toBeChecked();
     }
     expect(screen.getByRole('button', { name: 'Save academic calendar' })).toBeDisabled();
@@ -110,13 +311,26 @@ describe('persisted academic data management', () => {
     const checked = {
       ...missing,
       issues: [
-        { severity: 'blocking' as const, code: 'missing_academic_calendar', message: 'Enter calendar.' },
+        {
+          severity: 'blocking' as const,
+          code: 'missing_academic_calendar',
+          message: 'Enter calendar.',
+        },
         { severity: 'blocking' as const, code: 'scope_not_complete', message: 'Review scope.' },
       ],
     };
-    render(<MemoryRouter><ReadinessSummary checked={checked} /></MemoryRouter>);
-    expect(screen.getByRole('link', { name: 'Review academic calendar' })).toHaveAttribute('href', '/admin/academic?period=period-a');
-    expect(screen.getByRole('link', { name: 'Review period scope and fixed assignments' })).toHaveAttribute('href', '/admin/scheduling-constraints?period=period-a');
+    render(
+      <MemoryRouter>
+        <ReadinessSummary checked={checked} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'Review academic calendar' })).toHaveAttribute(
+      'href',
+      '/admin/academic?period=period-a',
+    );
+    expect(
+      screen.getByRole('link', { name: 'Review period scope and fixed assignments' }),
+    ).toHaveAttribute('href', '/admin/scheduling-constraints?period=period-a');
   });
   it('creates a period with explicit catalog inclusion and keeps the selected period in its URL', async () => {
     vi.mocked(api.listAcademicPeriods).mockResolvedValueOnce({ periods: [] });
@@ -136,11 +350,51 @@ describe('persisted academic data management', () => {
       title: 'Entered term',
       include_cdm_catalog: true,
     });
-    expect(screen.getByRole('link', { name: 'Subjects' })).toHaveAttribute(
+    const subjectsArea = screen.getByRole('button', { name: /Subjects/ });
+    expect(subjectsArea).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(subjectsArea);
+    expect(subjectsArea).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('link', { name: 'View all subjects' })).toHaveAttribute(
       'href',
       '/admin/subjects?period=period-a',
     );
     expect(api.saveAcademicRecord).not.toHaveBeenCalled();
+  });
+  it('explains the full setup before an admin chooses a period', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/offerings']}>
+        <AcademicManagementPage initialKind="offerings" />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Choose a period to continue' });
+    expect(screen.getByRole('button', { name: 'New academic period' })).toBeInTheDocument();
+    for (const area of [
+      'Approved dates and instructional days',
+      'Supplied catalogs and confirmed cohort records',
+      'Assigned subjects, windows and workload limits',
+      'Confirmed classes and verified room suitability',
+      'Teaching windows, shared scope and fixed commitments',
+    ])
+      expect(screen.getByText(area)).toBeInTheDocument();
+    expect(screen.getByText(/not verified institutional records/i)).toBeInTheDocument();
+  });
+  it('keeps the sample scenario behind a development-only tool at the bottom of setup', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/academic']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Choose a period to continue' });
+    const tool = screen.getByRole('region', { name: 'Development tools' });
+    expect(tool).toHaveAttribute('id', 'sample-scenario');
+    expect(within(tool).getByText('Sample Academic Scenario')).toBeInTheDocument();
+    expect(
+      (screen
+        .getByRole('heading', { name: 'Choose a period to continue' })
+        .compareDocumentPosition(tool) &
+        Node.DOCUMENT_POSITION_FOLLOWING) !==
+        0,
+    ).toBe(true);
   });
   it('submits a subject with explicit program ownership and only the selected weekly pattern', async () => {
     const onSaved = vi.fn();
@@ -227,11 +481,23 @@ describe('persisted academic data management', () => {
     fireEvent.click(screen.getByText('Eligible teaching subjects · 0 selected'));
     fireEvent.click(screen.getByRole('checkbox', { name: 'USER-A · Entered subject' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add faculty availability window' }));
-    fireEvent.change(screen.getByRole('combobox', { name: 'Faculty availability day 1' }), {
-      target: { value: '2' },
+    expect(
+      screen.getByRole('checkbox', { name: 'Faculty availability Monday 1' }),
+    ).not.toBeChecked();
+    expect(screen.getByRole('combobox', { name: 'Faculty availability start 1' })).toHaveValue('');
+    expect(screen.getByRole('combobox', { name: 'Faculty availability end 1' })).toHaveValue('');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Faculty availability Wednesday 1' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Faculty availability Friday 1' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Faculty availability start 1' }), {
+      target: { value: '540' },
     });
-    fireEvent.change(screen.getByLabelText('Faculty availability start 1'), {
-      target: { value: '09:00' },
+    expect(
+      within(screen.getByRole('combobox', { name: 'Faculty availability start 1' })).getAllByRole(
+        'option',
+      ),
+    ).toHaveLength(49);
+    fireEvent.change(screen.getByRole('combobox', { name: 'Faculty availability end 1' }), {
+      target: { value: '720' },
     });
     fireEvent.click(screen.getByText('Workload and unavailable times'));
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Maximum weekly teaching minutes' }), {
@@ -243,7 +509,10 @@ describe('persisted academic data management', () => {
       'period-a',
       expect.objectContaining({
         record: expect.objectContaining({
-          availability: [{ day: 2, start: 540, end: 720 }],
+          availability: [
+            { day: 2, start: 540, end: 720 },
+            { day: 4, start: 540, end: 720 },
+          ],
           subject_ids: ['subject-a'],
           max_weekly_minutes: 360,
         }),

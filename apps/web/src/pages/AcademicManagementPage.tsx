@@ -19,6 +19,7 @@ import { ReadinessSummary } from './AcademicGenerationPage';
 import { AcademicFixtureImport } from './AcademicFixtureImport';
 import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
+import { AcademicPeriodSetup } from './AcademicPeriodSetup';
 const schedulingSandboxEnabled = appMode !== 'presentation';
 
 export function AcademicManagementPage({
@@ -61,9 +62,10 @@ function ManagementContent({
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [includeCatalog, setIncludeCatalog] = useState(true);
-  const [query, setQuery] = useState('');
+  const [recordFilter, setRecordFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<string | null>(null);
+  const [editingKind, setEditingKind] = useState<AcademicKind>(kind);
   const [checked, setChecked] = useState<AcademicReadiness | null>(null);
   const [retry, setRetry] = useState(0);
   const active = useRef(false);
@@ -102,6 +104,7 @@ function ManagementContent({
       </p>
     );
   const current = academicTabs.find((t) => t.kind === kind)!;
+  const setupLanding = location.pathname === '/admin/academic';
   async function create(event: FormEvent) {
     event.preventDefault();
     if (active.current || !title.trim()) return;
@@ -137,29 +140,29 @@ function ManagementContent({
   }
   const all = snapshot?.records.filter((e) => e.record.kind === kind) ?? [];
   const matching = snapshot
-    ? all.filter((e) =>
-        academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-      )
+    ? all.filter((e) => {
+        const inactive = 'active' in e.record && e.record.active === false;
+        return recordFilter === 'all' || (recordFilter === 'inactive' ? inactive : !inactive);
+      })
     : [];
   const visible = matching.slice(page * 10, page * 10 + 10);
-  const editRecord = all.find((e) => e.record.id === editing);
+  const editRecord = snapshot?.records.find(
+    (e) => e.record.kind === editingKind && e.record.id === editing,
+  );
+  const hasSelectedPeriod = Boolean(periodId && periods.some((period) => period.id === periodId));
   return (
     <div className="weekly-scheduler academic-management">
-      <details className="calendar-source">
-        <summary>Data source · Academic records</summary>
-        <p>
-          Development-entered data · Persisted on the server · Not verified institutional records.
-          Synthetic scheduling assumptions remain separate from the provisional room directory.
-        </p>
-      </details>
-      {location.pathname === '/admin/academic' && (
-        <section id="sample-scenario">
-          {appMode === 'sandbox' && <AcademicFixtureImport />}
-        </section>
-      )}
-      {snapshot && (
+      <p className="academic-workspace-note">
+        <strong>
+          {appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'}
+        </strong>
+        <span>
+          {appMode === 'institutional'
+            ? 'Connected academic records · source and revision are shown for each period'
+            : 'Server-saved workspace · not verified institutional records'}
+        </span>
+      </p>
+      {snapshot && !setupLanding && (
         <AcademicCalendarEditor
           key={snapshot.period.revision}
           snapshot={snapshot}
@@ -171,22 +174,96 @@ function ManagementContent({
         />
       )}
       <section className="workspace-card">
-        <div className="academic-period-controls">
-          <label>
-            Academic period
-            <select value={periodId} disabled={busy} onChange={(e) => onPeriod(e.target.value)}>
-              <option value="">Choose a period</option>
-              {periods.map((p) => (
-                <option value={p.id} key={p.id}>
-                  {periodLabel(p)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
-            New Academic Period
-          </Button>
-        </div>
+        {!hasSelectedPeriod && (
+          <div className="academic-start">
+            <div className="academic-start__intro">
+              <p className="academic-setup__eyebrow">Academic setup</p>
+              <h2>
+                {periods.length
+                  ? 'Choose a period to continue'
+                  : 'Create your first academic period'}
+              </h2>
+              <p>
+                Academic data is grouped by period so the calendar, curriculum, sections, faculty,
+                rooms and scheduling rules stay together. You can save setup in stages.
+              </p>
+            </div>
+            <div className="academic-start__controls">
+              <label>
+                Academic period
+                <select
+                  value={periodId}
+                  disabled={busy || periods.length === 0}
+                  onChange={(e) => onPeriod(e.target.value)}
+                >
+                  <option value="">
+                    {periods.length ? 'Choose a period' : 'No periods saved yet'}
+                  </option>
+                  {periods.map((p) => (
+                    <option value={p.id} key={p.id}>
+                      {periodLabel(p)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {periods.length > 0 && (
+                <Button disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
+                  New academic period
+                </Button>
+              )}
+            </div>
+            <section
+              className="academic-start__checklist"
+              aria-labelledby="academic-start-checklist"
+            >
+              <h3 id="academic-start-checklist">What you’ll set up in one workspace</h3>
+              <ul>
+                <li>
+                  <strong>Calendar</strong>
+                  <span>Approved dates and instructional days</span>
+                </li>
+                <li>
+                  <strong>Programs, subjects and sections</strong>
+                  <span>Supplied catalogs and confirmed cohort records</span>
+                </li>
+                <li>
+                  <strong>Faculty and availability</strong>
+                  <span>Assigned subjects, windows and workload limits</span>
+                </li>
+                <li>
+                  <strong>Offerings and rooms</strong>
+                  <span>Confirmed classes and verified room suitability</span>
+                </li>
+                <li>
+                  <strong>Scheduling rules</strong>
+                  <span>Teaching windows, shared scope and fixed commitments</span>
+                </li>
+              </ul>
+              <p>
+                Readiness is checked from saved records; this overview does not assume any item is
+                complete.
+              </p>
+            </section>
+          </div>
+        )}
+        {hasSelectedPeriod && (
+          <div className="academic-period-controls">
+            <label>
+              Academic period
+              <select value={periodId} disabled={busy} onChange={(e) => onPeriod(e.target.value)}>
+                <option value="">Choose a period</option>
+                {periods.map((p) => (
+                  <option value={p.id} key={p.id}>
+                    {periodLabel(p)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
+              New academic period
+            </Button>
+          </div>
+        )}
         {loading && <p role="status">Loading academic records…</p>}
         {(createOpen || (!loading && !error && !periods.length)) && (
           <form className="academic-create-period" onSubmit={create}>
@@ -208,7 +285,7 @@ function ManagementContent({
                 disabled={busy}
                 onChange={(e) => setIncludeCatalog(e.target.checked)}
               />
-              Include the supplied nine-program catalog and 59 provisional CdM spaces
+              Include the supplied nine-program catalog and 53 row-classified CdM spaces
             </label>
             <p className="muted">
               No subjects, faculty, sections, operating hours or room capacities are invented. A
@@ -218,14 +295,16 @@ function ManagementContent({
               <Button type="submit" disabled={busy || !title.trim()}>
                 {busy ? 'Creating period…' : 'Create Period'}
               </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={busy}
-                onClick={() => setCreateOpen(false)}
-              >
-                Cancel
-              </Button>
+              {periods.length > 0 && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => setCreateOpen(false)}
+                >
+                  Cancel
+                </Button>
+              )}
             </div>
           </form>
         )}
@@ -247,17 +326,20 @@ function ManagementContent({
       )}
       {snapshot && (
         <>
-          <nav className="academic-tabs" aria-label="Academic data categories">
-            {academicTabs.map((t) => (
-              <Link
-                key={t.kind}
-                to={academicPath(t.kind, periodId)}
-                aria-current={kind === t.kind ? 'page' : undefined}
-              >
-                {t.label}
-              </Link>
-            ))}
-          </nav>
+          {!setupLanding && (
+            <nav className="academic-tabs" aria-label="Academic data categories">
+              <Link to={academicPath('programs', periodId)}>Setup overview</Link>
+              {academicTabs.map((t) => (
+                <Link
+                  key={t.kind}
+                  to={academicPath(t.kind, periodId)}
+                  aria-current={kind === t.kind ? 'page' : undefined}
+                >
+                  {t.label}
+                </Link>
+              ))}
+            </nav>
+          )}
           <div className="academic-review-actions">
             <p>
               {periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}
@@ -275,10 +357,35 @@ function ManagementContent({
             </div>
           </div>
           {checked && <ReadinessSummary checked={checked} />}
-          {editing !== null ? (
+          {setupLanding ? (
+            <AcademicPeriodSetup
+              snapshot={snapshot}
+              editing={editing}
+              editingKind={editingKind}
+              onEdit={(nextKind, id) => {
+                setEditingKind(nextKind);
+                setEditing(id);
+                setNotice('');
+              }}
+              onCancel={() => setEditing(null)}
+              onReload={() => {
+                setEditing(null);
+                setSnapshot(null);
+                setLoading(true);
+                setError('');
+                setRetry((n) => n + 1);
+              }}
+              onSaved={(next) => {
+                setSnapshot(next);
+                setEditing(null);
+                setChecked(null);
+                setNotice('Academic record saved. Existing drafts are unchanged.');
+              }}
+            />
+          ) : editing !== null ? (
             <AcademicRecordEditor
-              key={`${periodId}:${kind}:${editing}`}
-              kind={kind}
+              key={`${periodId}:${editingKind}:${editing}`}
+              kind={editingKind}
               snapshot={snapshot}
               existing={editRecord}
               onCancel={() => setEditing(null)}
@@ -300,18 +407,16 @@ function ManagementContent({
             <section className="academic-records" aria-label={`${current.label} records`}>
               <div className="academic-list-toolbar">
                 <label>
-                  Search {current.label.toLowerCase()}
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setPage(0);
-                    }}
-                  />
+                  Record status
+                  <select value={recordFilter} onChange={(e) => { setRecordFilter(e.target.value as typeof recordFilter); setPage(0); }}>
+                    <option value="all">All records</option>
+                    <option value="active">Active records</option>
+                    <option value="inactive">Inactive records</option>
+                  </select>
                 </label>
                 <Button
                   onClick={() => {
+                    setEditingKind(kind);
                     setEditing(kind === 'constraints' ? 'rules' : 'new');
                     setNotice('');
                   }}
@@ -324,8 +429,8 @@ function ManagementContent({
               {!matching.length && (
                 <p>
                   No {current.label.toLowerCase()}{' '}
-                  {query
-                    ? 'match this search.'
+                  {recordFilter !== 'all'
+                    ? 'match this status.'
                     : 'saved for this period. Add the records required by the intended timetable.'}
                 </p>
               )}
@@ -380,6 +485,7 @@ function ManagementContent({
                       <Button
                         variant="secondary"
                         onClick={() => {
+                          setEditingKind(kind);
                           setEditing(e.record.id!);
                           setNotice('');
                         }}
@@ -418,6 +524,12 @@ function ManagementContent({
             {notice}
           </p>
         </>
+      )}
+      {setupLanding && appMode === 'sandbox' && (
+        <section className="academic-dev-tools" id="sample-scenario" aria-label="Development tools">
+          <p className="academic-setup__eyebrow">Development tools</p>
+          <AcademicFixtureImport />
+        </section>
       )}
     </div>
   );

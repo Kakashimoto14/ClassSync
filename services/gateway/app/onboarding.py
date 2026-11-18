@@ -10,13 +10,22 @@ from classync_contracts.request_authorization import request_principal
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+STUDENT_VERIFICATION_ERROR = (
+    "Unable to sign in wth Google. Use the email registered in your student record. "
+    "If you need assistance, contact the Registrar"
+)
+
 
 class Input(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
 class StudentClaim(Input):
-    student_id: str = Field(min_length=1, max_length=128)
+    student_id: str = Field(min_length=8, max_length=8, pattern=r"^[0-9]{2}-[0-9]{5}$")
+
+
+class StudentVerification(Input):
+    student_id: str | None = Field(default=None, max_length=8, pattern=r"^[0-9]{2}-[0-9]{5}$")
 
 
 class ClaimDecision(Input):
@@ -90,6 +99,12 @@ def onboarding_router(settings):
     def submit_claim(body: StudentClaim, request: Request):
         principal, repository = context(request, write=True)
         return {"data": repository.submit_claim(principal, body.student_id)}
+
+    @router.post("/verify-student")
+    def verify_student(body: StudentVerification, request: Request, response: Response):
+        principal, repository = context(request, write=True)
+        response.headers["Cache-Control"] = "no-store"
+        return {"data": repository.verify_student(principal, body.student_id)}
 
     @router.get("/student-claims")
     def claims(request: Request, response: Response):

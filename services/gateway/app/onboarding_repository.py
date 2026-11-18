@@ -5,6 +5,8 @@ No startup migrations, credentials, cloud calls, roster creation or fallback sto
 """
 
 import hashlib
+import hmac
+import re
 import secrets
 from contextlib import contextmanager
 from uuid import uuid4
@@ -16,6 +18,29 @@ from classync_persistence.memberships import identity_context
 from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from .onboarding import STUDENT_VERIFICATION_ERROR
+
+STUDENT_ID_PATTERN = re.compile(r"^[0-9]{2}-[0-9]{5}$")
+STUDENT_EMAIL_PATTERN = re.compile(r"^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$")
+
+
+def student_record_matches(row, student_id, email):
+    candidate = email if isinstance(email, str) else ""
+    valid_email = bool(STUDENT_EMAIL_PATTERN.fullmatch(candidate))
+    valid_student_id = isinstance(student_id, str) and bool(
+        STUDENT_ID_PATTERN.fullmatch(student_id)
+    )
+    registered = row["registered_email"] if row is not None else ""
+    email_matches = hmac.compare_digest(candidate.encode("utf-8"), registered.encode("utf-8"))
+    return bool(
+        valid_student_id
+        and valid_email
+        and row is not None
+        and row["id"] == student_id
+        and row["enrollment_status"] == "active"
+        and email_matches
+    )
 
 
 class OnboardingRepository:
@@ -112,6 +137,70 @@ class OnboardingRepository:
                 self.params(principal, student=student_id),
             )
         return {"status": "pending"}
+
+    def verify_student(self, principal, student_id):
+        """Bind only an active roster record whose registered email matches verified Firebase email.
+
+        Every failed roster match uses the same response. The lookup is tenant-scoped,
+        row-locked, and the membership insert is in the same transaction.
+        """
+        lookup_id = student_id if isinstance(student_id, str) and STUDENT_ID_PATTERN.fullmatch(
+            student_id
+        ) else None
+
+        with self.session(principal) as db:
+            row = (
+                db.execute(
+                    text(
+                        "SELECT id,person_id,registered_email,enrollment_status "
+                        "FROM classsync_identity.students "
+                        "WHERE tenant_id=:tenant AND id=:student FOR SHARE"
+                    ),
+                    self.params(principal, student=lookup_id),
+                )
+                .mappings()
+                .first()
+            )
+            # The pure comparator runs a constant-time email comparison even when
+            # the queried student row is absent.
+            if not student_record_matches(row, student_id, principal.email):
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+
+            existing = (
+                db.execute(
+                    text(
+                        "SELECT student_id,roles,state FROM classsync_identity.memberships "
+                        "WHERE tenant_id=:tenant AND uid=:uid FOR UPDATE"
+                    ),
+                    self.params(principal),
+                )
+                .mappings()
+                .first()
+            )
+            if existing is not None:
+                if (
+                    existing["student_id"] == student_id
+                    and "student" in existing["roles"]
+                    and existing["state"] == "active"
+                ):
+                    return {"status": "verified"}
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+
+            inserted = db.execute(
+                text(
+                    "INSERT INTO classsync_identity.memberships "
+                    "(tenant_id,uid,person_id,student_id,roles,state,revision) "
+                    "VALUES(:tenant,:uid,:person,:student,ARRAY['student']::text[],'active',1) "
+                    "ON CONFLICT DO NOTHING"
+                ),
+                self.params(principal, person=row["person_id"], student=student_id),
+            )
+            if inserted.rowcount != 1:
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+        return {"status": "verified"}
 
     def claims(self, principal):
         with self.session(principal, admin=True) as db:

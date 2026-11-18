@@ -18,6 +18,7 @@ const asMinutes = (value: string) => {
 };
 const asTime = (value: number) =>
   `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+const startTimes = Array.from({ length: 48 }, (_, index) => index * 30);
 
 export function LockedAssignmentsEditor({
   snapshot,
@@ -61,6 +62,10 @@ export function LockedAssignmentsEditor({
   const patterns = offering?.patterns_override ?? subject?.patterns ?? [];
   const teachers = offering?.teacher_ids ?? [];
   const eligibleRooms = offering?.room_ids ?? [];
+  const selectedStart = start ? asMinutes(start) : null;
+  const allowedEndTimes = selectedStart === null
+    ? []
+    : [...new Set(patterns.flatMap((pattern) => pattern.durations).map((duration) => selectedStart + duration).filter((end) => end <= 1440))].sort((a, b) => a - b);
 
   function add() {
     setError('');
@@ -159,10 +164,18 @@ export function LockedAssignmentsEditor({
             </select>
           </label>
           <label>
-            Start time<input type="time" step={1800} value={start} onChange={(e) => setStart(e.target.value)} />
+            Start time
+            <select value={start} onChange={(e) => { setStart(e.target.value); setEnd(''); }}>
+              <option value="">Choose start time</option>
+              {startTimes.map((minute) => <option key={minute} value={asTime(minute)}>{asTime(minute)}</option>)}
+            </select>
           </label>
           <label>
-            End time<input type="time" step={1800} value={end} onChange={(e) => setEnd(e.target.value)} />
+            End time
+            <select value={end} disabled={!start} onChange={(e) => setEnd(e.target.value)}>
+              <option value="">Choose permitted end time</option>
+              {allowedEndTimes.map((minute) => <option key={minute} value={asTime(minute)}>{asTime(minute)}</option>)}
+            </select>
           </label>
           <label>
             Eligible faculty

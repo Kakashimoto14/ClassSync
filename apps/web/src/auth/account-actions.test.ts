@@ -5,6 +5,8 @@ import { accountRequest, createStudentAccount, recoverPassword } from './account
 const fixture = vi.hoisted(() => ({
   auth: { currentUser: null as null | { uid: string; getIdToken: ReturnType<typeof vi.fn> } },
   signup: vi.fn(),
+  google: vi.fn(),
+  googleProvider: vi.fn(),
   verify: vi.fn(),
   reset: vi.fn(),
 }));
@@ -16,6 +18,8 @@ vi.mock('./university-session-driver', () => ({
 vi.mock('firebase/auth', () => ({
   getAuth: () => fixture.auth,
   createUserWithEmailAndPassword: fixture.signup,
+  GoogleAuthProvider: fixture.googleProvider,
+  signInWithPopup: fixture.google,
   sendEmailVerification: fixture.verify,
   sendPasswordResetEmail: fixture.reset,
 }));
@@ -38,6 +42,21 @@ it('creates a Firebase account then requests verification without any role API c
   expect(fixture.verify).toHaveBeenCalledWith(user);
   expect(fetch).not.toHaveBeenCalled();
   fetch.mockRestore();
+});
+
+it('starts Google sign-in through Firebase and does not create a client-selected role', async () => {
+  const provider = { setCustomParameters: vi.fn() };
+  fixture.googleProvider.mockImplementation(function () {
+    return provider;
+  });
+  fixture.google.mockResolvedValue({ user: { uid: 'google-student' } });
+
+  await expect(import('./account-actions').then(({ signInWithGoogle }) => signInWithGoogle()))
+    .resolves.toEqual({ user: { uid: 'google-student' } });
+
+  expect(fixture.googleProvider).toHaveBeenCalledOnce();
+  expect(provider.setCustomParameters).toHaveBeenCalledWith({ prompt: 'select_account' });
+  expect(fixture.google).toHaveBeenCalledWith(fixture.auth, provider);
 });
 
 it('does not disclose an unknown account through password recovery', async () => {

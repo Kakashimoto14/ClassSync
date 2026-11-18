@@ -7,12 +7,13 @@ import {
   type UniversitySessionContextValue,
 } from '../auth/university-session-context';
 
-const actions = vi.hoisted(() => ({ create: vi.fn(), recover: vi.fn(), signIn: vi.fn() }));
+const actions = vi.hoisted(() => ({ create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn() }));
 vi.mock('../auth/account-actions', async (original) => ({
   ...(await original<typeof import('../auth/account-actions')>()),
   createStudentAccount: actions.create,
   recoverPassword: actions.recover,
   signInToAccount: actions.signIn,
+  signInWithGoogle: actions.google,
 }));
 
 function entrance(path = '/', overrides: Partial<UniversitySessionContextValue> = {}) {
@@ -73,8 +74,12 @@ it('validates confirmation before student account creation and submits no role',
   entrance();
   fireEvent.click(screen.getByRole('link', { name: 'Create an account' }));
   expect(screen.getByRole('heading', { name: 'Create your account' })).toHaveFocus();
+  expect(screen.getByLabelText('Email')).toHaveAttribute(
+    'placeholder',
+    'juan.delacruz@student.pnm.edu.ph',
+  );
   fireEvent.change(screen.getByLabelText('Email'), {
-    target: { value: 'student@synthetic.invalid' },
+    target: { value: 'juan.delacruz@student.pnm.edu.ph' },
   });
   fireEvent.change(screen.getByLabelText('Password', { exact: true }), {
     target: { value: 'Synthetic-password-42!' },
@@ -90,10 +95,34 @@ it('validates confirmation before student account creation and submits no role',
   fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
   await waitFor(() =>
     expect(actions.create).toHaveBeenCalledWith(
-      'student@synthetic.invalid',
+      'juan.delacruz@student.pnm.edu.ph',
       'Synthetic-password-42!',
     ),
   );
+});
+
+it('requires the registered institutional email pattern for student account creation', async () => {
+  entrance();
+  fireEvent.click(screen.getByRole('link', { name: 'Create an account' }));
+  fireEvent.change(screen.getByLabelText('Email'), {
+    target: { value: 'Student.Name@student.pnm.edu.ph' },
+  });
+  fireEvent.change(screen.getByLabelText('Password', { exact: true }), {
+    target: { value: 'Synthetic-password-42!' },
+  });
+  fireEvent.change(screen.getByLabelText('Confirm password'), {
+    target: { value: 'Synthetic-password-42!' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+
+  expect(await screen.findByText(/lowercase institutional email/i)).toBeInTheDocument();
+  expect(actions.create).not.toHaveBeenCalled();
+});
+
+it('offers Google sign-in and delegates identity verification to the server session', async () => {
+  entrance();
+  fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
+  await waitFor(() => expect(actions.google).toHaveBeenCalledOnce());
 });
 
 it('offers recovery without an enumeration-sensitive success message', async () => {

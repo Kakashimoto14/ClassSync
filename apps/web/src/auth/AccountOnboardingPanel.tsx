@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 import { useUniversitySession } from './university-session-context';
@@ -9,7 +9,6 @@ import {
   accountError,
   type OnboardingStatus,
   observeAccountProfile,
-  updateAccountName,
   type AccountProfile,
 } from './account-actions';
 
@@ -48,15 +47,10 @@ function PendingAccount({
   const session = useUniversitySession();
   const [status, setStatus] = useState<OnboardingStatus | null>(null);
   const [studentId, setStudentId] = useState('');
-  const [name, setName] = useState(profile.name);
-  const [reviewing, setReviewing] = useState(false);
   const [token, setToken] = useState('');
   const [message, setMessage] = useState('');
+  const [studentIdError, setStudentIdError] = useState('');
   const [busy, setBusy] = useState(false);
-  const reviewHeading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (reviewing) reviewHeading.current?.focus();
-  }, [reviewing]);
   const signedIn = ['denied', 'verification-required'].includes(session.state.status);
   useEffect(() => {
     if (!signedIn) return;
@@ -99,28 +93,25 @@ function PendingAccount({
       setBusy(false);
     }
   };
-  const claim = (event: FormEvent) => {
+  const verifyStudent = (event: FormEvent) => {
     event.preventDefault();
-    if (busy || !status?.email_verified || status.claim_state || status.membership_state) return;
-    if (!studentId.trim() || !name.trim()) {
-      setMessage('Enter your name and student number to continue.');
+    if (busy || !status?.email_verified || status.membership_state) return;
+    if (!/^[0-9]{2}-[0-9]{5}$/.test(studentId.trim())) {
+      const error = 'Use the format 12-12345 for your student number.';
+      setStudentIdError(error);
+      setMessage(error);
       return;
     }
-    if (!reviewing) {
-      setReviewing(true);
-      setMessage('');
-      return;
-    }
+    setStudentIdError('');
     void action(async () => {
-      if (name.trim() !== profile.name) await updateAccountName(name, profile.uid);
       await accountRequest(
-        'student-claims',
+        'verify-student',
         'POST',
         { student_id: studentId.trim() },
         undefined,
         profile.uid,
       );
-    }, 'Your request is waiting for university verification.');
+    }, 'Student record verified. Refresh your account to continue.');
   };
   return (
     <section className="account-onboarding" aria-label="Set up university access" aria-busy={busy}>
@@ -172,63 +163,49 @@ function PendingAccount({
               Scan registration form
             </Link>
           )}
-          {entryRole !== 'teacher' && !status.claim_state && !status.membership_state && (
-            <form onSubmit={claim}>
-              {reviewing ? (
-                <>
-                  <h4 tabIndex={-1} ref={reviewHeading}>
-                    Review your student record claim
-                  </h4>
-                  <dl>
-                    <dt>Account name</dt>
-                    <dd>{name.trim()}</dd>
-                    <dt>Student number</dt>
-                    <dd>{studentId.trim()}</dd>
-                  </dl>
-                  <p>
-                    Your university verifies your academic record before you can access your
-                    schedule.
-                  </p>
-                  <Button type="submit" disabled={busy}>
-                    Request student access
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => setReviewing(false)}
-                  >
-                    Edit profile
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <h4>Complete your academic profile</h4>
-                  <label htmlFor="claim-account-name">Account name</label>
-                  <input
-                    id="claim-account-name"
-                    required
-                    maxLength={100}
-                    autoComplete="name"
-                    disabled={busy}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                  <label htmlFor="claim-student-id">Student number</label>
-                  <input
-                    id="claim-student-id"
-                    required
-                    maxLength={128}
-                    autoComplete="off"
-                    disabled={busy}
-                    value={studentId}
-                    onChange={(event) => setStudentId(event.target.value)}
-                  />
-                  <Button type="submit" disabled={busy}>
-                    Review student record
-                  </Button>
-                </>
+          {entryRole !== 'teacher' && !status.membership_state && (
+            <form noValidate onSubmit={verifyStudent}>
+              <h4>Verify your student record</h4>
+              <label htmlFor="claim-registered-email">Registered student email</label>
+              <input
+                id="claim-registered-email"
+                type="email"
+                readOnly
+                value={profile.email}
+                placeholder="juan.delacruz@student.pnm.edu.ph"
+                autoComplete="email"
+              />
+              <p className="entrance-hint">
+                This verified account email must match the address on your Registrar record.
+              </p>
+              <label htmlFor="claim-student-id">Student number</label>
+              <input
+                id="claim-student-id"
+                required
+                minLength={8}
+                maxLength={8}
+                pattern="[0-9]{2}-[0-9]{5}"
+                inputMode="numeric"
+                placeholder="12-12345"
+                autoComplete="off"
+                disabled={busy}
+                value={studentId}
+                aria-invalid={!!studentIdError}
+                aria-describedby={studentIdError ? 'student-number-error' : undefined}
+                onChange={(event) => {
+                  setStudentId(event.target.value);
+                  setStudentIdError('');
+                  setMessage('');
+                }}
+              />
+              {studentIdError && (
+                <p id="student-number-error" className="entrance-error">
+                  {studentIdError}
+                </p>
               )}
+              <Button type="submit" disabled={busy}>
+                {busy ? 'Checking record…' : 'Verify student record'}
+              </Button>
             </form>
           )}
           {status.claim_state === 'rejected' && (

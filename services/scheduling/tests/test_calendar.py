@@ -61,8 +61,9 @@ def test_idempotent_fixture_generation_calendar_and_draft_integrity(tmp_path):
         for e in snapshot.records
         if e.record.kind == "resources" and e.record.source == "cdm-provisional"
     ]
-    assert len(provisional) == 59
+    assert len(provisional) == 53
     assert all(r.capacity is None and not r.capacity_verified for r in provisional)
+    assert all("inventory designation only" in r.verification_note for r in provisional)
     checked = academic_readiness(snapshot)
     assert checked.ready and checked.inputs.synthetic
     assert checked.assigned_faculty == 2

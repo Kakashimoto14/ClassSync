@@ -30,6 +30,10 @@ jobs:
               --memory 1g --cpus 1 --cap-drop ALL --security-opt no-new-privileges:true \
               "$image" python -m scripts.linux_runtime_probe
           done
+          # Render's single-container mode installs all four APIs while the
+          # production Cloud Run images above remain isolated per service.
+          docker build --build-arg SERVICE=all -t "${prefix}-all:local" .
+          docker image inspect --format '{{.Id}}' "${prefix}-all:local"
           docker network create --internal "$network"
           for service in academic scheduling gateway; do
             docker run -d --name "${prefix}-${service}" --network "$network" \

@@ -84,7 +84,7 @@ responses in `{ "data": ... }`; the Scheduling service returns the typed object.
 | Method/path | Behavior |
 | --- | --- |
 | `GET /sandbox/scenario?infeasible=false` | Complete synthetic input; use `true` for the impossible variant |
-| `GET /sandbox/catalogs` | Nine-program catalog and 59 provisional CdM spaces |
+| `GET /sandbox/catalogs` | Nine-program catalog and 53 November 2026 row-classified CdM spaces; source designation is not operational verification |
 | `POST /sandbox/readiness` | Validate and normalize a `GenerationInput`; return diagnostics |
 | `POST /sandbox/generate` | Run the actual CP-SAT solver on the supplied full batch |
 | `POST /sandbox/validate` | Independently validate `{inputs, assignments}` |

@@ -6,18 +6,18 @@ security-rule change or production data write was performed.
 
 ## Executive status
 
-| Area | Result |
-| --- | --- |
-| LOCAL FRONTEND | PASS — canonical connected workspace and explicit production presentation artifact |
-| LOCAL BACKEND | PASS — real generation/independent validation/save/reopen and recovery |
-| FIREBASE INITIALIZATION | PASS locally; intended project initialization on Vercel BLOCKED/unverified |
-| FIRESTORE | BLOCKED — administrative metadata needs OAuth; no provisioning/rules claim |
-| VERCEL FRONTEND | FAIL for direct-route refresh; root and client navigation work |
-| PUBLIC TIMETABLE API | NOT DEPLOYED at configured public URL: actual timetable requests return 404 plain text |
-| PRODUCTION AUTHORIZATION | NOT CONFIGURED — preview role remains separate from verified server identity |
-| UX-06 INTERFACE | PASS locally, including separate read-only production build; not deployed |
-| DATABASE INTEGRITY | PASS — both SQLite checks, foreign keys, original checksums and publication counts |
-| DEPLOYMENT READY | PARTIALLY — reviewed read-only artifact staged; owner approval and Vercel settings verification required |
+| Area                     | Result                                                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| LOCAL FRONTEND           | PASS — canonical connected workspace and explicit production presentation artifact                       |
+| LOCAL BACKEND            | PASS — real generation/independent validation/save/reopen and recovery                                   |
+| FIREBASE INITIALIZATION  | PASS locally; intended project initialization on Vercel BLOCKED/unverified                               |
+| FIRESTORE                | BLOCKED — administrative metadata needs OAuth; no provisioning/rules claim                               |
+| VERCEL FRONTEND          | FAIL for direct-route refresh; root and client navigation work                                           |
+| PUBLIC TIMETABLE API     | NOT DEPLOYED at configured public URL: actual timetable requests return 404 plain text                   |
+| PRODUCTION AUTHORIZATION | NOT CONFIGURED — preview role remains separate from verified server identity                             |
+| UX-06 INTERFACE          | PASS locally, including separate read-only production build; not deployed                                |
+| DATABASE INTEGRITY       | PASS — both SQLite checks, foreign keys, original checksums and publication counts                       |
+| DEPLOYMENT READY         | PARTIALLY — reviewed read-only artifact staged; owner approval and Vercel settings verification required |
 
 ## Baseline and actual diagnosis
 
@@ -96,19 +96,19 @@ Details: [Firebase readiness](../infrastructure/firebase-readiness.md) and
 
 ## Implemented screen and workflow changes
 
-| Surface | Change and truthful boundary |
-| --- | --- |
-| Student Home | Retained next-class hierarchy, real next occurrence/no-class state, compact source/context, valid time/room and direct Schedule/Room actions; shortened synthetic faculty display names without changing IDs |
-| Teacher Home | Shared authoritative timetable context; readable instructor alias; pending request first, recent decisions disclosed, fixed demo source explicitly separate from selected faculty; no submission or approval simulation |
-| Administrator Home | Actual period/readiness/drafts/publication reads; requirements → generation → current validated draft review; at most three blockers; real scope counts and recent snapshot metadata; no fabricated unsaved result/published state |
-| Calendar/details/rooms | Shared context retained; explicit presentation badge; registered synthetic room destinations remain usable; availability receives the correct role and explicitly states that live occupancy is unavailable in presentation mode |
-| Scheduling | Existing OR-Tools path unchanged; default generation setup stays focused; sample import moved to dedicated Academic Setup → Sample Academic Scenario |
-| Conflict Center | Independent validator leads; loading differs from empty; timetable is secondary disclosure; conflict review opens the enclosing disclosure and focuses the assignment |
-| Saved Drafts | Neutral outlined reopen action, solver/source and actual stored-validation status; immutable content unchanged |
-| Academic Management | Dedicated deliberate sample setup only on setup root; ordinary management pages no longer repeat the import module |
-| Reports/utilization | Removed invented report bars and disabled fake filters; concise Coming soon with real timetable navigation |
-| Institutional rules | Existing planned governance screen retained; no fake policy editor. Enforced constraints remain in real readiness/generation/validator contracts |
-| Shared interactions | Neutral 44px disclosure rows/chevrons, recognizable underlined normal navigation, outlined ordinary actions, original primary/status/destructive semantics preserved |
+| Surface                | Change and truthful boundary                                                                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Student Home           | Retained next-class hierarchy, real next occurrence/no-class state, compact source/context, valid time/room and direct Schedule/Room actions; shortened synthetic faculty display names without changing IDs                       |
+| Teacher Home           | Shared authoritative timetable context; readable instructor alias; pending request first, recent decisions disclosed, fixed demo source explicitly separate from selected faculty; no submission or approval simulation            |
+| Administrator Home     | Actual period/readiness/drafts/publication reads; requirements → generation → current validated draft review; at most three blockers; real scope counts and recent snapshot metadata; no fabricated unsaved result/published state |
+| Calendar/details/rooms | Shared context retained; explicit presentation badge; registered synthetic room destinations remain usable; availability receives the correct role and explicitly states that live occupancy is unavailable in presentation mode   |
+| Scheduling             | Existing OR-Tools path unchanged; generation is labeled deterministic; sample import is separated under Academic Setup → Development Tools → Sample Academic Scenario                                                              |
+| Conflict Center        | Independent validator leads; loading differs from empty; timetable is secondary disclosure; conflict review opens the enclosing disclosure and focuses the assignment                                                              |
+| Saved Drafts           | Neutral outlined reopen action, solver/source and actual stored-validation status; immutable content unchanged                                                                                                                     |
+| Academic Management    | Dedicated deliberate sample setup only on setup root; ordinary management pages no longer repeat the import module                                                                                                                 |
+| Reports/utilization    | Removed invented report bars and disabled fake filters; concise Coming soon with real timetable navigation                                                                                                                         |
+| Institutional rules    | Existing planned governance screen retained; no fake policy editor. Enforced constraints remain in real readiness/generation/validator contracts                                                                                   |
+| Shared interactions    | Neutral 44px disclosure rows/chevrons, recognizable underlined normal navigation, outlined ordinary actions, original primary/status/destructive semantics preserved                                                               |
 
 The Admin homepage does not invent a cross-route unsaved candidate store or offer
 publication as a consequence of saving. Real generation results retain their existing
@@ -148,18 +148,18 @@ Relevant module overview pages were re-read: M2 p6, M3 p9, M6 p18, M7 p21,
 M11 p31, M12 p34. Existing project HCI reports supplied implementation context.
 No human-participant study or participant-derived performance claim was made.
 
-| Observed problem → HCI principle | Implemented correction | Verification |
-| --- | --- | --- |
-| Public API failure appeared to be a timetable fault → M3 mental models, Nielsen visibility/recovery | Distinct infrastructure diagnosis; explicit optional sample, no automatic fallback | Real public 404/plain-text evidence; local source/error tests |
-| Long synthetic IDs competed with next-class facts → M2 attention/recognition, M11 hierarchy | Readable display aliases with stable IDs and source details secondary | Both role Homes/details, 360–1440px |
-| Teacher request demo could look related to selected faculty → M3 source/status visibility | Separate demonstration source beside pending-first request list; explanation disclosure | Correct pending request detail route, no fake submission |
-| Admin promotional page did not answer what to do next → M6 task analysis, M7 information architecture | Readiness/revision-based primary action and real period context | Ready/current-draft and blocked period UI plus component tests |
-| Full timetable obscured conflict work → M2 attention, Nielsen minimalism | Validator first; timetable secondary; affected-assignment focus retained | Real independent validation and exact assignment navigation test |
-| Rouge summaries looked like errors → M3 signifiers, M11 color/affordance | Neutral disclosure rows, chevrons, outlines and underlined navigation | Rendered shared controls; 44px targets; contrast checks |
-| Repeated import configuration competed with management → M6 task simplification, M7 grouping | Dedicated reviewed setup route | No import on review; explicit backend import succeeds; generation link retains period |
-| Fake report charts implied operational statistics → Nielsen real-world match, feedback | Honest unavailable/Coming soon state and useful real link | No report bars, route screenshot |
-| Mobile class facts/actions could be hard to reach → M12 operability, user control | Existing shared padded sheet, keyboard trap, inert background and safe scroll retained | Tab/Shift+Tab, Escape, Close, restoration, short screen and reflow equivalent |
-| Wrong default role leaked into room availability → M3 consistency, error prevention | Pass role through shared availability page | Teacher/Admin regression tests and production presentation browser checks |
+| Observed problem → HCI principle                                                                      | Implemented correction                                                                  | Verification                                                                          |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Public API failure appeared to be a timetable fault → M3 mental models, Nielsen visibility/recovery   | Distinct infrastructure diagnosis; explicit optional sample, no automatic fallback      | Real public 404/plain-text evidence; local source/error tests                         |
+| Long synthetic IDs competed with next-class facts → M2 attention/recognition, M11 hierarchy           | Readable display aliases with stable IDs and source details secondary                   | Both role Homes/details, 360–1440px                                                   |
+| Teacher request demo could look related to selected faculty → M3 source/status visibility             | Separate demonstration source beside pending-first request list; explanation disclosure | Correct pending request detail route, no fake submission                              |
+| Admin promotional page did not answer what to do next → M6 task analysis, M7 information architecture | Readiness/revision-based primary action and real period context                         | Ready/current-draft and blocked period UI plus component tests                        |
+| Full timetable obscured conflict work → M2 attention, Nielsen minimalism                              | Validator first; timetable secondary; affected-assignment focus retained                | Real independent validation and exact assignment navigation test                      |
+| Rouge summaries looked like errors → M3 signifiers, M11 color/affordance                              | Neutral disclosure rows, chevrons, outlines and underlined navigation                   | Rendered shared controls; 44px targets; contrast checks                               |
+| Repeated import configuration competed with management → M6 task simplification, M7 grouping          | Dedicated reviewed setup route                                                          | No import on review; explicit backend import succeeds; generation link retains period |
+| Fake report charts implied operational statistics → Nielsen real-world match, feedback                | Honest unavailable/Coming soon state and useful real link                               | No report bars, route screenshot                                                      |
+| Mobile class facts/actions could be hard to reach → M12 operability, user control                     | Existing shared padded sheet, keyboard trap, inert background and safe scroll retained  | Tab/Shift+Tab, Escape, Close, restoration, short screen and reflow equivalent         |
+| Wrong default role leaked into room availability → M3 consistency, error prevention                   | Pass role through shared availability page                                              | Teacher/Admin regression tests and production presentation browser checks             |
 
 Focus and dialog checks passed at 360×800, 390×400, 720×450 and 1440×900.
 720×450 is a 200% reflow equivalent of 1440×900, not native browser toolbar zoom.
@@ -207,13 +207,13 @@ This phase does not claim a new public or local publication event.
 These are actual browser captures, not mockups. Dates/rooms are synthetic source data.
 Fixed navigation in full-page captures reflects the viewport at capture time.
 
-| Surface | Before | After |
-| --- | --- | --- |
-| Student mobile | [Before](screenshots/ux06/before-student-390.png) | [After](screenshots/ux06/after-student-home-390.png) |
-| Teacher mobile | [Before](screenshots/ux06/before-teacher-390.png) | [After](screenshots/ux06/after-teacher-home-390.png) |
-| Admin mobile | [Before](screenshots/ux06/before-administrator-390.png) | [After](screenshots/ux06/after-administrator-390.png) |
-| Admin desktop | [Before](screenshots/ux06/before-administrator-1440.png) | [After](screenshots/ux06/after-administrator-1440.png) |
-| Reports | [Before](screenshots/ux06/before-reports.png) | [After](screenshots/ux06/after-reports.png) |
+| Surface        | Before                                                   | After                                                  |
+| -------------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| Student mobile | [Before](screenshots/ux06/before-student-390.png)        | [After](screenshots/ux06/after-student-home-390.png)   |
+| Teacher mobile | [Before](screenshots/ux06/before-teacher-390.png)        | [After](screenshots/ux06/after-teacher-home-390.png)   |
+| Admin mobile   | [Before](screenshots/ux06/before-administrator-390.png)  | [After](screenshots/ux06/after-administrator-390.png)  |
+| Admin desktop  | [Before](screenshots/ux06/before-administrator-1440.png) | [After](screenshots/ux06/after-administrator-1440.png) |
+| Reports        | [Before](screenshots/ux06/before-reports.png)            | [After](screenshots/ux06/after-reports.png)            |
 
 [Shared mobile class details](screenshots/ux06/after-student-details-390.png),
 [desktop calendar](screenshots/ux06/after-calendar-1440.png),

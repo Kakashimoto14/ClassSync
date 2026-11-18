@@ -36,6 +36,7 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<ClassroomRequest['status'] | 'all'>('all');
   useEffect(() => {
     if (create) return;
     const controller = new AbortController();
@@ -89,14 +90,8 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
   };
   if (create) return <CreateClassroomRequest />;
   return (
-    <section className="workspace-card" aria-busy={busy}>
-      <h1>Classroom requests</h1>
-      <p>
-        {role === 'teacher'
-          ? 'Track requests for your published classes.'
-          : 'Review faculty requests. Classroom changes take effect only after validated publication.'}
-      </p>
-      <div className="draft-actions">
+    <section className="admin-requests" aria-busy={busy}>
+      <div className="admin-screen-actions admin-requests-actions">
         {role === 'teacher' && (
           <Link className="button" to="/teacher/change-requests/new">
             Request a classroom change
@@ -106,26 +101,32 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
           Reload requests
         </Button>
       </div>
+      {role === 'administrator' && (
+        <div className="admin-filter-pills" role="group" aria-label="Filter classroom requests">
+          {(['all', 'pending', 'approved', 'rejected', 'fulfilled'] as const).map((status) => {
+            const count = status === 'all' ? requests?.length ?? 0 : requests?.filter((item) => item.status === status).length ?? 0;
+            const label = status === 'all' ? 'All' : stateLabel[status];
+            return <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}>{label}<span>{count}</span></button>;
+          })}
+        </div>
+      )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
       {!requests && !error && <p role="status">Loading classroom requests…</p>}
-      {requests?.length === 0 && <p>No classroom requests yet.</p>}
-      {requests?.map((request) => (
-        <article className="workspace-card" key={request.id}>
-          <h2>
+      {requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
+      {requests?.length && !requests.filter((request) => statusFilter === 'all' || request.status === statusFilter).length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
+      {requests?.filter((request) => statusFilter === 'all' || request.status === statusFilter).map((request) => (
+        <article className="workspace-card admin-request-card" key={request.id}>
+          <header className="admin-request-card__header"><div><span className={`admin-request-status admin-request-status--${request.status}`}>{stateLabel[request.status]}</span><h2>
             {request.context.class.subject.code} · {request.context.class.subject.name}
-          </h2>
-          <p>
+          </h2></div><span className="admin-request-card__date">{request.context.class.date}</span></header>
+          <div className="admin-request-metadata"><span>
             {request.context.class.date} · {request.context.class.section.name}
-          </p>
-          <p>
+          </span><span>
             {request.context.class.room.name} → {request.context.proposed_room.name}
-          </p>
-          <p>
-            <strong>{stateLabel[request.status]}</strong>
-          </p>
-          <p>{request.reason}</p>
-          {request.decision_note && <p>Decision: {request.decision_note}</p>}
+          </span></div>
+          <p className="admin-request-card__reason">{request.reason}</p>
+          {request.decision_note && <p className="muted">Decision: {request.decision_note}</p>}
           {role === 'administrator' && request.status === 'pending' && (
             <div>
               <label htmlFor={`note-${request.id}`}>

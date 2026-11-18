@@ -3,11 +3,13 @@
 .env.*
 **/.env*
 .venv
+.venv-main-junction
 **/__pycache__
 **/node_modules
 **/dist
 **/.pytest_cache
 var
+docs/production/p4d-local
 docs
 *.pdf
 *.sqlite3*

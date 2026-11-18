@@ -32,15 +32,15 @@ beforeEach(() => {
 const profile = (uid: string) => ({
   uid,
   name: '',
-  email: 'student@synthetic.invalid',
+  email: 'juan.delacruz@student.pnm.edu.ph',
   emailVerified: true,
 });
 
-function panel() {
+function panel(refresh = vi.fn()) {
   return (
     <MemoryRouter>
       <UniversitySessionContext.Provider
-        value={{ available: true, state: { status: 'denied' }, refresh: vi.fn(), signOut: vi.fn() }}
+        value={{ available: true, state: { status: 'denied' }, refresh, signOut: vi.fn() }}
       >
         <AccountOnboardingPanel />
       </UniversitySessionContext.Provider>
@@ -57,6 +57,7 @@ it('clears student numbers and invitation codes when the Firebase account change
   });
   render(panel());
   await screen.findByLabelText('Student number');
+  expect(screen.getByLabelText('Student number')).toHaveAttribute('placeholder', '12-12345');
   fireEvent.change(screen.getByLabelText('Student number'), {
     target: { value: 'private-previous-number' },
   });
@@ -68,45 +69,78 @@ it('clears student numbers and invitation codes when the Firebase account change
   expect(screen.queryByLabelText('Student number')).not.toBeInTheDocument();
   act(() => next(profile('student-b')));
   await screen.findByLabelText('Student number');
+  expect(screen.getByLabelText('Student number')).toHaveAttribute('placeholder', '12-12345');
   expect(screen.getByLabelText('Student number')).toHaveValue('');
   expect(screen.getByLabelText('Invitation code')).toHaveValue('');
 });
 
-it('submits only a pending claim and announces confirmation from the server', async () => {
+it('checks student ID against the verified account email and refreshes current membership', async () => {
+  const refresh = vi.fn();
   source.observe.mockImplementation(async (listener) => {
     listener(profile('student-a'));
     return vi.fn();
   });
-  source.request.mockImplementation(async (_path, method) =>
-    method === 'POST'
-      ? { status: 'pending' }
-      : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' },
-  );
-  render(panel());
+  source.request.mockImplementation(async (_path, method) => method === 'POST'
+    ? { status: 'verified' }
+    : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' });
+  render(panel(refresh));
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), {
-    target: { value: 'synthetic-student' },
+    target: { value: '24-98096' },
   });
-  fireEvent.change(screen.getByLabelText('Account name'), {
-    target: { value: 'Synthetic Student' },
-  });
-  fireEvent.click(screen.getByRole('button', { name: 'Review student record' }));
-  expect(screen.getByRole('heading', { name: 'Review your student record claim' })).toHaveFocus();
-  expect(source.request.mock.calls.some(([, method]) => method === 'POST')).toBe(false);
-  fireEvent.click(screen.getByRole('button', { name: 'Request student access' }));
+  expect(screen.getByLabelText('Registered student email')).toHaveValue(
+    'juan.delacruz@student.pnm.edu.ph',
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
   await waitFor(() =>
     expect(source.request).toHaveBeenCalledWith(
-      'student-claims',
+      'verify-student',
       'POST',
       {
-        student_id: 'synthetic-student',
+        student_id: '24-98096',
       },
       undefined,
       'student-a',
     ),
   );
-  expect(source.updateName).toHaveBeenCalledWith('Synthetic Student', 'student-a');
   expect(
-    await screen.findByText('Your request is waiting for university verification.'),
+    await screen.findByText('Student record verified. Refresh your account to continue.'),
   ).toBeInTheDocument();
+  expect(source.updateName).not.toHaveBeenCalled();
+  expect(refresh).toHaveBeenCalledOnce();
+});
+
+it('shows the exact anti-enumeration Registrar error for a roster mismatch', async () => {
+  source.observe.mockImplementation(async (listener) => {
+    listener(profile('student-a'));
+    return vi.fn();
+  });
+  const registrarError =
+    'Unable to sign in wth Google. Use the email registered in your student record. If you need assistance, contact the Registrar';
+  source.request.mockImplementation(async (_path, method) => {
+    if (method === 'POST') throw new Error(registrarError);
+    return { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' };
+  });
+  render(panel());
+  await screen.findByLabelText('Student number');
+  fireEvent.change(screen.getByLabelText('Student number'), { target: { value: '24-98096' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
+  expect(await screen.findByText(registrarError)).toBeInTheDocument();
+});
+
+it('rejects malformed student IDs in the form before sending a roster lookup', async () => {
+  source.observe.mockImplementation(async (listener) => {
+    listener(profile('student-a'));
+    return vi.fn();
+  });
+  render(panel());
+  await screen.findByLabelText('Student number');
+  fireEvent.change(screen.getByLabelText('Student number'), { target: { value: 'student-a' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
+  expect(await screen.findByRole('status')).toHaveTextContent(/Use the format 12-12345/);
+  expect(screen.getByText(/Use the format 12-12345/, { selector: '#student-number-error' }))
+    .toBeInTheDocument();
+  expect(source.request).not.toHaveBeenCalledWith(
+    'verify-student', expect.anything(), expect.anything(), expect.anything(), expect.anything(),
+  );
 });

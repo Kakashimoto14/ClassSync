@@ -23,8 +23,15 @@ from sqlalchemy import text
 from sqlalchemy.engine import URL
 
 from scripts.postgres_disposable import checked_root, qualify
-from scripts.postgres_driver_qualification import engine_for, require
-from scripts.postgres_identity_qualification import exercise as identity_exercise
+from scripts.postgres_driver_qualification import current_migration_head, engine_for, require
+from scripts.postgres_identity_qualification import (
+    add_synthetic_faculty,
+    add_synthetic_student,
+    require_unique_student_bindings,
+)
+from scripts.postgres_identity_qualification import (
+    exercise as identity_exercise,
+)
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.scheduling.app.draft_rules import digest, encode, now
 from services.scheduling.tests.test_calendar import configuration
@@ -69,7 +76,7 @@ def exercise(connection, project, endpoint):
     try:
         with transaction(owner) as db:
             require(db.scalar(text("SELECT version_num FROM public.alembic_version"))
-                    == "0006_scheduling_drafts", "Scheduling provider migration scope drift")
+                    == current_migration_head(), "Scheduling provider migration scope drift")
             require(Path(db.scalar(text("SHOW data_directory"))).resolve() == root / "data",
                     "Scheduling provider target differs from owned marked cluster")
         with pytest.MonkeyPatch.context() as patch, emulator_firebase(
@@ -182,11 +189,25 @@ def exercise(connection, project, endpoint):
                 request(client, "GET", "/drafts", 401,
                         extra={"Authorization": "Bearer malformed"})
                 with transaction(owner) as db:
+                    student_record = "student-scheduling-provider"
+                    faculty_record = "faculty-scheduling-provider"
+                    person_record = "person-scheduling-provider"
+                    add_synthetic_student(
+                        db, tenant="tenant-a", person_id=person_record,
+                        student_id=student_record,
+                    )
+                    add_synthetic_faculty(
+                        db, tenant="tenant-a", person_id=person_record,
+                        faculty_id=faculty_record,
+                    )
+                    require_unique_student_bindings([
+                        ("uid-a", "student-a"), (student["localId"], student_record),
+                    ])
                     for identity, roles, person, student_id, faculty_id in (
                         (admin, ["administrator"], "person-other", None, None),
                         (other, ["administrator"], "person-other", None, None),
-                        (student, ["student"], "person-a", "student-a", None),
-                        (teacher, ["teacher"], "person-a", None, "faculty-a"),
+                        (student, ["student"], person_record, student_record, None),
+                        (teacher, ["teacher"], person_record, None, faculty_record),
                     ):
                         identity_context(db, tenant_id="tenant-a", uid=identity["localId"])
                         audit_actor(db, VerifiedPrincipal(uid="synthetic-operator"))

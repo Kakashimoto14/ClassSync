@@ -1,5 +1,17 @@
 # ClassSync — execution roadmap and dependency gates
 
+## 15 November 2026 — current product direction and implementation start
+
+The owner approved the audit/master implementation plan and directed local implementation
+to begin on `feature/auth-onboarding-saas`. PostgreSQL is the authoritative relational
+store for membership, academics, schedules and publication; Firebase Auth proves identity;
+Firestore is optional unless a verified rubric or later owner decision requires it. This
+supersedes the 10 November Firestore bridge directive. Start with authority-document
+reconciliation and current README maintenance, then follow the dependency-ordered tasks in
+[`docs/audit/MASTER_ROADMAP.md`](../audit/MASTER_ROADMAP.md). Preserve existing work and
+qualification evidence. No commit, push, merge, real-data import, original DB migration,
+hosted setting, spending, or deployment is authorized by this local implementation start.
+
 ## 4 November 2026 — functional MVP M1–M5
 
 Owner authorizes the local five-milestone implementation sequence in APPROVALS.md.
@@ -26,23 +38,24 @@ No cloud/Git/original-data authority is expanded.
 
 Status at harness creation is a historical snapshot, not a new repository audit. Continue only authorized work. Keep a requirement-to-test evidence matrix in `STATUS.md` or a linked file.
 
-| Phase | Definition of demonstrably done | Requires |
-|---|---|---|
-| P1 Modes/release boundaries | Presentation vs sandbox vs institutional resolver; no sandbox distributable builds; frontend API gating plus independent backend protection; compatibility matrix; artifacts/SPA tests; UI unchanged; original DB hashes preserved | Already approved local scope |
-| P2a Identity and membership contracts | Explicit contracts, tenant/record membership model, typed error states, auth/authorization tests using disposable adapters, no fake production identities | P1 pass + phase approval |
-| P2b PostgreSQL foundation | Local disposable PostgreSQL schema, relational constraints, migrations, test adapters, consistency and tenant isolation; pin versions from compatibility evidence | P2a + phase approval; no original-data cutover |
-| P3a Firebase Auth and actual authorization | Verified ID token, current DB-backed membership, authenticated lifecycle and denied access, staging/emulator negative-path tests | P2b and access/config approvals for any real external change |
-| P3b Full repository adaptation | Replace approved SQLite adapters with PostgreSQL adapters, deterministic migration rehearsal, checksums, indexes and rollback tests; live cutover separately gated | P3a; original DB remains intact absent cutover permission |
-| P4 Academic inputs/readiness | Periods, curriculum, offerings, faculty, rooms, availability, calendars and enrollment modeling; honest missing-info blockers and provenance; verified pilot scope required for live pilot | P3b; actual institutional data only with permission |
-| P5 Durable generation | Real ready-period → OR-Tools run → independently validated durable draft, across restart/session; robust unknown/infeasible states, deduplication, scaling benchmarks | P4 readiness and solver correctness |
-| P6 Review/approval | Admin edit/reassign/revalidate, optimistic revisions, scoped approval and conflict recovery, auditable change history | P5 |
-| P7 Atomic publish | Transactional head/version publication, immutable snapshots and role projections, idempotency, concurrent publish/revoke/stale-input tests, outbox | P3b + P6 |
-| P8 Connected experience | Real student/teacher calendars, administrator state, faculty requests, version-aware realtime and alerts; premium Soft Rouge responsive UI, accessibility, dark mode if approved | P7, policy decision for approvals/notifications |
-| P9 Infrastructure/qualification | Authorized staging, reproducible deploys, secrets, backups, restore, monitoring, audit/security/privacy/rate-limit/scale/accessibility and manual acceptance | Cloud/privacy/budget approvals |
-| P10 Supervised pilot | Real institutional identities and approved data, smoke/e2e for all three roles, release evidence, gradual cutover and rollback | P9 + institutional release authorization |
+| Phase                                      | Definition of demonstrably done                                                                                                                                                                                                    | Requires                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| P1 Modes/release boundaries                | Presentation vs sandbox vs institutional resolver; no sandbox distributable builds; frontend API gating plus independent backend protection; compatibility matrix; artifacts/SPA tests; UI unchanged; original DB hashes preserved | Already approved local scope                                 |
+| P2a Identity and membership contracts      | Explicit contracts, tenant/record membership model, typed error states, auth/authorization tests using disposable adapters, no fake production identities                                                                          | P1 pass + phase approval                                     |
+| P2b PostgreSQL foundation                  | Local disposable PostgreSQL schema, relational constraints, migrations, test adapters, consistency and tenant isolation; pin versions from compatibility evidence                                                                  | P2a + phase approval; no original-data cutover               |
+| P3a Firebase Auth and actual authorization | Verified ID token, current DB-backed membership, authenticated lifecycle and denied access, staging/emulator negative-path tests                                                                                                   | P2b and access/config approvals for any real external change |
+| P3b Full repository adaptation             | Replace approved SQLite adapters with PostgreSQL adapters, deterministic migration rehearsal, checksums, indexes and rollback tests; live cutover separately gated                                                                 | P3a; original DB remains intact absent cutover permission    |
+| P4 Academic inputs/readiness               | Periods, curriculum, offerings, faculty, rooms, availability, calendars and enrollment modeling; honest missing-info blockers and provenance; verified pilot scope required for live pilot                                         | P3b; actual institutional data only with permission          |
+| P5 Durable generation                      | Real ready-period → OR-Tools run → independently validated durable draft, across restart/session; robust unknown/infeasible states, deduplication, scaling benchmarks                                                              | P4 readiness and solver correctness                          |
+| P6 Review/approval                         | Admin edit/reassign/revalidate, optimistic revisions, scoped approval and conflict recovery, auditable change history                                                                                                              | P5                                                           |
+| P7 Atomic publish                          | Transactional head/version publication, immutable snapshots and role projections, idempotency, concurrent publish/revoke/stale-input tests, outbox                                                                                 | P3b + P6                                                     |
+| P8 Connected experience                    | Real student/teacher calendars, administrator state, faculty requests, version-aware realtime and alerts; premium Soft Rouge responsive UI, accessibility, dark mode if approved                                                   | P7, policy decision for approvals/notifications              |
+| P9 Infrastructure/qualification            | Authorized staging, reproducible deploys, secrets, backups, restore, monitoring, audit/security/privacy/rate-limit/scale/accessibility and manual acceptance                                                                       | Cloud/privacy/budget approvals                               |
+| P10 Supervised pilot                       | Real institutional identities and approved data, smoke/e2e for all three roles, release evidence, gradual cutover and rollback                                                                                                     | P9 + institutional release authorization                     |
 
 ## No skipped work rules
-- UI quality, privacy/security, tests, docs and error handling are *cross-cutting*, not deferred until P8/P9.
+
+- UI quality, privacy/security, tests, docs and error handling are _cross-cutting_, not deferred until P8/P9.
 - A partial phase is PARTIAL. A phase is PASS only when the acceptance criteria are proven by freshly run commands and real workflows (or labelled as awaiting unavailable external verification).
 - No `UNKNOWN` solver solution, unresolved critical security path, database inconsistency, false-authenticated identity or missing institutional approval may be reclassified as PASS.
 - If blocked by an external gate, work on an independent approved improvement or document the exact dependency; do not jump past the gate.
@@ -50,7 +63,6 @@ Status at harness creation is a historical snapshot, not a new repository audit.
 ## Verified local checkpoint — 26 October 2026
 
 P1, P2a and bounded local P2b passed with fresh code, actual isolated PostgreSQL/migration/RLS/audit/concurrency/restore/failure evidence, full relevant regressions and independent reviews. See STATUS and `docs/production/local-20261026/p2b-exit-gap-review.md` for exact results/limits. P3a local synthetic/emulator composition is next. No institutional policy, real accounts/data, live provider/configuration, original-data cutover or release approval follows from these local gates.
-
 
 ## Current local checkpoint — 27 October 2026
 
@@ -77,6 +89,24 @@ PLANNED; implementation follows the unfinished PostgreSQL publication repository
 
 Execute bounded screen-family slices alongside the dependency-ready authorized roadmap after the backend gate; this track does not waive P3b–P7 dependencies or grant institutional authority. Each slice requires real before/after screenshots, working actions and negative paths, independent review, relevant regression tests, 360/390/768/1024/1440 widths, keyboard/focus and native 200% zoom. Manual screen-reader checks remain unverified until performed. No fake data, statistics, alerts or decorative widgets.
 
+### Current Administrator entry-flow slice — 15 November 2026
+
+Implemented locally with the current Phase 1.3 academic-input work: no-period Academic Setup now
+shows its configuration map before selection; development mode and sample import are clearly
+separated; period-scoped categories are consolidated under one sidebar entry and remain searchable;
+generation is labeled as deterministic Schedule Generation; and Conflict Center empty states link
+to setup/generation. Source-level route inventory and screenshot findings are in
+[`docs/hci/admin-workspace-audit.md`](../hci/admin-workspace-audit.md). This is a partial
+implementation only. The two supplied screenshots predate these changes; no new rendered browser
+screenshots, responsive matrix, 200% zoom, manual keyboard, or screen-reader results are claimed.
+Audit/visual acceptance for remaining preview-only Admin screens is open.
+
+### Administrator dashboard command-center slice — 16 November 2026
+
+The owner approved and the feature worktree now implements the connected dashboard hierarchy in [AdminSchedulingHome](../../apps/web/src/pages/AdminSchedulingHome.tsx): inline period selection, period-scoped KPI links, a unified readiness card with typed issue destinations, and separate publication/draft snapshots. [AppShell](../../apps/web/src/components/layout/AppShell.tsx) now presents an Administrator-only route picker; Student and Teacher destination search remains unchanged. Scoped dashboard/shell styles keep responsive layout, focus indication, reduced-motion behavior, and a thinner sidebar scrollbar. README and the detailed [file-by-file implementation plan](../hci/admin-dashboard-command-center-plan.md) are synchronized.
+
+Focused UI regression is **49/49 across 5 files**; frontend typecheck, lint, and production build pass. The full web suite has three room/building presentation expectation failures against the already-updated room catalog (two expected-card-count mismatches and one missing Court link label); these remain open and were not altered in this dashboard slice. Browser screenshot, viewport/zoom rendering, manual assistive-technology, and real API/provider acceptance remain unverified because the local ports were not listening and Playwright is not installed in this worktree. This slice is implemented locally but not marked visual/production PASS.
+
 ## Historical P3b checkpoint — 29 October 2026 (superseded below)
 
 The PostgreSQL repository and 0008 rollback/reapply had actual disposable-PG acceptance. Institutional API composition and migration0009 route configured publication, calendar, period, availability and restriction operations through the PG repository and define current Student/Teacher record-level RLS projection; the synthetic sandbox stays unavailable. The verified-role route correction covers Student/Teacher/Administrator timetable routes in mocked HTTP composition tests (17 focused tests; 703 scheduling/persistence tests pass). Provider composition and migrations0009/0010 remain **IMPLEMENTED-UNVERIFIED** because Windows initdb/pg_ctl failed before startup while creating its restricted process token; the separately running local PostgreSQL service requires a password and is not the owned disposable cluster. Migration0010 now adds a separate append-only admin-scoped archive for legacy publication history; its generated SQLite fixture/import/rollback exercise is implemented but not executed. See the latest STATUS entry. P3b remains PARTIAL pending actual disposable-PG execution, archive backup/restore evidence, and remaining phase-exit checks. Preserve the UI/UX track above; do not claim screenshot verification or skip backend dependencies.
@@ -102,12 +132,12 @@ P4–P8 work or production authority follows automatically.
 
 Owner's current task names **P4a connected application recovery / P4b Student experience**; this bounded UI priority follows the P3b PASS above and takes precedence over older numbered planning labels for this session only. Authorization and one consumed serial-retry limit are in APPROVALS.md.
 
-| Milestone | Current evidence | Exit |
-|---|---|---|
-| P4a connected recovery | Actual Auth/current-PG/TCP Student journey including outage recovery, denied/revoked/unassigned, navigation/refresh/logout and native200; fixture setup pools released before service handoff; final patched Vite6.4.5 qualification | **PASS bounded local**; zero healthy503s; production/manual screen reader excluded |
-| P4b Student product experience | Soft Rouge Home, readable period/full title, UUID disclosure, compact Next Class/event hierarchy, actual scoped class-room action, all five widths and safe navigation | **PASS bounded local**; Teacher/Admin redesign deferred |
-| P4c Teacher | Compact teaching agenda, actual requests/decisions and role browser acceptance | PLANNED; not started |
-| P4d Administrator | Readiness/blocker and generate-review-approve-publish hierarchy; actual task and responsive browser acceptance | PLANNED; not started |
+| Milestone                      | Current evidence                                                                                                                                                                                                                     | Exit                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| P4a connected recovery         | Actual Auth/current-PG/TCP Student journey including outage recovery, denied/revoked/unassigned, navigation/refresh/logout and native200; fixture setup pools released before service handoff; final patched Vite6.4.5 qualification | **PASS bounded local**; zero healthy503s; production/manual screen reader excluded |
+| P4b Student product experience | Soft Rouge Home, readable period/full title, UUID disclosure, compact Next Class/event hierarchy, actual scoped class-room action, all five widths and safe navigation                                                               | **PASS bounded local**; Teacher/Admin redesign deferred                            |
+| P4c Teacher                    | Compact teaching agenda, actual requests/decisions and role browser acceptance                                                                                                                                                       | PLANNED; not started                                                               |
+| P4d Administrator              | Readiness/blocker and generate-review-approve-publish hierarchy; actual task and responsive browser acceptance                                                                                                                       | PARTIAL: local audit trail added; full connected lifecycle and accessibility gates remain blocked/unverified; see latest STATUS and P4D evidence |
 
 Current commands, truthful pass/failure counts, screenshot provenance, one independent review and requirement traceability: [P4_EVIDENCE.md](P4_EVIDENCE.md), [P4_ACCEPTANCE.md](P4_ACCEPTANCE.md), and latest STATUS entry. All original DB hashes and61 P3b backend/package hashes unchanged; all new owned services stopped. The initial one-retry stop remains historical. The owner subsequently reopened bounded stability recovery. Current P4a/P4b exit is **PASS**; see [P4_STABILITY_EVIDENCE.md](P4_STABILITY_EVIDENCE.md) and latest STATUS. **Stop at P4a/P4b; no P4c/P4d, infrastructure redesign or production authority.** Never substitute presentation data for a failed connected request.
 
@@ -138,6 +168,7 @@ Web test clock and Python module invocation corrections implemented. Focused6 pa
 Owner-confirmed green BSIT 3A priority correction and twelve-session isolated file staging COMPLETE; pink superseded,3B currency unconfirmed, NB107 separate/undated. See ../academic/review-20261031/README.md for current dataset/source register/missing information and STATUS for fresh checks. Contract validation/observed minutes/within-section overlaps VERIFIED; Registrar reconciliation, full scheduling acceptance and PG import BLOCKED on missing authorized inputs. STOP before institutional accounts/import/publication/deployment; CI repair gate remains separate and unchanged.
 
 ## Approved CI qualification outcome — 31 October2026
+
 WEB PASS754/46 in219.68s; web gates/security17/artifacts4/builds green. PYTHON PARTIAL934 pass/13 fail of947 in120.08s due runner's non-OS-temp basetemp; guards unchanged, no second full run. New local audit:4 pyasn1.6.4 advisories with.6.5 fix. minimatch remains separately BLOCKED; bounded assessment found no supported parent upgrade and no production dependency path. All70 hashes preserved. See latest CI_REPAIR_EVIDENCE.md appendix. Stop; next separately authorized work is compatible Python dependency remediation plus plain python-mpytest qualification; Node audit remains blocking until upstream support or explicit policy decision. No remote-green/commit/deployment claim.
 
 ## Cohort-aware curriculum and synthetic BSIT pilot — PASS locally, 3 November 2026
@@ -149,3 +180,57 @@ Implemented the versioned 39-source catalog, immutable entry-cohort bindings, st
 Administrator data capture, verification references, institutional readiness blockers, same-period ICS/IBE/ITE scope review, structured fixed assignments, and the BSIT Years 1–4 readiness report are complete. Final academic/scheduling regression: **395 passed**; focused Admin **11 passed**; typecheck/lint/build/Ruff and review-only source reconciliation passed. Migration `0013_synthetic_review_period_mode` keeps synthetic reviews isolated from institutional periods; final disposable PostgreSQL qualification passed with **54 independently validated sessions**, institutional synthetic-write denials, role/tenant/RLS/rollback checks, and synthetic-to-institutional publication denial. Evidence: [REAL_ACADEMIC_READINESS_EVIDENCE.md](REAL_ACADEMIC_READINESS_EVIDENCE.md), [BSIT readiness report](../academic/real-academic-readiness-20261103/BSIT_YEARS_1_TO_4_READINESS.md), and [PostgreSQL evidence](../production/real-academic-readiness-20261103/postgres-synthetic-mode-final.json).
 
 Real scheduling remains BLOCKED pending the Registrar-approved cohort/source/code/minute decisions, actual period/calendar, sections/populations/offerings, authentic faculty, verified rooms, effective NB 107 date, cross-institute commitment inventory, and supervised-pilot authority listed in the report. No institutional import, account provisioning, publication, deployment, commit or push. STOP at this milestone; Teacher/Admin visual redesign is out of scope.
+
+## Administrator workspace density and responsive repair — current slice
+
+Owner-approved continuation on `feature/auth-onboarding-saas`: fix the active topbar command-menu overlay; keep Academic Setup to a compact period workspace with one selected setup category; add selection-based status/category filters; reduce generation and conflict-center vertical bloat; compact classroom-request and notification rows; prevent status/action labels from breaking. Preserve API behavior and be explicit that Notifications are still demonstration-only. The current November 2026 room catalog has four grouped locations, so directory regression expectations must follow that source instead of the former three-group/59-space assumptions.
+
+Exit gates: verify current branch and preserve existing dirty changes; topbar is capped at 64px and command popover is absolutely positioned in the loaded stylesheet; active academic category switches and retains CRUD forms; role/API requests and publication semantics stay unchanged; responsive controls fit 360–1024 and desktop dimensions without forced word splitting; web typecheck, lint, build and full frontend tests pass; real browser rendering at target widths and keyboard/reduced-motion checks are recorded or marked UNVERIFIED. No backend, data, branch, provider or deployment changes.
+
+### Command-menu visual and build qualification follow-up — PASS local, 16 November 2026
+
+Owner-authorized follow-up corrected neutral/current/focus menu colors, two-column category layout with single-column links, scroll-bottom breathing room, consistent Firebase app imports, and Vite `react-vendor` / `firebase-vendor` / `ui-vendor` splitting. Real local Chrome/Playwright verified the topbar and all destination labels at 1366×768, 1440×900 and 1024×768, then verified Academic Setup, Schedule Generation, Conflict Center, Requests and Notifications at 1366×768 and 390×844 without horizontal overflow. `npm run lint`, `npm run typecheck`, `npm run test` (837/837, 62 files), `npm run build` and `git diff --check` pass. Bundle chunks are 319 kB, 243 kB, 47 kB and 321 kB; no Vite chunk-size or mixed Firebase import warning remains. Preview browser evidence is local UI only; connected provider/data, 200% zoom and assistive technology gates remain open. See latest `STATUS.md` for exact measurements.
+
+### P4d Administrator workflow completion — PARTIAL, 18 November 2026
+
+Local implementation and checks on `feature/auth-onboarding-saas` added PostgreSQL-backed, append-only redacted Administrator activity events for academic period/record/calendar changes, draft saves and publications; a tenant-scoped Administrator-only read endpoint and UI; and a disposable-PostgreSQL qualification mode. The complete fresh serial Python suite passes 1092 tests, web gates pass 838 tests, Ruff passes and the production build has no chunk-size/Firebase mixed-import warning. The activity-only PostgreSQL slice passed same-tenant Admin read, cross-tenant RLS denial and append-only checks (78 synthetic events). P4d is not complete: one current Python advisory remains (CVE-2026-126360 in opentelemetry-api 1.45.1; compatible fixed version 1.45.2 is constrained but could not be installed after the approval service usage limit), complete academic PostgreSQL qualification later fails its readiness fixture contract, the pinned Auth Emulator harness cannot start, and no connected browser, native 200% zoom or keyboard-only end-to-end evidence exists. Exact outputs, paths, and limits are in the latest `STATUS.md` entry and `docs/autonomy/P4D_ADMIN_ACCEPTANCE.md`.
+
+18 November continuation diagnosed that assertion as a harness mismatch: the SQLite `complete()` fixture is ready only as `development-entered`, while PostgreSQL creates `institutional` periods and correctly requires verification references. Added a regression characterization and changed the qualification to require the exact institutional blockers; full suite is now **1093 passed**. This corrected full PostgreSQL qualification remains unverified because the non-elevated Windows `pg_ctl` startup fails before the assertion with restricted-token error 87. The worktree `.venv` is a junction to the main worktree's environment, so dependency installation there is not safe. Independent review found no critical RLS/authorization defect; five medium/low audit privacy/retention/order/pagination/actor-display concerns are recorded in P4D acceptance and must be decided before production. Other dependency scan, Auth Emulator, connected browser and 200%/keyboard gates remain open.
+
+### P4d continuation — 18 November 2026
+
+The readiness-fixture mismatch correction is covered by a regression test and the full Python suite (1093 passed); frontend lint, typecheck, 838 tests and production build pass, and Ruff is clean. No vulnerability-free claim is made: the installed OpenTelemetry advisory could not be remediated in the shared `.venv`, and a fresh scan is pending. The corrected full disposable PostgreSQL qualification is blocked before test execution by Windows `pg_ctl` restricted-token error 87. A separate presentation preview confirms shell dimensions and keyboard menu/drawer behavior only; most target routes rendered a preview gate, so actual Admin screen acceptance is still open. Native 200% zoom was not measured. P4d remains PARTIAL pending isolated dependency/PG qualification, Auth Emulator tools, connected create-to-publish browser journey, workspace zoom/accessibility checks, and audit-history privacy/retention decisions.
+
+### External environment handoff — verification result, 18 November 2026
+
+The claimed setup was not visible to the current feature worktree: `.venv` remained a junction to the main environment, pip-audit was absent, no system Python 3.12 was registered, and the pinned Auth Emulator runner exited before starting. The repository pins the emulator toolchain rather than accepting `firebase-tools@latest`. No setup, PostgreSQL or connected E2E PASS is recorded. Continue only after the isolated Python 3.12, pinned tools, and disposable qualification receipts are available.
+
+### PostgreSQL qualification-script synchronization — IMPLEMENTED, awaiting disposable qualification, 18 November 2026
+
+The environment statement immediately above is superseded by the latest STATUS addendum: the
+feature worktree now contains Python 3.12.10 and the pinned Auth Emulator package versions in an
+isolated temp root. Five qualification defects were corrected: non-BYPASSRLS migration-owner use
+in the academic-period qualification; exact current provisional-catalog assertion without inferred
+capacity; migration ordering/current-head alignment before `period_metadata.data_mode` writes;
+unique synthetic account-to-student records across emulator/provider fixtures; and dynamic current
+Alembic-head checking in the scheduling provider qualification. Focused regression tests pass 11/11,
+Ruff passes, pip check is clean and Web tests pass 838/838. The serial Python suite still has two
+solver-dependent failures (the existing 8-second multi-program `unknown` and a draft test dependent
+on complete solver output); neither was altered. The sandbox's strict pip-audit invocation was
+blocked from reaching PyPI, while the owner reports a clean external scan that is still awaiting its
+receipt. Next task: owner reruns the five corrected disposable PostgreSQL qualifications and Auth
+Emulator qualification in normal PowerShell; then attach receipts and continue connected P4d E2E.
+Do not mark P4d complete from unit tests alone.
+
+### Local feature continuation — active; external qualification deferred, 18 November 2026
+
+Owner direction supersedes earlier manual-receipt prerequisites for local feature development:
+do not block on external PowerShell qualification receipts, disposable PostgreSQL `pg_ctl` runs,
+or isolated `pip-audit` tool environments. These remain CI/pre-release gates. Current fast local
+gates are fresh: full Python 1115 passed, Web 843 passed across 63 files, Web lint/typecheck/build
+pass, Ruff passes. Student ID and lowercase institutional email validation now lead to an exact,
+active Registrar roster match at Gateway; no roster import or migration was executed. Continue with
+small authorized application features and their in-process tests, while keeping PostgreSQL/RLS,
+dependency scan, Auth Emulator, connected lifecycle E2E, native 200% and keyboard gates explicitly
+open. Do not commit, switch branches or merge until the entire dirty diff and target worktree are
+reviewed and staging paths are grouped safely.

@@ -331,6 +331,7 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     subject_name=subject.name,
                     subject_code=subject.code,
                     section_id=section.id,
+                    activity_type=offering.activity_type,
                     eligible_teacher_ids=offering.teacher_ids,
                     eligible_room_ids=offering.room_ids,
                     required_weekly_minutes=minutes,

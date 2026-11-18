@@ -212,6 +212,15 @@ def test_cors_rejects_non_origin_and_wildcard_configuration(origin):
         main.Settings(_env_file=None, cors_origins=[origin])
 
 
+def test_cors_allowed_origins_environment_name_is_supported(monkeypatch):
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    monkeypatch.setenv(
+        "CORS_ALLOWED_ORIGINS", '["https://class-sync-bhiv.vercel.app"]'
+    )
+    settings = main.Settings(_env_file=None)
+    assert settings.cors_origins == ["https://class-sync-bhiv.vercel.app"]
+
+
 def test_coursework_openapi_has_all_verbs_and_validated_inputs():
     schema = main.app.openapi()
     assert set(schema["paths"]["/api/v1/coursework/preferences"]) == {

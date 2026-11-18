@@ -13,11 +13,13 @@ Degree sections use structured program ID, year level, and section letters with
 stable IDs independent of labels. No universal program length or section count is
 assumed. TCP uses a custom label policy pending an approved institutional format.
 
-The owner also supplies the 59-space provisional CdM inventory and explicit floor
-assignments. See [inventory provenance](../cdm-room-inventory.md). PRRC 304–306 do
-not exist in this dataset. PRRC 302's VGA label remains unconfirmed. Laboratory
-aliases do not verify equipment or capacity. Court and Function Hall are not
-automatically eligible classrooms. Legacy fictional campus records remain separate.
+The owner supplied an updated November 2026 CdM inventory with 53 physical spaces,
+41 row-designated schedulable and 12 excluded; the source summary still conflicts
+(37/16). See [current inventory provenance](../audit/ROOM_INVENTORY_UPDATE.md). The
+activity restrictions are encoded, but source designation does not verify operation,
+current availability, capacity, equipment, or room-type suitability. Backend readiness
+requires verified operational condition and room type. Legacy fictional campus records
+remain a separate dataset.
 
 ## Proposed configurable scheduling defaults
 

@@ -1,5 +1,307 @@
 # ClassSync — autonomy status ledger
 
+## 15 November 2026 14:29 SGT — Administrator task-flow and screen audit
+
+Base/current HEAD remains `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
+`feature/auth-onboarding-saas`; preserved the prior dirty worktree. Reviewed the two supplied
+screenshots as evidence of `/admin/academic` and `/admin/offerings` before period selection,
+then cross-referenced the Administrator route registry and page dispatch. Added
+`docs/hci/admin-workspace-audit.md` with a screen-family inventory, source evidence, screenshot
+findings, statuses and open verification gates.
+
+Implemented a bounded Admin UX slice: the no-period Academic Setup entry describes all setup
+areas before period selection, opens period creation directly when no period exists, keeps the
+sandbox/data qualification visible, and moves synthetic scenario import below the primary setup
+flow. Period-scoped academic categories now use one sidebar entry while remaining available from
+the workspace and destination search. Renamed the deterministic CP-SAT screen to Schedule
+Generation; conflict validation now explicitly identifies itself as deterministic, and its empty
+state and the generation no-period state link to their next actions. Added a no-period readiness
+outline to the Administrator dashboard. Updated `README.md`, `docs/audit/MASTER_ROADMAP.md`,
+`docs/autonomy/ROADMAP.md`, and `TRACEABILITY.md`.
+
+Fresh checks:
+
+- `npm run test --workspace=@classync/web -- src/pages/AcademicManagementPage.test.tsx
+src/pages/ConflictCenterPage.test.tsx src/components/layout/AppShell.test.tsx` — **31 passed
+  across 3 files**.
+- `npm run typecheck --workspace=@classync/web` — PASS.
+- `npm run lint --workspace=@classync/web` — PASS.
+- `npm run build --workspace=@classync/web` — PASS; Vite retained the existing Firebase mixed
+  static/dynamic import warning and emitted a 713.55 kB minified chunk warning (>500 kB).
+- Targeted Prettier check — PASS; `git diff --check` — PASS.
+
+The first test run exposed one stale test expectation about period auto-selection; corrected it to
+assert the intentional explicit-choice state. The second run passed. No browser automation was
+available: rendered before/after screenshots, 360/390/768/1024/1440 widths, keyboard walkthrough,
+200% zoom and screen-reader checks remain UNVERIFIED. Institutional providers/data, Admin
+preview-only routes and production operation remain unqualified. No backend, database, external
+provider, cloud, production data, main worktree or Git publication changed. Phase 1.3 and the Admin
+UX recovery remain PARTIAL.
+
+## 15 November 2026 04:53 SGT — catalog-backed program selection
+
+Continued Phase 1.3 on the same feature worktree and unchanged HEAD
+(`7165fa130e413f8dc8893b85d30ecbe530ef8173`); all existing dirty files remain preserved.
+New program records now select from the shared supplied catalog
+`packages/api-contracts/classync_contracts/catalogs/programs.json` through the frontend
+adapter `apps/web/src/data/academic-program-catalog.ts`. Program acronyms, names, institutes
+and section policy are populated from the selected entry rather than typed. Entries already
+present in the selected academic period are excluded from new-record choices. Existing
+non-catalog records retain their current editable fields to avoid stranding legacy data.
+The UI clearly says the local list is supplied data that still needs Registrar confirmation;
+catalog selection alone does not claim that a program is active this term.
+New-program creation is disabled when every supplied catalog entry is already saved.
+Subtle inline-form and selection transitions are implemented in CSS and are enabled only
+when `prefers-reduced-motion: no-preference`.
+
+The combined Admin input checks were rerun after this change:
+
+- `npm run test:web -- src/pages/AcademicManagementPage.test.tsx
+src/pages/LockedAssignmentsEditor.test.tsx` — **17 passed across 2 files**. Covers the
+  one-workspace period overview, duplicate-free catalog program menu and completed-catalog
+  guard, section selectors,
+  day-checkbox window mapping, blank window defaults, 30-minute time menu and fixed
+  assignment duration filtering.
+- `npm run typecheck --workspace=@classync/web` — PASS.
+- `npm run lint --workspace=@classync/web` — PASS.
+- `npm run build --workspace=@classync/web` — PASS; known Firebase mixed-import warning
+  remains and the largest minified chunk is 710.86 kB (above 500 kB).
+- Targeted Prettier checks on the test files and README — PASS; `git diff --check` — PASS.
+
+No backend/API contract, academic database, schedule solver, production data, cloud setting,
+or Git publication changed. Browser screenshots, responsive widths, native 200% zoom and
+manual assistive-technology checks remain UNVERIFIED due unavailable browser automation.
+Phase 1.3 remains PARTIAL; continue with structured selectors in the broader scheduling
+generation/review surfaces and obtain rendered browser acceptance when tooling is available.
+README, the Phase 1.3 roadmap progress, and requirements traceability were synchronized.
+
+## 15 November 2026 04:47 SGT — structured scheduling time and day entry
+
+Base/current HEAD: `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
+`feature/auth-onboarding-saas`. Preserved the existing dirty work. Continued Phase 1.3 by
+changing the shared Admin `WeeklyWindows` control in `AcademicRecordEditor.tsx`: each
+window begins with no days or times selected; operators select one or more weekdays using
+checkboxes and choose start/end from 30-minute menus. Only complete, explicitly selected
+windows enter the academic record. This shared control serves faculty availability,
+resource availability/blocked windows and operating hours. The copy states these controls
+do not establish approved campus hours.
+
+Updated `LockedAssignmentsEditor.tsx` to use a start-time menu and restrict end-time choices
+to durations present in the selected offering's saved subject pattern. Day, offering,
+eligible faculty and eligible room remain menu-selected. No scheduling contract, solver
+constraint or persisted schema changed. Added focused acceptance tests for blank window
+defaults, multi-day mapping, 30-minute choices and offering-pattern end-time constraints.
+Updated GitHub `README.md`, `MASTER_ROADMAP.md` and `TRACEABILITY.md`.
+
+Fresh local verification:
+
+- `npm run test:web -- src/pages/AcademicManagementPage.test.tsx` — **14 passed**.
+- `npm run test:web -- src/pages/LockedAssignmentsEditor.test.tsx` — **1 passed**.
+- `npm run typecheck --workspace=@classync/web` — PASS.
+- `npm run lint --workspace=@classync/web` — PASS.
+- `npm run build --workspace=@classync/web` — PASS; the existing mixed Firebase import
+  warning remains and the largest minified chunk is 708.44 kB (over Vite's 500 kB advisory).
+- `npx prettier --check apps/web/src/pages/AcademicManagementPage.test.tsx
+apps/web/src/pages/LockedAssignmentsEditor.test.tsx README.md` — PASS.
+- `git diff --check` — PASS.
+
+The initial acceptance run failed before implementation because the expected day checkboxes
+did not yet exist; final focused suites passed after implementation. Browser visual/responsive
+and manual accessibility checks remain UNVERIFIED because available browser automation did
+not initialize in the prior slice. These are form-component tests using isolated synthetic
+academic data, not an institutional service or Registrar acceptance. No API/backend,
+database, migration, saved record, provider configuration, cloud setting, production data,
+or Git publication was touched. Phase 1.3 remains PARTIAL. Next dependency-ready work:
+continue selection-first coverage across the Administrator schedule generation/review
+surfaces, then complete rendered keyboard/responsive QA when browser tooling is available.
+
+## 15 November 2026 04:30 SGT — Administrator academic-period setup workspace
+
+Base/current HEAD: `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
+`feature/auth-onboarding-saas`; local changes remain uncommitted and all pre-existing
+dirty work is preserved. Implemented the bounded Phase 1.3 slice: the `/admin/academic`
+period overview now keeps the calendar and seven academic input categories in one
+workspace, supports inline record create/edit, quick-jump links, first-record summaries,
+saved-record counts, and links to complete category lists. Counts explicitly do not assert
+source accuracy or scheduling readiness. Existing category routes and the separate
+**Validate Readiness** action remain available. Section year and letter use fixed menus.
+Added responsive Soft Rouge layout rules and documented the workflow in `README.md`.
+
+Fresh local checks:
+
+- `npm run test:web -- src/pages/AcademicManagementPage.test.tsx` — **14 passed, 1 file**;
+  covers one-screen setup, inline subject form, catalog-derived room/activity selection,
+  fixed section menus, period creation and readiness behavior.
+- `npm run typecheck --workspace=@classync/web` — PASS.
+- `npm run lint --workspace=@classync/web` — PASS.
+- `npm run build --workspace=@classync/web` — PASS. Existing warning persists: Firebase is
+  both statically and dynamically imported, and the largest minified chunk is 706.71 kB
+  (above the 500 kB advisory threshold).
+- `npx prettier --check apps/web/src/pages/AcademicPeriodSetup.tsx
+apps/web/src/pages/AcademicManagementPage.test.tsx README.md` — PASS. New CSS keeps
+  the file's existing compact style rather than reformatting its unrelated baseline rules.
+- `git diff --check` — PASS.
+
+The first typecheck/build attempt caught two local TypeScript issues in this slice; they
+were corrected and all final checks above were rerun successfully. Browser visual checks
+were not completed: no Playwright package/browser plugin was available, and the CUA
+browser initialization failed because its kernel assets path was missing. Thus rendered
+responsive behavior, keyboard/focus movement and 200% zoom remain UNVERIFIED. No API,
+database, provider, migration, institutional record, original DB, `main` worktree or cloud
+setting was changed. This does not complete Phase 1.3 or certify the Admin product flow;
+full browser QA and structured schedule-level inputs remain open. See the matching
+`TRACEABILITY.md` row. Next: continue the same phase with selection-first scheduling forms
+and a real browser acceptance pass when browser tooling is available.
+
+## 15 November 2026 03:33 SGT — Scheduling import startup failure
+
+Reproduced the import-resolution cause from the user's startup log. The worktree `.venv`
+has an editable `classync-api-contracts` finder targeting
+`C:\Projects\ClassSync\packages\api-contracts` (the separate primary checkout), where
+`classync_contracts/cloud_run.py` does not exist. The feature worktree's file does exist.
+The local launcher previously inherited that stale editable mapping, so Academic could
+start while Scheduling failed on `from classync_contracts.cloud_run import service_headers`.
+
+Updated `scripts/dev.py` to put this worktree's `packages/api-contracts`,
+`packages/persistence`, and root ahead of inherited `PYTHONPATH` for all child services.
+Updated `README.md` with the launcher/manual-Uvicorn explanation. Verification with an
+explicit path containing both the feature package and the stale primary-checkout path
+successfully imported `classync_contracts.cloud_run` from
+`C:\Projects\ClassSync\var\feature-auth-onboarding-saas\packages\api-contracts\classync_contracts\cloud_run.py`
+and `services.scheduling.app.main` from this feature worktree. Targeted Ruff, README
+Prettier, and `git diff --check` passed. No service was launched against default local
+databases; the startup import failure is resolved at the same module import boundary,
+but a complete local three-service/browser launch has not been requalified here. No
+package reinstall, database mutation, production configuration or cloud change occurred.
+
+If manually launching Uvicorn, set `PYTHONPATH` to the active worktree's
+`packages/api-contracts`, `packages/persistence`, and repository root first. The
+supported one-command `npm run dev` launcher now does that automatically.
+
+## 15 November 2026 03:05 SGT — CdM room catalog implementation
+
+Base/current HEAD: `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
+`feature/auth-onboarding-saas`; implementation is uncommitted and `main` is untouched.
+Preserved all prior dirty work, including the seven-document audit set. Updated the
+GitHub README to report the implemented catalog and local evidence without claiming
+Facilities verification.
+
+Implemented the November 2026 row-mapped catalog in
+`packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json`, versioned it in
+`apps/web/src/data/cdm-room-inventory.ts`, and extended
+`packages/api-contracts/classync_contracts/{scheduling,academic}.py` plus generated
+`packages/api-contracts/schemas/scheduling-v1.json` and
+`packages/shared-types/src/scheduling.ts` with allowlisted room activity types. Updated
+`services/academic/app/record_rules.py`, `services/scheduling/app/academic_input.py`, and
+`services/scheduling/app/readiness.py`: canonical identity includes restrictions and
+schedulability, offerings pass activity type through, and restricted rooms fail solver
+readiness until both operational condition and room-type verification are recorded.
+`apps/web/src/pages/AcademicRecordEditor.tsx` now provides structured room-type/activity
+selectors and filters offering room choices by source schedulability, activity and
+program; it labels unverified candidates and explains that selection is not availability.
+Inventory consumers and fixtures/tests were updated, including
+`apps/web/src/pages/AcademicManagementPage.test.tsx` selection coverage.
+
+Acceptance evidence (all fresh in this worktree):
+
+- `npm run test:web -- src/data/cdm-room-inventory.test.ts src/pages/StudentRooms.test.tsx src/pages/RoomNavigation.test.tsx src/pages/dashboards/OperationsDashboards.test.tsx` — **54 passed, 4 files**.
+- `npm run test:web -- src/pages/AcademicManagementPage.test.tsx` — **12 passed, 1 file**, including activity/program/schedulability filtering and excluded-room rejection.
+- With `PYTHONPATH` explicitly rooted at this worktree's `packages/api-contracts`, `packages/persistence`, and root: `python -m pytest services/scheduling/tests/test_engine.py::test_cdm_inventory_and_program_policy services/scheduling/tests/test_engine.py::test_restricted_inventory_rooms_require_matching_activity_and_verified_type services/academic/tests/test_academic.py::test_catalog_and_empty_readiness_and_restart services/scheduling/tests/test_api.py -q` — **14 passed**. One existing Starlette/httpx TestClient deprecation warning.
+- `npm run typecheck --workspace=@classync/web` — PASS; `npm run lint --workspace=@classync/web` — PASS; targeted `ruff check` on changed Python modules/tests — PASS; `npm run build --workspace=@classync/web` — PASS with the existing Firebase dynamic/static import warning and a minified 701.26 kB chunk warning; Prettier checks on README, the audit directory, changed short docs and the inventory/editor test files — PASS; `git diff --check` — PASS.
+
+During verification an initial test exposed strict Pydantic enum parsing at internal Python
+construction boundaries. Valid allowlisted activity strings now normalize to enum values;
+unknown values remain rejected by the enum validator. A selector test was added, stale
+room-number expectations corrected, and checks rerun successfully. This was focused
+catalog/readiness/API verification only: no full suite, browser rendering, live service,
+hosted provider, Facilities source reconciliation, migration, or dependency scan ran.
+The DOCX still has the 37/16 summary vs. 41/12 row discrepancy, visual rendering remains
+unavailable, and capacities/equipment/current availability remain unknown. The known
+8-second CP-SAT `UNKNOWN` failure is still an open gate and was not rerun unchanged.
+No database or real institutional data was accessed or modified; no Git publication,
+cloud setting, spending, migration, merge, or deployment occurred.
+
+Next: review `docs/audit/ROOM_INVENTORY_UPDATE.md` against the DOCX row text and preserve
+the Facilities verification gate; then continue dependency-ready work without altering
+the solver's constraints/time limit. Student roster verification forms and ID/email
+validation remain unimplemented and are not implied by the README examples. The signup
+email and Student claim ID fields now show the requested examples as placeholders only;
+8 account/onboarding tests assert them. No regex enforcement or roster match was added.
+The post-change production build completed with the Firebase import/chunking warning and
+701.26 kB chunk warning still present. A broad Prettier check also reported seven
+long-form docs with noncanonical formatting; the changed README/audit/core short docs
+and targeted inventory/editor test files passed bounded formatting checks. Large
+historical documents were not reformatted solely to silence that broad check.
+
+## 15 November 2026 — authority reconciliation and GitHub README
+
+Base/current source SHA: `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
+`feature/auth-onboarding-saas`; no source revision occurred. Completed roadmap task 0.1
+and the owner's README maintenance request. Updated `README.md`, `docs/architecture.md`,
+`docs/production/firestore-authority.md`, `docs/autonomy/APPROVALS.md`,
+`docs/autonomy/ROADMAP.md`, and `docs/autonomy/TRACEABILITY.md`. The current authority is
+PostgreSQL for identity membership, academic data, schedules and publication; Firebase
+Auth proves identity; Firestore is optional unless a verified rubric or later owner
+decision requires it. The old Firestore proposal and qualification receipts are retained
+as explicitly superseded/historical evidence.
+
+Acceptance: the README reports the stack and readiness without claiming production
+qualification, links the audit and updated inventory, and states the student form examples;
+architecture/authority/traceability/approval records agree; no app behavior, DB or provider
+settings changed. Verification: Prettier write/check on `README.md` and
+`docs/architecture.md` PASS; README local-link script PASS (15 links); current-authority
+source review PASS; `git diff --check` on changed tracked docs PASS (line-ending notices
+only). No application tests were applicable to this documentation milestone. Dirty audit
+documents from the preceding approved plan were preserved. No external changes, real data,
+original database writes, Git publication or deployment occurred.
+
+Next: diagnose the existing CP-SAT `UNKNOWN` regression from retained inputs/model/test
+evidence. Do not rerun the failing test unchanged or alter its 8-second limit/constraints.
+
+## 15 November 2026 — room inventory and student input-plan revision
+
+Target remains `feature/auth-onboarding-saas` at `7165fa130e413f8dc8893b85d30ecbe530ef8173`; `main` and application source were not changed. Revised the audit set under `docs/audit/` and consolidated `MASTER_IMPLEMENTATION_PLAN.md` / `MASTER_ROADMAP.md` for the uploaded November 2026 room inventory and owner-confirmed student ID/email formats. Added `ROOM_INVENTORY_UPDATE.md` with row-to-ID mapping.
+
+DOCX table text was extracted from the supplied attachment; LibreOffice was unavailable, so visual rendering was not completed. Followed the individual room rows per owner direction: 53 physical spaces, 41 schedulable and 12 excluded (PRRC 27 / 18 / 9; New Building 24 / 21 / 3; Court/Oval 2 / 2 / 0). Preserved the DOCX aggregate discrepancy (37/16), recorded absent capacities/equipment/availability, and classified special-use rooms by activity. Added ID pattern `^[0-9]{2}-[0-9]{5}$` and lowercase dotted-name student email at exact `student.pnm.edu.ph`; formatting is not identity proof, and active roster/email match remains required. The clean restrained UX, accessible motion evaluation, and hard $0/month launch block are now consistent across documents.
+
+Documentation-only revision. Updated `PROJECT_STATUS.md`, `FUNCTIONALITY_AUDIT.md`, `BUGS_AND_ISSUES.md`, `SECURITY_AUDIT.md`, `MASTER_ROADMAP.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `TESTING_STRATEGY.md`, `DEFINITION_OF_DONE.md`, and `ROOM_INVENTORY_UPDATE.md`; appended this evidence. No application source, migration, database, provider, real-data, or `main` worktree change. Existing focused test/build evidence was not rerun or represented as new evidence; the scheduling UNKNOWN failure and unverified provider/release gates remain open. Validation: `node_modules/.bin/prettier --check docs/audit` PASS; `git diff --check -- docs/autonomy/STATUS.md` PASS (Git emitted only a working-copy LF-to-CRLF notice). No application tests were required for this plan-documentation revision. Next: owner review of the consolidated plan, then only dependency-ready authorized local roadmap work.
+
+## 15 November 2026 — static audit and master implementation plan
+
+Target: `feature/auth-onboarding-saas`, baseline/current HEAD
+`7165fa130e413f8dc8893b85d30ecbe530ef8173`; clean at audit start. The separate `main`
+worktree was not modified. Added the seven audit/acceptance documents and consolidated
+`docs/audit/MASTER_IMPLEMENTATION_PLAN.md` / `MASTER_ROADMAP.md`. These are planning
+deliverables only; application source, migrations, provider settings and real data were
+not changed.
+
+Fresh focused checks on this exact commit:
+
+- Frontend auth/routes/schedule/calendar: 6 files, 55 tests PASS.
+- Gateway onboarding/token/provider lifecycle plus Scheduling engine:
+  67 PASS, 1 FAIL, 1 Starlette TestClient deprecation warning. The existing
+  `test_complete_multi_program_batch_and_independent_minutes_check` returns solver
+  `unknown` under its unchanged 8-second limit. No unchanged retry or guard change.
+- `npm run typecheck --workspace=@classync/web`: PASS.
+- `npm run lint --workspace=@classync/web`: PASS.
+- `npm run build --workspace=@classync/web`: PASS with Firebase dynamic/static import
+  warning and 692.33 kB minified chunk warning.
+- `git diff --check -- docs/audit`: PASS (untracked audit files were also reviewed by
+  status and file inventory; this command alone does not inspect untracked content).
+
+No full suites, service/browser journey, migration, database connection, external
+dependency scan or hosted provider check was run. No original DB was opened or modified;
+their hashes were not independently checked in this audit. New risk record: current
+solver UNKNOWN is an observed release gate. Authority conflict (PostgreSQL vs Firestore)
+is resolved by the owner's instruction for this plan: PostgreSQL is authoritative and
+Firestore optional absent verified rubric approval. Free-tier pricing was checked against
+provider-published pages, but is volatile and carries no zero-cost/availability promise.
+
+Next: review `docs/audit/MASTER_IMPLEMENTATION_PLAN.md` and `MASTER_ROADMAP.md`; first
+implementation gate is authority-document reconciliation and exact-candidate evidence,
+then diagnose solver UNKNOWN without changing limits/constraints. No merge, commit, push,
+deployment, cloud setup, real-record import or original-data cutover authorized.
+
 ## 6 November 2026 — release candidate portability review
 
 Local checkpoint `a54b53343bed00fbbdfdeacf511889213f3eac98` on
@@ -521,6 +823,7 @@ Local main/HEAD remains `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`; pre-existing
 **This initial record is based on historic conversation and the GitHub default branch inspected 25 October 2026, NOT a current audit of `C:\Projects\ClassSync`.** Codex must reconcile local files, commit and uncommitted changes before implementation.
 
 ## Last known evidence (historical)
+
 - Previous verified HEAD reported as `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`, `main`, clean (21 October). Reverify.
 - Prior Codex reconciliation: 216 frontend tests and 78 backend tests passed serially; two earlier scheduling backend tests failed during overlapping workload. Reverify intermittent behavior.
 - Existing presentation experience verified locally for three roles; live institutional production behavior not verified.
@@ -531,9 +834,11 @@ Local main/HEAD remains `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`; pre-existing
 - Root `AGENTS.md` was not found on GitHub on 25 October; inspect local workspace before copying this harness.
 
 ## Current verified state
+
 See the dated current-session checkpoints below and [requirements traceability](TRACEABILITY.md). Historical counts and approvals above are not current acceptance evidence.
 
 ## Required checkpoint entry schema
+
 For each checkpoint append:
 
 ```
@@ -689,7 +994,7 @@ Do not overwrite prior checkpoint entries; append evidence and maintain a brief 
 - Final10:59 explicit comparison asserts all three original SQLite hashes equal recorded baselines, with matchesBaseline:true (`p2b-exit-original-preservation.json`); working tree captured (`p2b-exit-working-tree.txt`), HEAD unchanged, user/pre-existing changes preserved; diff check0. Source changes: shared persistence package/three migrations, six PG qualification/harness scripts, persistence requirements/tests/audit provenance/CI checks, eight pure web test annotations+DOM-aware setup, evidence/docs. No original DB import/migration/cutover, real people/accounts/data, credentials, Firebase/IAM/cloud/spending, messages, commit/push/merge/deployment. All executed tool/owned-server/browser handles terminal; no background run claimed.
 - **Gate: PASS — complete bounded LOCAL P2b.** Production NO-GO. Next dependency-ready authorized outcome: P3a synthetic/emulator verified identity→current PostgreSQL membership→HTTP authorization composition and denial lifecycle. Keep default institutional service path unavailable until its own explicit configuration/gates; do not enable real institutions or invent provisioning policy. Actual academic/scheduling PostgreSQL adapter adoption is P3b and follows P3a acceptance; original SQLite remains current local storage until separately authorized cutover. No overall-goal completion or scope reduction.
 
-## 26 October 2026 11:15 +08  -  P3a first request-composition slice; phase PARTIAL
+## 26 October 2026 11:15 +08 - P3a first request-composition slice; phase PARTIAL
 
 HEAD/base39200a4f2ef3ec7557bc3c86127e674e260ca4fc unchanged; existing dirty work preserved. Acceptance written before edits in `docs/production/local-20261026/p3a-local-acceptance.md`. Added `scripts/postgres_identity_http_qualification.py`; extracted existing offline SDK fixture to `services/testing/offline_firebase.py`; added forced-setup-failure cleanup regression; CI Ruff includes new script. No runtime provider/default or UI source changed.
 
@@ -825,7 +1130,6 @@ Gate: bounded configured Gateway provider lifecycle PASS. OverallP3a PARTIAL; fu
 - Fresh `scheduling-provider-preservation.json` verifies all3 original SQLite SHA256 unchanged and7 owned PG roots including prior failed attempts/no postmaster PID, all assigned PG and new Auth ports closed. It records exact source file SHA256 for the provider, routes, tests, manifest, harness, qualifier, example config and CI. No original writes/import/migration, real records/credentials/Firebase/cloud settings/spending/messages, commit/push/deploy/cutover or unclassified-process cleanup.
 - Status: bounded local/emulator Scheduling provider PASS; full P3b PARTIAL, Goal ACTIVE/incomplete, production NO-GO. Next dependency-ready local work is generated-only Scheduling run/draft migration and backup/restore proof, followed by publication adapter/provider and complete P3b exit. Write acceptance before implementation; preserve originals and run actual solver-sensitive cases serially. Do not infer institutional authority or advance to P4 while P3b is partial.
 
-
 ### 2026-10-28 02:10 Asia/Singapore — bounded P3b generated Scheduling migration/restore PASS
 
 - Current/base main HEAD unchanged `39200a4f2ef3ec7557bc3c86127e674e260ca4fc`; uncommitted user work preserved. Owner local P2–P8 authorization unchanged. Actual implementation/drills ran 27 October; regression was observed terminal and preservation reverified 28 October after continuation. Acceptance preceded source changes: `docs/production/local-20261027/scheduling-migration-restore-acceptance.md`. This accepts these bounded P3b slices, not full P3b/P4 or the full Goal.
@@ -838,7 +1142,6 @@ Gate: bounded configured Gateway provider lifecycle PASS. OverallP3a PARTIAL; fu
 - `scheduling-migration-restore-preservation.json`: all3 original database hashes match baseline, all11 recorded owned PG roots have no postmaster and assigned ports closed (one older never-started root has no port), current5 source hashes and backend log hash recorded. No original data writes/cutover/real records/cloud/Firebase production/remote Git/deploy/messages. Same-cluster synthetic restore does not prove cross-host recovery.
 - Next authorized dependency-ready slice: publication PostgreSQL data-access boundary/schema and immutable version/head/restriction persistence, then provider adoption and full P3b exit. Keep publication unavailable in PG mode until its complete correctness/current-role/tenant/revision/atomicity tests pass; no second writable official source. P4–P8 remain pending predecessor gates; institutional authority and production remain NO-GO.
 
-
 ### 2026-10-28 02:24 Asia/Singapore — publication rules boundary and workload correction PASS
 
 - Base/current HEAD unchanged39200a4f2ef3ec7557bc3c86127e674e260ca4fc, dirty work preserved. P3b local prerequisite under owner authority; acceptance written before source in `local-20261027/publication-rules-acceptance.md`. This is not full P3b or an advance to P4.
@@ -850,7 +1153,6 @@ Gate: bounded configured Gateway provider lifecycle PASS. OverallP3a PARTIAL; fu
 - Next: PostgreSQL publication schema/data-access boundary and actual atomicity/current-authority qualification, then provider adoption/full P3b exit. Keep PG publication unavailable until its applicable gates pass; no second official source. Full Goal remains ACTIVE/incomplete, P3b PARTIAL, production NO-GO.
 
 - Final independent evidence review corrected cluster wording: preservation proves10 stopped/closed-port owned clusters plus one never-started cluster, not11 running-then-stopped clusters. Underlying JSON states were already exact; no source/test failure or additional running process was found.
-
 
 ### 2026-10-28 02:40 Asia/Singapore — bounded publication-state foundation PASS
 
@@ -891,7 +1193,7 @@ Gate: bounded configured Gateway provider lifecycle PASS. OverallP3a PARTIAL; fu
 - Actual command `.venv/Scripts/python.exe -m scripts.postgres_publication_repository_qualification --bin "C:/Program Files/PostgreSQL/18/bin" --output docs/production/local-20261027/publication-repository-locks.json` exit0. Fresh PG18.6 cluster f6517ed1e3694b1788de346e972184ca stopped. Six unauthorized helper contexts return false and leave authority rows unlocked; valid Admin control succeeds. Both writer orderings observe one actual waiter and commit exact publication/restriction revisions4 then5, preserving immutable history and audit prefixes. Earlier concurrency/replay/revision/outage/rollback probes still pass. Independent evidence review agrees; these compatible writer cases do not prove conflicting-winner cases.
 - Full serial `.venv/Scripts/python.exe -m pytest -q` exit0: **829 passed**,85.19s, one existing Starlette warning; isolated process database paths recorded in publication-adapter-backend-root.txt, complete log publication-adapter-backend.log. `npm run test:security` exit0 **16/16**. Ruff across services/packages and changed qualifiers, `pip check`, `git diff --check`: exit0. No solver constraints, timeouts or tests weakened.
 - Packaging: initial no-build-isolation attempt failed because setuptools was unavailable; failure log retained. Isolated build from disposable copy exit0; **16 Python files byte-equal** to repository source, wheel SHA256 `2c6b980bd72f7ed5ff91292d677ee6306d2ff1edcee48bcfe75502cd5e9e182e`; publication-adapter-wheel-contents.json/log/root retained. No application dependency installation.
-- Old disposable scanner failed importing pip_audit.__version__; NOT a successful scan. Fresh isolated scanner pinned2.10.1 installed successfully. Fresh audit exit0 **68 exact versions / zero findings**, retained hashing warning; evidence publication-adapter-python-audit-fresh directory/log. Application dependencies unchanged.
+- Old disposable scanner failed importing pip_audit.**version**; NOT a successful scan. Fresh isolated scanner pinned2.10.1 installed successfully. Fresh audit exit0 **68 exact versions / zero findings**, retained hashing warning; evidence publication-adapter-python-audit-fresh directory/log. Application dependencies unchanged.
 - Latest original hashes saved in publication-adapter-original-hashes.json match all three established baselines. The four clusters from this resumed interval were disposable; successful runs report stopped and earlier failed cluster's postmaster.pid was verified absent. Previous frontend709/build/browser evidence remains historical unchanged-input evidence; no fresh screenshots or UI claims.
 - Review evidence: publication-adapter-independent-review.md. Clarification: JSON key mutation_denied_after_commit means access is denied after the authority mutation commits, not that mutation was denied.
 - Gate: **P3b PARTIAL; complete publication adapter acceptance still open**. Next dependency-ready work: actual per-resource conflict matrix (room/faculty/section/student), conflicting restriction/publication outcomes and representative scale qualification. Then close adapter acceptance and continue guarded provider/history migration/restore/full P3b. Approval/outbox/institutional publication and production remain unqualified. UI/UX recovery retains high priority after backend gate; do not restart P1/P2 or bypass mode/authority guards.
@@ -1040,16 +1342,16 @@ Gate: bounded configured Gateway provider lifecycle PASS. OverallP3a PARTIAL; fu
 
 The final unchanged web retry **PASS**,712 tests/40 files in143.23s. Final `npm run build`, `npm run build:presentation` and `npm run test:artifacts` **PASS** (all4 artifact checks; production metadata, direct SPA refresh and static/API errors). Lint/typecheck pass. First failed web timeout remains in its original log. No timeout, worker, assertion, solver or production dependency changes. Vite's >500kB chunk/mixed Firebase-import warnings and the existing Starlette/httpx deprecation remain disclosed nonblocking observations.
 
-| Approved P3b requirement | Final status | Authoritative evidence |
-|---|---|---|
-| Actual PostgreSQL publication; current identity/tenant/role/record scope; immutable revision/head state | PASS | `publication-repository-sqlite-scope-fixed.json`, migration0011; actual SDK/current-PG `publication-provider-http.json` |
-| Restriction/publication serialization; rollback; conflicting writes; exact replay; freshness; restart/reconnect and errors | PASS | Actual observed lock orders and precise failures in publication JSON; previously qualified draft/provider restart retained; restored reconnect/replay verified |
-| Generated migration and legacy compatibility; hashes; ownership; rollback | PASS | Prior generated academic/draft migration evidence retained; actual0011 chain/publication rollback; archive opaque hash/payload/owner mapping, no canonical preimage fabricated, non-current/non-replayable |
-| Complete publication/archive backup and restore | PASS | `publication-archive-restore.json`:17 nonempty/related tables,17 catalog categories/sequence equality, role calendars/history/replay, RLS/grants/immutability and unchanged source/dump |
-| Current provider/API composition and role calendars | PASS | `publication-provider-http.json`: actual Auth Emulator SDK/current membership/owned PG pool/ASGI HTTP; admin publish/replay/history, three-role calendars/periods, unassigned/unbound/wrong-role/revoked denial, no SQLite fallback, cleanup |
-| Final regressions/static/security/package consistency | PASS | backend947, frontend712/40, security16, artifacts4; lint/types/builds/Ruff/pip-check; Python68 exact/0 findings, npm0; both byte-matched wheels/all11 migrations, graph single head0011 |
-| Original databases and owned process preservation | PASS | All3 SHA256 baselines match. All113 marked PG roots checked,0 running; one stale PID marker independently returned pg_ctl exit3/no server. No files deleted. All owned Auth/PG service cleanup recorded |
-| Independent review and truthful limitations | PASS | One focused independent exit reviewer: no blocking defect. Same-cluster restore, ASGI HTTP, generated/caller-attested source provenance; no cross-host DR/new browser acceptance/production cutover claimed |
+| Approved P3b requirement                                                                                                   | Final status | Authoritative evidence                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actual PostgreSQL publication; current identity/tenant/role/record scope; immutable revision/head state                    | PASS         | `publication-repository-sqlite-scope-fixed.json`, migration0011; actual SDK/current-PG `publication-provider-http.json`                                                                                                                      |
+| Restriction/publication serialization; rollback; conflicting writes; exact replay; freshness; restart/reconnect and errors | PASS         | Actual observed lock orders and precise failures in publication JSON; previously qualified draft/provider restart retained; restored reconnect/replay verified                                                                               |
+| Generated migration and legacy compatibility; hashes; ownership; rollback                                                  | PASS         | Prior generated academic/draft migration evidence retained; actual0011 chain/publication rollback; archive opaque hash/payload/owner mapping, no canonical preimage fabricated, non-current/non-replayable                                   |
+| Complete publication/archive backup and restore                                                                            | PASS         | `publication-archive-restore.json`:17 nonempty/related tables,17 catalog categories/sequence equality, role calendars/history/replay, RLS/grants/immutability and unchanged source/dump                                                      |
+| Current provider/API composition and role calendars                                                                        | PASS         | `publication-provider-http.json`: actual Auth Emulator SDK/current membership/owned PG pool/ASGI HTTP; admin publish/replay/history, three-role calendars/periods, unassigned/unbound/wrong-role/revoked denial, no SQLite fallback, cleanup |
+| Final regressions/static/security/package consistency                                                                      | PASS         | backend947, frontend712/40, security16, artifacts4; lint/types/builds/Ruff/pip-check; Python68 exact/0 findings, npm0; both byte-matched wheels/all11 migrations, graph single head0011                                                      |
+| Original databases and owned process preservation                                                                          | PASS         | All3 SHA256 baselines match. All113 marked PG roots checked,0 running; one stale PID marker independently returned pg_ctl exit3/no server. No files deleted. All owned Auth/PG service cleanup recorded                                      |
+| Independent review and truthful limitations                                                                                | PASS         | One focused independent exit reviewer: no blocking defect. Same-cluster restore, ASGI HTTP, generated/caller-attested source provenance; no cross-host DR/new browser acceptance/production cutover claimed                                  |
 
 Current-source hashes (65 files), qualification SHA256s, exact gate counts, original hashes and process check are in `docs/production/local-20261029/p3b-exit-evidence.json`; command logs are adjacent. Runtime behavior did not change during this closure; new source is disposable restore/provider qualification and guard tests, plus the fixed emulator runner mode. Documentation/traceability supersede stale pending checkpoints. Full publication qualifier was not rerun. Original data, unrelated user diffs and HEAD `39200a4f2ef3ec7557bc3c86127e674e260ca4fc` preserved; no commit/push/deploy/cloud/real Firebase change.
 
@@ -1237,7 +1539,6 @@ The entrance now combines the larger original logo with the sign-in surface, use
 
 Startup and shutdown instructions, exact mode distinctions and the environment-name inventory are in docs/infrastructure/local-connected-development.md. Current run receipts and test logs are in the parent workspace's ignored var/auth-saas-evidence directory. Local functionality is usable; full milestone acceptance remains PARTIAL pending the required regression-diagnosis approval.
 
-
 ## 7 November 2026 — Approved regression diagnosis and local connected qualification
 
 Current/base SHA96cbd34a9ea2a040e00061357f7b362485743d4e on feature/auth-onboarding-saas; all feature work is uncommitted. The owner reopened bounded frontend performance diagnosis and confirmed read-only inspection of Firebase classsync-f444c and Vercel class-sync-bhiv. Hosted mutation authority was not granted.
@@ -1395,3 +1696,213 @@ Implemented `services/gateway/app/firestore_registration.py` and composed the op
 Focused Python scanner/Linux OCR contract/request authorization suite 111 PASS (`python -m pytest services/gateway/tests/test_registration.py services/gateway/tests/test_linux_ocr.py services/gateway/tests/test_request_authorization.py -q`). Focused scanner UI 9 PASS (`npm run test:web -- src/pages/RegistrationScannerPage.test.tsx`). Typecheck, lint, Ruff, JSON parse and diff check PASS. The owned Firestore emulator with synthetic identity exercised actual PDF upload and review, fresh Gateway and SDK client readback, redaction, foreign account/tenant and direct-client denials, erase while another instance held an in-flight review, expiry 404 and outage 503. Final redacted receipt `var/registration-review-qualification-14a6c5321d0c45d39c7ffa6aae9df554/result.json`; the owned emulator stopped. Logical expiration was verified; physical managed TTL and hosted rules/IAM were not exercised.
 
 Original SQLite hashes match the earlier receipt. No staged files, hosted changes or Git ref changes. Local durable review PASS in isolated composition. Next gate is a publication/revocation fence spanning Firestore admission and the existing PostgreSQL commit, followed by release-candidate Linux/CI and provider acceptance. The previous whole-role bootstrap timeout and outstanding npm audit findings remain open.
+
+## 16 November 2026 02:52 SGT — Administrator dashboard command-center slice (PARTIAL)
+
+Base/current SHA `7165fa130e413f8dc8893b85d30ecbe530ef8173` on `feature/auth-onboarding-saas`. Before work, the feature worktree was verified as the target and was already substantially dirty. All pre-existing edits, `main`, branch refs and worktree registrations were preserved. Owner approved only the local UI slice recorded in `APPROVALS.md`; no merge, commit, push, deployment, external-service change, database write or production-data operation occurred.
+
+Implemented the connected `/admin/dashboard` command-center hierarchy: inline period selector, truthful mode badge, period-scoped section/offering/resource/draft links, unified readiness/status card with typed issue-code setup destinations, distinct publication and draft panels, stable loading/error/retry states, refresh action, bounded issue disclosure, responsive CSS, focus styling, reduced-motion-aware CSS transitions, and thinner sidebar scrollbar. The Administrator topbar now opens a grouped selection-only route menu derived from existing available role routes, with arrow/Home/End, Escape, Tab, pointer-close and route-close behavior. Student and Teacher typed local route search remains unchanged. Reused the readiness destination resolver from Academic Generation rather than maintaining a second regex map. Dashboard copy does not claim that schedulable spaces are available/suitable and does not reuse the stale 59-room count. CSS was used instead of adding Motion or changing the lockfile.
+
+Changed for this slice: `apps/web/src/pages/AdminSchedulingHome.tsx`, `apps/web/src/pages/AdminSchedulingHome.test.tsx`, `apps/web/src/components/layout/AppShell.tsx`, `apps/web/src/components/layout/AppShell.test.tsx`, `apps/web/src/pages/AcademicGenerationPage.tsx`, new `apps/web/src/lib/readiness-navigation.ts` and test, `apps/web/src/operational-ui.css`, `apps/web/src/styles/layout/shell.css`, `README.md`, and dashboard plan/approval/roadmap/traceability documents. No backend, contracts, migrations, user records, or database files were modified.
+
+Fresh verification on the final focused source: **49 tests passed across 5 files** (Admin dashboard, AppShell, readiness routing, Academic Management, preview dashboard); `npm run typecheck --workspace=@classync/web` PASS; `npm run lint --workspace=@classync/web` PASS; `npm run build --workspace=@classync/web` PASS. Build retains the existing Firebase mixed static/dynamic import warning and emits a 730.05 kB minified JavaScript chunk (>500 kB warning). A full `npm run test:web` run reported three failures in `src/pages/PresentationRoutes.test.tsx`: PRRC and New Building card assertions each expected 3 but received 4, and the Court `View Court rooms` link assertion was not found. The failures concern the already-dirty updated room/building catalog and are outside this dashboard slice; no unrelated test or inventory files were changed. Full-suite PASS is not claimed.
+
+Visual/browser acceptance is UNVERIFIED: the expected local web/API listener ports were not active and `npm ls playwright --workspace=@classync/web` returned no local Playwright package. No live API, responsive viewport/zoom, manual keyboard browser, or assistive-technology run was claimed. Continue by reconciling the three inventory presentation failures in their own approved scope, then perform real 360/390/768/1024/1440 rendering and native 200%/keyboard review when the local app is available. Production and institutional acceptance remain separate.
+
+## 16 November 2026 04:03 SGT — Administrator secondary screens density and topbar repair (PARTIAL)
+
+Base/current SHA remains `7165fa130e413f8dc8893b85d30ecbe530ef8173` on `feature/auth-onboarding-saas`. The worktree was already dirty before this task; existing source, untracked files, database files, branch refs, and the separate `main` worktree were preserved. Owner-approved scope is recorded in `APPROVALS.md`. No backend/API contract, solver, migration, provider, database data, commit, push, branch operation, or deployment changed.
+
+Implemented the active Administrator command-menu popover in `operational-ui.css` with a 64px locked topbar, right-anchored bounded overlay, two-column grouped route links, horizontal icon/label alignment, and active application CSS load path. `styles.css` now uses the thinner, non-reserved sidebar scrollbar. `AcademicPeriodSetup.tsx` presents seven counted setup selectors and only one active category, preserving calendar disclosure and existing inline record editing. `AcademicManagementPage.tsx` uses record-status selection instead of text search. Schedule Generation and Conflict Center use tighter toolbars/layouts; the conflict checklist reflects checks present in `services/scheduling/app/validation.py` only. The active `/admin/requests` route uses `PreviewRequestsView`, so its preview feed now has counted status filters and compact request rows; notifications likewise remain preview-only, with selection filters and compact update cards. The separate API-backed `ClassroomRequestsPage` has corresponding filtering but is not the currently mounted `/admin/requests` implementation. No new operational request or delivery capability is claimed.
+
+The room presentation regression was aligned to the already-current November 2026 source inventory of 53 spaces across PRRC, New Building, Campus Grounds and Montalban Sports Complex; stale tests expected the former three-group catalog. Updated README, workspace audit, roadmap and traceability describe the implementation and limitations.
+
+Fresh verification on the final code: `npm test` **836 passed / 0 failed across 62 files**; `npm run typecheck` PASS; `npm run lint` PASS; `npm run build` PASS; `git diff --check` PASS with only Git line-ending conversion warnings. Production build still reports the existing Firebase mixed dynamic/static import warning and a **734.29 kB** minified chunk over Vite's 500 kB advisory threshold.
+
+Rendered viewport acceptance is **UNVERIFIED**. Starting Vite failed because port 5173 is already occupied by PID 16276; process command-line inspection was denied, so that existing process was not stopped or treated as the feature worktree. A frontend-only dev server was started on 5174 and stopped after `/dev/role-preview` redirected to sign-in with “University sign-in is unavailable”; no Admin preview was reachable. No target-screen screenshot or pixel-width assertion is claimed. Keyboard behavior was covered by the existing AppShell tests; real-browser responsive, 100% zoom, reduced-motion visual, manual keyboard/focus, and assistive-technology checks remain open. `docs/hci/admin-workspace-audit.md` contains the current screen-specific notes.
+
+## 16 November 2026 13:31 SGT — Command menu, production chunks and live preview qualification (PASS local)
+
+Base/current HEAD remains `7165fa130e413f8dc8893b85d30ecbe530ef8173` on `feature/auth-onboarding-saas`; all previous dirty work and the separate `main` worktree were preserved. This is a follow-up to the prior entry: the existing Vite service on `127.0.0.1:5173` is now reachable and was used without stopping or replacing it. Administrator preview was entered through the app's `/dev/role-preview` flow; this is local presentation data, not connected institutional/provider acceptance.
+
+Updated `apps/web/src/operational-ui.css` so each command-menu category lays out destination links in one column, with a wider bounded two-column category popover, scrollable body/bottom padding, neutral inactive links, burgundy active route, muted icons and a theme-colored focus ring. Added manual `react-vendor`, `firebase-vendor` and `ui-vendor` chunks in `apps/web/vite.config.ts`; `apps/web/src/auth/account-actions.ts` and `university-session-driver.ts` now import the shared Firebase app module consistently instead of mixing static and dynamic imports. Corrected the request-filter test in `apps/web/src/pages/PresentationRoutes.test.tsx` to distinguish the filter button from the request status badge. Updated GitHub README and approval/roadmap/traceability notes. No server/API behavior, records, migration, provider, deployment or branch changed.
+
+Fresh verification: `npm run lint` PASS; `npm run typecheck` PASS; focused PresentationRoutes test **13/13 PASS**; full `npm run test` **837/837 PASS across 62 files**; `npm run build` PASS with **no Firebase mixed-import or chunk-size warning**. Minified JavaScript chunks: `react-vendor` 318.51 kB, `firebase-vendor` 243.27 kB, `ui-vendor` 47.38 kB, app entry 321.16 kB. `git diff --check` PASS with only pre-existing/standard LF-to-CRLF working-tree notices.
+
+Real Chrome/Playwright preview measurements: menu checked at 1366×768, 1440×900 and 1024×768. In each, `.topbar` measured 64px; all 23 destination labels had `scrollWidth <= clientWidth`; active route color was `rgb(135, 46, 73)` and every inactive link `rgb(32, 36, 44)`; focus ring matched Soft Rouge; bottom destination was fully visible after scrolling. The five routes `/admin/academic`, `/admin/ai-scheduling`, `/admin/conflicts`, `/admin/requests` and `/admin/notifications` rendered at 1366×768 and 390×844 with document/body width equal to viewport and no browser `pageerror`. The desktop page picker is hidden on mobile by the existing shell in favor of its navigation drawer. No screenshot file, 200% zoom, device screen-reader or connected service behavior is claimed; those remain open.
+
+## P4d Administrator lifecycle implementation — PARTIAL, 18 November 2026 (SGT)
+
+- **Branch/preservation:** `feature/auth-onboarding-saas`, HEAD `7165fa130e413f8dc8893b85d30ecbe530ef8173`. The candidate worktree was already dirty; its existing edits and untracked files were preserved. The separate `main` worktree was not inspected or changed in this phase. The existing service on port 5173 was left untouched. No live data, original DB, hosted provider, cloud setting, migration/cutover, commit, push, merge, or deployment was touched.
+- **Scope:** P4d acceptance cases were written first in `P4D_ADMIN_ACCEPTANCE.md`; scope recorded in `APPROVALS.md`. Current room source remains the 53-row November catalog; this phase did not infer availability, capacity, equipment, or institutional readiness from that provisional catalog.
+- **Implementation:** added migration `packages/persistence/classync_persistence/migrations/versions/0017_administrator_activity_audit.py`, creating an append-only, FORCE-RLS, tenant-scoped activity table. PostgreSQL triggers record period creation, academic record create/update, calendar saves, immutable draft saves, and publications with hashed entity references and no copied row payload. Added a bounded Administrator-only `GET /api/v1/timetables/audit/{period}` in `services/scheduling/app/publication_api.py`, tenant-scoped query in `postgres_publication_repository.py`, Gateway Administrator enforcement in `services/gateway/app/main.py`, and institutional activity / clearly labeled synthetic preview in `apps/web/src/pages/PublicationAuditPage.tsx`. Added audit endpoint/provider and Gateway authorization tests, plus `--activity-only` disposable PG qualification in `scripts/postgres_academic_repository_qualification.py`. Updated the synthetic qualification fixture's provisional-room provenance note and stale 59-room test expectation to the current 53-room catalog. Updated `scripts/connected_browser.cjs` to include audit and publication destinations.
+- **Disposable PostgreSQL evidence:** command: `.venv/Scripts/python.exe -m scripts.postgres_academic_repository_qualification --bin 'C:/Program Files/PostgreSQL/18/bin' --output var/p4d-evidence/activity-only-20261117.json --activity-only`. PG 18.6 isolated temporary cluster; evidence reports `stopped: true`, `activity_count: 78`, `redacted_admin_activity_triggers: true`, `same_tenant_admin_activity_read: true`, `cross_tenant_activity_rls: true`, `activity_append_only: true`, `payload_values_copied: false`, `fixture_mode: synthetic`, `production_acceptance: false`. A broader academic PostgreSQL qualification attempt passed the activity checks then stopped later at its fixture expectation `Persisted academic snapshot no longer satisfies existing readiness contract`; this P4d run did not change readiness semantics or weaken assertions. No claim is made that the full period-to-publication PostgreSQL chain passed.
+- **Backend regression:** command run with `PYTHONPATH=packages/api-contracts;packages/persistence;.`: `.venv/Scripts/python.exe -m pytest -q`; result **1092 passed, 0 failed, 1 warning** in 141.66s. Warning: installed Starlette deprecates using `httpx` with `starlette.testclient`. Full output: `var/p4d-evidence/pytest-20261117-retry.log`.
+- **Python static:** `.venv/Scripts/python.exe -m ruff check services packages scripts` → `All checks passed!`.
+- **Frontend:** in `apps/web`, `npm run lint` PASS, `npm run typecheck` PASS, `npm run test` **838 passed across 63 files**, `npm run build` PASS (1777 modules). Build output has no Firebase mixed-import warning and no >500kB chunk warning; minified JS chunks are 321.61 kB app entry, 318.51 kB React vendor, 243.27 kB Firebase vendor, 47.38 kB UI vendor, 12.65 kB role workspace. Logs: `var/p4d-evidence/web-lint-20261117.log`, `web-typecheck-20261117.log`, `web-test-20261117.log`, `web-build-20261117.log`. `node --check scripts/connected_browser.cjs` PASS. These are unit/static/build checks, not rendered connected acceptance.
+- **Dependency security gate:** a fresh pinned `pip-audit 2.10.1` scan of installed third-party versions found **1 known vulnerability**: CVE-2026-126360 / GHSA-mf5v-w3w3-f6cg in installed `opentelemetry-api 1.45.1`, fixed in 1.45.2 (ReDoS for attacker-controlled trace-context strings in applicable carriers). Added `opentelemetry-api==1.45.2` to `services/security-constraints.txt`. The compatible update was not installed into the application environment and a zero-finding re-scan was not completed: the approval request for the local package installation was rejected because the approval service hit its usage limit. Per instruction, no retry/bypass was attempted. The repository's strict wrapper `scripts/security/python_audit.py` also did not complete because it classified Windows editable package source provenance as unverified; the raw scan result is `var/p4d-evidence/pip-audit-20261117/pip-audit-direct.json`. `npm audit` was not run. Do not describe the security gate as passing.
+- **Connected/auth/browser gates:** `node scripts/auth_emulator_qualification.cjs --development` exits with `Missing pinned Auth Emulator tools. See docs/infrastructure/local-connected-development.md.` No owned Emulator + PostgreSQL + Chrome journey could start. The 5173 service was not probed or interrupted. No native 200% browser zoom, keyboard-only flow, focus/announcement test, screen-reader run, or connected create-period → readiness → generate → save draft → validate → publish → calendar/dashboard journey was performed. Mark these UNVERIFIED; current UI/API wiring and unit tests are not substitutes for that evidence.
+- **Current phase decision:** P4d **PARTIAL**. The PostgreSQL audit slice and local automated suites passed, but open gates include resolving and re-scanning the Python advisory, qualifying the full PostgreSQL academic fixture, supplying the pinned isolated Auth Emulator tools, running the real connected browser journey, and completing native 200% and keyboard/focus acceptance. No production-readiness claim.
+
+## 18 November 2026 — P4d qualification continuation (PARTIAL)
+
+Branch remains `feature/auth-onboarding-saas`, HEAD `7165fa130e413f8dc8893b85d30ecbe530ef817`. Existing dirty changes and untracked files were preserved. The live `localhost:5173` service was not changed; a read-only probe found it unavailable (`ERR_CONNECTION_REFUSED`). No original database, hosted service, provider setting, branch/ref, or remote system was modified.
+
+Fresh evidence after the readiness-fixture characterization:
+
+- `.venv/Scripts/python.exe -m pytest -q` with `PYTHONPATH=packages/api-contracts;packages/persistence;.`: **1093 passed, 0 failed, 1 Starlette deprecation warning**, 135.71s. Log: `var/p4d-evidence/pytest-20261118-post-fixture.log`.
+- `.venv/Scripts/python.exe -m ruff check services packages scripts`: **All checks passed!**
+- `.venv/Scripts/python.exe -m pip check`: **No broken requirements found.** This is not a vulnerability scan.
+- In `apps/web`, `npm run lint` PASS, `npm run typecheck` PASS, `npm run test` **838 passed across 63 files**, and `npm run build` PASS. Logs: `var/p4d-evidence/web-lint-20261118.log`, `web-typecheck-20261118.log`, `web-test-20261118.log`, and `web-build-20261118.log`. The build reports no Firebase mixed-import or >500 kB chunk warning.
+- The corrected full academic PostgreSQL qualification did **not** reach the assertion: non-elevated Windows `pg_ctl` failed at disposable-cluster startup with `could not create restricted token: error code 87`. The disposable PostgreSQL activity-only qualification remains separately PASS with 78 synthetic events; it is not evidence for the full academic/draft/publication journey.
+- The feature `.venv` is a junction to `C:\Projects\ClassSync\.venv`, shared with the main worktree. No Python package was installed or upgraded in this shared environment. Existing advisory evidence remains one finding: `CVE-2026-126360` / `GHSA-mf5v-w3w3-f6cg`, installed `opentelemetry-api 1.45.1`, fixed version constrained at `1.45.2`. A clean re-scan is not available; `pip check` does not resolve this gate. The strict scanner provenance limitation and raw scan are recorded above.
+- `node scripts/auth_emulator_qualification.cjs --development` remains blocked because pinned isolated Auth Emulator tools are missing. No network installation was attempted.
+- A separate presentation-only Vite preview on `127.0.0.1:5193` was used and then stopped. Playwright evidence is `var/p4d-evidence/admin-preview-qa-20261118.json`, script `var/p4d-evidence/admin-preview-qa-20261118.cjs`, screenshots under `var/p4d-evidence/admin-preview-screenshots-20261118/`. At 1366×768 and 390×844, the shell measured 64px topbar, no document/body horizontal overflow, and no page errors. Keyboard checks for route menu/mobile drawer passed (focus entry, arrow navigation, Escape and focus restoration, Tab/Shift+Tab, visible theme focus ring). However, dashboard, academic, generation, conflicts, and audit routes each exposed only one main control in this preview; only calendar had a substantial control count. Treat those routes as **shell/preview-gate measurements only**, not actual screen-level responsive acceptance. The attempted native 200% probe was blocked by Chrome (`ERR_BLOCKED_BY_CLIENT` loading the temporary extension); `native200` is empty. No connected API flow, actual workspace browser acceptance, or manual screen-reader check is claimed.
+- Independent read-only review of the activity audit implementation found no critical authorization/RLS defect in the inspected slice. Open production concerns remain: guessable unkeyed entity-reference hashes; migration downgrade dropping audit history; nondeterministic ordering for timestamp ties; no pagination beyond 500 events; and stable Firebase actor UIDs displayed to tenant Administrators. These require a documented policy/fix before production adoption.
+
+Current decision: **P4d PARTIAL / not closed**. Remaining gates are a clean current `pip-audit` with zero findings or approved disposition, corrected full disposable PostgreSQL academic qualification, pinned Auth Emulator setup and connected Administrator lifecycle E2E, real workspace responsive/keyboard acceptance, native 200% zoom, and audit privacy/retention decisions. Next safe action: arrange an isolated Python environment and viable Windows PostgreSQL execution context, then rerun the disposable qualification; keep all original databases and port 5173 out of scope.
+
+## 18 November 2026 — PostgreSQL qualification script corrections (PARTIAL)
+
+The user's latest normal-PowerShell setup is now visible in the feature worktree: branch remains
+`feature/auth-onboarding-saas`; `.venv` is a Python **3.12.10** directory, while
+`.venv-main-junction` preserves the separate link to `C:\Projects\ClassSync\.venv`. A temp tool
+root was found at `C:\Users\lenovo\AppData\Local\Temp\classsync-auth-tools-354b2a1670cc40b4894547335932b187`
+with `firebase-tools 15.34.1`, `@opentelemetry/core 2.8.0`, and `uuid 11.1.1`. No port 5173 process,
+original database, live data, hosted service, or branch was changed.
+
+Corrected the five reported qualification defects without changing RLS, uniqueness, validation,
+scheduler constraints, or migration owner checks:
+
+1. `postgres_academic_period_qualification.py` provisions a generated `NOLOGIN NOSUPERUSER
+   NOBYPASSRLS` migrator role and verifies its effective role flags before upgrading through 0008.
+2. `postgres_academic_repository_qualification.py` checks exact room IDs/count against
+   `services.academic.app.repository.catalog_data()` and requires all provisional capacities to
+   remain `None`; stale 59-room expectations are removed from this assertion.
+3. Publication qualification setup migrates schema before academic repository writes so
+   `period_metadata.data_mode` exists. Provider migration scope resolves the current Alembic head
+   through `ScriptDirectory` rather than a stale 0006/0011 constant. Publication qualification still
+   tests that an unprivileged owner is rejected at 0008 and that the failed migration rolls back.
+4. Synthetic provider identities receive distinct student/faculty records. Student bindings are
+   checked before insertion; publication fixtures use the distinct `student-restore` record and the
+   corresponding projection regression expectation was synchronized.
+5. Scheduling provider migration scope now compares against the repository's resolved current head.
+
+Fresh checks on this corrected source:
+
+- `pytest -q services/persistence/tests/test_publication_projection_fixture.py scripts/tests/test_postgres_qualification_regressions.py`
+  → **11 passed, 0 failed, 1 Starlette/httpx deprecation warning**. The seven dedicated qualification
+  regression cases cover migrator enforcement, canonical provisional IDs/no capacity, duplicate
+  synthetic bindings, and current migration-head selection; the remaining four exercise the affected
+  publication projection fixture and guards.
+- Full serial `pytest -q` before the final expectation sync → **1090 passed, 3 failed, 1 warning**.
+  One failure was the now-updated stale assertion expecting `student-a` after the fixture correctly
+  moved to `student-restore`; the targeted rerun above passes. Two solver-dependent failures remain:
+  `test_new_run_creates_separate_draft_and_old_snapshot_is_unchanged` rejected an incomplete result,
+  and `test_complete_multi_program_batch_and_independent_minutes_check` returned `unknown` at its
+  existing 8-second limit. No limit or hard constraint was changed; both are existing scheduling
+  blockers and prevent a full-suite pass claim.
+- `ruff check scripts services packages` → **All checks passed**.
+- `npm run test` in `apps/web` → **838 passed across 63 files**.
+- `.venv/Scripts/python.exe -m pip check` → **No broken requirements found**.
+- `.venv/Scripts/python.exe -m pip_audit --strict` could not complete: Windows sandbox networking
+  denied the connection to `pypi.org` (`WinError 10013`). User reports that `scripts/security/python_audit.py`
+  and `pip check` passed in normal PowerShell, but that external audit output has not yet been provided
+  as a receipt and is not represented as independently verified here.
+
+The five PostgreSQL/Auth Emulator qualifications have **not** been run in this turn. The user asked
+to rerun them in normal PowerShell after these fixes; their report says only the audit qualification
+already passed. The script fixes are locally unit-checked but remain **IMPLEMENTED-UNVERIFIED** until
+the disposable runs produce receipts. P4d remains **PARTIAL**; connected administrator E2E and browser
+acceptance remain open.
+
+## 18 November 2026 — external environment handoff verification (BLOCKED)
+
+The follow-up prompt said the blockers had been resolved outside the sandbox. A fresh read-only check of this feature worktree does not show that setup:
+
+- `C:\Projects\ClassSync\var\feature-auth-onboarding-saas\.venv` is still a **Junction** targeting `C:\Projects\ClassSync\.venv`; it is not an isolated feature environment. The target environment reports Python 3.12.14.
+- `py -0p` reports `No installed Pythons found!`; system `python` resolves to Python 3.14. A new environment created with that interpreter would not satisfy the repository's documented Python 3.12 qualification requirement.
+- `.venv/Scripts/python.exe -m pip check` → `No broken requirements found.` This does not establish an advisory-free environment.
+- `.venv/Scripts/python.exe -m pip_audit --version` → `No module named pip_audit`.
+- `node scripts/auth_emulator_qualification.cjs --development` → exit 1, `Missing pinned Auth Emulator tools. See docs/infrastructure/local-connected-development.md.` A scan of the system temp root did not find a `classync-auth-tools-*` installation.
+- The repository requires pinned `firebase-tools 15.34.1`, `@opentelemetry/core 2.8.0`, and `uuid 11.1.1`; the supplied `npx firebase-tools@latest` command does not satisfy that pinned-tool gate by itself. Do not infer emulator qualification from a global CLI version.
+
+Therefore the outside-shell commands in the handoff have not yet produced evidence visible to this worktree/session. I did not install packages, replace/remove the `.venv` junction, run a PostgreSQL qualification expected to fail under the same restricted process, start an unqualified backend/frontend, or touch port 5173. No connected E2E attempt was made. P4d remains **PARTIAL**. Required next prerequisite: provide an isolated Python 3.12 environment and the repository-pinned Auth Emulator tool root; then run the disposable PostgreSQL qualifications in a normal shell and make their receipts available in this worktree before connected browser testing.
+
+## 18 November 2026 — local MVP continuation and merge preparation (PARTIAL)
+
+- **Branch/preservation:** Work was performed on `feature/auth-onboarding-saas` at base HEAD
+  `7165fa130e413f8dc8893b85d30ecbe530ef8173`. The worktree contained extensive pre-existing dirty
+  application, docs, migration, test, script, and local artifact changes before this slice. No reset,
+  stash, cleanup, stage, commit, branch switch, merge, push, or deployment was performed. The
+  existing service on port 5173 was left alone.
+- **Student identity correction:** `onboarding_repository.py` now requires the authenticated Firebase
+  email to match the exact lowercase `^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$` format and the
+  stored Registrar email byte-for-byte after the format check. A new uppercase-email regression was
+  observed failing first, then passed after the minimal correction. Active enrollment and exact
+  student ID/email matching remain mandatory; old rows default to `unverified`. The exact generic
+  Registrar message remains centralized in `onboarding.py`. No Registrar data was imported and no
+  migration was executed against a database.
+- **Fresh local verification:**
+  - `apps/web`: focused Auth/onboarding tests **18 passed**; full `npm run test` **843 passed across
+    63 files**; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm run build` exit 0. Build output:
+    React vendor 318.51 kB, Firebase vendor 243.27 kB, UI vendor 47.38 kB, app entry 322.15 kB; no
+    oversized-chunk or mixed Firebase import warning.
+  - Python: `.venv/Scripts/python.exe -m pytest -q` **1115 passed**, one Starlette/httpx deprecation
+    warning. Focused onboarding and qualification-regression tests **24 passed**, same warning.
+  - Ruff: `ruff check --no-cache scripts services packages` **All checks passed** using the preserved
+    shared Ruff executable via `.venv-main-junction`; the isolated Python 3.12.10 feature `.venv`
+    itself does not contain Ruff. `--no-cache` was used to avoid environment/cache writes.
+- **Deferred by owner direction:** Do not wait for manual PowerShell receipts, disposable `pg_ctl`
+  runs, or isolated `pip-audit` checks to continue local feature development. Those environment-
+  specific checks are deferred to CI/pre-release. This does not convert PostgreSQL migration/RLS,
+  dependency security, Auth Emulator, connected browser journey, institutional roster, native 200%,
+  or keyboard accessibility gates into PASS. The identical Registrar response is covered by
+  contract-level tests; response-time equivalence has not been measured and is not claimed. P4d
+  remains **PARTIAL** and production readiness is not established.
+- **Merge preparation:** `feature/auth-onboarding-saas` is three commits ahead of `main` per
+  `git log main..feature/auth-onboarding-saas --oneline`. The root directory is a separate checkpoint
+  worktree, not checked out to `main`; main worktree safety/status could not be confirmed in this
+  sandbox because Git reports its parent directory as dubious ownership. No global Git safe-directory
+  exception was added. Numerous pre-existing untracked files (including `.venv-main-junction/`) mean
+  a blanket `git add -A` would be unsafe. Stage reviewed paths in logical commits only after reviewing
+  this worktree's complete diff and confirming a clean merge target.
+- **Files changed in this slice:** `services/gateway/app/onboarding_repository.py`,
+  `services/gateway/tests/test_onboarding.py`,
+  `packages/persistence/classync_persistence/migrations/versions/0018_student_roster_verification.py`,
+  `README.md`, `docs/autonomy/TRACEABILITY.md`, and this ledger. Other dirty files listed by Git are
+  retained from earlier work and were not rewritten as part of this slice.
+
+## 18 November 2026 — Render preview/qualification configuration (NOT DEPLOYED)
+
+- Added `CORS_ALLOWED_ORIGINS` as a validated environment alias while preserving the existing
+  `CORS_ORIGINS` name. Its red-first regression and final focused checks pass.
+- Extended the existing `Dockerfile` with a default all-service build while retaining explicit
+  `SERVICE=gateway|academic|scheduling` CI/Cloud Run images. Added `scripts/render_entrypoint.py`
+  to launch Academic, Scheduling, and the current Notification health stub on loopback, then the
+  Gateway on `$PORT`; added signal handling, readiness checks, no access logs, and fail-the-container
+  behavior if one child exits. The existing service entrypoint remains in use for single-service
+  builds. CI now builds the all-service image in addition to the three existing isolated images.
+- Added root `render.yaml` with `main` selected, automatic deploys disabled, exact Vercel CORS origin,
+  fail-closed security flags, verified-TLS DSN prompts, and no database creation/migration. Added
+  `.dockerignore`/`.gitignore` exclusions for the environment junction and local P4d JSON evidence.
+  YAML parser validation passes; ignore probes confirm `.venv-main-junction/`,
+  `docs/production/p4d-local/`, and `var/p4d-evidence/` stay untracked/ignored.
+- Targeted render/CORS/config suite: **41 passed**, one Starlette/httpx deprecation warning. Full
+  Python: **1115 passed**, same warning. Web: **843 passed/63 files**, lint and typecheck pass;
+  production build pass with chunks 318.51/243.27/47.38/322.15 kB and no earlier chunk/import warning.
+  Ruff and `git diff --check` pass. `render.yaml` parses and has the required main/off policy.
+- Local Docker is unavailable (`docker` command not found), so container build and supervisor runtime
+  are not locally verified; the new all-service image build is assigned to CI. No Render resources,
+  Neon resources, environment secrets, Firebase settings, hosted domain/CORS settings, or Vercel
+  configuration were created or changed. No deployment was made.
+- **Production limitation:** this blueprint uses Render's Free plan only for preview/qualification.
+  Its documented idle shutdown, cold-start, ephemeral filesystem, compute limits, and explicit
+  non-production guidance mean it does not meet ClassSync production reliability. The Notification
+  service also remains a health stub. Keep production blocked unless an approved hosting path passes
+  recovery, privacy, latency, and full workflow gates.
+- **Merge/push authorization:** the 18 November owner instruction now explicitly authorizes selective
+  staging, local commit(s), merge of `feature/auth-onboarding-saas` into `main`, and pushes of both
+  refs to `origin`. Earlier approval text prohibiting those Git actions is superseded for this exact
+  request. Hosted deployment, cloud provisioning/settings, spending, live-data import, and original
+  database migration remain unauthorized.

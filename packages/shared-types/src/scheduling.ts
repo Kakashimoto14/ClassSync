@@ -55,6 +55,7 @@ export type AcademicOffering = {
   kind?: "offerings";
   subject_id: string;
   section_id: string;
+  activity_type?: ActivityType;
   teacher_ids?: Array<string>;
   room_ids?: Array<string>;
   weekly_minutes_override?: number | null;
@@ -118,6 +119,7 @@ export type AcademicResource = {
   condition?: "unknown" | "operational" | "maintenance";
   room_type?: string | null;
   type_verified?: boolean;
+  allowed_activity_types?: Array<ActivityType> | null;
   capacity?: number | null;
   capacity_verified?: boolean;
   equipment?: Array<string>;
@@ -180,6 +182,8 @@ export type AcademicSubject = {
   required_equipment?: Array<string>;
   minimum_capacity?: number | null;
 };
+
+export type ActivityType = "academic_instruction" | "computer_lab_instruction" | "bse_science_instruction" | "pahfit" | "sports" | "assembly" | "rotc" | "special_booking";
 
 export type Assignment = {
   id: string;
@@ -338,6 +342,7 @@ export type Offering = {
   subject_name: string;
   subject_code?: string | null;
   section_id: string;
+  activity_type?: ActivityType;
   eligible_teacher_ids?: Array<string>;
   eligible_room_ids?: Array<string>;
   required_weekly_minutes?: number;
@@ -409,6 +414,7 @@ export type Room = {
   condition?: "unknown" | "operational" | "maintenance";
   room_type?: string | null;
   type_verified?: boolean;
+  allowed_activity_types?: Array<ActivityType> | null;
   capacity?: number | null;
   capacity_verified?: boolean;
   equipment?: Array<string>;

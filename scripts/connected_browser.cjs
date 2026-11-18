@@ -279,6 +279,33 @@ async function main() {
       .filter({ hasText: /^published$/ })
       .waitFor();
     await shot('administrator-published');
+    const auditResponse = await page.request.get(
+      origin + `/api/v1/timetables/audit/${config.fixture.period}`,
+      { headers: { Authorization: publication.request().headers()['authorization'] } },
+    );
+    assert.equal(auditResponse.status(), 200, 'Administrator activity audit was unavailable');
+    const auditEvents = (await auditResponse.json()).data.events;
+    const auditTypes = new Set(auditEvents.map((event) => event.event_type));
+    for (const event of [
+      'academic.record.created',
+      'academic.calendar.saved',
+      'scheduling.draft.saved',
+      'scheduling.publication.published',
+    ])
+      assert(auditTypes.has(event), `Missing PostgreSQL activity event: ${event}`);
+    await page.goto(origin + '/admin/audit-logs');
+    await page.getByLabel('Academic period', { exact: true }).selectOption(config.fixture.period);
+    await visible('Schedule draft saved');
+    await visible('Timetable published');
+    await shot('administrator-audit');
+    await page.goto(origin + '/admin/dashboard?period=' + config.fixture.period);
+    await visible('Published · Rev 2');
+    const publishedCalendar = page.waitForResponse((response) =>
+      new URL(response.url()).pathname.startsWith('/api/v1/timetables/calendar/'),
+    );
+    await page.goto(origin + '/admin/calendar?period=' + config.fixture.period);
+    assert.equal((await publishedCalendar).status(), 200);
+    await shot('administrator-calendar');
     await logout();
     const teacherAccount = await fetch(
       `http://${config.authEndpoint}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=synthetic-emulator-key`,

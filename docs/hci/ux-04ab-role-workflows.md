@@ -11,18 +11,18 @@ sample databases; working `var/` records were not replaced.
 
 ## Action trace
 
-| User action | Route / actual API |
-| --- | --- |
-| Student/Teacher Home → Schedule | Shared role workspace → `/student/schedule` or `/teacher/schedule` |
-| Choose period/identity | Existing `/timetables/sandbox/periods` and `/calendar/{period}`; production projection uses verified identity instead |
-| Receive schedule change | Existing server-originated `/timetables/{sandbox/}events/{period}` → authoritative refetch |
-| Tap class / Room Details | Accessible class dialog → registered room detail route; synthetic rooms resolved from the selected timetable |
-| Room occupancy | Existing published `/timetables/{sandbox/}availability`, with remembered selected date; occupancy spans active scopes, not only the personal timetable |
-| AI-Powered Scheduling | `/admin/ai-scheduling` → academic periods/readiness → `/scheduling/sandbox/academic/{period}/generate` |
-| Save Draft / reopen | Existing server-held run → `/scheduling/sandbox/academic/drafts` → exact immutable detail |
-| Conflict Center | Load exact draft → independent `/scheduling/sandbox/validate`; no outcome invented |
-| Academic fixes | Issue-specific Faculty, Offerings, Sections, Resources or Constraints route with period retained |
-| Teacher requests | Existing separately labelled request demonstration and exact detail links; not published faculty requests |
+| User action                     | Route / actual API                                                                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Student/Teacher Home → Schedule | Shared role workspace → `/student/schedule` or `/teacher/schedule`                                                                                     |
+| Choose period/identity          | Existing `/timetables/sandbox/periods` and `/calendar/{period}`; production projection uses verified identity instead                                  |
+| Receive schedule change         | Existing server-originated `/timetables/{sandbox/}events/{period}` → authoritative refetch                                                             |
+| Tap class / Room Details        | Accessible class dialog → registered room detail route; synthetic rooms resolved from the selected timetable                                           |
+| Room occupancy                  | Existing published `/timetables/{sandbox/}availability`, with remembered selected date; occupancy spans active scopes, not only the personal timetable |
+| Schedule Generation             | `/admin/ai-scheduling` → academic periods/readiness → `/scheduling/sandbox/academic/{period}/generate` (deterministic OR-Tools CP-SAT)                 |
+| Save Draft / reopen             | Existing server-held run → `/scheduling/sandbox/academic/drafts` → exact immutable detail                                                              |
+| Conflict Center                 | Load exact draft → independent `/scheduling/sandbox/validate`; no outcome invented                                                                     |
+| Academic fixes                  | Issue-specific Faculty, Offerings, Sections, Resources or Constraints route with period retained                                                       |
+| Teacher requests                | Existing separately labelled request demonstration and exact detail links; not published faculty requests                                              |
 
 Old Generate Schedule and AI Conflict Detection URLs remain supported aliases. Main
 navigation exposes one automated scheduling destination and one Conflict Center.
@@ -33,18 +33,18 @@ year/semester; known legacy/sample titles receive a display-only Sample label.
 
 ## HCI evidence
 
-| User problem | Principle | Change | Observed result |
-| --- | --- | --- | --- |
-| Empty Home until several selectors are configured | Recognition over recall | Prefer an existing published sample period and BSIT 3A/eligible faculty; remember choice per role and preview session | Fresh Student and Teacher contexts showed the correct next assignment without setup |
-| Source settings compete with the actual day | Progressive disclosure | Compact truthful sample label and secondary Change context control | Next Class, location and action fit in the first phone viewport |
-| Context disappears between pages | Consistency and user control | Versioned session context shared by Home, Schedule, Calendar and scheduled Rooms; explicit URLs override initial context | Identity, period and selected date survived navigation and refresh |
-| Class inspection requires another page | Recognition and minimal navigation | Date selection updates agenda; Day/Week/Month, mobile week strip and class dialog | Correct class/room inspected; Escape closed dialog and restored trigger focus |
-| Solver hidden behind Coming Soon | Match with real-world tasks | AI-Powered Scheduling leads to the real constraint solver; LLM recommendations remain planned | Administrator generated a complete validated batch from the main destination |
-| Readiness problems require searching | Recovery and error prevention | Short blocking list with period-specific fix links; all warnings behind disclosure | Missing-input tests kept Generate disabled and exposed the correct Faculty fix |
-| Unclear solver success or save status | Visibility of system status | Server-confirmed solver status, coverage, minutes, sessions and conflicts; duplicate-run guard and real Save Draft | Browser generation/save/reopen preserved all assignment IDs exactly |
-| Disconnected conflict destination | Visibility and actionable feedback | Independent snapshot validation, blocking violation details and affected-assignment links | Real validator confirmed zero conflicts; focused test checked a violation without inventing resolution |
-| Missing services look like an empty timetable | Visibility and recovery | Specific service errors, retry and last-confirmed data; no fallback classes | Failure/recovery browser check distinguishes service error from no-class/unpublished states |
-| Starting three services is error prone | Error prevention | `npm run dev` checks service health and sandbox routes before reporting Ready | Real launcher started Gateway, Academic, Scheduling and Vite successfully |
+| User problem                                      | Principle                          | Change                                                                                                                   | Observed result                                                                                        |
+| ------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Empty Home until several selectors are configured | Recognition over recall            | Prefer an existing published sample period and BSIT 3A/eligible faculty; remember choice per role and preview session    | Fresh Student and Teacher contexts showed the correct next assignment without setup                    |
+| Source settings compete with the actual day       | Progressive disclosure             | Compact truthful sample label and secondary Change context control                                                       | Next Class, location and action fit in the first phone viewport                                        |
+| Context disappears between pages                  | Consistency and user control       | Versioned session context shared by Home, Schedule, Calendar and scheduled Rooms; explicit URLs override initial context | Identity, period and selected date survived navigation and refresh                                     |
+| Class inspection requires another page            | Recognition and minimal navigation | Date selection updates agenda; Day/Week/Month, mobile week strip and class dialog                                        | Correct class/room inspected; Escape closed dialog and restored trigger focus                          |
+| Solver hidden behind Coming Soon                  | Match with real-world tasks        | Schedule Generation leads to the deterministic constraint solver; LLM recommendations remain planned                     | Administrator generated a complete validated batch from the main destination                           |
+| Readiness problems require searching              | Recovery and error prevention      | Short blocking list with period-specific fix links; all warnings behind disclosure                                       | Missing-input tests kept Generate disabled and exposed the correct Faculty fix                         |
+| Unclear solver success or save status             | Visibility of system status        | Server-confirmed solver status, coverage, minutes, sessions and conflicts; duplicate-run guard and real Save Draft       | Browser generation/save/reopen preserved all assignment IDs exactly                                    |
+| Disconnected conflict destination                 | Visibility and actionable feedback | Independent snapshot validation, blocking violation details and affected-assignment links                                | Real validator confirmed zero conflicts; focused test checked a violation without inventing resolution |
+| Missing services look like an empty timetable     | Visibility and recovery            | Specific service errors, retry and last-confirmed data; no fallback classes                                              | Failure/recovery browser check distinguishes service error from no-class/unpublished states            |
+| Starting three services is error prone            | Error prevention                   | `npm run dev` checks service health and sandbox routes before reporting Ready                                            | Real launcher started Gateway, Academic, Scheduling and Vite successfully                              |
 
 These are engineering observations and automated/browser checks. No participant or
 usability-study results are claimed. Reduced motion, keyboard focus, narrow layouts,

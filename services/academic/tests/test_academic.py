@@ -177,10 +177,13 @@ def test_catalog_and_empty_readiness_and_restart(repo):
     )
     programs = [e.record for e in snapshot.records if e.record.kind == "programs"]
     rooms = [e.record for e in snapshot.records if e.record.kind == "resources"]
-    assert len(programs) == 9 and len(rooms) == 59
-    assert all(not r.schedulable and r.capacity is None for r in rooms)
-    assert not any(r.id in {"cdm-prrc-304", "cdm-prrc-305", "cdm-prrc-306"} for r in rooms)
-    assert next(r for r in rooms if r.id == "cdm-prrc-302").alias_unconfirmed
+    assert len(programs) == 9 and len(rooms) == 53
+    assert sum(r.schedulable for r in rooms) == 41
+    assert sum(not r.schedulable for r in rooms) == 12
+    assert all(r.capacity is None and not r.equipment for r in rooms)
+    assert not any(r.id in {"cdm-prrc-109", "cdm-prrc-110", "cdm-prrc-210"} for r in rooms)
+    assert next(r for r in rooms if r.id == "cdm-prrc-302").alias == "COMLAB1"
+    assert next(r for r in rooms if r.id == "cdm-prrc-302").verification_note
     checked = academic_readiness(snapshot)
     assert not checked.ready
     assert {i.code for i in checked.issues if i.severity == "blocking"} >= {
@@ -451,6 +454,30 @@ def api(tmp_path, monkeypatch):
 
     monkeypatch.setattr(httpx, "Client", AcademicClient)
     return TestClient(gateway.app)
+
+
+def test_sandbox_qualification_fixture_is_blocked_in_institutional_mode(repo):
+    saved = complete(repo)
+    assert saved.period.source == "development-entered"
+    assert academic_readiness(saved).ready
+
+    institutional = saved.model_copy(
+        update={"period": saved.period.model_copy(update={"source": "institutional"})}
+    )
+    checked = academic_readiness(institutional)
+    codes = {issue.code for issue in checked.issues}
+    assert not checked.ready and checked.inputs is None
+    assert checked.offerings == 4
+    assert {
+        "cohort_assignment_unverified",
+        "curriculum_reference_missing",
+        "contact_minutes_reference_missing",
+        "faculty_verification_missing",
+        "offering_reference_missing",
+        "operating_windows_unverified",
+        "room_availability_unverified",
+        "shared_scope_unverified",
+    } <= codes
 
 
 def test_real_gateway_entered_generation_save_and_isolation(api):

@@ -111,6 +111,7 @@ export function PreviewRequestsView({
   role: 'teacher' | 'administrator';
   detail?: boolean;
 }) {
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'declined'>('all');
   const [params] = useSearchParams();
   const requests = selectRequests(
     schedulePreview,
@@ -118,13 +119,16 @@ export function PreviewRequestsView({
   ).slice().sort((a,b)=>Number(b.status==='pending')-Number(a.status==='pending'));
   const id = params.get('id');
   const selected = id ? requests.find((item) => item.id === id) : requests[0];
-  const shown = detail ? (selected ? [selected] : []) : requests;
+  const shown = detail
+    ? selected ? [selected] : []
+    : requests.filter((request) => role !== 'administrator' || statusFilter === 'all' || request.status === statusFilter);
   return (
-    <section className="preview-records">
+    <section className={`preview-records${role === 'administrator' ? ' admin-requests' : ''}`}>
       <p className="muted">
         Demonstration requests · separate from your selected timetable. Official changes require
         administrator review.
       </p>
+      {role === 'administrator' && !detail && <div className="admin-filter-pills" role="group" aria-label="Filter classroom requests">{([['all','All'],['pending','Pending review'],['approved','Approved'],['declined','Declined']] as const).map(([status,label])=><button type="button" key={status} aria-pressed={statusFilter===status} onClick={()=>setStatusFilter(status)}>{label}<span>{status==='all'?requests.length:requests.filter((item)=>item.status===status).length}</span></button>)}</div>}
       {shown.map((request) => (
         <RequestSummary
           key={request.id}
@@ -307,37 +311,41 @@ export function PreviewRequestCreateView() {
 }
 
 export function PreviewUpdatesView({ role }: { role: UserRole }) {
+  const [category, setCategory] = useState<'all' | 'schedule' | 'rooms'>('all');
   const assignments = selectAssignments(schedulePreview, previewViewer(role)) ?? [];
   const updates = selectUpdates(schedulePreview, assignments);
+  const visible = updates.filter((update) => {
+    const isRoom = /room|classroom/i.test(`${update.title} ${update.detail}`);
+    return category === 'all' || (category === 'rooms' ? isRoom : !isRoom);
+  });
   return (
-    <section className="preview-records">
+    <section className={`preview-records${role === 'administrator' ? ' admin-notifications' : ''}`}>
+      {role === 'administrator' && <div className="admin-notifications-toolbar"><StatusBadge tone="info">Demonstration feed</StatusBadge><Link className="button button--secondary" to="/admin/schedule-manager">Open Schedule Manager</Link></div>}
       <p className="muted">
         Demonstration alerts · separate from your selected timetable. Notification delivery is not
         connected.
       </p>
-      {updates.map((update) => (
-        <article key={update.id} className="dashboard-panel">
-          <h2>{update.title}</h2>
-          <p>{update.detail}</p>
+      {role === 'administrator' && <div className="admin-filter-pills" role="group" aria-label="Filter notifications">{([['all','All'],['schedule','Schedule updates'],['rooms','Room updates']] as const).map(([value,label])=><button type="button" key={value} aria-pressed={category===value} onClick={()=>setCategory(value)}>{label}<span>{value==='all'?updates.length:updates.filter((item)=>value==='rooms'?/room|classroom/i.test(`${item.title} ${item.detail}`):!/room|classroom/i.test(`${item.title} ${item.detail}`)).length}</span></button>)}</div>}
+      {visible.map((update) => (
+        <article key={update.id} className="dashboard-panel admin-notification-row">
+          <span className="admin-notification-marker" aria-hidden="true">{/room|classroom/i.test(`${update.title} ${update.detail}`) ? 'Room' : 'Schedule'}</span>
+          <div><h2>{update.title}</h2><p>{update.detail}</p></div>
+          <span className="admin-notification-source">Demo alert</span>
         </article>
       ))}
-      {!updates.length && (
+      {!visible.length && (
         <EmptyState
-          title="No sample updates"
-          detail="There are no updates for these assignments."
+          title={updates.length ? 'No updates in this category' : 'No sample updates'}
+          detail="There are no updates for this filter in the demonstration timetable."
         />
       )}
-      <Link
+      {role !== 'administrator' && <Link
         className="text-action"
-        to={rolePath(role, role === 'administrator' ? 'schedule-manager' : 'schedule')}
+        to={rolePath(role, 'schedule')}
       >
         Open{' '}
-        {role === 'administrator'
-          ? 'Schedule Manager'
-          : role === 'teacher'
-            ? 'teaching schedule'
-            : 'my schedule'}
-      </Link>
+        {role === 'teacher' ? 'teaching schedule' : 'my schedule'}
+      </Link>}
     </section>
   );
 }

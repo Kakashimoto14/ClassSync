@@ -187,6 +187,20 @@ class PostgresPublicationRepository(PublicationRules):
                 for row in reversed(self.rows(db, self.keys["tenant"], dataset, period))
             ]
 
+    def administrator_activity(self, period, *, limit=100):
+        """Return redacted activity events visible to a verified tenant Administrator."""
+        with self.session() as db:
+            rows = db.execute(
+                text("""
+                    SELECT event_id,event_type,entity_type,entity_ref,revision,actor_uid,created_at
+                    FROM classsync_scheduling.administrator_activity
+                    WHERE tenant_id=:tenant AND period_id=:period
+                    ORDER BY created_at DESC,event_id DESC LIMIT :limit
+                """),
+                {"tenant": self.keys["tenant"], "period": period, "limit": limit},
+            ).mappings().all()
+            return [dict(row) for row in rows]
+
     def calendar(self, tenant, dataset, period, start, end, viewer):
         self.scope(dataset, period)
         role = viewer.get("role")

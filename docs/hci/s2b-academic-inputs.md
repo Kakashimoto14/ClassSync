@@ -21,7 +21,7 @@ selectable. This is scripted functional/visual QA, not a human-participant study
 | Many related data types risk a giant form | Meaningful grouping and progressive disclosure | Focused Programs/Subjects/Sections/Faculty/Offerings/Resources/Constraints views; advanced fields disclosed separately | Mobile entry completed at 390px; desktop record edit completed at 1440px |
 | Remembering IDs invites mismatched references | Recognition over recall and error prevention | Labelled selectors, searchable checkbox groups, structured section fields; server-side foreign keys | Correct BSIT-3A/3B ownership, eligibility and period references verified |
 | Missing data could be mistaken for a feasible schedule | Visibility of system status | Required errors versus warnings; Generate disabled when blocked; solver still establishes feasibility | Empty period blocked; complete entered batch passed independent validation |
-| Resources might look usable simply because listed | Accurate mental model | Provisional flags, explicit operational eligibility, verified metadata and source notes | All 59 supplied CdM records remained unverified; QA resources entered separately |
+| Resources might look usable simply because listed | Accurate mental model | Provisional flags, explicit operational eligibility, verified metadata and source notes | Historical 59-row catalog was superseded in November 2026; current 53-row records remain provisional pending Facilities verification |
 | A save or source edit might silently replace a draft | Consistency and recovery | Server-confirmed save states, revisions, immutable input snapshots, source-aware draft routes | Earlier draft unchanged after subject edit, refresh and all-service restart |
 | Navigating categories could lose period context | Orientation and consistency | Period carried in every category URL; familiar labels and active state | Tab route/period identity checks and reload verification |
 
@@ -33,7 +33,7 @@ in place of those entries.
 
 - Period: `S2B entered period — verified workflow`.
 - ID: `a769a019-82ae-456b-a29b-937700631ee3`.
-- The owner-supplied catalog supplied nine programs and 59 provisional spaces;
+- The earlier owner-supplied catalog supplied nine programs and 59 provisional spaces;
   one additional explicitly labelled QA program was created to verify configurability.
   Catalog availability did not imply that all programs had sections or curricula.
 - Two user-entered QA subjects, associated explicitly with BSIT, each requiring
@@ -45,7 +45,9 @@ in place of those entries.
   daily workload limits.
 - Two separate QA resources with explicitly entered 25-person capacity, operational
   assertions and provenance notes stating these were development QA assertions,
-  **not official CdM metadata**. No capacity/facility facts were added to the 59 spaces.
+  **not official CdM metadata**. This historical checkpoint predates the November 2026
+  53-row inventory in `docs/audit/ROOM_INVENTORY_UPDATE.md`; no capacity/facility facts
+  were added to the earlier catalog.
 - Four offerings: both subjects for each section; eligible faculty/resources chosen
   explicitly. Operating hours were entered as Monday/Wednesday/Friday 08:00–14:00.
 

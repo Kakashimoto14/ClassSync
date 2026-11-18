@@ -9,9 +9,11 @@ import { addDays } from '../lib/calendar-model';
 export function AcademicCalendarEditor({
   snapshot,
   onSaved,
+  open,
 }: {
   snapshot: AcademicSnapshot;
   onSaved: (snapshot: AcademicSnapshot) => void;
+  open?: boolean;
 }) {
   const c = snapshot.period.calendar;
   const [year, setYear] = useState(c?.academic_year ?? '');
@@ -78,7 +80,7 @@ export function AcademicCalendarEditor({
     }
   }
   return (
-    <details className="workspace-card" open={!c}>
+      <details className="workspace-card" open={open ?? !c}>
       <summary>Academic year, semester and instructional calendar</summary>
       <form className="academic-create-period" onSubmit={submit}>
         <p>

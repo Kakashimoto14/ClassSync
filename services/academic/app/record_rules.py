@@ -323,7 +323,17 @@ def validate_record(record, period_id, lookup):
             room is None
             or any(
                 getattr(record, k) != room.get(k)
-                for k in ("name", "building", "floor", "location", "alias")
+                for k in (
+                    "name",
+                    "building",
+                    "floor",
+                    "location",
+                    "alias",
+                    "schedulable",
+                    "room_type",
+                    "allowed_program_ids",
+                    "allowed_activity_types",
+                )
             )
             or record.alias_unconfirmed != room.get("aliasUnconfirmed", False)
             or record.source != "cdm-provisional"
@@ -331,7 +341,8 @@ def validate_record(record, period_id, lookup):
             raise AcademicError(
                 422,
                 "cdm_identity",
-                "Preserve the supplied CdM resource ID, location and provisional label.",
+                "Preserve the supplied CdM identity, location, schedulability and "
+                "activity restrictions.",
             )
 
 
@@ -345,6 +356,13 @@ def initial_records(include_cdm_catalog):
                 AcademicResource(
                     **{k: v for k, v in room.items() if k not in {"aliasUnconfirmed", "alias"}},
                     source="cdm-provisional",
+                    verification_note=(
+                        "November 2026 room inventory row designates this space for scheduling. "
+                        "Operational condition, availability, capacity and equipment "
+                        "are not verified."
+                        if room.get("schedulable")
+                        else ""
+                    ),
                     alias=room.get("alias"),
                     alias_unconfirmed=room.get("aliasUnconfirmed", False),
                 )

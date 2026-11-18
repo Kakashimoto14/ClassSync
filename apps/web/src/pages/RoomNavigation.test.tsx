@@ -50,16 +50,16 @@ describe('room discovery routes and interactions', () => {
     'offers provisional CDM inventory to %s without implying verified resources',
     (role) => {
       open(role, roomDirectoryPath(role), 'cdm');
-      expect(main().getByText('59 of 59 spaces')).toBeInTheDocument();
+      expect(main().getByText('53 of 53 spaces')).toBeInTheDocument();
       expect(main().getAllByRole('article')).toHaveLength(12);
       fireEvent.click(main().getByRole('button', { name: 'Next' }));
       expect(main().getByText('Page 2 of 5')).toBeInTheDocument();
       expect(main().getByRole('heading', { name: 'Rooms & spaces' })).toHaveFocus();
       fireEvent.change(main().getByRole('searchbox', { name: 'Search rooms' }), {
-        target: { value: 'VGA' },
+        target: { value: 'COMLAB1' },
       });
-      expect(main().getByText('1 of 59 spaces')).toBeInTheDocument();
-      expect(main().getByText('VGA Room · Unconfirmed')).toBeInTheDocument();
+      expect(main().getByText('1 of 53 spaces')).toBeInTheDocument();
+      expect(main().getByText('COMLAB1')).toBeInTheDocument();
       fireEvent.click(main().getByRole('link', { name: 'View PRRC 302 details' }));
       expect(main().getByText('Condition unverified')).toBeInTheDocument();
       expect(main().getAllByText('Unverified')).toHaveLength(3);

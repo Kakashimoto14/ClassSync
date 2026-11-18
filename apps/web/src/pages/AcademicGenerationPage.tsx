@@ -11,6 +11,7 @@ import {
 } from '../lib/academic-api';
 import { type GenerationResult } from '../lib/scheduling-api';
 import { appMode } from '../config/runtime-config';
+import { readinessActionForIssue } from '../lib/readiness-navigation';
 const schedulingSandboxEnabled = appMode !== 'presentation';
 import {
   defaultPeriod,
@@ -43,19 +44,10 @@ export function SchedulingSourcePage() {
   );
 }
 function fixPath(code: string, period: string) {
-  if (/curriculum|cohort/.test(code)) return '/admin/subjects?period=' + encodeURIComponent(period);
-  const path = /calendar/.test(code)
-    ? '/admin/academic'
-    : /faculty|teacher|workload/.test(code)
-      ? '/admin/teachers'
-      : /room|resource/.test(code)
-        ? '/admin/academic/resources'
-        : /section/.test(code)
-          ? '/admin/sections'
-          : /operating|scope|constraint/.test(code)
-            ? '/admin/scheduling-constraints'
-            : '/admin/offerings';
-  return path + '?period=' + encodeURIComponent(period);
+  return readinessActionForIssue(
+    { code, message: '', severity: 'blocking' },
+    period,
+  ).to;
 }
 export function ReadinessSummary({ checked }: { checked: AcademicReadiness }) {
   const blocking = checked.issues.filter((i) => i.severity === 'blocking');
@@ -337,7 +329,16 @@ function AcademicGenerationPage() {
         </label>
         {loading && <p role="status">Loading academic periods…</p>}
         {!loading && !periods.length && !error && (
-          <p>No academic periods yet. Set up your academic inputs to begin.</p>
+          <section className="generation-empty-state">
+            <h3>Start with academic setup</h3>
+            <p>
+              Create a period and add its calendar, curriculum, sections, faculty availability,
+              classroom requirements and scheduling rules before generating.
+            </p>
+            <Link className="button" to="/admin/academic">
+              Create an academic period
+            </Link>
+          </section>
         )}
         {checked && <ReadinessSummary checked={checked} />}
         <Button
@@ -416,12 +417,9 @@ function AcademicGenerationPage() {
           </Button>
         </div>
       )}
-      {!result && (
-        <Link
-          className="button button--secondary"
-          to={appMode === 'institutional' ? '/admin/academic' : '/admin/academic#sample-scenario'}
-        >
-          {appMode === 'institutional' ? 'Manage academic inputs' : 'Set up a sample scenario'}
+      {!result && periods.length > 0 && (
+        <Link className="button button--secondary" to="/admin/academic">
+          Manage academic setup
         </Link>
       )}
       {result && (

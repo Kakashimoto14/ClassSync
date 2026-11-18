@@ -226,12 +226,48 @@ def test_incomplete_and_missing_references():
 
 def test_cdm_inventory_and_program_policy():
     data = catalogs()
-    assert len(data["cdm_spaces"]) == 59
-    assert all(not r.schedulable and r.capacity is None for r in data["cdm_spaces"])
-    assert not any(
-        r.id in {"cdm-prrc-304", "cdm-prrc-305", "cdm-prrc-306"} for r in data["cdm_spaces"]
-    )
+    rooms = data["cdm_spaces"]
+    assert len(rooms) == 53 and len({r.id for r in rooms}) == 53
+    assert sum(r.schedulable for r in rooms) == 41
+    assert sum(not r.schedulable for r in rooms) == 12
+    assert sum(r.room_type == "lecture_classroom" for r in rooms) == 33
+    assert sum(r.room_type == "computer_lab" for r in rooms) == 4
+    assert sum(r.room_type == "science_lab" for r in rooms) == 1
+    assert all(r.capacity is None and not r.equipment and not r.type_verified for r in rooms)
+    assert not any(r.id in {"cdm-prrc-109", "cdm-prrc-110", "cdm-prrc-210"} for r in rooms)
+    science = next(r for r in rooms if r.id == "cdm-prrc-108")
+    assert science.allowed_program_ids == ["bsed-sci"]
+    assert science.allowed_activity_types == ["bse_science_instruction"]
+    court = next(r for r in rooms if r.id == "cdm-court")
+    oval = next(r for r in rooms if r.id == "cdm-oval")
+    assert court.allowed_activity_types == ["pahfit", "sports", "assembly"]
+    assert oval.allowed_activity_types == ["pahfit", "sports", "rotc"]
     assert next(p for p in data["programs"] if p.id == "tcp").section_policy == "custom"
+
+
+def test_restricted_inventory_rooms_require_matching_activity_and_verified_type():
+    from classync_contracts.scheduling import Offering
+
+    from services.scheduling.app.readiness import eligible_room
+
+    rooms = {r.id: r for r in catalogs()["cdm_spaces"]}
+    court = rooms["cdm-court"].model_copy(
+        update={"condition": "operational", "type_verified": True}
+    )
+    sports = Offering(
+        id="sports", subject_id="sports", subject_name="Sports", section_id="section",
+        activity_type="sports", eligible_teacher_ids=["teacher"], eligible_room_ids=[court.id],
+    )
+    lecture = sports.model_copy(update={"activity_type": "academic_instruction"})
+    assert eligible_room(court, sports, "bsit")
+    assert not eligible_room(court, lecture, "bsit")
+    assert not eligible_room(court.model_copy(update={"type_verified": False}), sports, "bsit")
+    science = rooms["cdm-prrc-108"].model_copy(
+        update={"condition": "operational", "type_verified": True}
+    )
+    lab = sports.model_copy(update={"activity_type": "bse_science_instruction"})
+    assert eligible_room(science, lab, "bsed-sci")
+    assert not eligible_room(science, lab, "bsit")
 
 
 def test_nonstandard_lab_override_and_distinct_day_validation():

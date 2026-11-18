@@ -84,6 +84,12 @@ def prepare(connection, owner, runtime, *, uid, project, requests=False):
         )
         db.execute(
             text(
+                "GRANT SELECT ON classsync_scheduling.administrator_activity "
+                f"TO {connection.runtime}"
+            )
+        )
+        db.execute(
+            text(
                 "GRANT USAGE,SELECT ON SEQUENCE "
                 "classsync_scheduling.published_versions_sequence_seq "
                 f"TO {connection.runtime}"

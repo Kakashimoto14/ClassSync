@@ -35,10 +35,14 @@ from sqlalchemy.engine import URL
 from sqlalchemy.exc import DBAPIError
 
 from scripts.postgres_academic_repository_qualification import FixtureCalls
-from scripts.postgres_academic_restore_qualification import prepare_source
+from scripts.postgres_academic_restore_qualification import (
+    create_source_fixture,
+    prepare_source,
+    seed_source,
+)
 from scripts.postgres_academic_restore_qualification import store as academic_store
 from scripts.postgres_disposable import checked_root, qualify
-from scripts.postgres_driver_qualification import engine_for, require
+from scripts.postgres_driver_qualification import current_migration_head, engine_for, require
 from scripts.postgres_publication_state_qualification import INSERT_VERSION
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.academic.tests.test_academic import complete
@@ -49,7 +53,7 @@ from services.scheduling.app.postgres_draft_repository import PostgresDraftRepos
 from services.scheduling.app.postgres_publication_repository import PostgresPublicationRepository
 from services.scheduling.tests.test_calendar import configuration
 
-MIGRATION = "0011_publication_policy_cycle"
+MIGRATION = current_migration_head()
 TABLES = ("solver_runs", "drafts", "published_versions", "publication_heads", "room_restrictions",
           "restriction_audit", "legacy_publication_archive")
 
@@ -201,18 +205,23 @@ def state(owner):
 
 
 def authorize_grants(connection, owner, migrator):
-    # The failed bootstrap upgrade must roll back even the preceding 0006/0007 DDL.
+    # Apply through 0007 as the migrator, then prove the 0008 owner guard rejects bootstrap.
+    with transaction(owner) as db:
+        db.execute(text(f"SET LOCAL ROLE {migrator}"))
+        migrate(db, target="0007_publication_state")
     try:
         with transaction(owner) as db:
-            migrate(db, target=MIGRATION)
+            migrate(db, target="0008_publication_transactions")
             raise RuntimeError("Privileged migration owner unexpectedly accepted")
     except DBAPIError as error:
         require(error.orig.sqlstate == "42501", "Wrong privileged migration rejection SQLSTATE")
     with transaction(owner) as db:
         require(db.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0005_academic_records"
-                and db.scalar(text("SELECT to_regnamespace('classsync_scheduling')")) is None,
-                "Rejected privileged upgrade left partial schema or revision behind")
+                == "0007_publication_state"
+                and db.scalar(text(
+                    "SELECT to_regclass('classsync_scheduling.room_restrictions')"
+                )) is None,
+                "Rejected privileged upgrade left partial 0008 schema or revision behind")
     with transaction(owner) as db:
         db.execute(text(f"SET LOCAL ROLE {migrator}"))
         migrate(db, target=MIGRATION)
@@ -255,7 +264,7 @@ def enrolled_projection_fixture(academic, snapshot):
                       if entry.record.kind == "sections" and entry.record.active)
     require(len(sections) == 2, "Projection fixture requires two distinct sections")
     enrollments = []
-    for student, section in zip(("student-a", "student-other"), sections, strict=True):
+    for student, section in zip(("student-restore", "student-other"), sections, strict=True):
         offerings = sorted(entry.record.id for entry in snapshot.records
                            if entry.record.kind == "offerings" and entry.record.active
                            and entry.record.section_id == section)
@@ -980,10 +989,14 @@ def exercise(connection):
         check_pool(runtime)
         with transaction(owner) as db:
             verify_fresh_target(db, connection, root)
-        first, _unused_empty, migrator = prepare_source(connection, owner, runtime)
+        _unused, _unused_empty, migrator = prepare_source(
+            connection, owner, runtime, defer_fixture=True
+        )
         authorize_grants(connection, owner, migrator)
         policy_cycle = publication_policy_cycle_probe(owner, runtime, migrator)
         direct_helper = direct_authority_helper(connection, owner, runtime, migrator)
+        seed_source(connection, owner)
+        first, _other = create_source_fixture(runtime)
         first = enrolled_projection_fixture(academic_store(runtime), first)
         repo = repository(runtime)
         draft = saved_draft(runtime, first)
@@ -1053,15 +1066,15 @@ def exercise(connection):
         student_view = student_repo.calendar(
             repo.keys["tenant"], body.dataset, first.period.id,
             date(2026, 10, 1), date(2026, 10, 31),
-            {"role": "student", "uid": "uid-student", "student_id": "student-a"},
+            {"role": "student", "uid": "uid-student", "student_id": "student-restore"},
         )
         student_periods = student_repo.periods(
-            "student", dataset=body.dataset, student_id="student-a"
+            "student", dataset=body.dataset, student_id="student-restore"
         )["periods"]
         require(student_view["occurrences"]
                 and {row["offering_id"] for row in student_view["occurrences"]}
                 <= {offering for enrollment in draft.input_snapshot.enrollments
-                    if enrollment.student_id == "student-a"
+                    if enrollment.student_id == "student-restore"
                     for offering in enrollment.offering_ids}
                 and all("student_id" not in row for row in student_view["occurrences"])
                 and any(item["id"] == first.period.id for item in student_periods),
@@ -1093,7 +1106,7 @@ def exercise(connection):
             must_fail(lambda: student_repo.calendar(
                 "tenant-a", body.dataset, first.period.id,
                 date(2026, 10, 1), date(2026, 10, 31),
-                {"role": "student", "uid": "uid-student", "student_id": "student-a"},
+                {"role": "student", "uid": "uid-student", "student_id": "student-restore"},
             ), "membership_denied")
         finally:
             with transaction(owner) as db:

@@ -1,5 +1,6 @@
 import { appMode, devServer } from '../config/runtime-config';
 import { env } from '../lib/env';
+import { firebaseApp, firebaseReadiness } from '../lib/firebase';
 import {
   UniversitySessionError,
   parseUniversityMembership,
@@ -40,7 +41,6 @@ export async function loadUniversitySessionDriver(): Promise<UniversitySessionDr
     if (devServer) console.warn('[ClassSync auth] VITE_API_BASE_URL is invalid.');
     throw error;
   }
-  const { firebaseApp, firebaseReadiness } = await import('../lib/firebase');
   if (!firebaseApp) {
     if (devServer)
       console.warn(

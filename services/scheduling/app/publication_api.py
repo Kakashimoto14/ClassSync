@@ -164,6 +164,25 @@ def history(period: str, request: Request, dataset: str = "institutional"):
     return {"versions": repo.history(tenant, dataset, period)}
 
 
+@router.get("/audit/{period}")
+def administrator_activity(
+    period: UUID, request: Request, limit: int = Query(100, ge=1, le=500)
+):
+    """Read redacted PostgreSQL activity for a verified institutional Administrator."""
+    settings = settings_only()
+    claims = require_administrator(request, settings)
+    if settings.scheduling_database_url is None:
+        raise HTTPException(503, "Institutional activity audit requires PostgreSQL storage")
+    require_local_publication(settings, False)
+    _, repo = scoped_repo(request, claims)
+    try:
+        return {"events": repo.administrator_activity(str(period), limit=limit)}
+    except DraftError as error:
+        raise HTTPException(error.status, detail={"error": {
+            "code": error.code, "message": str(error),
+        }}) from error
+
+
 def periods_for(request, sandbox, role, section, teacher, claims=None):
     repo, tenant, dataset, viewer = read_scope(
         request, sandbox, role, section, teacher, claims=claims

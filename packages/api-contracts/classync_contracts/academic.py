@@ -3,10 +3,11 @@
 from typing import Annotated, Literal
 from uuid import uuid4
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from .calendar import AcademicCalendar
 from .scheduling import (
+    ActivityType,
     Assignment,
     Contract,
     Enrollment,
@@ -139,6 +140,7 @@ class AcademicOffering(Identity):
     kind: Literal["offerings"] = "offerings"
     subject_id: str
     section_id: str
+    activity_type: ActivityType = ActivityType.ACADEMIC_INSTRUCTION
     teacher_ids: list[str] = Field(default_factory=list)
     room_ids: list[str] = Field(default_factory=list)
     weekly_minutes_override: int | None = Field(default=None, gt=0, le=10080, multiple_of=30)
@@ -146,6 +148,16 @@ class AcademicOffering(Identity):
     required_room_type: str | None = None
     required_equipment: list[str] = Field(default_factory=list)
     minimum_capacity: int | None = Field(default=None, gt=0)
+
+    @field_validator("activity_type", mode="before")
+    @classmethod
+    def validate_activity_type(cls, value):
+        if isinstance(value, str) and not isinstance(value, ActivityType):
+            try:
+                return ActivityType(value)
+            except ValueError:
+                return value
+        return value
     allowed_buildings: list[str] | None = None
     term_offering_verified: bool = False
     override_requirements_verified: bool = False

@@ -8,6 +8,7 @@ import {
   accountError,
   createStudentAccount,
   recoverPassword,
+  signInWithGoogle,
   signInToAccount,
 } from '../auth/account-actions';
 import { useUniversitySession } from '../auth/university-session-context';
@@ -21,6 +22,7 @@ const invitePath = '/auth/teacher-invite';
 const verifyPath = '/auth/verify';
 const onboardingPath = '/auth/student-onboarding';
 const accountPath = '/auth/account';
+const STUDENT_EMAIL_PATTERN = /^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$/;
 
 function presentationUrl() {
   try {
@@ -275,6 +277,8 @@ function CredentialsForm({
     if (busy) return;
     const validation: typeof errors = validateLogin(email.trim(), password);
     if (recovery) delete validation.password;
+    if (signup && !STUDENT_EMAIL_PATTERN.test(email.trim()))
+      validation.email = 'Use a lowercase institutional email such as juan.delacruz@student.pnm.edu.ph.';
     if (signup && password.length < 12) validation.password = 'Use at least 12 characters.';
     if (signup && confirmation !== password)
       validation.confirmation = 'Enter the same password again.';
@@ -302,6 +306,20 @@ function CredentialsForm({
     }
   }
 
+  async function continueWithGoogle() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await signInWithGoogle();
+    } catch (failure) {
+      setError(accountError(failure));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <h1 ref={heading} tabIndex={-1}>
@@ -311,18 +329,27 @@ function CredentialsForm({
         {recovery
           ? 'Enter your email to request a reset link.'
           : signup
-            ? 'Create a student account, then verify your email.'
+            ? 'Create your account with the email on your student record, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
               : 'Sign in to your ClassSync account.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
+        {!recovery && !invited && (
+          <>
+            <Button type="button" variant="secondary" disabled={busy} onClick={continueWithGoogle}>
+              Continue with Google
+            </Button>
+            <p className="entrance-hint">Or continue with your email</p>
+          </>
+        )}
         <div className="auth-field">
           <label htmlFor="entrance-email">Email</label>
           <input
             id="entrance-email"
             ref={emailField}
             type="email"
+            placeholder={signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
             autoComplete="username"
             inputMode="email"
             autoCapitalize="none"

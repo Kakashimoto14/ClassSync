@@ -68,14 +68,14 @@ it('defaults to distinct authorized schedule rooms and retains date/term in deta
   expect(new URL(href, 'http://localhost').searchParams.get('period')).toBe('term-1');
   expect(new URL(href, 'http://localhost').searchParams.get('date')).toBe('2026-10-30');
 });
-it('keeps the 59 provisional rooms separate and supports combined alias/building search, reset and labs', () => {
+it('keeps the 53 provisional spaces separate and supports catalog search, reset and restricted labs', () => {
   show();
   fireEvent.click(screen.getByRole('button', { name: 'All rooms' }));
-  expect(screen.getAllByRole('article')).toHaveLength(59);
+  expect(screen.getAllByRole('article')).toHaveLength(53);
   expect(screen.queryByText('Advanced Database Systems')).not.toBeInTheDocument();
   expect(screen.queryByText('On your schedule')).not.toBeInTheDocument();
   const search = screen.getByRole('searchbox', { name: 'Search rooms or buildings' });
-  fireEvent.change(search, { target: { value: 'VGA' } });
+  fireEvent.change(search, { target: { value: 'COMLAB1' } });
   expect(screen.getAllByRole('article')).toHaveLength(1);
   expect(screen.getByRole('heading', { name: 'PRRC 302' })).toBeVisible();
   fireEvent.change(search, { target: { value: 'New Building' } });
@@ -90,8 +90,10 @@ it('keeps the 59 provisional rooms separate and supports combined alias/building
   );
   expect(search).toHaveValue('');
   fireEvent.click(screen.getByRole('button', { name: 'Labs' }));
-  expect(screen.getByRole('heading', { name: 'Lab information is not confirmed' })).toBeVisible();
-  expect(screen.queryByRole('article')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('article')).toHaveLength(5);
+  expect(screen.getByRole('heading', { name: 'PRRC 302' })).toBeVisible();
+  expect(screen.getByRole('heading', { name: 'PRRC 108' })).toBeVisible();
+  expect(screen.queryByRole('heading', { name: 'PRRC 204' })).not.toBeInTheDocument();
 });
 it.each([401, 403, 503])('does not show stale room relationships after HTTP %s', (status) => {
   fixture.workspace.error = 'Rejected';
@@ -119,7 +121,7 @@ it('honestly shows no assigned rooms and offers the directory', () => {
   show();
   expect(screen.getByRole('heading', { name: 'No assigned rooms yet' })).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Browse all rooms' }));
-  expect(screen.getAllByRole('article')).toHaveLength(59);
+  expect(screen.getAllByRole('article')).toHaveLength(53);
 });
 it('does not inject the local directory into an institutional account', () => {
   fixture.preview = false;

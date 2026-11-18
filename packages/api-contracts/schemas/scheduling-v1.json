@@ -1,6 +1,20 @@
 {
   "GenerationInput": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -197,6 +211,10 @@
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -429,6 +447,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -1199,6 +1233,20 @@
   },
   "ReadinessResult": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -1563,6 +1611,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "eligible_teacher_ids": {
             "items": {
               "type": "string"
@@ -1794,6 +1846,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -2116,6 +2184,20 @@
   },
   "ValidationInput": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -2442,6 +2524,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "eligible_teacher_ids": {
             "items": {
               "type": "string"
@@ -2673,6 +2759,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -3131,6 +3233,20 @@
   },
   "DraftDetail": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -3641,6 +3757,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "eligible_teacher_ids": {
             "items": {
               "type": "string"
@@ -3872,6 +3992,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -4892,6 +5028,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "teacher_ids": {
             "items": {
               "type": "string"
@@ -5220,6 +5360,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -5679,6 +5835,20 @@
         ],
         "title": "AcademicSubject",
         "type": "object"
+      },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
       },
       "Assignment": {
         "additionalProperties": false,
@@ -6462,6 +6632,20 @@
         "title": "AcademicPeriod",
         "type": "object"
       },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -6867,6 +7051,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "eligible_teacher_ids": {
             "items": {
               "type": "string"
@@ -7138,6 +7326,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -8296,6 +8500,10 @@
             "title": "Section Id",
             "type": "string"
           },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
+          },
           "teacher_ids": {
             "items": {
               "type": "string"
@@ -8574,6 +8782,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -9033,6 +9257,20 @@
         ],
         "title": "AcademicSubject",
         "type": "object"
+      },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
       },
       "Assignment": {
         "additionalProperties": false,

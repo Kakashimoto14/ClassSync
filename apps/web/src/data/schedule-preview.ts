@@ -1,5 +1,6 @@
 import type { UserRole } from '../types/ui';
 import { provisionalCdmRooms } from './cdm-room-inventory';
+import type { ActivityType } from '../../../../packages/shared-types/src/scheduling';
 
 export interface AcademicReference {
   id: string;
@@ -11,6 +12,14 @@ export interface PreviewRoom extends AcademicReference {
 }
 export interface ProvisionalRoom extends PreviewRoom {
   source: 'user-supplied-provisional';
+  schedulable: boolean;
+  room_type: string;
+  type_verified: boolean;
+  condition?: 'unknown' | 'operational' | 'maintenance';
+  capacity?: number | null;
+  equipment?: Array<string>;
+  allowed_activity_types?: Array<ActivityType> | null;
+  allowed_program_ids?: Array<string> | null;
   alias?: string;
   aliasUnconfirmed?: boolean;
   location?: string;

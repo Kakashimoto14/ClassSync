@@ -86,6 +86,59 @@ def test_postgres_publication_history_route_uses_only_postgres_repository(monkey
     assert result == {"versions": [{"dataset": "institutional", "period_id": "term-a"}]}
 
 
+def test_administrator_activity_route_uses_scoped_postgres_repository(monkeypatch):
+    from uuid import uuid4
+
+    from services.scheduling.app.postgres_publication_repository import (
+        PostgresPublicationRepository,
+    )
+
+    settings = pg_settings()
+    period = uuid4()
+    expected = [{
+        "event_id": uuid4(),
+        "event_type": "scheduling.draft.saved",
+        "entity_type": "draft",
+        "entity_ref": "a" * 64,
+        "revision": None,
+        "actor_uid": "verified-admin",
+        "created_at": "2026-11-17T10:00:00+08:00",
+    }]
+    monkeypatch.setattr(api, "settings_only", lambda: settings)
+    monkeypatch.setattr(api, "require_administrator", lambda *_: {
+        "uid": "verified-admin", "tenant_id": "tenant-a", "role": "administrator",
+    })
+    monkeypatch.setattr(api, "require_local_publication", lambda *_: None)
+    repository = object.__new__(PostgresPublicationRepository)
+    monkeypatch.setattr(api, "scoped_repo", lambda *_: (settings, repository))
+    monkeypatch.setattr(
+        PostgresPublicationRepository,
+        "administrator_activity",
+        lambda self, requested, *, limit: expected
+        if requested == str(period) and limit == 25
+        else pytest.fail("Audit query scope or limit changed"),
+    )
+    result = api.administrator_activity(period, request(object()), limit=25)
+    assert result == {"events": expected}
+
+
+def test_administrator_activity_fails_closed_without_postgres(monkeypatch):
+    settings = main.Settings(
+        _env_file=None,
+        classsync_env="test",
+        firebase_project_id="demo-publication",
+        institutional_tenant_id="tenant-a",
+        scheduling_database_transport="loopback-sspi-test",
+        scheduling_database_url=None,
+    )
+    monkeypatch.setattr(api, "settings_only", lambda: settings)
+    monkeypatch.setattr(api, "require_administrator", lambda *_: {"uid": "verified-admin"})
+    with pytest.raises(HTTPException) as error:
+        api.administrator_activity("00000000-0000-0000-0000-000000000001", request())
+    assert error.value.status_code == 503
+    assert "requires PostgreSQL" in str(error.value.detail)
+
+
 @pytest.mark.parametrize("role", ["student", "teacher", "administrator"])
 def test_timetable_http_routes_use_verified_role_for_postgres_projection(monkeypatch, role):
     class Repository:

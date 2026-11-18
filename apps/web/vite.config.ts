@@ -77,5 +77,29 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const moduleId = id.replaceAll(String.fromCharCode(92), '/');
+            if (
+              moduleId.includes('/node_modules/firebase/') ||
+              moduleId.includes('/node_modules/@firebase/')
+            ) return 'firebase-vendor';
+            if (
+              moduleId.includes('/node_modules/react/') ||
+              moduleId.includes('/node_modules/react-dom/') ||
+              moduleId.includes('/node_modules/react-router/') ||
+              moduleId.includes('/node_modules/react-router-dom/') ||
+              moduleId.includes('/node_modules/@remix-run/')
+            ) return 'react-vendor';
+            if (
+              moduleId.includes('/node_modules/lucide-react/') ||
+              moduleId.includes('/node_modules/@tanstack/react-query/')
+            ) return 'ui-vendor';
+          },
+        },
+      },
+    },
   };
 });
