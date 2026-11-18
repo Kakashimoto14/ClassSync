@@ -36,3 +36,7 @@ docs/production/p4d-local/
 .idea/
 Thumbs.db
 .DS_Store
+
+.venv-main-junction/
+var/p4d-evidence/
+.codex-attachments/
