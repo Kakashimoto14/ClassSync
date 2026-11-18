@@ -142,8 +142,10 @@ The root `Dockerfile` keeps the existing single-service mode used by Cloud Run C
 opt-in-by-default multi-service image for the root `render.yaml` blueprint. That mode runs the
 three internal APIs on loopback and exposes only the Gateway. It performs no migrations or seeding;
 Neon runtime-role DSNs, Firebase service credentials, institutional tenant, and exact CORS origins
-must be supplied through the hosting provider's secret settings. The Notification API remains a
-health-only stub. This Render Free blueprint is for qualification or preview only: its documented
-cold starts, ephemeral local disk, resource limits, and Render's stated non-production guidance do
-not satisfy ClassSync's production reliability gates. It is not deployed, and `vercel.json` remains
-the presentation build. See [Render qualification setup](docs/infrastructure/render-free-qualification.md).
+must be supplied through the hosting provider's secret settings. Notification now exposes a private
+verification-email endpoint, but real delivery requires the private service token and verified
+Resend sender configuration; no provider delivery has been qualified. This Render Free blueprint
+is for qualification or preview only: its documented cold starts, ephemeral local disk, resource
+limits, and Render's stated non-production guidance do not satisfy ClassSync's production reliability
+gates. It is not deployed, and `vercel.json` remains the presentation build. See [Render
+qualification setup](docs/infrastructure/render-free-qualification.md).

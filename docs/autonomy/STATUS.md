@@ -1,5 +1,33 @@
 # ClassSync — autonomy status ledger
 
+## 19 November 2026 00:01 SGT — local checkpoint and stale-ref cleanup
+
+Committed the feature-worktree implementation/evidence from the preceding checkpoint as
+`9b5cde2cefebdd18a3df8a38e8c9699f9db6d89c` (`feat(auth): add Turnstile and student email
+verification`). The focused auth, bootstrap, validation and build evidence is in the entry below.
+The branch remains local-only; feature/main were not merged or pushed because the complete Python
+and Web suites are not green, and student-number/password login plus post-OTP password creation
+remain unimplemented. Port 5173, the `main` worktree, ignored environments and databases remain
+untouched.
+
+Performed the explicitly authorized stale-ref cleanup after confirming only `main` and
+`feature/auth-onboarding-saas` were checked out: deleted remote
+`origin/codex/classsync-main-checkpoint-20261114` (GitHub returned `[deleted]`), local
+`codex/classsync-main-checkpoint-20261114`, and local `release/mvp-staging-qualification`; expired
+local reflogs and ran `git gc --prune=now`. The named local/remote-tracking refs are absent. GC
+reported zero loose/pruneable objects but warned of an empty worktree `refs` directory as garbage;
+no data was manually removed. A subsequent `git ls-remote` could not reach GitHub, so there is no
+second remote read-after-delete receipt. `git worktree prune --dry-run --verbose` reported no
+prunable worktrees. Branch-local unique old commits were intentionally made unreachable under the
+owner's cleanup instruction; GitHub's server-side unreachable-object retention is outside this
+local verification.
+
+The final README now describes the private Notification verification endpoint and clearly says
+provider delivery is unqualified. Do not represent this local checkpoint as merged, pushed,
+production-ready or fully qualified. Next gate: diagnose the unchanged-limit solver `UNKNOWN`
+result and resolve/retest the complete local suites; then complete missing password setup and
+student-number sign-in before reconsidering merge/push.
+
 ## 18 November 2026 23:52 SGT — authentication and bootstrap continuation checkpoint
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
