@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 import { useUniversitySession } from './university-session-context';
@@ -7,10 +7,12 @@ import {
   refreshVerifiedAccount,
   resendVerification,
   accountError,
+  setStudentPortalPassword,
   type OnboardingStatus,
   observeAccountProfile,
   type AccountProfile,
 } from './account-actions';
+import { TurnstileWidget } from './TurnstileWidget';
 
 export function AccountOnboardingPanel({ entryRole }: { entryRole?: 'student' | 'teacher' } = {}) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
@@ -50,6 +52,7 @@ function PendingAccount({
   const [token, setToken] = useState('');
   const [message, setMessage] = useState('');
   const [studentIdError, setStudentIdError] = useState('');
+  const [step, setStep] = useState<'student' | 'code' | 'password'>('student');
   const [challenge, setChallenge] = useState<{
     challenge_id: string;
     masked_email: string;
@@ -57,6 +60,11 @@ function PendingAccount({
     resend_after_seconds: number;
   } | null>(null);
   const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileRevision, setTurnstileRevision] = useState(0);
+  const onTurnstileToken = useCallback((value: string) => setTurnstileToken(value), []);
   const [resendSeconds, setResendSeconds] = useState(0);
   const digitRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [busy, setBusy] = useState(false);
@@ -120,10 +128,13 @@ function PendingAccount({
     setMessage('');
     try {
       const next = await accountRequest<NonNullable<typeof challenge>>(
-        'student-verification-challenges', 'POST', { student_id: studentId.trim() },
+        'student-verification-challenges', 'POST', {
+          student_id: studentId.trim(), turnstile_token: turnstileToken,
+        },
         undefined, profile.uid,
       );
       setChallenge(next);
+      setStep('code');
       setCode('');
       setResendSeconds(next.resend_after_seconds);
       setMessage(`A code was sent to ${next.masked_email}. It expires in 5 minutes.`);
@@ -131,6 +142,8 @@ function PendingAccount({
     } catch (error) {
       setMessage(error instanceof Error ? error.message : accountError(error));
     } finally {
+      setTurnstileToken('');
+      setTurnstileRevision((revision) => revision + 1);
       setBusy(false);
     }
   };
@@ -141,18 +154,64 @@ function PendingAccount({
   const verifyCode = async (event: FormEvent) => {
     event.preventDefault();
     if (busy || !challenge || code.length !== 6) return;
-    await action(async () => {
+    setBusy(true);
+    setMessage('');
+    try {
       await accountRequest(
         'verify-student', 'POST',
-        { student_id: studentId.trim(), challenge_id: challenge.challenge_id, code },
+        { student_id: studentId.trim(), challenge_id: challenge.challenge_id, code,
+          turnstile_token: turnstileToken },
         undefined, profile.uid,
       );
-      setChallenge(null);
+      setStep('password');
       setCode('');
-    }, 'Student record verified. Refresh your account to continue.');
+      setMessage('Student record verified. Create a private password for future sign-ins.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : accountError(error));
+    } finally {
+      setTurnstileToken('');
+      setTurnstileRevision((revision) => revision + 1);
+      setBusy(false);
+    }
   };
   const resendCode = () => {
     if (resendSeconds === 0 && !busy) void sendCode();
+  };
+  const completePasswordSetup = async (event: FormEvent) => {
+    event.preventDefault();
+    if (busy || !challenge) return;
+    if (newPassword.length < 8 || newPassword.length > 128) {
+      setMessage('Choose a password between 8 and 128 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setMessage('The passwords do not match.');
+      return;
+    }
+    setBusy(true);
+    setMessage('');
+    try {
+      await setStudentPortalPassword(newPassword, profile.uid);
+      await accountRequest(
+        'complete-student-onboarding', 'POST', {
+          student_id: studentId.trim(), challenge_id: challenge.challenge_id,
+          turnstile_token: turnstileToken,
+        }, undefined, profile.uid,
+      );
+      setStatus(await accountRequest<OnboardingStatus>(
+        'onboarding', 'GET', undefined, undefined, profile.uid,
+      ));
+      setNewPassword('');
+      setConfirmPassword('');
+      setMessage('Your student record and portal password are ready.');
+      session.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error && !('code' in error) ? error.message : accountError(error));
+    } finally {
+      setTurnstileToken('');
+      setTurnstileRevision((revision) => revision + 1);
+      setBusy(false);
+    }
   };
   return (
     <section className="account-onboarding" aria-label="Set up university access" aria-busy={busy}>
@@ -199,13 +258,13 @@ function PendingAccount({
         </>
       ) : (
         <>
-          {entryRole !== 'teacher' && !status.membership_state && (
+          {entryRole !== 'teacher' && !status.membership_state && step === 'student' && (
             <Link className="button" to="/student/registration-scanner">
               Scan registration form
             </Link>
           )}
           {entryRole !== 'teacher' && !status.membership_state && (
-            !challenge ? <form noValidate onSubmit={requestCode}>
+            step === 'student' ? <form noValidate onSubmit={requestCode}>
               <h4>Verify your student record</h4>
               <label htmlFor="claim-registered-email">Registered student email</label>
               <input
@@ -244,10 +303,11 @@ function PendingAccount({
                   {studentIdError}
                 </p>
               )}
+              <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
               <Button type="submit" disabled={busy}>
                 {busy ? 'Sending code…' : 'Send verification code'}
               </Button>
-            </form> : <form noValidate onSubmit={verifyCode} className="account-onboarding__otp">
+            </form> : step === 'code' && challenge ? <form noValidate onSubmit={verifyCode} className="account-onboarding__otp">
               <h4>Verify your sign-in</h4>
               <p>Enter the 6-digit code sent to {challenge.masked_email}. It expires in 5 minutes and can be used once.</p>
               <div className="account-onboarding__otp-digits" role="group" aria-label="Verification code">
@@ -288,6 +348,7 @@ function PendingAccount({
                   />
                 ))}
               </div>
+              <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
               <Button type="submit" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify and sign in'}</Button>
               <div className="account-onboarding__otp-actions">
                 <Button type="button" variant="secondary" disabled={busy || resendSeconds > 0} onClick={resendCode}>
@@ -298,7 +359,21 @@ function PendingAccount({
                 </Button>
               </div>
               <p className="entrance-hint">If you cannot access your registered email, contact the Registrar for identity-checked account recovery.</p>
-            </form>
+            </form> : step === 'password' && challenge ? <form noValidate onSubmit={completePasswordSetup} className="account-onboarding__password-setup">
+              <h4>Create your portal password</h4>
+              <p>Student Number <strong>{studentId}</strong></p>
+              <label htmlFor="student-new-password">New Password</label>
+              <input id="student-new-password" type="password" autoComplete="new-password"
+                minLength={8} maxLength={128} required disabled={busy} value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)} />
+              <label htmlFor="student-confirm-password">Confirm Password</label>
+              <input id="student-confirm-password" type="password" autoComplete="new-password"
+                minLength={8} maxLength={128} required disabled={busy} value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)} />
+              <p className="entrance-hint">Use at least 8 characters. Your password stays with your ClassSync account.</p>
+              <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
+              <Button type="submit" disabled={busy}>{busy ? 'Securing your account…' : 'Create portal password'}</Button>
+            </form> : null
           )}
           {status.claim_state === 'rejected' && (
             <p>Your request was not approved. Contact your university to correct or review it.</p>

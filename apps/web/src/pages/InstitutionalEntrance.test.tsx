@@ -57,9 +57,9 @@ it('offers one login with persistent labels and associated validation errors', a
   for (const name of ['Student', 'Teacher', 'Admin'])
     expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
-  expect(screen.getByLabelText('Institutional email')).toHaveFocus();
-  expect(screen.getByLabelText('Institutional email')).toBeRequired();
-  fireEvent.change(screen.getByLabelText('Institutional email'), {
+  expect(screen.getByLabelText('Student Number or Institutional Email')).toHaveFocus();
+  expect(screen.getByLabelText('Student Number or Institutional Email')).toBeRequired();
+  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
     target: { value: 'student@synthetic.invalid' },
   });
   fireEvent.change(screen.getByLabelText('Password'), {
@@ -77,6 +77,22 @@ it('offers one login with persistent labels and associated validation errors', a
       'Synthetic-password-42!',
     ),
   );
+});
+
+it('routes student-number sign-in through the Gateway with the one-use Turnstile token', async () => {
+  entrance();
+  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
+    target: { value: '23-01425' },
+  });
+  fireEvent.change(screen.getByLabelText('Password'), {
+    target: { value: 'campus-pass-2026' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
+
+  await waitFor(() => expect(actions.signIn).toHaveBeenCalledWith(
+    '23-01425', 'campus-pass-2026', 'test-token',
+  ));
+  expect(actions.verify).not.toHaveBeenCalled();
 });
 
 it('validates confirmation before student account creation and submits no role', async () => {

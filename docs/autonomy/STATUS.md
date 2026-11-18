@@ -1,5 +1,51 @@
 # ClassSync — autonomy status ledger
 
+## 19 November 2026 01:06 SGT — student portal password setup and local qualification
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `981d654058ab5b05f2dc0285d4a797efce63c7cd`.
+The main worktree remains clean at `fa248229eef753297fbc9a49a884a475e6920ea5`; port 5173 was
+not touched. Implemented the post-OTP password step: the browser links/updates the Firebase
+password provider, then the Gateway verifies the provider and the OTP challenge before marking
+`password_configured` and granting student membership. Student-number/password login now resolves
+the roster email only inside the Gateway, verifies Turnstile, authenticates through Firebase
+Identity Toolkit, checks active membership and returns only a Firebase custom token. Missing roster
+and invalid credential responses share a generic message. Added migration `0020_student_portal_password`
+and regression coverage. `FIREBASE_WEB_API_KEY` is documented in the ignored-environment examples.
+README, security guidance and the traceability row now reflect the implemented flow and its limits.
+
+Fresh serial checks:
+
+- `.venv\Scripts\python.exe -m pytest` — **1,128 passed**, one existing Starlette/httpx
+  deprecation warning, 121.57 seconds. Pytest's configured test paths are `services`; the separately
+  targeted PostgreSQL migration qualification regression file was also run. After the
+  missing-roster Firebase credential request was added to reduce a timing signal, the final full
+  serial rerun was **1,128 passed**, one deprecation warning, 101.94 seconds.
+- `.venv\Scripts\python.exe -m pytest services/gateway/tests/test_onboarding.py
+  services/gateway/tests/test_turnstile.py scripts/tests/test_postgres_qualification_regressions.py -q`
+  — **33 passed**, one Starlette/httpx deprecation warning.
+- `npm run test:web` — **847 passed across 63 files**. The first full run exposed a React warning in
+  the test-only Turnstile mock; the mock was moved to an effect and the complete suite was rerun.
+  The rerun passed with no React warning; after the final Gateway timing-path change, the full Web
+  suite was rerun again and passed **847 tests across 63 files**.
+- `npm run lint`, `npm run typecheck`, and `npm run build` — PASS. Build emitted no Firebase
+  mixed-import or oversized-chunk warning; largest JavaScript chunk: `index` 328.65 kB.
+- `.venv\Scripts\python.exe -m ruff check services packages scripts` — NOT RUN successfully:
+  Ruff is not installed in the isolated worktree environment (`No module named ruff`). No network
+  installation was attempted.
+- `git diff --check` — PASS. PostgreSQL migration/RLS execution, Auth Emulator, Resend delivery,
+  provider-backed login and connected browser acceptance were not run.
+
+The authorized local-only bootstrap still creates synthetic academic setup records in its guarded
+SQLite sandbox. This change does not import a student roster or set canonical CdM room capacities,
+and does not create a published revision. A synthetic roster and solver output must not be presented
+as an official student identity roster, Facilities verification or authoritative published
+timetable. Production seed/publication remains blocked on verified institutional data and a
+successful independent validation path. P4d remains **PARTIAL**; local unit/build gates do not
+qualify external identity, PostgreSQL or browser behavior. Next: review and commit this feature
+checkpoint as specifically authorized, merge to `main`, and push both named branches; preserve the
+separate external qualification and production-readiness gates.
+
 ## 19 November 2026 00:01 SGT — local checkpoint and stale-ref cleanup
 
 Committed the feature-worktree implementation/evidence from the preceding checkpoint as

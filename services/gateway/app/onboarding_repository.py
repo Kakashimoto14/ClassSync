@@ -285,7 +285,7 @@ class OnboardingRepository:
             else:
                 db.execute(text("""
                     UPDATE classsync_identity.email_verification_challenges
-                    SET consumed_at=transaction_timestamp()
+                    SET consumed_at=transaction_timestamp(), verified_at=transaction_timestamp()
                     WHERE tenant_id=:tenant AND uid=:uid AND challenge_id=:challenge
                 """), self.params(principal, challenge=challenge_id))
                 existing = db.execute(text("""
@@ -300,20 +300,86 @@ class OnboardingRepository:
                         raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
                                             headers={"Cache-Control": "no-store"})
                 else:
-                    inserted = db.execute(text("""
-                        INSERT INTO classsync_identity.memberships
-                            (tenant_id,uid,person_id,student_id,roles,state,revision)
-                        VALUES (:tenant,:uid,:person,:student,ARRAY['student']::text[],'active',1)
-                        ON CONFLICT DO NOTHING
-                    """), self.params(principal, person=row["person_id"], student=student_id))
-                    if inserted.rowcount != 1:
-                        raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
-                                            headers={"Cache-Control": "no-store"})
                     result = {"status": "verified"}
         if invalid_code:
             raise HTTPException(403, "Verification code could not be confirmed",
                                 headers={"Cache-Control": "no-store"})
         return result
+
+    def complete_student_onboarding(self, principal, student_id, challenge_id):
+        with self.session(principal) as db:
+            row = db.execute(text("""
+                SELECT c.verified_at,s.id,s.person_id,s.registered_email,s.enrollment_status
+                FROM classsync_identity.email_verification_challenges c
+                JOIN classsync_identity.students s
+                  ON s.tenant_id=c.tenant_id AND s.id=c.student_id
+                WHERE c.tenant_id=:tenant AND c.uid=:uid AND c.challenge_id=:challenge
+                  AND c.student_id=:student
+                  AND c.verified_at > transaction_timestamp()-interval '10 minutes'
+                FOR UPDATE OF c,s
+            """), self.params(principal, challenge=challenge_id, student=student_id)) \
+                .mappings().first()
+            if not student_record_matches(row, student_id, principal.email):
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+            existing = db.execute(text("""
+                SELECT student_id,roles,state FROM classsync_identity.memberships
+                WHERE tenant_id=:tenant AND uid=:uid FOR UPDATE
+            """), self.params(principal)).mappings().first()
+            if existing and not (
+                existing["student_id"] == student_id
+                and "student" in existing["roles"]
+                and existing["state"] == "active"
+            ):
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+            db.execute(text("""
+                UPDATE classsync_identity.students SET password_configured=true
+                WHERE tenant_id=:tenant AND id=:student AND enrollment_status='active'
+                    AND registered_email=:email
+            """), self.params(principal, student=student_id, email=principal.email))
+            if existing is None:
+                inserted = db.execute(text("""
+                    INSERT INTO classsync_identity.memberships
+                        (tenant_id,uid,person_id,student_id,roles,state,revision)
+                    VALUES (:tenant,:uid,:person,:student,ARRAY['student']::text[],'active',1)
+                    ON CONFLICT DO NOTHING
+                """), self.params(principal, person=row["person_id"], student=student_id))
+                if inserted.rowcount != 1:
+                    raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                        headers={"Cache-Control": "no-store"})
+        return {"status": "active", "password_configured": True}
+
+    def student_login_email(self, student_id):
+        """Resolve an eligible roster email internally; never return it to the client."""
+        with transaction(self.engine) as db:
+            db.execute(text("SELECT set_config('classsync.tenant_id',:tenant,true)"),
+                       {"tenant": self.tenant})
+            row = db.execute(text("""
+                SELECT registered_email FROM classsync_identity.students
+                WHERE tenant_id=:tenant AND id=:student AND enrollment_status='active'
+                    AND password_configured=true
+            """), {"tenant": self.tenant, "student": student_id}).mappings().first()
+            return row["registered_email"] if row else None
+
+    def student_login_membership_matches(self, uid, student_id):
+        if not isinstance(uid, str) or not uid or len(uid) > 128:
+            return False
+        with transaction(self.engine) as db:
+            identity_context(db, tenant_id=self.tenant, uid=uid)
+            return db.scalar(text("""
+                SELECT EXISTS (
+                    SELECT 1 FROM classsync_identity.memberships m
+                    JOIN classsync_identity.students s
+                      ON s.tenant_id=m.tenant_id AND s.id=m.student_id
+                    JOIN classsync_identity.tenants t ON t.id=m.tenant_id
+                    WHERE m.tenant_id=:tenant AND m.uid=:uid AND m.student_id=:student
+                        AND m.state='active' AND 'student'=ANY(m.roles)
+                        AND s.enrollment_status='active' AND s.password_configured=true
+                        AND t.firebase_project_id=:project
+                )
+            """), {"tenant": self.tenant, "uid": uid, "student": student_id,
+                  "project": self.project}) is True
 
     def claims(self, principal):
         with self.session(principal, admin=True) as db:

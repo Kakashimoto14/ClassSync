@@ -27,6 +27,7 @@ from .coursework import coursework_router
 from .onboarding import onboarding_router
 from .openapi import install_openapi
 from .registration import registration_router
+from .turnstile import verify_turnstile_token
 
 ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
 
@@ -45,6 +46,7 @@ class Settings(SchedulingSecuritySettings):
     turnstile_secret_key: SecretStr | None = None
     otp_hmac_secret: SecretStr | None = Field(default=None, min_length=32)
     notification_service_token: SecretStr | None = Field(default=None, min_length=32)
+    firebase_web_api_key: SecretStr | None = None
     identity_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
     registration_max_bytes: int = Field(default=5_000_000, ge=1024, le=10_000_000)
     registration_max_pages: int = Field(default=5, ge=1, le=8)
@@ -172,25 +174,9 @@ class TurnstileInput(BaseModel):
 @app.post("/api/v1/auth/verify-turnstile")
 async def verify_turnstile(body: TurnstileInput, request: Request) -> dict:
     """Verify a single-use Cloudflare challenge token; dev bypass is never production."""
+    await verify_turnstile_token(body.token, settings)
     response = JSONResponse(content={"data": {"verified": True}})
     response.headers["Cache-Control"] = "no-store"
-    if settings.turnstile_secret_key is None:
-        if settings.classsync_env in {"test", "development"}:
-            return response
-        raise HTTPException(503, "Human verification is unavailable")
-    try:
-        async with httpx.AsyncClient(timeout=5.0, trust_env=False) as client:
-            result = await client.post(
-                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-                data={"secret": settings.turnstile_secret_key.get_secret_value(),
-                      "response": body.token},
-            )
-            result.raise_for_status()
-            verified = result.json().get("success") is True
-    except (httpx.HTTPError, ValueError, AttributeError) as error:
-        raise HTTPException(503, "Human verification is unavailable") from error
-    if not verified:
-        raise HTTPException(403, "Human verification failed")
     return response
 
 

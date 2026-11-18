@@ -9,9 +9,36 @@ async function provider() {
   return { auth: sdk.getAuth(firebaseApp), sdk };
 }
 
-export async function signInToAccount(email: string, password: string) {
+export async function signInToAccount(
+  identifier: string,
+  password: string,
+  turnstileToken?: string,
+) {
   const { auth, sdk } = await provider();
-  await sdk.signInWithEmailAndPassword(auth, email.trim(), password);
+  if (/^[0-9]{2}-[0-9]{5}$/.test(identifier.trim())) {
+    const response = await fetch(identityEndpoint('/auth/student-password-login'), {
+      method: 'POST',
+      signal: AbortSignal.timeout(10_000),
+      credentials: 'omit',
+      cache: 'no-store',
+      redirect: 'error',
+      referrerPolicy: 'no-referrer',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id: identifier.trim(),
+        password,
+        turnstile_token: turnstileToken ?? '',
+      }),
+    });
+    if (!response.headers.get('content-type')?.includes('application/json'))
+      throw new Error('Invalid student number or password.');
+    const payload = await response.json();
+    if (!response.ok || typeof payload?.data?.custom_token !== 'string')
+      throw new Error('Invalid student number or password.');
+    await sdk.signInWithCustomToken(auth, payload.data.custom_token);
+    return;
+  }
+  await sdk.signInWithEmailAndPassword(auth, identifier.trim(), password);
 }
 
 export async function signInWithGoogle() {
@@ -129,6 +156,25 @@ export async function updateAccountName(
   await sdk.updateProfile(user, { displayName });
   if (auth.currentUser !== user) throw new Error('Your account changed. Sign in again.');
   return profileOf(user);
+}
+
+export async function setStudentPortalPassword(password: string, expectedUid?: string) {
+  const { auth, sdk } = await provider();
+  const user = currentAccount(auth, expectedUid);
+  if (!user.email || password.length < 8 || password.length > 128)
+    throw new Error('Use a password between 8 and 128 characters.');
+  const hasPassword = () => user.providerData.some((provider) => provider.providerId === 'password');
+  if (hasPassword()) {
+    await sdk.updatePassword(user, password);
+  } else {
+    try {
+      await sdk.linkWithCredential(user, sdk.EmailAuthProvider.credential(user.email, password));
+    } catch (error) {
+      if ((error as { code?: string }).code !== 'auth/provider-already-linked') throw error;
+      await sdk.updatePassword(user, password);
+    }
+  }
+  if (auth.currentUser !== user) throw new Error('Your account changed. Sign in again.');
 }
 
 export async function accountRequest<T>(

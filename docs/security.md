@@ -38,24 +38,27 @@ Python scanning uses isolated pip-audit 2.10.1 against exact installed third-par
 
 The gateway supplies safe error envelopes and request IDs. It is also the planned enforcement point for rate limiting (per IP on public/auth-sensitive paths, per identity on authenticated paths); exact quotas require usage data and are intentionally not guessed. Local publication already records server-side audit information. Complete privileged academic-edit, request-decision and future override auditing remains a production requirement. No client success flag substitutes for server audit.
 
-## Student verification and Turnstile boundary (18 November 2026)
+## Student verification and Turnstile boundary (19 November 2026)
 
-Gateway now provides a Turnstile verification endpoint and the institutional entrance calls it
-before invoking Firebase email/password or Google sign-in. Production Gateway fails closed if its
-secret is absent, and the no-secret bypass is limited to development/test. This is currently a UI
-anti-abuse check only: Firebase Auth is still called directly by the browser, so callers can bypass
-the widget and invoke Firebase Auth themselves. Do not treat Turnstile as a control that protects
-the Firebase authentication endpoint until sign-in is mediated by a trusted server boundary or
-Firebase itself enforces an equivalent supported control. The production site key/secret and
-provider acceptance have not been verified.
+Gateway verifies Turnstile before student-number lookup/sign-in, OTP issuance/confirmation, and
+password-onboarding completion. Production Gateway fails closed if its secret is absent, and the
+no-secret bypass is limited to development/test. Direct Firebase email/password and Google Auth
+calls still originate in the browser and can bypass this Gateway check; this is not a global
+Firebase authentication enforcement boundary. The production site key/secret and provider
+acceptance have not been verified.
 
 For roster-linked onboarding, `/api/v1/auth/student-verification-challenges` requires a verified
 Firebase principal, an exact `YY-NNNNN` student ID and a matching active Registrar record, then
 stores only a tenant/UID-scoped HMAC digest in the PostgreSQL challenge table from migration
 `0019_student_email_challenges`. Codes expire after five minutes, are limited to five failures,
-and have a 60-second resend cooldown. Notification delivery requires a private service token and
-configured Resend credentials; no plaintext code fallback is enabled. Migration/RLS execution,
-real Resend delivery, real roster handling, and Auth Emulator/browser end-to-end behavior are
-unverified. Student-number/password sign-in and password creation after OTP are not implemented.
-The bootstrap seed is local synthetic academic data only and does not create identity or official
+and have a 60-second resend cooldown. After OTP, the browser links a Firebase password provider;
+the Gateway verifies current provider/email state before setting `password_configured` and granting
+membership. Migration `0020_student_portal_password` records that gate. Student-number login
+resolves roster email only inside the Gateway, authenticates with Firebase Identity Toolkit, checks
+active membership, and returns a custom token without the email. Unknown IDs and invalid passwords
+share a generic error, and the Gateway sends the Firebase credential request for unknown IDs too
+to reduce a missing-roster timing signal. Notification delivery requires a private service token and configured
+Resend credentials; no plaintext code fallback is enabled. Migration/RLS execution, real Resend
+delivery, real roster handling, and Auth Emulator/browser end-to-end behavior are unverified. The
+bootstrap seed remains local synthetic academic data only and does not create identity or official
 publication data.

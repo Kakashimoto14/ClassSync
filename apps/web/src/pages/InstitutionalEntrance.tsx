@@ -25,6 +25,7 @@ const verifyPath = '/auth/verify';
 const onboardingPath = '/auth/student-onboarding';
 const accountPath = '/auth/account';
 const STUDENT_EMAIL_PATTERN = /^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$/;
+const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
 function ProductPreview() {
   return (
@@ -226,7 +227,11 @@ function CredentialsForm({
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
-    const validation: typeof errors = validateLogin(email.trim(), password);
+    const studentNumberLogin = mode === 'login' && STUDENT_ID_PATTERN.test(email.trim());
+    const validation: typeof errors = studentNumberLogin
+      ? {}
+      : validateLogin(email.trim(), password);
+    if (studentNumberLogin && !password) validation.password = 'Enter your password.';
     if (recovery) delete validation.password;
     if (signup && !STUDENT_EMAIL_PATTERN.test(email.trim()))
       validation.email = 'Use a lowercase institutional email such as juan.delacruz@student.pnm.edu.ph.';
@@ -246,13 +251,19 @@ function CredentialsForm({
         setNotice('If your account can receive a reset link, check your email for the next steps.');
       } else if (signup) await createStudentAccount(email, password);
       else {
-        await verifyHumanChallenge(turnstileToken);
-        await signInToAccount(email, password);
+        if (studentNumberLogin) {
+          await signInToAccount(email, password, turnstileToken);
+        } else {
+          await verifyHumanChallenge(turnstileToken);
+          await signInToAccount(email, password);
+        }
       }
     } catch (failure) {
       setError(
-        mode === 'login'
-          ? 'We could not sign you in. Check your email and password, or try resetting your password.'
+        mode === 'login' && studentNumberLogin
+          ? 'Invalid student number or password.'
+          : mode === 'login'
+            ? 'We could not sign you in. Check your email and password, or try resetting your password.'
           : accountError(failure),
       );
     } finally {
@@ -300,14 +311,18 @@ function CredentialsForm({
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
         <div className="auth-field">
-          <label htmlFor="entrance-email">{mode === 'login' ? 'Institutional email' : 'Email'}</label>
+          <label htmlFor="entrance-email">
+            {mode === 'login' ? 'Student Number or Institutional Email' : 'Email'}
+          </label>
           <input
             id="entrance-email"
             ref={emailField}
-            type="email"
-            placeholder={mode === 'login' || signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
+            type={mode === 'login' ? 'text' : 'email'}
+            placeholder={mode === 'login'
+              ? '23-01425 or juan.delacruz@student.pnm.edu.ph'
+              : signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
             autoComplete="username"
-            inputMode="email"
+            inputMode={mode === 'login' ? 'text' : 'email'}
             autoCapitalize="none"
             spellCheck={false}
             required

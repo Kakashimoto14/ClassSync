@@ -85,4 +85,4 @@ def test_synthetic_provider_fixture_requires_unique_student_records():
 
 
 def test_provider_qualification_uses_current_alembic_head():
-    assert current_migration_head() == "0019_student_email_challenges"
+    assert current_migration_head() == "0020_student_portal_password"
