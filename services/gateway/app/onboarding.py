@@ -1,14 +1,19 @@
 """Narrow pending-user endpoints; uploaded evidence never confers a role."""
 
+import hmac
 import re
+import secrets
 import time
 from collections import OrderedDict, deque
 from threading import Lock
-from uuid import UUID
+from uuid import UUID, uuid4
 
+import httpx
+from classync_contracts.cloud_run import service_headers
 from classync_contracts.request_authorization import request_principal
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from starlette.concurrency import run_in_threadpool
 
 STUDENT_VERIFICATION_ERROR = (
     "Unable to sign in wth Google. Use the email registered in your student record. "
@@ -25,7 +30,9 @@ class StudentClaim(Input):
 
 
 class StudentVerification(Input):
-    student_id: str | None = Field(default=None, max_length=8, pattern=r"^[0-9]{2}-[0-9]{5}$")
+    student_id: str = Field(min_length=8, max_length=8, pattern=r"^[0-9]{2}-[0-9]{5}$")
+    challenge_id: UUID
+    code: str = Field(min_length=6, max_length=6, pattern=r"^[0-9]{6}$")
 
 
 class ClaimDecision(Input):
@@ -100,11 +107,56 @@ def onboarding_router(settings):
         principal, repository = context(request, write=True)
         return {"data": repository.submit_claim(principal, body.student_id)}
 
+    @router.post("/student-verification-challenges", status_code=202)
+    async def request_student_verification(body: StudentClaim, request: Request,
+                                           response: Response):
+        principal, repository = context(request, write=True)
+        response.headers["Cache-Control"] = "no-store"
+        config = settings()
+        if not config.otp_hmac_secret or not config.notification_service_token:
+            raise HTTPException(503, "Email verification is unavailable")
+        challenge_id = uuid4()
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        secret = config.otp_hmac_secret.get_secret_value().encode("utf-8")
+        digest = hmac.new(
+            secret,
+            f"{principal.uid}\0{challenge_id}\0{code}".encode("utf-8"),
+            "sha256",
+        ).digest()
+        masked = repository.issue_student_challenge(
+            principal, body.student_id, challenge_id, digest
+        )
+        try:
+            notification_url = config.notification_service_url
+            headers = await run_in_threadpool(
+                service_headers, config.cloud_run_iam_enabled, notification_url,
+                {"X-ClassSync-Service-Token":
+                 config.notification_service_token.get_secret_value()},
+            )
+            async with httpx.AsyncClient(timeout=6.0, trust_env=False) as client:
+                sent = await client.post(
+                    notification_url + "/internal/v1/verification-email",
+                    json={"email": principal.email, "code": code},
+                    headers=headers,
+                )
+                sent.raise_for_status()
+        except (httpx.HTTPError, ValueError) as error:
+            repository.cancel_student_challenge(principal, challenge_id)
+            raise HTTPException(503, "Email verification is unavailable") from error
+        return {"data": {"challenge_id": str(challenge_id), "masked_email": masked,
+                         "expires_in_seconds": 300, "resend_after_seconds": 60}}
+
     @router.post("/verify-student")
     def verify_student(body: StudentVerification, request: Request, response: Response):
         principal, repository = context(request, write=True)
         response.headers["Cache-Control"] = "no-store"
-        return {"data": repository.verify_student(principal, body.student_id)}
+        config = settings()
+        if not config.otp_hmac_secret:
+            raise HTTPException(503, "Email verification is unavailable")
+        secret = config.otp_hmac_secret.get_secret_value().encode("utf-8")
+        return {"data": repository.verify_student_challenge(
+            principal, body.student_id, body.challenge_id, body.code, secret
+        )}
 
     @router.get("/student-claims")
     def claims(request: Request, response: Response):

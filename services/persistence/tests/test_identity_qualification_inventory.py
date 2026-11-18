@@ -9,7 +9,7 @@ from scripts.postgres_identity_qualification import identity_tables, require_ide
     ("0007_publication_state", 6),
     ("0013_synthetic_review_period_mode", 6),
     ("0014_account_onboarding", 8),
-    ("head", 8),
+    ("head", 9),
 ])
 def test_identity_inventory_tracks_the_requested_migration(target, count):
     tables = identity_tables(target)

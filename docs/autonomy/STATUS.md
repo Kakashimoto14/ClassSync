@@ -1,5 +1,58 @@
 # ClassSync — autonomy status ledger
 
+## 18 November 2026 23:52 SGT — authentication and bootstrap continuation checkpoint
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`; base/current committed HEAD before this change is
+`49e1b69f414bffcd455848eb34a24b7fc15580a4`. The worktree has the authorized local changes listed
+in Git status; the separate `main` worktree at `fa248229eef753297fbc9a49a884a475e6920ea5` is
+clean. Port 5173 and ignored databases/evidence were left untouched.
+
+This change adds a Cloudflare Turnstile widget and Gateway Siteverify boundary, a CdM campus login
+layout, tenant/UID-scoped OTP storage and delivery, a PostgreSQL migration at
+`0019_student_email_challenges`, updated onboarding/API qualification checks, a synthetic local-only
+`scripts/seed_bootstrap_cdm.py`, and README/security/traceability notes. The seed refuses non-sandbox
+SQLite filenames and does not create student identity records, set room capacities, assert official
+availability or publish a timetable. OTP email delivery requires an explicitly configured Resend
+sender and private service token; no code is emitted to logs. Exact Google-roster mismatch text is
+preserved.
+
+Fresh checks in this turn:
+
+- Focused Python: `.venv\\Scripts\\python.exe -m pytest scripts/tests/test_bootstrap_cdm.py
+  services/gateway/tests/test_onboarding.py services/gateway/tests/test_turnstile.py
+  services/notification/tests/test_email_verification.py
+  services/persistence/tests/test_identity_qualification_inventory.py -q` — **35 passed**, one
+  Starlette/httpx deprecation warning.
+- Focused Web: `npm run test -- --run src/pages/InstitutionalEntrance.test.tsx
+  src/auth/AccountOnboardingPanel.test.tsx` — **13 passed across 2 files**.
+- Web `npm run lint` and `npm run typecheck` — both exit 0.
+- Web `npm run build` — PASS; chunks: React 318.51 kB, Firebase 243.27 kB, UI 47.83 kB, app
+  325.20 kB; no mixed-import or chunk-size warning.
+- `.venv\\Scripts\\python.exe -m pip check` — PASS, no broken requirements.
+- `.venv\\Scripts\\python.exe -m ruff check services packages scripts` — unavailable: `ruff` is not
+  installed in this environment.
+- `git diff --check` — PASS.
+
+The last full Python suite at the pre-correction snapshot reported 1,119 passed and 2 failed. The
+stale identity-inventory expectation was corrected and the affected focused regression now passes;
+the scheduling draft regression returned solver `UNKNOWN` at its unchanged 8-second limit. The last
+full Web suite reported 843 passed and one timeout; its test file passed when run alone. The full
+suites have not been rerun to a clean result and are not green evidence. Do not alter solver limits
+or weaken constraints to mask this. No actual PostgreSQL migration/RLS run, Auth Emulator, Resend,
+Cloudflare Siteverify, connected login/browser journey, password setup, student-number/password
+login, native 200% zoom, or keyboard-only end-to-end check was performed. Direct browser calls to
+Firebase Auth can bypass the current Gateway Turnstile check, so it is not a hard auth boundary.
+
+The feature branch is four commits behind `main` and currently shares its history ancestor; the
+feature diff contains no unique committed feature work relative to `main` yet. The working tree
+contains the planned implementation and focused tests. Because a full-suite solver failure remains
+and production auth gates are unverified, do not call this release-ready. Next: finish review of the
+changed files and retain this as a feature checkpoint; only merge/push after the regression gate is
+resolved or an explicit quality-gate disposition is recorded. The stale branch deletion and local
+GC are separately authorized but should be done only after verifying the final target refs and
+worktree safety.
+
 ## 18 November 2026 22:26 SGT — final target-branch rewrite and remote verification
 
 The final pre-ledger-push rewritten refs were `feature/auth-onboarding-saas`

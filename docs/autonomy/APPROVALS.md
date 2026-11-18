@@ -1,5 +1,24 @@
 # ClassSync autonomy — authority and approvals
 
+## 18 November 2026 — identity hardening, owner bootstrap, and named-ref cleanup
+
+Owner explicitly authorizes local feature-branch implementation on
+`feature/auth-onboarding-saas` for the CdM-style authentication entrance, server-side
+Cloudflare Turnstile verification, student verification-code contracts, Notification
+email delivery integration, and an idempotent owner-supplied bootstrap script. Synthetic
+bootstrap records must retain `owner_bootstrap_seed` provenance and remain isolated from
+institutional readiness, eligibility, and official publication until the relevant campus
+data is independently verified. No original database writes, hosted settings, real user
+provisioning, production delivery, or deployment are authorized.
+
+Owner also explicitly authorizes deletion of local
+`codex/classsync-main-checkpoint-20261114`, remote `origin/codex/classsync-main-checkpoint-20261114`,
+and local `release/mvp-staging-qualification`, followed by reflog expiration and local Git
+garbage collection. Owner authorizes committing the completed local work on the feature branch,
+merging it into `main`, and pushing the two branches to `origin`. Preserve all other refs and
+worktrees; verify the branch targets before destructive Git operations. These operations do not
+authorize deployment or change of provider configuration/data.
+
 ## 15 November 2026 — master-plan local implementation and GitHub README maintenance
 
 Owner directs implementation to begin from the reviewed `docs/audit/MASTER_ROADMAP.md`
@@ -256,3 +275,18 @@ other unselected user data. Owner also authorizes local Docker/Render blueprint 
 configuration work. This does not authorize creating or changing Render/Neon/Vercel/Firebase
 resources or secrets, deploying, importing real data, migrating original databases, spending, or
 releasing. Render Free configuration is qualification-only and cannot be called production-ready.
+
+## 18 November 2026 — auth, bootstrap, and legacy-ref cleanup authorization
+
+Owner explicitly authorizes the CdM login/Turnstile and student roster verification/OTP work,
+the local bootstrap seed using only owner-supplied values and explicit synthetic provenance, and
+the requested Git publication sequence (feature commit, local merge to `main`, push both target
+branches). Owner also explicitly authorizes deletion of local
+`codex/classsync-main-checkpoint-20261114`, remote `origin/codex/classsync-main-checkpoint-20261114`,
+and local `release/mvp-staging-qualification`, followed by local reflog expiration and garbage
+collection. Preserve `.venv-main-junction/`, ignored databases/evidence, and all other data. This
+does not make the synthetic seed official, authorize changing institutional/hosted resources,
+publishing live data, or certify production readiness. Do not force-rewrite feature/main history;
+the requested cleanup is limited to removing the named stale refs and pruning unreachable local
+objects. Branch publication and cleanup remain subject to repository quality gates and safe
+worktree/remote verification.

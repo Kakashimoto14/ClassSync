@@ -101,7 +101,8 @@ def exercise(
             db.execute(
                 text(
                     "GRANT SELECT,INSERT,UPDATE ON classsync_identity.memberships,"
-                    "classsync_identity.account_claims,classsync_identity.faculty_invitations "
+                    "classsync_identity.account_claims,classsync_identity.faculty_invitations,"
+                    "classsync_identity.email_verification_challenges "
                     f"TO {connection.runtime}"
                 )
             )
@@ -514,6 +515,12 @@ def exercise(
                     db.scalar(text("SELECT count(*) FROM classsync_identity.faculty_invitations"))
                     == 0,
                     "Cross-tenant invitation leakage",
+                )
+                require(
+                    db.scalar(text(
+                        "SELECT count(*) FROM classsync_identity.email_verification_challenges"
+                    )) == 0,
+                    "Cross-tenant verification challenge leakage",
                 )
             try:
                 with transaction(owner) as db:

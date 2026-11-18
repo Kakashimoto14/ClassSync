@@ -38,6 +38,21 @@ export async function recoverPassword(email: string) {
   }
 }
 
+export async function verifyHumanChallenge(token: string) {
+  if (!token) throw new Error('Complete the human verification check first.');
+  const response = await fetch(identityEndpoint('/auth/verify-turnstile'), {
+    method: 'POST',
+    signal: AbortSignal.timeout(8_000),
+    credentials: 'omit',
+    cache: 'no-store',
+    redirect: 'error',
+    referrerPolicy: 'no-referrer',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+  if (!response.ok) throw new Error('Human verification could not be confirmed. Try again.');
+}
+
 export async function resendVerification(expectedUid?: string) {
   const { auth, sdk } = await provider();
   await sdk.sendEmailVerification(currentAccount(auth, expectedUid));

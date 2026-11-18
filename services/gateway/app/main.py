@@ -17,7 +17,7 @@ from classync_contracts.scheduling_security import (
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import AliasChoices, Field, SecretStr, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
@@ -42,6 +42,9 @@ class Settings(SchedulingSecuritySettings):
     classsync_env: str = "production"
     enable_scheduling_sandbox: bool = False
     identity_database_url: SecretStr | None = None
+    turnstile_secret_key: SecretStr | None = None
+    otp_hmac_secret: SecretStr | None = Field(default=None, min_length=32)
+    notification_service_token: SecretStr | None = Field(default=None, min_length=32)
     identity_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
     registration_max_bytes: int = Field(default=5_000_000, ge=1024, le=10_000_000)
     registration_max_pages: int = Field(default=5, ge=1, le=8)
@@ -159,6 +162,36 @@ async def service_health(service_name: str, request: Request) -> dict:
         return {"data": response.json()}
     except (httpx.HTTPError, ValueError) as error:
         raise HTTPException(503, "Service unavailable") from error
+
+
+class TurnstileInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    token: str = Field(min_length=1, max_length=2048)
+
+
+@app.post("/api/v1/auth/verify-turnstile")
+async def verify_turnstile(body: TurnstileInput, request: Request) -> dict:
+    """Verify a single-use Cloudflare challenge token; dev bypass is never production."""
+    response = JSONResponse(content={"data": {"verified": True}})
+    response.headers["Cache-Control"] = "no-store"
+    if settings.turnstile_secret_key is None:
+        if settings.classsync_env in {"test", "development"}:
+            return response
+        raise HTTPException(503, "Human verification is unavailable")
+    try:
+        async with httpx.AsyncClient(timeout=5.0, trust_env=False) as client:
+            result = await client.post(
+                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+                data={"secret": settings.turnstile_secret_key.get_secret_value(),
+                      "response": body.token},
+            )
+            result.raise_for_status()
+            verified = result.json().get("success") is True
+    except (httpx.HTTPError, ValueError, AttributeError) as error:
+        raise HTTPException(503, "Human verification is unavailable") from error
+    if not verified:
+        raise HTTPException(403, "Human verification failed")
+    return response
 
 
 async def scheduling_proxy(operation: str, request: Request, sandbox: bool):

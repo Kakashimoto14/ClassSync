@@ -14,6 +14,8 @@ The previous Firestore authority document is retained as a [superseded proposal]
 
 The code catalog now reflects the uploaded November 2026 room rows: 53 physical spaces, 41 marked schedulable by the source and 12 excluded. Focused catalog, readiness, directory, and Administrator selector checks pass locally. The document summary still conflicts (37/16), and Facilities has not verified operation, type, capacity, equipment, or current availability; no room is made solver-eligible by the source designation alone. See [the room inventory mapping](docs/audit/ROOM_INVENTORY_UPDATE.md). Student registration and onboarding forms use ID format `12-12345` and the institutional email placeholder `juan.delacruz@student.pnm.edu.ph`. The Gateway now validates the ID and lowercase email format and binds only an active roster record with an exact Firebase-verified email match. Existing student rows remain unverified until authorized Registrar data is populated; this local code change does not itself provide or verify that roster. See the [master plan](docs/audit/MASTER_IMPLEMENTATION_PLAN.md).
 
+The institutional login now uses a CdM campus access layout and asks the Gateway to verify a Cloudflare Turnstile token before Firebase email/password or Google sign-in. Local development may omit the Turnstile secret and use the official test widget key; the Gateway bypass is restricted to `development`/`test`, while production without a configured secret fails closed. First-time student account linking now uses a five-minute single-use email code stored as HMAC in a tenant/UID-scoped PostgreSQL challenge table (migration `0019_student_email_challenges`) and delivered through the private Notification service using Resend. Configure distinct `TURNSTILE_SECRET_KEY`, `OTP_HMAC_SECRET` (32+ random bytes), `NOTIFICATION_SERVICE_TOKEN`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` values in local ignored environment files before exercising provider delivery. No OTP or PII is printed as a development fallback. Student-number/password sign-in and password creation after OTP are not yet connected; sign-in currently accepts institutional email/password or Google. The browser calls the Gateway Turnstile verifier before Firebase SDK sign-in, but direct Firebase Auth calls can bypass this UI challenge, so Turnstile is not yet an enforcement boundary for Firebase authentication. The current test widget and any bootstrap/sandbox records do not qualify institutional identity or official schedules.
+
 ## Workspace
 
 | Path                      | Purpose                                                                                |
@@ -64,6 +66,15 @@ Generation and Conflict Center are labeled as deterministic OR-Tools and indepen
 no language-model copilot is connected. Their empty states link to the next required action.
 Inline form and selection transitions respect the browser's reduced-motion preference.
 
+For local review of the owner-provided bootstrap scenario, run
+`python -m scripts.seed_bootstrap_cdm --database-path var/bootstrap-sandbox/classsync.bootstrap-sandbox.sqlite3`.
+The script is idempotent and refuses database filenames without the isolated sandbox suffix. It
+creates synthetic program/subject/section/faculty/offering inputs in SQLite, leaves the supplied
+53-room catalog at its current provisional state, and writes an `owner_bootstrap_seed` manifest.
+It does not create student identities, apply the owner-proposed room capacity of 40, verify room
+eligibility, or publish a timetable. Those production operations require authorized Registrar
+and Facilities data and verified tenant configuration.
+
 Several Administrator routes are still previews or placeholders, including student record lists,
 building views, operational reports, and sample communications. Their contents are not live campus
 records. See the [Administrator workspace audit](docs/hci/admin-workspace-audit.md) for the
@@ -107,14 +118,16 @@ Run `npm run lint`, `npm run typecheck`, `npm run test:web`, and `npm run build`
 
 Academic and scheduling endpoints independently enforce authorization. The S1/S2 examples above describe historical sandbox milestones. Connected local sign-in and publication use isolated synthetic records; hosting, approved academic inputs and institutional release remain separately gated. See [rules and assumptions](docs/scheduling/rules-and-assumptions.md) before supplying institutional data.
 
-P4d local qualification status (18 Nov 2026): latest in-process gates pass with 1115 Python tests,
-843 Web tests, Web lint/typecheck/build, and Ruff. The activity-only PostgreSQL audit qualification
-was previously verified with disposable data; this turn did not rerun external PostgreSQL or Auth
-Emulator qualification. The connected schedule-to-publication browser flow, native 200% zoom, and
-keyboard-only end-to-end journey remain open. The student verification code is fail-closed when no
-matching active Registrar roster record exists; roster ingestion/population and institutional
-acceptance remain required. External qualification scripts and dependency scans are deferred to
-CI/pre-release and are not a manual PowerShell prerequisite for local development. See [P4d
+P4d remains PARTIAL. On 18 Nov 2026, focused onboarding checks passed (35 Python tests and 13 Web
+tests), Web lint/typecheck passed, and the production Web build passed with no chunk/import warnings
+(largest JavaScript chunk 325.20 kB). The most recent full Python run before the final qualification
+fixture correction had 1,119 passed and 2 failures; one stale inventory assertion has since passed
+in isolation, while the scheduling regression returned `UNKNOWN` at its unchanged 8-second limit.
+The most recent full Web run had 843 passed and one timeout; that test file passed when run alone.
+Neither full suite has been rerun to a clean result. Ruff is unavailable in this isolated environment.
+PostgreSQL/Auth Emulator/browser/provider qualification, native 200% zoom and keyboard-only journeys
+remain open. The student verification code fails closed without a matching active Registrar roster
+record; roster ingestion/population and institutional acceptance remain required. See [P4d
 acceptance](docs/autonomy/P4D_ADMIN_ACCEPTANCE.md) and the [current evidence ledger](docs/autonomy/STATUS.md);
 local checks do not establish production readiness.
 

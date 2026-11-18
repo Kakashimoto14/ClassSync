@@ -202,6 +202,119 @@ class OnboardingRepository:
                                     headers={"Cache-Control": "no-store"})
         return {"status": "verified"}
 
+    def issue_student_challenge(self, principal, student_id, challenge_id, digest):
+        lookup_id = student_id if isinstance(student_id, str) and STUDENT_ID_PATTERN.fullmatch(
+            student_id
+        ) else None
+        with self.session(principal) as db:
+            row = db.execute(text("""
+                SELECT id,person_id,registered_email,enrollment_status
+                FROM classsync_identity.students
+                WHERE tenant_id=:tenant AND id=:student FOR SHARE
+            """), self.params(principal, student=lookup_id)).mappings().first()
+            if not student_record_matches(row, student_id, principal.email):
+                raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                    headers={"Cache-Control": "no-store"})
+            current = db.execute(text("""
+                SELECT resend_after FROM classsync_identity.email_verification_challenges
+                WHERE tenant_id=:tenant AND uid=:uid AND consumed_at IS NULL
+                ORDER BY created_at DESC LIMIT 1 FOR UPDATE
+            """), self.params(principal)).mappings().first()
+            if current and db.scalar(text("SELECT :resend_after > transaction_timestamp()"),
+                                     {"resend_after": current["resend_after"]}):
+                raise HTTPException(429, "Wait before requesting another verification code",
+                                    headers={"Retry-After": "60", "Cache-Control": "no-store"})
+            db.execute(text("""
+                UPDATE classsync_identity.email_verification_challenges
+                SET consumed_at=transaction_timestamp()
+                WHERE tenant_id=:tenant AND uid=:uid AND consumed_at IS NULL
+            """), self.params(principal))
+            db.execute(text("""
+                INSERT INTO classsync_identity.email_verification_challenges
+                    (tenant_id,uid,challenge_id,student_id,otp_hmac,expires_at,resend_after)
+                VALUES (:tenant,:uid,:challenge,:student,:digest,
+                    transaction_timestamp()+interval '5 minutes',
+                    transaction_timestamp()+interval '60 seconds')
+            """), self.params(principal, challenge=challenge_id, student=student_id,
+                              digest=digest))
+        local, domain = principal.email.split("@", 1)
+        return f"{local[:1]}{'*' * min(max(len(local)-1, 4), 8)}@{domain}"
+
+    def cancel_student_challenge(self, principal, challenge_id):
+        with self.session(principal) as db:
+            db.execute(text("""
+                UPDATE classsync_identity.email_verification_challenges
+                SET consumed_at=transaction_timestamp()
+                WHERE tenant_id=:tenant AND uid=:uid AND challenge_id=:challenge
+                    AND consumed_at IS NULL
+            """), self.params(principal, challenge=challenge_id))
+
+    def verify_student_challenge(self, principal, student_id, challenge_id, code, secret):
+        invalid_code = False
+        result = None
+        with self.session(principal) as db:
+            row = db.execute(text("""
+                SELECT c.otp_hmac,c.failed_attempts,c.expires_at,c.consumed_at,
+                       s.id,s.person_id,s.registered_email,s.enrollment_status
+                FROM classsync_identity.email_verification_challenges c
+                JOIN classsync_identity.students s
+                  ON s.tenant_id=c.tenant_id AND s.id=c.student_id
+                WHERE c.tenant_id=:tenant AND c.uid=:uid AND c.challenge_id=:challenge
+                  AND c.student_id=:student
+                FOR UPDATE OF c,s
+            """), self.params(principal, challenge=challenge_id, student=student_id)) \
+                .mappings().first()
+            if (row is None or row["consumed_at"] is not None or row["failed_attempts"] >= 5
+                    or db.scalar(text("SELECT :expires_at <= transaction_timestamp()"),
+                                 {"expires_at": row["expires_at"] if row else "epoch"})
+                    or not student_record_matches(row, student_id, principal.email)):
+                raise HTTPException(403, "Verification code could not be confirmed",
+                                    headers={"Cache-Control": "no-store"})
+            expected = hmac.new(
+                secret, f"{principal.uid}\0{challenge_id}\0{code}".encode("utf-8"), "sha256"
+            ).digest()
+            if not hmac.compare_digest(expected, bytes(row["otp_hmac"])):
+                db.execute(text("""
+                    UPDATE classsync_identity.email_verification_challenges
+                    SET failed_attempts=failed_attempts+1,
+                        consumed_at=CASE WHEN failed_attempts+1>=5
+                            THEN transaction_timestamp() ELSE consumed_at END
+                    WHERE tenant_id=:tenant AND uid=:uid AND challenge_id=:challenge
+                """), self.params(principal, challenge=challenge_id))
+                invalid_code = True
+            else:
+                db.execute(text("""
+                    UPDATE classsync_identity.email_verification_challenges
+                    SET consumed_at=transaction_timestamp()
+                    WHERE tenant_id=:tenant AND uid=:uid AND challenge_id=:challenge
+                """), self.params(principal, challenge=challenge_id))
+                existing = db.execute(text("""
+                    SELECT student_id,roles,state FROM classsync_identity.memberships
+                    WHERE tenant_id=:tenant AND uid=:uid FOR UPDATE
+                """), self.params(principal)).mappings().first()
+                if existing:
+                    if (existing["student_id"] == student_id and "student" in existing["roles"]
+                            and existing["state"] == "active"):
+                        result = {"status": "verified"}
+                    else:
+                        raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                            headers={"Cache-Control": "no-store"})
+                else:
+                    inserted = db.execute(text("""
+                        INSERT INTO classsync_identity.memberships
+                            (tenant_id,uid,person_id,student_id,roles,state,revision)
+                        VALUES (:tenant,:uid,:person,:student,ARRAY['student']::text[],'active',1)
+                        ON CONFLICT DO NOTHING
+                    """), self.params(principal, person=row["person_id"], student=student_id))
+                    if inserted.rowcount != 1:
+                        raise HTTPException(403, STUDENT_VERIFICATION_ERROR,
+                                            headers={"Cache-Control": "no-store"})
+                    result = {"status": "verified"}
+        if invalid_code:
+            raise HTTPException(403, "Verification code could not be confirmed",
+                                headers={"Cache-Control": "no-store"})
+        return result
+
     def claims(self, principal):
         with self.session(principal, admin=True) as db:
             return [

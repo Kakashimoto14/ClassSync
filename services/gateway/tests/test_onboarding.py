@@ -2,9 +2,11 @@ import time
 from unittest.mock import Mock
 
 import pytest
+from uuid import UUID
 from classync_contracts.identity import VerifiedPrincipal
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from services.gateway.app import main
 from services.gateway.app.onboarding import STUDENT_VERIFICATION_ERROR
@@ -71,12 +73,13 @@ def test_student_verification_requires_verified_firebase_email(setup, monkeypatc
     result = client.post(
         "/api/v1/auth/verify-student",
         headers=HEADERS,
-        json={"student_id": "24-98096"},
+        json={"student_id": "24-98096", "challenge_id": "00000000-0000-0000-0000-000000000001",
+              "code": "123456"},
     )
 
     assert result.status_code == 403
     assert result.json()["error"]["message"] == "Verify your email before continuing"
-    repository.verify_student.assert_not_called()
+    repository.verify_student_challenge.assert_not_called()
 
 
 def test_privileged_account_management_requires_recent_sign_in(setup, monkeypatch):
@@ -130,24 +133,30 @@ def test_student_verification_uses_verified_firebase_email_and_strict_roster_id(
         email_verified=True,
     )
     monkeypatch.setattr(verifier, "verify", lambda _: principal)
-    repository.verify_student.return_value = {"status": "verified"}
+    monkeypatch.setattr(main.settings, "otp_hmac_secret", SecretStr("test-secret"))
+    repository.verify_student_challenge.return_value = {"status": "verified"}
 
     result = client.post(
         "/api/v1/auth/verify-student",
         headers=HEADERS,
-        json={"student_id": "24-98096"},
+        json={"student_id": "24-98096", "challenge_id": "00000000-0000-0000-0000-000000000001",
+              "code": "123456"},
     )
 
     assert result.status_code == 200
     assert result.json() == {"data": {"status": "verified"}}
-    repository.verify_student.assert_called_once_with(principal, "24-98096")
+    repository.verify_student_challenge.assert_called_once_with(
+        principal, "24-98096", UUID("00000000-0000-0000-0000-000000000001"),
+        "123456", b"test-secret",
+    )
 
 
 @pytest.mark.parametrize(
     "body",
     [
         {"student_id": "<script>alert(1)</script>"},
-        {"student_id": "24-98096", "email": "attacker@example.invalid"},
+        {"student_id": "24-98096", "challenge_id": "00000000-0000-0000-0000-000000000001",
+         "code": "123456", "email": "attacker@example.invalid"},
     ],
 )
 def test_student_verification_rejects_invalid_or_untrusted_fields_before_repository(setup, body):
@@ -156,19 +165,38 @@ def test_student_verification_rejects_invalid_or_untrusted_fields_before_reposit
     result = client.post("/api/v1/auth/verify-student", headers=HEADERS, json=body)
 
     assert result.status_code == 422
-    repository.verify_student.assert_not_called()
+    repository.verify_student_challenge.assert_not_called()
 
 
-@pytest.mark.parametrize("body", [{}, {"student_id": "24-98096"}])
-def test_missing_student_id_and_roster_mismatch_share_the_registrar_message(setup, body):
+def test_roster_mismatch_shares_registrar_message_before_otp_delivery(setup, monkeypatch):
     client, _, repository = setup
-    repository.verify_student.side_effect = HTTPException(403, STUDENT_VERIFICATION_ERROR)
+    monkeypatch.setattr(main.settings, "otp_hmac_secret", SecretStr("test-secret"))
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("service-secret"))
+    repository.issue_student_challenge.side_effect = HTTPException(403, STUDENT_VERIFICATION_ERROR)
 
-    result = client.post("/api/v1/auth/verify-student", headers=HEADERS, json=body)
+    result = client.post(
+        "/api/v1/auth/student-verification-challenges", headers=HEADERS,
+        json={"student_id": "24-98096"},
+    )
 
     assert result.status_code == 403
     assert result.json()["error"]["message"] == STUDENT_VERIFICATION_ERROR
-    repository.verify_student.assert_called_once()
+    repository.issue_student_challenge.assert_called_once()
+
+
+def test_student_challenge_fails_closed_when_hmac_or_delivery_secret_is_missing(setup, monkeypatch):
+    client, _, repository = setup
+    monkeypatch.setattr(main.settings, "otp_hmac_secret", None)
+    monkeypatch.setattr(main.settings, "notification_service_token", None)
+
+    result = client.post(
+        "/api/v1/auth/student-verification-challenges", headers=HEADERS,
+        json={"student_id": "24-98096"},
+    )
+
+    assert result.status_code == 503
+    assert result.json()["error"]["message"] == "Email verification is unavailable"
+    repository.issue_student_challenge.assert_not_called()
 
 
 @pytest.mark.parametrize(

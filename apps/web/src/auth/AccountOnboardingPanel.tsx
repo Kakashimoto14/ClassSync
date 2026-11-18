@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
 import { Link } from 'react-router-dom';
 import { useUniversitySession } from './university-session-context';
@@ -50,8 +50,22 @@ function PendingAccount({
   const [token, setToken] = useState('');
   const [message, setMessage] = useState('');
   const [studentIdError, setStudentIdError] = useState('');
+  const [challenge, setChallenge] = useState<{
+    challenge_id: string;
+    masked_email: string;
+    expires_in_seconds: number;
+    resend_after_seconds: number;
+  } | null>(null);
+  const [code, setCode] = useState('');
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const digitRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [busy, setBusy] = useState(false);
   const signedIn = ['denied', 'verification-required'].includes(session.state.status);
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = window.setTimeout(() => setResendSeconds((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendSeconds]);
   useEffect(() => {
     if (!signedIn) return;
     let closed = false;
@@ -93,8 +107,7 @@ function PendingAccount({
       setBusy(false);
     }
   };
-  const verifyStudent = (event: FormEvent) => {
-    event.preventDefault();
+  const sendCode = async () => {
     if (busy || !status?.email_verified || status.membership_state) return;
     if (!/^[0-9]{2}-[0-9]{5}$/.test(studentId.trim())) {
       const error = 'Use the format 12-12345 for your student number.';
@@ -103,15 +116,43 @@ function PendingAccount({
       return;
     }
     setStudentIdError('');
-    void action(async () => {
-      await accountRequest(
-        'verify-student',
-        'POST',
-        { student_id: studentId.trim() },
-        undefined,
-        profile.uid,
+    setBusy(true);
+    setMessage('');
+    try {
+      const next = await accountRequest<NonNullable<typeof challenge>>(
+        'student-verification-challenges', 'POST', { student_id: studentId.trim() },
+        undefined, profile.uid,
       );
+      setChallenge(next);
+      setCode('');
+      setResendSeconds(next.resend_after_seconds);
+      setMessage(`A code was sent to ${next.masked_email}. It expires in 5 minutes.`);
+      digitRefs.current[0]?.focus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : accountError(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const requestCode = (event: FormEvent) => {
+    event.preventDefault();
+    void sendCode();
+  };
+  const verifyCode = async (event: FormEvent) => {
+    event.preventDefault();
+    if (busy || !challenge || code.length !== 6) return;
+    await action(async () => {
+      await accountRequest(
+        'verify-student', 'POST',
+        { student_id: studentId.trim(), challenge_id: challenge.challenge_id, code },
+        undefined, profile.uid,
+      );
+      setChallenge(null);
+      setCode('');
     }, 'Student record verified. Refresh your account to continue.');
+  };
+  const resendCode = () => {
+    if (resendSeconds === 0 && !busy) void sendCode();
   };
   return (
     <section className="account-onboarding" aria-label="Set up university access" aria-busy={busy}>
@@ -164,7 +205,7 @@ function PendingAccount({
             </Link>
           )}
           {entryRole !== 'teacher' && !status.membership_state && (
-            <form noValidate onSubmit={verifyStudent}>
+            !challenge ? <form noValidate onSubmit={requestCode}>
               <h4>Verify your student record</h4>
               <label htmlFor="claim-registered-email">Registered student email</label>
               <input
@@ -204,8 +245,59 @@ function PendingAccount({
                 </p>
               )}
               <Button type="submit" disabled={busy}>
-                {busy ? 'Checking record…' : 'Verify student record'}
+                {busy ? 'Sending code…' : 'Send verification code'}
               </Button>
+            </form> : <form noValidate onSubmit={verifyCode} className="account-onboarding__otp">
+              <h4>Verify your sign-in</h4>
+              <p>Enter the 6-digit code sent to {challenge.masked_email}. It expires in 5 minutes and can be used once.</p>
+              <div className="account-onboarding__otp-digits" role="group" aria-label="Verification code">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <input
+                    key={index}
+                    ref={(node) => { digitRefs.current[index] = node; }}
+                    aria-label={`Verification digit ${index + 1}`}
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                    pattern="[0-9]*"
+                    maxLength={index === 0 ? 6 : 1}
+                    value={code[index] ?? ''}
+                    disabled={busy}
+                    onPaste={(event) => {
+                      const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                      if (!pasted) return;
+                      event.preventDefault();
+                      setCode(pasted);
+                      digitRefs.current[Math.min(pasted.length, 5)]?.focus();
+                    }}
+                    onChange={(event) => {
+                      const digits = event.target.value.replace(/\D/g, '');
+                      if (!digits) {
+                        setCode((value) => value.slice(0, index) + value.slice(index + 1));
+                        return;
+                      }
+                      const next = digits.length > 1
+                        ? digits.slice(0, 6)
+                        : (code.slice(0, index) + digits[0] + code.slice(index + 1)).slice(0, 6);
+                      setCode(next);
+                      digitRefs.current[Math.min(index + digits.length, 5)]?.focus();
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Backspace' && !code[index] && index > 0)
+                        digitRefs.current[index - 1]?.focus();
+                    }}
+                  />
+                ))}
+              </div>
+              <Button type="submit" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify and sign in'}</Button>
+              <div className="account-onboarding__otp-actions">
+                <Button type="button" variant="secondary" disabled={busy || resendSeconds > 0} onClick={resendCode}>
+                  {resendSeconds ? `Resend code in ${resendSeconds}s` : 'Resend code'}
+                </Button>
+                <Button type="button" variant="ghost" disabled={busy} onClick={() => void session.signOut()}>
+                  Cancel sign-in
+                </Button>
+              </div>
+              <p className="entrance-hint">If you cannot access your registered email, contact the Registrar for identity-checked account recovery.</p>
             </form>
           )}
           {status.claim_state === 'rejected' && (
