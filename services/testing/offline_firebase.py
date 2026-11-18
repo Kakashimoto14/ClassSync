@@ -57,6 +57,8 @@ def offline_firebase(monkeypatch):
                     "auth_time": now - 10,
                     "exp": now + 600,
                     "role": "administrator",
+                    "email": "synthetic@example.invalid",
+                    "email_verified": True,
                     "tenant_id": "forged-tenant",
                     **changes,
                 },

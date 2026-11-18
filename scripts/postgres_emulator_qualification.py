@@ -23,7 +23,13 @@ from sqlalchemy import text
 
 from scripts.postgres_disposable import qualify
 from scripts.postgres_driver_qualification import engine_for, require
-from scripts.postgres_identity_qualification import exercise as identity_exercise
+from scripts.postgres_identity_qualification import (
+    add_synthetic_student,
+    require_unique_student_bindings,
+)
+from scripts.postgres_identity_qualification import (
+    exercise as identity_exercise,
+)
 from services.testing.emulator_firebase import emulator_firebase
 
 
@@ -77,19 +83,28 @@ def exercise(connection, *, project, endpoint):
                     ), {"project": project})
                     identity_context(session, tenant_id="tenant-a", uid=uid)
                     audit_actor(session, VerifiedPrincipal(uid="synthetic-operator"))
+                    student_id = "student-emulator-primary"
+                    add_synthetic_student(
+                        session, tenant="tenant-a", person_id="person-emulator-primary",
+                        student_id=student_id,
+                    )
+                    require_unique_student_bindings([
+                        ("uid-a", "student-a"), (uid, student_id),
+                    ])
                     session.execute(text("""
                         INSERT INTO classsync_identity.memberships
-                        VALUES ('tenant-a', :uid, 'person-a', 'student-a', NULL,
+                        VALUES ('tenant-a', :uid, 'person-emulator-primary', :student,
+                                NULL,
                                 ARRAY['student'], 'active', 1)
-                    """), {"uid": uid})
+                    """), {"uid": uid, "student": student_id})
                 require(request(200)["data"] == {
                     "uid": uid, "tenant_id": "tenant-a", "role": "student",
-                    "student_id": "student-a", "membership_revision": 1,
+                    "student_id": student_id, "membership_revision": 1,
                 }, "Actual emulator token did not bind current academic record")
                 request(403, role="administrator", extra={"X-Tenant-ID": "tenant-b"})
                 require(request(200, extra={"X-Tenant-ID": "tenant-b",
                                            "X-Student-ID": "forged"})["data"]["student_id"]
-                        == "student-a", "Forged emulator request record selection")
+                        == student_id, "Forged emulator request record selection")
                 auth.set_custom_user_claims(uid, {"role": "administrator",
                                                  "tenant_id": "tenant-b"}, app=app)
                 with httpx.Client(
@@ -164,11 +179,21 @@ def exercise(connection, *, project, endpoint):
                 with transaction(owner) as session:
                     identity_context(session, tenant_id="tenant-a", uid=uid)
                     audit_actor(session, VerifiedPrincipal(uid="synthetic-operator"))
+                    second_student = "student-emulator-secondary"
+                    add_synthetic_student(
+                        session, tenant="tenant-a", person_id="person-emulator-secondary",
+                        student_id=second_student,
+                    )
+                    require_unique_student_bindings([
+                        ("uid-a", "student-a"), (identity["localId"], student_id),
+                        (uid, second_student),
+                    ])
                     session.execute(text("""
                         INSERT INTO classsync_identity.memberships
-                        VALUES ('tenant-a', :uid, 'person-a', 'student-a', NULL,
+                        VALUES ('tenant-a', :uid, 'person-emulator-secondary', :student,
+                                NULL,
                                 ARRAY['student'], 'active', 1)
-                    """), {"uid": uid})
+                    """), {"uid": uid, "student": second_student})
                 request(200)
                 root = Path(os.environ["CLASSSYNC_AUTH_RUN_ROOT"])
                 print("CLASSSYNC_OWNED_AUTH_STOP", flush=True)

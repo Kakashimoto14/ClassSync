@@ -77,7 +77,8 @@ def test_membership_change_after_request_guard_is_private_http_error(monkeypatch
     assert set(response.json()["error"]) == {"code", "message"}
 
 
-def test_normal_owned_cleanup_and_bounded_pool_without_migrations(monkeypatch):
+@pytest.mark.parametrize("pool_size", [5, 2])
+def test_normal_owned_cleanup_and_bounded_pool_without_migrations(monkeypatch, pool_size):
     from services.academic.app import authorization as providers
 
     disposed, options = [], []
@@ -89,10 +90,10 @@ def test_normal_owned_cleanup_and_bounded_pool_without_migrations(monkeypatch):
 
     monkeypatch.setattr(providers, "postgres_engine", create)
     app = SimpleNamespace(state=SimpleNamespace())
-    with providers.configured_academic(app, configured_settings()):
+    with providers.configured_academic(app, configured_settings(database_pool_size=pool_size)):
         assert app.state.academic_engine is engine
     assert disposed == [True]
-    assert options[0]["pool_size"] == 5 and options[0]["max_overflow"] == 0
+    assert options[0]["pool_size"] == pool_size and options[0]["max_overflow"] == 0
     assert options[0]["pool_timeout"] == 3
     assert "statement_timeout=5000" in options[0]["connect_args"]["options"]
     assert options[0]["connect_args"]["application_name"] == "classsync-academic"

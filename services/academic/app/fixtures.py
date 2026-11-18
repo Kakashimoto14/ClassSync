@@ -65,12 +65,16 @@ def fixture_records(body, pid):
             **{k: v for k, v in r.items() if k not in {"alias", "aliasUnconfirmed"}},
             "kind": "resources",
             "source": "cdm-provisional",
+            "verification_note": (
+                "November 2026 inventory designation only; operational status, availability, "
+                "capacity and equipment remain unverified."
+            ),
             "alias": r.get("alias"),
             "alias_unconfirmed": r.get("aliasUnconfirmed", False),
         }
         for r in rooms
     ]
-    # These IDs and locations are separate from all 59 provisional inventory entries.
+    # These IDs and locations are separate from the November 2026 CdM inventory.
     resources = [f"synthetic-room-{i}" for i in range(1, 5)]
     records += [
         {
@@ -109,6 +113,7 @@ def fixture_records(body, pid):
             records.append(
                 {
                     "kind": "faculty",
+                    "synthetic": True,
                     "id": tid,
                     "name": f"Sample Instructor {identity.upper()}",
                     "subject_ids": [identity],

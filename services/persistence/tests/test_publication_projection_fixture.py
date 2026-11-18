@@ -32,12 +32,12 @@ def test_generated_projection_fixture_saves_disjoint_enrollment_before_hashing(t
     assert scheduling_input_hash(before.inputs) != scheduling_input_hash(after.inputs)
     assert before.inputs.enrollments == []
     memberships = {entry.student_id: set(entry.offering_ids) for entry in after.inputs.enrollments}
-    assert set(memberships) == {"student-a", "student-other"}
+    assert set(memberships) == {"student-restore", "student-other"}
     assert "student-unassigned" not in memberships
-    assert memberships["student-a"] and memberships["student-other"]
-    assert memberships["student-a"].isdisjoint(memberships["student-other"])
+    assert memberships["student-restore"] and memberships["student-other"]
+    assert memberships["student-restore"].isdisjoint(memberships["student-other"])
     offerings = {offering.id: offering.section_id for offering in after.inputs.offerings}
-    assert {offerings[key] for key in memberships["student-a"]} == {"section-a"}
+    assert {offerings[key] for key in memberships["student-restore"]} == {"section-a"}
     assert {offerings[key] for key in memberships["student-other"]} == {"section-b"}
     restored = academic.snapshot(
         "sandbox", "development-academic-sandbox", linked.period.id,

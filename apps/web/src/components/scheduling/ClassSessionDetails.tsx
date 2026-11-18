@@ -15,6 +15,7 @@ export function ClassSessionDetails({
   published,
   presentation = false,
   onClose,
+  period,
 }: {
   session: CalendarOccurrence;
   role: UserRole;
@@ -22,12 +23,16 @@ export function ClassSessionDetails({
   published: boolean;
   presentation?: boolean;
   onClose: () => void;
+  period?: string;
 }) {
   const [params] = useSearchParams();
   const roomPath =
     role === 'student'
       ? `/student/rooms/detail?${new URLSearchParams({ id: session.room.id, date: session.date, schedule: '1', ...(params.get('period') ? { period: params.get('period')! } : {}) })}`
-      : sessionRoomPath(role, session.room.id);
+      : sessionRoomPath(role, session.room.id, {
+          period: period ?? params.get('period') ?? '',
+          date: session.date,
+        });
   const duration = (Date.parse(session.ends_at) - Date.parse(session.starts_at)) / 60000;
   return (
     <DialogSurface
@@ -98,6 +103,14 @@ export function ClassSessionDetails({
         )}
       </div>
       <footer className="class-session-footer">
+        {role === 'teacher' && !sample && published && (period || params.get('period')) && (
+          <Link
+            className="button"
+            to={`/teacher/change-requests/new?${new URLSearchParams({ period: period || params.get('period')!, date: session.date, occurrence: session.id })}`}
+          >
+            Request classroom change
+          </Link>
+        )}
         {roomPath && (
           <Link className="button button--secondary" to={roomPath}>
             Open Room Details

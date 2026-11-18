@@ -20,11 +20,16 @@ export type AcademicConstraints = {
   enrollments?: Array<Enrollment>;
   options?: SolverOptions;
   all_intended_offerings_supplied?: boolean;
+  operating_windows_verified?: boolean;
+  shared_scope_verified?: boolean;
+  shared_scope_reference?: string | null;
+  verification_reference?: string | null;
 };
 
 export type AcademicFaculty = {
   id: string;
   name: string;
+  synthetic?: boolean;
   availability?: Array<Window>;
   unavailable?: Array<Window>;
   preferred_days?: Array<number>;
@@ -34,6 +39,10 @@ export type AcademicFaculty = {
   active?: boolean;
   subject_ids?: Array<string>;
   institutional_id?: string | null;
+  eligibility_verified?: boolean;
+  availability_verified?: boolean;
+  workload_verified?: boolean;
+  verification_reference?: string | null;
 };
 
 export type AcademicGenerationRequest = {
@@ -46,6 +55,7 @@ export type AcademicOffering = {
   kind?: "offerings";
   subject_id: string;
   section_id: string;
+  activity_type?: ActivityType;
   teacher_ids?: Array<string>;
   room_ids?: Array<string>;
   weekly_minutes_override?: number | null;
@@ -54,6 +64,9 @@ export type AcademicOffering = {
   required_equipment?: Array<string>;
   minimum_capacity?: number | null;
   allowed_buildings?: Array<string> | null;
+  term_offering_verified?: boolean;
+  override_requirements_verified?: boolean;
+  verification_reference?: string | null;
 };
 
 export type AcademicPeriod = {
@@ -61,7 +74,7 @@ export type AcademicPeriod = {
   title: string;
   revision: number;
   created_at: string;
-  source: "development-entered" | "institutional";
+  source: "development-entered" | "institutional" | "synthetic-review";
   calendar?: AcademicCalendar | null;
 };
 
@@ -106,6 +119,7 @@ export type AcademicResource = {
   condition?: "unknown" | "operational" | "maintenance";
   room_type?: string | null;
   type_verified?: boolean;
+  allowed_activity_types?: Array<ActivityType> | null;
   capacity?: number | null;
   capacity_verified?: boolean;
   equipment?: Array<string>;
@@ -116,6 +130,7 @@ export type AcademicResource = {
   kind?: "resources";
   active?: boolean;
   verification_note?: string;
+  availability_verified?: boolean;
   alias?: string | null;
   alias_unconfirmed?: boolean;
 };
@@ -130,8 +145,13 @@ export type AcademicSection = {
   kind?: "sections";
   active?: boolean;
   period_id: string;
+  entry_cohort_year?: number | null;
+  curriculum_version_id?: string | null;
+  cohort_assignment_verified?: boolean;
+  identity_verified?: boolean;
   population?: number | null;
   population_verified?: boolean;
+  verification_reference?: string | null;
 };
 
 export type AcademicSnapshot = {
@@ -146,6 +166,12 @@ export type AcademicSubject = {
   kind?: "subjects";
   code: string;
   name: string;
+  curriculum_version_id?: string | null;
+  curriculum_course_id?: string | null;
+  curriculum_review_verified?: boolean;
+  curriculum_review_reference?: string | null;
+  contact_minutes_verified?: boolean;
+  contact_minutes_reference?: string | null;
   year_level?: number | null;
   semester?: "first" | "second" | null;
   provenance?: "synthetic" | "administrator-entered" | "source-supplied";
@@ -156,6 +182,8 @@ export type AcademicSubject = {
   required_equipment?: Array<string>;
   minimum_capacity?: number | null;
 };
+
+export type ActivityType = "academic_instruction" | "computer_lab_instruction" | "bse_science_instruction" | "pahfit" | "sports" | "assembly" | "rotc" | "special_booking";
 
 export type Assignment = {
   id: string;
@@ -256,6 +284,8 @@ export type DraftSummary = {
 export type Enrollment = {
   student_id: string;
   offering_ids: Array<string>;
+  entry_cohort_year?: number | null;
+  curriculum_version_id?: string | null;
 };
 
 export type GenerationInput = {
@@ -310,7 +340,9 @@ export type Offering = {
   id: string;
   subject_id: string;
   subject_name: string;
+  subject_code?: string | null;
   section_id: string;
+  activity_type?: ActivityType;
   eligible_teacher_ids?: Array<string>;
   eligible_room_ids?: Array<string>;
   required_weekly_minutes?: number;
@@ -382,6 +414,7 @@ export type Room = {
   condition?: "unknown" | "operational" | "maintenance";
   room_type?: string | null;
   type_verified?: boolean;
+  allowed_activity_types?: Array<ActivityType> | null;
   capacity?: number | null;
   capacity_verified?: boolean;
   equipment?: Array<string>;
@@ -449,6 +482,7 @@ export type SolverOptions = {
 export type Teacher = {
   id: string;
   name: string;
+  synthetic?: boolean;
   availability?: Array<Window>;
   unavailable?: Array<Window>;
   preferred_days?: Array<number>;

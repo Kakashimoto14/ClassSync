@@ -21,7 +21,14 @@ from sqlalchemy.engine import URL
 
 from scripts.postgres_disposable import qualify
 from scripts.postgres_driver_qualification import engine_for, require
-from scripts.postgres_identity_qualification import exercise as identity_exercise
+from scripts.postgres_identity_qualification import (
+    add_synthetic_faculty,
+    add_synthetic_student,
+    require_unique_student_bindings,
+)
+from scripts.postgres_identity_qualification import (
+    exercise as identity_exercise,
+)
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.scheduling.tests.test_calendar import configuration
 from services.testing.emulator_firebase import emulator_firebase
@@ -144,10 +151,25 @@ def exercise(connection, project, endpoint):
                 )
                 request("GET", "/periods", 401, extra={"Authorization": "Bearer malformed"})
                 with transaction(owner) as db:
+                    learner_student = "student-academic-provider"
+                    learner_person = "person-academic-provider"
+                    learner_faculty = "faculty-academic-provider"
+                    add_synthetic_student(
+                        db, tenant="tenant-a", person_id=learner_person,
+                        student_id=learner_student,
+                    )
+                    add_synthetic_faculty(
+                        db, tenant="tenant-a", person_id=learner_person,
+                        faculty_id=learner_faculty,
+                    )
+                    require_unique_student_bindings([
+                        ("uid-a", "student-a"), (learner["localId"], learner_student),
+                    ])
                     for identity, roles, person, student, faculty in (
                         (admin, ["administrator"], "person-other", None, None),
                         (other, ["administrator"], "person-other", None, None),
-                        (learner, ["student", "teacher"], "person-a", "student-a", "faculty-a"),
+                        (learner, ["student", "teacher"], learner_person,
+                         learner_student, learner_faculty),
                     ):
                         identity_context(db, tenant_id="tenant-a", uid=identity["localId"])
                         audit_actor(db, VerifiedPrincipal(uid="synthetic-operator"))

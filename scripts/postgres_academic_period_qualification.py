@@ -1,8 +1,10 @@
 """Actual academic metadata checks on a new marked PostgreSQL cluster only."""
 
 import argparse
+import re
 from functools import partial
 from pathlib import Path
+from uuid import uuid4
 
 from classync_contracts.identity import (
     MembershipAuthorizationError,
@@ -23,6 +25,36 @@ from scripts.postgres_identity_qualification import exercise as identity_exercis
 from scripts.postgres_web_session_qualification import write_new_evidence
 
 
+def migration_owner(session):
+    role = "classync_migrator_" + uuid4().hex
+    session.execute(text(
+        f"CREATE ROLE {role} NOLOGIN NOSUPERUSER NOCREATEDB "
+        "NOCREATEROLE NOREPLICATION NOBYPASSRLS"
+    ))
+    session.execute(text(f"GRANT CREATE ON DATABASE postgres TO {role}"))
+    session.execute(text(f"GRANT USAGE,CREATE ON SCHEMA public TO {role}"))
+    session.execute(text(
+        f"GRANT SELECT,INSERT,UPDATE,DELETE ON public.alembic_version TO {role}"
+    ))
+    return role
+
+
+def migrate_as_migrator(session, role, *, target=None, downgrade=False):
+    if not re.fullmatch(r"classync_migrator_[a-f0-9]{32}", role):
+        raise ValueError("Only an internally provisioned migration role is accepted")
+    session.execute(text(f"SET LOCAL ROLE {role}"))
+    current_role, is_superuser, bypass_rls = session.execute(text(
+        "SELECT current_user, rolsuper, rolbypassrls FROM pg_roles "
+        "WHERE rolname=current_user"
+    )).one()
+    require(current_role == role and not is_superuser and not bypass_rls,
+            "Migrations must run as the non-superuser, non-BYPASSRLS migrator")
+    if target is None:
+        migrate(session, downgrade=True) if downgrade else migrate(session)
+    else:
+        migrate(session, target=target, downgrade=downgrade)
+
+
 def exercise(connection):
     foundation = identity_exercise(connection)
     owner, runtime = engine_for(connection, bootstrap=True), engine_for(connection)
@@ -30,6 +62,7 @@ def exercise(connection):
     other_admin = VerifiedPrincipal(uid="uid-admin-other")
     try:
         with transaction(owner) as session:
+            migrator = migration_owner(session)
             # This historical slice intentionally qualifies revision0004's metadata-only API.
             # Later revisions implement writes needed by the complete academic repository.
             migrate(session, target="0004_academic_period_metadata", downgrade=True)
@@ -186,7 +219,7 @@ def exercise(connection):
                     "Academic downgrade left schema")
             require(session.scalar(text("SELECT count(*) FROM classsync_identity.memberships"))
                     == original_memberships, "Academic downgrade altered identity rows")
-            migrate(session)
+            migrate_as_migrator(session, migrator)
         return {"foundation": foundation, "create_list_connection_restart": True,
                 "typed_denied_cases": denied_cases, "direct_sql_rls": True,
                 "rollback_and_constraints": constraints, "revocation_reactivation": True,

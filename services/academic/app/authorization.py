@@ -25,9 +25,14 @@ def configured_academic(application, settings):
         firebase_project_id=settings.firebase_project_id,
         tenant_id=settings.institutional_tenant_id,
         application_name="classsync-academic",
+        tls_root_cert=settings.postgres_tls_root_cert,
     )
     engine = postgres_engine(
-        url, connect_args=parameters, pool_timeout=3, pool_size=5, max_overflow=0
+        url,
+        connect_args=parameters,
+        pool_timeout=3,
+        pool_size=settings.database_pool_size,
+        max_overflow=0,
     )
     adapters = None
     try:

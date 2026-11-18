@@ -3,6 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { useScheduleWorkspace } from './use-schedule-workspace';
 import { studentTimetableRequest } from './student-timetable-api';
+import { institutionalRequest } from './institutional-api';
+vi.mock('./institutional-api', () => ({ institutionalRequest: vi.fn() }));
 vi.mock('../config/runtime-config', async () => {
   const { capabilitiesFor } = await import('../config/app-mode');
   return { appMode: 'institutional', capabilities: capabilitiesFor('institutional') };
@@ -46,5 +48,29 @@ it('retrieves the complete displayed week across a month boundary and clears old
   act(() => result.current.retry());
   await waitFor(() => expect(result.current.errorStatus).toBe(403));
   expect(result.current.records).toEqual([]);
+  unmount();
+});
+
+it('clears teaching assignments when a successful refresh removes all authorized periods', async () => {
+  vi.mocked(institutionalRequest).mockImplementation(async (path) =>
+    path.endsWith('/periods')
+      ? ({ periods: [{ id: 'teaching-period', title: 'Invented teaching period' }] } as never)
+      : ({
+          status: 'published',
+          version: 'v1',
+          occurrences: [{ id: 'old-teaching-class' }],
+          sections: [],
+          teachers: [],
+        } as never),
+  );
+  const { result, unmount } = renderHook(() => useScheduleWorkspace('teacher'), {
+    wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+  });
+  await waitFor(() => expect(result.current.records).toHaveLength(1));
+  vi.mocked(institutionalRequest).mockResolvedValue({ periods: [] });
+  act(() => result.current.retry());
+  await waitFor(() => expect(result.current.context.period).toBe(''));
+  expect(result.current.records).toEqual([]);
+  expect(result.current.data).toBeNull();
   unmount();
 });

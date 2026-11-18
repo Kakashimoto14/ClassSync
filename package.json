@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev:connected": "node scripts/auth_emulator_qualification.cjs --development",
     "dev:web": "npm run dev --workspace=@classync/web",
     "build": "npm run build --workspace=@classync/web",
     "build:presentation": "node scripts/build-presentation.cjs",
@@ -15,7 +16,7 @@
     "typecheck": "npm run typecheck --workspace=@classync/web",
     "test:web": "node scripts/test-web.cjs",
     "test:artifacts": "node --test scripts/tests/production-artifacts.test.cjs",
-    "test:security": "node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs scripts/tests/auth-emulator-qualification.test.cjs scripts/tests/web-session-fixture.test.cjs",
+    "test:security": "node --test scripts/tests/dependency-security.test.cjs scripts/tests/hosted-verification.test.cjs scripts/tests/auth-emulator-qualification.test.cjs scripts/tests/web-session-fixture.test.cjs scripts/tests/coursework-artifacts.test.cjs",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "dev": "node scripts/dev.cjs"

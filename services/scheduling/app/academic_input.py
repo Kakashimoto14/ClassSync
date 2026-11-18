@@ -32,6 +32,14 @@ def academic_readiness(snapshot: AcademicSnapshot):
         for s in active_sections
     }
     active_offerings = [o for o in offerings.values() if o.active]
+    used_rooms = {rid for o in active_offerings for rid in o.room_ids}
+    used_teachers = {tid for o in active_offerings for tid in o.teacher_ids}
+    simulation = (
+        snapshot.period.source in {"development-entered", "synthetic-review"}
+        and bool(used_rooms)
+        and all(rid in rooms and rooms[rid].source == "synthetic" for rid in used_rooms)
+        and all(tid in faculty and faculty[tid].synthetic for tid in used_teachers)
+    )
     rules = next(iter(by_kind["constraints"].values()), None)
     issues = []
 
@@ -44,6 +52,11 @@ def academic_readiness(snapshot: AcademicSnapshot):
         issue("missing_sections", "Create the sections intended for this academic period.")
     if not active_offerings:
         issue("missing_offerings", "Create subject offerings for this academic period.")
+    if snapshot.period.calendar is None:
+        issue(
+            "missing_academic_calendar",
+            "Enter the approved academic year, semester, effective dates and instructional days.",
+        )
     if not rules or not rules.operating_windows:
         issue(
             "missing_operating_hours",
@@ -66,10 +79,41 @@ def academic_readiness(snapshot: AcademicSnapshot):
             issue(
                 "population_unverified",
                 f"{label}: population is unverified; "
-                "capacity coverage is not asserted unless explicitly required.",
+                "verify aggregate enrollment before assigning capacity-limited rooms.",
                 section.id,
-                "warning",
+                "blocking" if snapshot.period.source == "institutional" else "warning",
             )
+        if not simulation and snapshot.period.source == "institutional":
+            if (
+                not section.entry_cohort_year
+                or not section.curriculum_version_id
+                or not section.cohort_assignment_verified
+            ):
+                issue(
+                    "cohort_assignment_unverified",
+                    f"{label}: confirm the Registrar-assigned entry cohort and curriculum version.",
+                    section.id,
+                )
+            if not section.identity_verified:
+                issue(
+                    "section_identity_unverified",
+                    f"{label}: confirm the official section identity.",
+                    section.id,
+                )
+            if section.population_verified and not section.verification_reference:
+                issue(
+                    "population_reference_missing",
+                    f"{label}: record the verified aggregate-population source/reference.",
+                    section.id,
+                )
+            if (
+                section.cohort_assignment_verified or section.identity_verified
+            ) and not section.verification_reference:
+                issue(
+                    "section_verification_reference_missing",
+                    f"{label}: record the cohort/identity verification source.",
+                    section.id,
+                )
     normalized_offerings = []
     for offering in active_offerings:
         subject, section = subjects.get(offering.subject_id), sections.get(offering.section_id)
@@ -80,6 +124,66 @@ def academic_readiness(snapshot: AcademicSnapshot):
             )
             continue
         program = programs.get(section.program_id)
+        if subject.curriculum_version_id != section.curriculum_version_id:
+            issue(
+                "curriculum_association",
+                f"{label}: section curriculum does not match.",
+                offering.id,
+            )
+        if not simulation and (
+            subject.curriculum_version_id or snapshot.period.source == "institutional"
+        ):
+            if not subject.curriculum_review_verified:
+                issue(
+                    "curriculum_unreviewed",
+                    f"{label}: review and approve the source course or Registrar mapping.",
+                    subject.id,
+                )
+            if not subject.contact_minutes_verified:
+                issue(
+                    "contact_minutes_unverified", f"{label}: approve contact minutes.", subject.id
+                )
+            if not subject.curriculum_review_reference:
+                issue(
+                    "curriculum_reference_missing",
+                    f"{label}: record the Registrar/source review reference.",
+                    subject.id,
+                )
+            if not subject.contact_minutes_reference:
+                issue(
+                    "contact_minutes_reference_missing",
+                    f"{label}: record the approved minutes/pattern reference.",
+                    subject.id,
+                )
+        if not simulation and snapshot.period.source == "institutional":
+            if not offering.term_offering_verified:
+                issue(
+                    "term_offering_unverified",
+                    f"{label}: confirm this actual offering for the selected period and section.",
+                    offering.id,
+                )
+            if not offering.verification_reference:
+                issue(
+                    "offering_reference_missing",
+                    f"{label}: record the approved term-offering reference.",
+                    offering.id,
+                )
+        if (
+            offering.weekly_minutes_override is not None or offering.patterns_override is not None
+        ) and not offering.override_requirements_verified:
+            issue(
+                "offering_override_unverified",
+                f"{label}: verify offering-specific minutes and meeting patterns.",
+                offering.id,
+            )
+        if not simulation and any(
+            tid in faculty and faculty[tid].synthetic for tid in offering.teacher_ids
+        ):
+            issue(
+                "synthetic_faculty",
+                f"{label}: synthetic faculty cannot serve institutional data.",
+                offering.id,
+            )
         if not program or not program.active or section.program_id not in subject.program_ids:
             issue(
                 "program_association",
@@ -107,6 +211,30 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     f"{teacher.name}: enter permitted teaching windows.",
                     teacher.id,
                 )
+            if teacher and teacher.active and teacher.max_weekly_minutes is None:
+                issue(
+                    "faculty_workload_unverified",
+                    f"{teacher.name}: enter the approved weekly workload limit.",
+                    teacher.id,
+                )
+            if (
+                not simulation
+                and snapshot.period.source == "institutional"
+                and teacher
+                and teacher.active
+            ):
+                if not (
+                    teacher.eligibility_verified
+                    and teacher.availability_verified
+                    and teacher.workload_verified
+                    and teacher.verification_reference
+                ):
+                    issue(
+                        "faculty_verification_missing",
+                        f"{teacher.name}: verify eligibility, availability and workload and record "
+                        "the source/reference.",
+                        teacher.id,
+                    )
         if not offering.room_ids:
             issue(
                 "missing_room_eligibility",
@@ -121,6 +249,22 @@ def academic_readiness(snapshot: AcademicSnapshot):
                 f"{label}: selected resources are missing or inactive.",
                 offering.id,
             )
+        for identity in offering.room_ids:
+            room = rooms.get(identity)
+            if not simulation and snapshot.period.source == "institutional" and room:
+                if room.source != "administrator-supplied":
+                    issue(
+                        "noninstitutional_room",
+                        f"{room.name}: synthetic or provisional resources cannot serve an "
+                        "institutional offering.",
+                        room.id,
+                    )
+                if not room.availability_verified:
+                    issue(
+                        "room_availability_unverified",
+                        f"{room.name}: verify availability and blocked windows.",
+                        room.id,
+                    )
         minutes = offering.weekly_minutes_override or subject.required_weekly_minutes
         patterns = (
             offering.patterns_override
@@ -185,7 +329,9 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     id=offering.id,
                     subject_id=subject.id,
                     subject_name=subject.name,
+                    subject_code=subject.code,
                     section_id=section.id,
+                    activity_type=offering.activity_type,
                     eligible_teacher_ids=offering.teacher_ids,
                     eligible_room_ids=offering.room_ids,
                     required_weekly_minutes=minutes,
@@ -203,10 +349,22 @@ def academic_readiness(snapshot: AcademicSnapshot):
     if rules and not rules.all_intended_offerings_supplied:
         issue(
             "scope_not_complete",
-            "Coverage applies only to supplied active offerings; "
-            "all intended offerings have not been declared complete.",
-            severity="warning",
+            "Declare and verify that all intended offerings and shared commitments in this "
+            "period scope are supplied before generation.",
         )
+    if rules and not simulation and snapshot.period.source == "institutional":
+        if not rules.operating_windows_verified or not rules.verification_reference:
+            issue(
+                "operating_windows_unverified",
+                "Verify academic operating windows and record the approved calendar/rules "
+                "reference.",
+            )
+        if not rules.shared_scope_verified or not rules.shared_scope_reference:
+            issue(
+                "shared_scope_unverified",
+                "Review shared ICS, IBE and ITE offerings, faculty, rooms and fixed "
+                "commitments in this period, and record the approved scope reference.",
+            )
     if any(not getattr(e.record, "active", True) for e in snapshot.records):
         issue(
             "inactive_records",
@@ -225,14 +383,12 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     f"{snapshot.period.title}. {snapshot.period.source} inputs; "
                     "coverage limited to this saved period's active offerings."
                 ),
-                synthetic=bool(room_ids)
-                and all(rooms[rid].source == "synthetic" for rid in room_ids),
+                synthetic=simulation,
                 all_intended_offerings_supplied=rules.all_intended_offerings_supplied,
                 operating_windows=[
                     window
                     for window in rules.operating_windows
-                    if snapshot.period.calendar is None
-                    or window.day in snapshot.period.calendar.instructional_days
+                    if window.day in snapshot.period.calendar.instructional_days
                 ],
                 transition_buffer_minutes=rules.transition_buffer_minutes,
                 programs=[solver_fields(p, Program) for p in programs.values()],

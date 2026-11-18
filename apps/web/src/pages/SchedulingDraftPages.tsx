@@ -11,6 +11,8 @@ import {
   type DraftList,
   type GenerationResult,
 } from '../lib/scheduling-api';
+import { appMode } from '../config/runtime-config';
+const schedulingWorkspaceEnabled = appMode === 'institutional' || schedulingSandboxEnabled;
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { draftPath } from '../lib/scheduling-labels';
 import { PublicationPanel } from './PublicationPanel';
@@ -125,7 +127,8 @@ function DraftUnavailable() {
 
 export function SavedDraftsPage() {
   const [search, setSearch] = useSearchParams();
-  const source = search.get('source') === 'synthetic' ? 'synthetic' : 'academic';
+  const source =
+    appMode !== 'institutional' && search.get('source') === 'synthetic' ? 'synthetic' : 'academic';
   return (
     <DraftListContent
       key={source}
@@ -151,7 +154,7 @@ function DraftListContent({
   const [offset, setOffset] = useState(0);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!schedulingSandboxEnabled) return;
+    if (!schedulingWorkspaceEnabled) return;
     let ignore = false;
     (source === 'academic' ? listSchedulingDrafts(offset, source) : listSchedulingDrafts(offset))
       .then((value) => {
@@ -164,7 +167,7 @@ function DraftListContent({
       ignore = true;
     };
   }, [offset, retry, source]);
-  if (!schedulingSandboxEnabled) return <DraftUnavailable />;
+  if (!schedulingWorkspaceEnabled) return <DraftUnavailable />;
   const reload = () => {
     setData(null);
     setError('');
@@ -178,22 +181,24 @@ function DraftListContent({
   return (
     <div className="weekly-scheduler">
       <p className="scheduling-boundary">
-        Development sandbox ·{' '}
+        {appMode === 'institutional' ? 'University academic schedules' : 'Development sandbox'} ·{' '}
         {source === 'academic'
           ? 'Saved user-entered academic drafts'
           : 'Saved synthetic test drafts'}{' '}
         · Unpublished
       </p>
-      <details>
-        <summary>Browse another draft collection</summary>
-        <label>
-          Draft source
-          <select value={source} onChange={(e) => onSource(e.target.value)}>
-            <option value="academic">Academic schedules</option>
-            <option value="synthetic">Engine test samples</option>
-          </select>
-        </label>
-      </details>
+      {schedulingSandboxEnabled && (
+        <details>
+          <summary>Browse another draft collection</summary>
+          <label>
+            Draft source
+            <select value={source} onChange={(e) => onSource(e.target.value)}>
+              <option value="academic">Academic schedules</option>
+              <option value="synthetic">Engine test samples</option>
+            </select>
+          </label>
+        </details>
+      )}
       <div className="draft-actions">
         <Link className="button" to="/admin/ai-scheduling">
           Generate Weekly Schedule
@@ -279,7 +284,8 @@ function DraftListContent({
 export function SavedDraftDetailPage() {
   const { draftId = '' } = useParams();
   const [search] = useSearchParams();
-  const source = search.get('source') === 'academic' ? 'academic' : 'synthetic';
+  const source =
+    appMode === 'institutional' || search.get('source') === 'academic' ? 'academic' : 'synthetic';
   return <DraftDetailContent key={`${source}:${draftId}`} draftId={draftId} source={source} />;
 }
 
@@ -295,7 +301,7 @@ function DraftDetailContent({
   const [retry, setRetry] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    if (!schedulingSandboxEnabled) return;
+    if (!schedulingWorkspaceEnabled) return;
     let ignore = false;
     (source === 'academic' ? loadSchedulingDraft(draftId, source) : loadSchedulingDraft(draftId))
       .then((value) => {
@@ -311,7 +317,7 @@ function DraftDetailContent({
   useEffect(() => {
     if (draft) heading.current?.focus({ preventScroll: true });
   }, [draft]);
-  if (!schedulingSandboxEnabled) return <DraftUnavailable />;
+  if (!schedulingWorkspaceEnabled) return <DraftUnavailable />;
   return (
     <div className="weekly-scheduler">
       <Link

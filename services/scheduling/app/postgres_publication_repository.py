@@ -187,6 +187,20 @@ class PostgresPublicationRepository(PublicationRules):
                 for row in reversed(self.rows(db, self.keys["tenant"], dataset, period))
             ]
 
+    def administrator_activity(self, period, *, limit=100):
+        """Return redacted activity events visible to a verified tenant Administrator."""
+        with self.session() as db:
+            rows = db.execute(
+                text("""
+                    SELECT event_id,event_type,entity_type,entity_ref,revision,actor_uid,created_at
+                    FROM classsync_scheduling.administrator_activity
+                    WHERE tenant_id=:tenant AND period_id=:period
+                    ORDER BY created_at DESC,event_id DESC LIMIT :limit
+                """),
+                {"tenant": self.keys["tenant"], "period": period, "limit": limit},
+            ).mappings().all()
+            return [dict(row) for row in rows]
+
     def calendar(self, tenant, dataset, period, start, end, viewer):
         self.scope(dataset, period)
         role = viewer.get("role")
@@ -239,6 +253,48 @@ class PostgresPublicationRepository(PublicationRules):
                                    "title": payload["draft"].title,
                                    "calendar": payload["calendar"].model_dump(mode="json")})
             return {"periods": result}
+
+    def room_directory(self, period, viewer):
+        role = viewer["role"]
+        record = viewer.get("student_id") if role == "student" else (
+            viewer.get("faculty_id") if role == "teacher" else None
+        )
+        with self.session(role=role, record_id=record) as db:
+            revision = self.head(db, self.keys["tenant"], "institutional", period)
+            rows = self.rows(db, self.keys["tenant"], "institutional", period)
+            if not rows or rows[-1]["revision"] != revision:
+                raise DraftError(
+                    403, "projection_forbidden", "No permitted current room directory."
+                )
+            value = self.decode(rows[-1])
+            draft = value["draft"]
+            eligible = role == "administrator" or (
+                role == "teacher" and any(
+                    assignment.teacher_id == record
+                    for assignment in draft.generation_result.assignments
+                )
+            ) or (
+                role == "student" and any(
+                    enrollment.student_id == record and enrollment.offering_ids
+                    for enrollment in draft.input_snapshot.enrollments
+                )
+            )
+            if not eligible:
+                raise DraftError(
+                    403, "projection_forbidden", "No permitted current room directory."
+                )
+            # Return room metadata only; never expose the enclosing academic snapshot.
+            rooms = [
+                {
+                    "id": room.id, "name": room.name, "building": room.building,
+                    "floor": room.floor, "location": room.location,
+                    "room_type": room.room_type if room.type_verified else None,
+                    "capacity": room.capacity if room.capacity_verified else None,
+                    "equipment": room.equipment if room.equipment_verified else [],
+                }
+                for room in value["draft"].input_snapshot.rooms
+            ]
+            return {"version": rows[-1]["id"], "rooms": rooms}
 
     def availability(self, dataset, room_id, start, end):
         if (
@@ -443,11 +499,14 @@ class PostgresPublicationRepository(PublicationRules):
             if not commit:
                 return report
             if any(
-                row["draft_id"] == draft.id and self.decode(row)["calendar"] == calendar
+                row["period_id"] == draft.period_id
+                and row["revision"] == revision
+                and row["draft_id"] == draft.id
+                and self.decode(row)["calendar"] == calendar
                 for row in rows
             ):
                 raise DraftError(
-                    409, "duplicate_publication", "This draft and calendar are already published."
+                    409, "duplicate_publication", "This draft and calendar are currently published."
                 )
             payload = encode(
                 {

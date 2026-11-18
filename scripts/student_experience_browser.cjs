@@ -128,16 +128,11 @@ async function main() {
       screenshots.push(file);
     };
     await page.goto(origin + '/student/dashboard', { waitUntil: 'domcontentloaded' });
-    await text('Signed out');
-    await page.getByLabel('University email').fill(config.email);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+    await page.getByLabel('Email', { exact: true }).fill(config.email);
     await page.getByLabel('Password', { exact: true }).fill(config.password);
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-    await text('Student membership verified');
-    await page.getByRole('button', { name: 'Check Teacher access' }).click();
-    await text('Current membership required');
-    await page.getByRole('button', { name: 'Check Student access' }).click();
-    await text('Student membership verified');
-    await page.getByRole('link', { name: 'Open Student workspace' }).click();
+    await page.waitForURL('**/student/dashboard');
     await page.getByRole('heading', { name: 'Your next class' }).waitFor();
     await page.locator('.student-next h3 button').waitFor();
     assert((await page.title()).includes('ClassSync'));
@@ -287,11 +282,11 @@ async function main() {
     await page.locator('.student-next h3 button').waitFor();
     await control('revoke');
     await page.reload();
-    await text('Current membership required');
+    await text('University access is not active');
     assert.equal(await page.locator('.student-next').count(), 0);
     await shot('membership-revoked');
     await control('activate');
-    await page.getByRole('button', { name: 'Check Student access' }).click();
+    await page.getByRole('button', { name: 'Retry access check' }).click();
     await page.locator('.student-next h3 button').waitFor();
     await control('unassign');
     await page.reload();
@@ -368,17 +363,17 @@ async function main() {
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
     await page.getByRole('dialog').waitFor();
     await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-    await text('Signed out');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     await page.goto(origin + '/student/dashboard');
-    await text('Signed out');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     assert.equal(await page.locator('.student-next').count(), 0);
-    await page.getByLabel('University email').fill('student-4@synthetic.invalid');
+    await page.getByLabel('Email', { exact: true }).fill('student-4@synthetic.invalid');
     await page.getByLabel('Password', { exact: true }).fill(config.password);
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-    await text('Current membership required');
+    await text('University access is not active');
     assert.equal(await page.locator('.student-next').count(), 0);
     await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-    await text('Signed out');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
     assert.deepEqual(
       apiStatuses.filter((r) => r.status === 503 && r.phase !== 'intentional-outage'),
       [],

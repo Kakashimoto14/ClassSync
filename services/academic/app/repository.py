@@ -31,6 +31,7 @@ from .record_rules import (
     references,
     unique_label,
     validate_calendar,
+    validate_period_data_mode,
     validate_record,
 )
 from .record_rules import (
@@ -238,6 +239,8 @@ class AcademicRepository:
 
     def write_in(self, db, scope, owner, period_id, body):
         record = body.record
+        if scope != "sandbox":
+            validate_period_data_mode(record, "institutional")
         key = (scope, owner, period_id, record.kind, record.id)
         existing = db.execute(
             "SELECT * FROM academic_records WHERE scope=? AND owner=? AND period_id=? "

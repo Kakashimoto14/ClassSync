@@ -17,7 +17,9 @@ from services.scheduling.tests.test_engine import tiny
 
 def configured_settings(**changes):
     values = dict(
-        classsync_env="test", firebase_project_id="demo-test", institutional_tenant_id="tenant-a",
+        classsync_env="test",
+        firebase_project_id="demo-test",
+        institutional_tenant_id="tenant-a",
         scheduling_database_transport="loopback-sspi-test",
         scheduling_database_url=SecretStr("postgresql+psycopg://runtime@127.0.0.1:19999/postgres"),
     )
@@ -52,7 +54,8 @@ def test_unconfigured_provider_leaves_unrelated_state_untouched():
 
 
 @pytest.mark.parametrize("body_failure", [False, True])
-def test_owned_pool_and_adapters_removed_and_disposed_on_exit(monkeypatch, body_failure):
+@pytest.mark.parametrize("pool_size", [5, 2])
+def test_owned_pool_and_adapters_removed_and_disposed_on_exit(monkeypatch, body_failure, pool_size):
     from services.scheduling.app import authorization as providers
 
     disposed, options = [], []
@@ -66,7 +69,9 @@ def test_owned_pool_and_adapters_removed_and_disposed_on_exit(monkeypatch, body_
     app = SimpleNamespace(state=SimpleNamespace())
 
     def exercise():
-        with providers.configured_scheduling(app, configured_settings()):
+        with providers.configured_scheduling(
+            app, configured_settings(database_pool_size=pool_size)
+        ):
             assert app.state.scheduling_engine is engine
             assert app.state.authorization_adapters.memberships.engine is engine
             if body_failure:
@@ -79,7 +84,7 @@ def test_owned_pool_and_adapters_removed_and_disposed_on_exit(monkeypatch, body_
         exercise()
     assert disposed == [True]
     assert not vars(app.state)
-    assert options[0]["pool_size"] == 5 and options[0]["max_overflow"] == 0
+    assert options[0]["pool_size"] == pool_size and options[0]["max_overflow"] == 0
     assert options[0]["pool_timeout"] == 3
     parameters = options[0]["connect_args"]
     assert parameters["connect_timeout"] == 5
@@ -107,9 +112,13 @@ def test_startup_constructor_failure_disposes_pool(monkeypatch, failed_factory):
     from services.scheduling.app import authorization as providers
 
     disposed = []
-    monkeypatch.setattr(providers, "postgres_engine", lambda *a, **k: SimpleNamespace(
-        dispose=lambda: disposed.append(True),
-    ))
+    monkeypatch.setattr(
+        providers,
+        "postgres_engine",
+        lambda *a, **k: SimpleNamespace(
+            dispose=lambda: disposed.append(True),
+        ),
+    )
 
     def fail(*args, **kwargs):
         raise RuntimeError("synthetic constructor failure")
@@ -127,9 +136,13 @@ def test_cleanup_preserves_replacement_state_it_does_not_own(monkeypatch):
     from services.scheduling.app import authorization as providers
 
     disposed = []
-    monkeypatch.setattr(providers, "postgres_engine", lambda *a, **k: SimpleNamespace(
-        dispose=lambda: disposed.append(True),
-    ))
+    monkeypatch.setattr(
+        providers,
+        "postgres_engine",
+        lambda *a, **k: SimpleNamespace(
+            dispose=lambda: disposed.append(True),
+        ),
+    )
     app = SimpleNamespace(state=SimpleNamespace())
     replacements = {"scheduling_engine": object(), "authorization_adapters": object()}
     with providers.configured_scheduling(app, configured_settings()):
@@ -150,33 +163,52 @@ def test_invalid_transport_target_rejected_before_pool_creation(monkeypatch):
     assert not vars(app.state)
 
 
-@pytest.mark.parametrize("environment,flag,path", [
-    ("production", True, "temporary"), ("development", True, "temporary"),
-    ("test", False, "temporary"), ("test", True, "var/scheduling.sqlite3"),
-])
+@pytest.mark.parametrize(
+    "environment,flag,path",
+    [
+        ("production", True, "temporary"),
+        ("development", True, "temporary"),
+        ("test", False, "temporary"),
+        ("test", True, "var/scheduling.sqlite3"),
+    ],
+)
 def test_sqlite_fixture_exception_cannot_enable_other_modes(
-    tmp_path, environment, flag, path,
+    tmp_path,
+    environment,
+    flag,
+    path,
 ):
     from services.scheduling.app.provider import institutional_repository
 
     settings = scheduling.Settings(
-        _env_file=None, classsync_env=environment, enable_test_identity_adapters=flag,
+        _env_file=None,
+        classsync_env=environment,
+        enable_test_identity_adapters=flag,
         scheduling_database_path=str(tmp_path / "synthetic.db") if path == "temporary" else path,
     )
     with pytest.raises(HTTPException) as denied:
-        institutional_repository(fake_request(), settings, "verified-owner",
-                                 lambda: pytest.fail("Opened SQLite fallback"))
+        institutional_repository(
+            fake_request(),
+            settings,
+            "verified-owner",
+            lambda: pytest.fail("Opened SQLite fallback"),
+        )
     assert denied.value.status_code == 503
 
 
 def test_configured_url_without_owned_lifespan_never_uses_fixture_fallback(tmp_path):
     from services.scheduling.app.provider import institutional_repository
 
-    settings = configured_settings(enable_test_identity_adapters=True,
-                                   scheduling_database_path=str(tmp_path / "synthetic.db"))
+    settings = configured_settings(
+        enable_test_identity_adapters=True, scheduling_database_path=str(tmp_path / "synthetic.db")
+    )
     with pytest.raises(HTTPException) as denied:
-        institutional_repository(fake_request(), settings, "verified-owner",
-                                 lambda: pytest.fail("Opened configured fallback"))
+        institutional_repository(
+            fake_request(),
+            settings,
+            "verified-owner",
+            lambda: pytest.fail("Opened configured fallback"),
+        )
     assert denied.value.status_code == 503
 
 
@@ -185,7 +217,9 @@ def test_configured_store_binds_server_tenant_project_and_verified_owner():
 
     engine = object()
     repository = institutional_repository(
-        fake_request(scheduling_engine=engine), configured_settings(), "verified-owner",
+        fake_request(scheduling_engine=engine),
+        configured_settings(),
+        "verified-owner",
         lambda: pytest.fail("Opened configured fallback"),
     )
     assert repository.engine is engine
@@ -200,19 +234,28 @@ def test_exact_temporary_test_fixture_preserves_owner_binding(tmp_path):
     calls, sentinel = [], object()
     legacy = SimpleNamespace(list=lambda *args, **kwargs: calls.append((args, kwargs)) or sentinel)
     settings = scheduling.Settings(
-        _env_file=None, classsync_env="test", enable_test_identity_adapters=True,
+        _env_file=None,
+        classsync_env="test",
+        enable_test_identity_adapters=True,
         scheduling_database_path=str(tmp_path / "synthetic.db"),
     )
     repository = institutional_repository(
-        fake_request(), settings, "verified-owner", lambda: legacy,
+        fake_request(),
+        settings,
+        "verified-owner",
+        lambda: legacy,
     )
     assert repository.list(limit=7, offset=14) is sentinel
     assert calls == [(("administrator", "verified-owner"), {"limit": 7, "offset": 14})]
 
 
-@pytest.mark.parametrize("code,status", [
-    (MembershipErrorCode.DENIED, 403), (MembershipErrorCode.UNAVAILABLE, 503),
-])
+@pytest.mark.parametrize(
+    "code,status",
+    [
+        (MembershipErrorCode.DENIED, 403),
+        (MembershipErrorCode.UNAVAILABLE, 503),
+    ],
+)
 def test_membership_change_after_initial_guard_is_private_http_error(monkeypatch, code, status):
     monkeypatch.setattr(scheduling, "require_administrator", lambda *a: {"uid": "verified-owner"})
 
@@ -239,38 +282,63 @@ def test_unconfigured_generation_rejects_storage_before_solver(monkeypatch):
 
 
 @pytest.mark.parametrize("configured", [False, True])
-@pytest.mark.parametrize("method,path", [
-    ("get", "/periods"),
-    ("get", "/history/synthetic-period"),
-    ("get", "/calendar/synthetic-period?start=2026-10-01&end=2026-10-31"),
-    ("get", "/events/synthetic-period?start=2026-10-01&end=2026-10-31"),
-    ("get", "/availability?room_id=room-a&start=2026-10-01T08:00:00%2B08:00"
-     "&end=2026-10-01T09:00:00%2B08:00"),
-    ("post", "/review"), ("post", "/publish"), ("put", "/restrictions/restriction-a"),
-])
+@pytest.mark.parametrize(
+    "method,path",
+    [
+        ("get", "/periods"),
+        ("get", "/history/synthetic-period"),
+        ("get", "/calendar/synthetic-period?start=2026-10-01&end=2026-10-31"),
+        ("get", "/events/synthetic-period?start=2026-10-01&end=2026-10-31"),
+        (
+            "get",
+            "/availability?room_id=room-a&start=2026-10-01T08:00:00%2B08:00"
+            "&end=2026-10-01T09:00:00%2B08:00",
+        ),
+        ("post", "/review"),
+        ("post", "/publish"),
+        ("put", "/restrictions/restriction-a"),
+    ],
+)
 def test_publication_routes_refuse_legacy_factory_even_after_trusted_guard(
-    monkeypatch, configured, method, path,
+    monkeypatch,
+    configured,
+    method,
+    path,
 ):
-    settings = configured_settings() if configured else scheduling.Settings(
-        _env_file=None, classsync_env="production",
+    settings = (
+        configured_settings()
+        if configured
+        else scheduling.Settings(
+            _env_file=None,
+            classsync_env="production",
+        )
     )
     claims = {"uid": "verified-owner", "tenant_id": "tenant-a", "role": "administrator"}
     monkeypatch.setattr(scheduling, "settings", settings)
     monkeypatch.setattr(publication, "identity", lambda *a: claims)
     monkeypatch.setattr(publication, "require_administrator", lambda *a: claims)
     monkeypatch.setattr(
-        publication, "settings_and_repo", lambda: pytest.fail("Publication fallback"),
+        publication,
+        "settings_and_repo",
+        lambda: pytest.fail("Publication fallback"),
     )
     payload = None
     if method == "post":
         payload = PublicationCommand(
-            draft_id="synthetic-draft", expected_version=0, expected_academic_revision=1,
-            idempotency_key="synthetic-publish-key", calendar=configuration().calendar,
+            draft_id="synthetic-draft",
+            expected_version=0,
+            expected_academic_revision=1,
+            idempotency_key="synthetic-publish-key",
+            calendar=configuration().calendar,
         ).model_dump(mode="json")
     elif method == "put":
         payload = RoomRestriction(
-            id="restriction-a", room_id="room-a", starts_at="2026-10-01T08:00:00+08:00",
-            ends_at="2026-10-01T09:00:00+08:00", kind="reservation", reason="Synthetic test",
+            id="restriction-a",
+            room_id="room-a",
+            starts_at="2026-10-01T08:00:00+08:00",
+            ends_at="2026-10-01T09:00:00+08:00",
+            kind="reservation",
+            reason="Synthetic test",
             expected_revision=0,
         ).model_dump(mode="json")
     # Intentionally no lifespan: this proves route guards before either pool or legacy storage.
@@ -293,32 +361,41 @@ def test_publication_helper_keeps_only_explicit_development_sandbox_and_temp_tes
     from services.scheduling.app.provider import require_local_publication
 
     development = scheduling.Settings(
-        _env_file=None, classsync_env="development", enable_scheduling_sandbox=True,
+        _env_file=None,
+        classsync_env="development",
+        enable_scheduling_sandbox=True,
     )
     require_local_publication(development, True)
     with pytest.raises(HTTPException):
         require_local_publication(development, False)
     test = scheduling.Settings(
-        _env_file=None, classsync_env="test", enable_test_identity_adapters=True,
+        _env_file=None,
+        classsync_env="test",
+        enable_test_identity_adapters=True,
         scheduling_database_path=str(tmp_path / "synthetic.db"),
     )
     require_local_publication(test, False)
 
 
-@pytest.mark.parametrize("path", [
-    "/sandbox/periods",
-    "/sandbox/calendar/synthetic-period?start=2026-10-01&end=2026-10-31",
-    "/sandbox/events/synthetic-period?start=2026-10-01&end=2026-10-31",
-    "/sandbox/availability?room_id=room-a&start=2026-10-01T08:00:00%2B08:00"
-    "&end=2026-10-01T09:00:00%2B08:00",
-    "/history/synthetic-period?dataset=synthetic",
-])
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/sandbox/periods",
+        "/sandbox/calendar/synthetic-period?start=2026-10-01&end=2026-10-31",
+        "/sandbox/events/synthetic-period?start=2026-10-01&end=2026-10-31",
+        "/sandbox/availability?room_id=room-a&start=2026-10-01T08:00:00%2B08:00"
+        "&end=2026-10-01T09:00:00%2B08:00",
+        "/history/synthetic-period?dataset=synthetic",
+    ],
+)
 def test_configured_pg_does_not_reopen_anonymous_synthetic_publication(monkeypatch, path):
     settings = configured_settings(classsync_env="development", enable_scheduling_sandbox=True)
     monkeypatch.setattr(scheduling, "settings", settings)
     monkeypatch.setattr(publication, "require_administrator", lambda *a: {"uid": "verified-owner"})
     monkeypatch.setattr(
-        publication, "settings_and_repo", lambda: pytest.fail("Synthetic publication fallback"),
+        publication,
+        "settings_and_repo",
+        lambda: pytest.fail("Synthetic publication fallback"),
     )
     response = TestClient(scheduling.app).get("/api/v1/timetables" + path)
     assert response.status_code == 503
@@ -331,9 +408,15 @@ def test_unsuccessful_solver_status_never_persists_a_run(monkeypatch, status):
     result = SimpleNamespace(solver_status=status)
     monkeypatch.setattr(scheduling, "generate_week", lambda *_args: result)
     storage = SimpleNamespace(remember_run=lambda *a: pytest.fail("Persisted failed solver run"))
-    assert scheduling.execute(
-        object(), "administrator", "verified-owner", storage=storage,
-    ) is result
+    assert (
+        scheduling.execute(
+            object(),
+            "administrator",
+            "verified-owner",
+            storage=storage,
+        )
+        is result
+    )
 
 
 def test_persistence_failure_never_returns_false_candidate_success_and_releases_slot(monkeypatch):
@@ -346,8 +429,9 @@ def test_persistence_failure_never_returns_false_candidate_success_and_releases_
         raise DraftError(503, "persistence_unavailable", "Synthetic storage outage")
 
     with pytest.raises(DraftError) as denied:
-        scheduling.execute(object(), "administrator", "verified-owner",
-                           storage=SimpleNamespace(remember_run=fail))
+        scheduling.execute(
+            object(), "administrator", "verified-owner", storage=SimpleNamespace(remember_run=fail)
+        )
     assert denied.value.status == 503
     assert scheduling.generation_slot.acquire(blocking=False)
     scheduling.generation_slot.release()
@@ -356,7 +440,9 @@ def test_persistence_failure_never_returns_false_candidate_success_and_releases_
 @pytest.mark.parametrize("scope", ["administrator", "student", "unknown", ""])
 def test_unbound_non_sandbox_execute_rejects_before_solver_or_legacy_factory(monkeypatch, scope):
     monkeypatch.setattr(
-        scheduling, "repository", lambda: pytest.fail("Opened unbound legacy store"),
+        scheduling,
+        "repository",
+        lambda: pytest.fail("Opened unbound legacy store"),
     )
     monkeypatch.setattr(scheduling, "generate_week", lambda *_a: pytest.fail("Unbound solver ran"))
     with pytest.raises(HTTPException) as denied:

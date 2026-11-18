@@ -168,7 +168,9 @@ def test_revocation_and_repository_outage_are_observed_without_cached_success(id
 def test_multirole_selection_is_checked_against_current_grants(identity_adapters):
     identity_adapters(gateway, roles=["student", "teacher"])
     client = TestClient(gateway.app)
-    assert client.get("/api/v1/auth/me", headers=HEADERS).status_code == 403
+    choice = client.get("/api/v1/auth/me", headers=HEADERS)
+    assert choice.status_code == 403
+    assert choice.json()["error"]["available_roles"] == ["student", "teacher"]
     for selected, status in [
         ("student", 200),
         ("teacher", 200),
@@ -177,6 +179,10 @@ def test_multirole_selection_is_checked_against_current_grants(identity_adapters
     ]:
         response = client.get("/api/v1/auth/me", headers={**HEADERS, "X-ClassSync-Role": selected})
         assert response.status_code == status
+        if status == 200:
+            assert response.json()["data"]["available_roles"] == ["student", "teacher"]
+        else:
+            assert "available_roles" not in response.json()["error"]
 
 
 @pytest.mark.parametrize(
@@ -202,6 +208,7 @@ def test_general_development_bypass_is_not_an_authenticated_identity(monkeypatch
         (scheduling, "/api/v1/scheduling/drafts"),
         (scheduling, "/api/v1/timetables/periods"),
         (scheduling, "/api/v1/timetables/history/synthetic-period"),
+        (scheduling, "/api/v1/timetables/audit/00000000-0000-0000-0000-000000000001"),
     ],
 )
 def test_denied_service_calls_never_open_repository(module, path, monkeypatch):
@@ -274,6 +281,36 @@ def test_unconfigured_membership_never_falls_back_to_token_role(identity_adapter
     response = TestClient(gateway.app).get("/api/v1/auth/me", headers=HEADERS)
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "membership_unavailable"
+
+
+def test_cloud_run_gateway_keeps_firebase_identity_and_ignores_forged_invoker(
+    identity_adapters, monkeypatch,
+):
+    import httpx
+    from classync_contracts import cloud_run
+
+    identity_adapters(gateway)
+    origin = "https://academic-probe.run.app"
+    monkeypatch.setattr(gateway.settings, "cloud_run_iam_enabled", True)
+    monkeypatch.setattr(gateway.settings, "academic_service_url", origin)
+    requested = []
+    monkeypatch.setattr(cloud_run, "_metadata_token",
+                        lambda audience: requested.append(audience) or "managed.probe.token")
+
+    async def forward(_self, method, url, **kwargs):
+        assert method == "GET" and url == origin + "/api/v1/academic/periods"
+        assert kwargs["headers"]["Authorization"] == HEADERS["Authorization"]
+        assert kwargs["headers"]["X-Serverless-Authorization"] == "Bearer managed.probe.token"
+        return httpx.Response(200, json={"periods": []})
+
+    monkeypatch.setattr(httpx.AsyncClient, "request", forward)
+    response = TestClient(gateway.app).get(
+        "/api/v1/academic/periods",
+        headers=HEADERS | {"X-Serverless-Authorization": "Bearer forged.probe.token"},
+    )
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-store"
+    assert requested == [origin]
 
 
 def test_missing_server_tenant_is_unavailable_not_client_selected(identity_adapters, monkeypatch):

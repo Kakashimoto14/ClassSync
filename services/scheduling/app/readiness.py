@@ -14,6 +14,9 @@ def intersects(windows, day, start, end):
 def eligible_room(room, offering, program_id):
     if not room.schedulable or room.condition != "operational":
         return False
+    if room.allowed_activity_types is not None:
+        if not room.type_verified or offering.activity_type not in room.allowed_activity_types:
+            return False
     if offering.required_room_type and (
         not room.type_verified or room.room_type != offering.required_room_type
     ):
@@ -69,6 +72,8 @@ def readiness(inputs: GenerationInput):
         if any(day not in range(7) for day in section.preferred_days):
             issue("invalid_preference", f"Section {section.id} has an invalid preferred day.")
     for teacher in inputs.teachers:
+        if teacher.synthetic and not inputs.synthetic:
+            issue("synthetic_faculty", "Synthetic faculty cannot serve institutional scheduling.")
         if not teacher.availability:
             issue("teacher_availability_missing", f"Supply availability for {teacher.name}.")
         if any(day not in range(7) for day in teacher.preferred_days):

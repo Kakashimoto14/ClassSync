@@ -26,6 +26,7 @@ from scripts.postgres_identity_qualification import exercise as identity_exercis
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.academic.app.postgres_repository import PostgresAcademicRepository
 from services.academic.app.record_rules import AcademicError, checksum
+from services.academic.app.repository import catalog_data
 from services.academic.tests.test_academic import complete
 from services.scheduling.app.academic_input import academic_readiness
 from services.scheduling.tests.test_calendar import configuration
@@ -52,6 +53,20 @@ class FixtureCalls:
         return self.repository.save(period, kind, identity, body)
 
 
+def assert_provisional_catalog(resources):
+    """Require the complete canonical provisional inventory and no inferred capacity."""
+    _programs, catalog_rooms = catalog_data()
+    expected_ids = {room["id"] for room in catalog_rooms}
+    provisional = [room for room in resources if room.source == "cdm-provisional"]
+    actual_ids = {room.id for room in provisional}
+    require(
+        len(provisional) == len(catalog_rooms)
+        and actual_ids == expected_ids
+        and all(room.capacity is None for room in provisional),
+        "Canonical provisional catalog IDs or capacity differ from source catalog",
+    )
+
+
 def must_fail(operation, code):
     try:
         operation()
@@ -61,7 +76,7 @@ def must_fail(operation, code):
         raise RuntimeError("Academic negative path unexpectedly succeeded")
 
 
-def exercise(connection):
+def exercise(connection, *, activity_only=False):
     foundation = identity_exercise(connection)
     owner, runtime = engine_for(connection, bootstrap=True), engine_for(connection)
     principal = VerifiedPrincipal(uid="uid-admin")
@@ -78,6 +93,7 @@ def exercise(connection):
     try:
         with transaction(owner) as db:
             db.execute(text(f"GRANT USAGE ON SCHEMA classsync_academic TO {connection.runtime}"))
+            db.execute(text(f"GRANT USAGE ON SCHEMA classsync_scheduling TO {connection.runtime}"))
             db.execute(
                 text(
                     "GRANT SELECT,INSERT ON classsync_academic.period_metadata "
@@ -99,10 +115,22 @@ def exercise(connection):
                 )
             db.execute(
                 text(
+                    "GRANT SELECT ON classsync_scheduling.administrator_activity "
+                    f"TO {connection.runtime}"
+                )
+            )
+            db.execute(
+                text(
                     f"GRANT DELETE ON classsync_academic.record_references TO {connection.runtime}"
                 )
             )
             identity_context(db, tenant_id="tenant-a", uid="uid-a")
+            db.execute(
+                text(
+                    f"GRANT SELECT,INSERT ON classsync_academic.cohort_bindings "
+                    f"TO {connection.runtime}"
+                )
+            )
             change_membership_state(
                 db,
                 tenant_id="tenant-a",
@@ -122,6 +150,68 @@ def exercise(connection):
             )
         original = complete(FixtureCalls(repository))
         pid = original.period.id
+        with transaction(runtime) as db:
+            identity_context(db, tenant_id="tenant-a", uid="uid-admin")
+            db.execute(text("SELECT set_config('classsync.project_id',"
+                            "'synthetic-project',true)"))
+            activity = db.execute(text("""
+                SELECT event_type,entity_type,entity_ref,revision
+                FROM classsync_scheduling.administrator_activity
+                WHERE tenant_id='tenant-a' AND period_id=:period
+            """), {"period": pid}).all()
+            require(
+                {row.event_type for row in activity}
+                >= {"academic.period.created", "academic.record.created"}
+                and all(row.entity_type and len(row.entity_ref) == 64
+                        and (row.revision is None or row.revision >= 1)
+                        for row in activity),
+                "Academic creation/seed operations did not produce redacted audit events",
+            )
+            initial_event_count = len(activity)
+        with transaction(runtime) as db:
+            identity_context(db, tenant_id="tenant-a", uid="uid-admin-other")
+            db.execute(text("SELECT set_config('classsync.project_id',"
+                            "'synthetic-project',true)"))
+            require(
+                db.scalar(text("SELECT count(*) FROM classsync_scheduling.administrator_activity "
+                               "WHERE tenant_id='tenant-a' AND period_id=:period"),
+                          {"period": pid}) == initial_event_count,
+                "Authorized same-tenant Administrator cannot read audit history",
+            )
+        with transaction(runtime) as db:
+            identity_context(db, tenant_id="tenant-b", uid="uid-admin")
+            db.execute(text("SELECT set_config('classsync.project_id',"
+                            "'synthetic-project',true)"))
+            require(
+                db.scalar(text("SELECT count(*) FROM classsync_scheduling.administrator_activity "
+                               "WHERE period_id=:period"), {"period": pid}) == 0,
+                "Cross-tenant audit read escaped FORCE RLS",
+            )
+        for statement in (
+            "UPDATE classsync_scheduling.administrator_activity "
+            "SET event_type='academic.period.created'",
+            "DELETE FROM classsync_scheduling.administrator_activity",
+            "TRUNCATE classsync_scheduling.administrator_activity",
+        ):
+            try:
+                with transaction(owner) as db:
+                    db.execute(text(statement))
+            except DBAPIError as error:
+                require(error.orig.sqlstate == "42501",
+                        "Audit mutation returned the wrong SQLSTATE")
+            else:
+                raise RuntimeError("Administrator activity was mutable")
+        if activity_only:
+            return {
+                "redacted_admin_activity_triggers": True,
+                "same_tenant_admin_activity_read": True,
+                "cross_tenant_activity_rls": True,
+                "activity_append_only": True,
+                "activity_count": initial_event_count,
+                "payload_values_copied": False,
+                "fixture_mode": "synthetic",
+                "production_acceptance": False,
+            }
         require(
             {entry.record.kind for entry in original.records}
             == {
@@ -135,10 +225,26 @@ def exercise(connection):
             },
             "Not all academic record kinds persisted",
         )
-        ready = academic_readiness(original)
+        readiness = academic_readiness(original)
+        readiness_codes = {issue.code for issue in readiness.issues}
         require(
-            ready.ready and len(ready.inputs.offerings) == 4,
-            "Persisted academic snapshot no longer satisfies existing readiness contract",
+            not readiness.ready
+            and readiness.inputs is None
+            and readiness.offerings == 4
+            and {
+                "cohort_assignment_unverified",
+                "curriculum_reference_missing",
+                "contact_minutes_reference_missing",
+                "faculty_verification_missing",
+                "offering_reference_missing",
+                "operating_windows_unverified",
+                "room_availability_unverified",
+                "shared_scope_unverified",
+            }
+            <= readiness_codes,
+            "Persisted institutional snapshot did not preserve required blockers: "
+            f"ready={readiness.ready}, offerings={readiness.offerings}, "
+            f"issues={sorted(readiness_codes)}",
         )
         runtime.dispose()
         require(
@@ -162,12 +268,9 @@ def exercise(connection):
         provisional = [
             entry.record
             for entry in original.records
-            if entry.record.kind == "resources" and entry.record.id.startswith("cdm-")
+            if entry.record.kind == "resources" and entry.record.source == "cdm-provisional"
         ]
-        require(
-            len(provisional) == 59 and all(room.capacity is None for room in provisional),
-            "Provisional catalog was omitted or given invented capacity",
-        )
+        assert_provisional_catalog(provisional)
         require(
             len(other.periods()) == 1 and len(repository.periods()) == 1,
             "Two active administrators leaked period lists",
@@ -448,6 +551,10 @@ def exercise(connection):
         return {
             "foundation": foundation,
             "all_seven_record_kinds": True,
+            "redacted_admin_activity_triggers": True,
+            "same_tenant_admin_activity_read": True,
+            "cross_tenant_activity_rls": True,
+            "activity_append_only": True,
             "ready_offerings": 4,
             "snapshot_reconnect": True,
             "two_active_owner_isolation": True,
@@ -474,9 +581,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--activity-only", action="store_true")
     args = parser.parse_args(argv)
     require(not args.output.exists() and args.output.parent.is_dir(), "New output required")
-    evidence = qualify(args.bin, exercise)
+    evidence = qualify(args.bin, lambda connection: exercise(
+        connection, activity_only=args.activity_only
+    ))
     write_new_evidence(args.output, evidence)
     print("Full academic repository qualification passed; owned PostgreSQL stopped")
 

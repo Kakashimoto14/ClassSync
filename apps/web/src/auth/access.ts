@@ -16,9 +16,22 @@ export function validateLogin(email: string, password: string): LoginValidationE
 
 export function isRoleOwnedPath(role: UserRole, path: string): boolean {
   const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
-  return routeDefinitions.some(route => route.role === role && route.path === pathname);
+  return routeDefinitions.some((route) => route.role === role && route.path === pathname);
+}
+
+export function workspaceDestination(role: UserRole, requested: string | null): string {
+  if (
+    requested?.startsWith('/') &&
+    !requested.startsWith('//') &&
+    !/[\\\s]/.test(requested) &&
+    isRoleOwnedPath(role, requested)
+  )
+    return requested;
+  return dashboardPath(role);
 }
 
 export function demoDestination(role: UserRole, requestedPath: string | null): string {
-  return requestedPath && isRoleOwnedPath(role, requestedPath) ? requestedPath : dashboardPath(role);
+  return requestedPath && isRoleOwnedPath(role, requestedPath)
+    ? requestedPath
+    : dashboardPath(role);
 }

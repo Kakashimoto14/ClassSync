@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, expect, it, vi } from 'vitest';
 import { listCalendarSamples, loadSampleCalendar } from './sample-calendar-api';
 afterEach(() => vi.unstubAllGlobals());

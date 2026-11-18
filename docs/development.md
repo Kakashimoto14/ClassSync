@@ -38,8 +38,9 @@ canonical workspace's data.
 Open Administrator → Academic Setup → **Sample Academic Scenario** → **Review sample
 setup** → **Import sample period**. Review readiness, generate and Save Draft.
 The default scenario is BSIT 3A, two synthetic offerings/teachers and four synthetic
-classroom candidates. The nine programs and 59 provisional spaces remain intact;
-provisional spaces are not made solver eligible. Imports are idempotent and do not
+classroom candidates. The nine-program catalog remains separate from the November 2026
+53-space row-classified room inventory. Provisional inventory rooms are not made solver
+eligible until operational condition and room type are verified. Imports are idempotent and do not
 overwrite edits. A sample with edited/incomplete requirements must be repaired or
 configured separately, not silently replaced.
 

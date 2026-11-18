@@ -5,3 +5,12 @@ httpx>=0.28,<1
 -e ../../packages/api-contracts
 -e ../../packages/persistence
 pytest>=9.0.3,<10
+pypdf==6.21.4
+google-cloud-firestore==2.34.1
+google-cloud-storage==3.17.1
+winrt-runtime==4.1.0; sys_platform == "win32"
+winrt-Windows.Media.Ocr==4!10.0.28000.2957; sys_platform == "win32"
+winrt-Windows.Graphics.Imaging==4!10.0.28000.2957; sys_platform == "win32"
+winrt-Windows.Storage==4!10.0.28000.2957; sys_platform == "win32"
+winrt-Windows.Storage.Streams==4!10.0.28000.2957; sys_platform == "win32"
+winrt-Windows.Data.Pdf==4!10.0.28000.2957; sys_platform == "win32"

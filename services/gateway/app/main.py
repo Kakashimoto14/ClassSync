@@ -2,31 +2,39 @@ import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
 import httpx
-from classync_contracts.models import HealthResponse
-from classync_contracts.request_authorization import install_identity_errors
+from classync_contracts.cloud_run import service_headers
+from classync_contracts.models import HealthResponse, UserRole
+from classync_contracts.request_authorization import install_identity_errors, request_identity
 from classync_contracts.scheduling_security import (
     SchedulingSecuritySettings,
     require_administrator,
-    require_identity,
     require_sandbox,
 )
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import SecretStr
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
+from .announcements import announcement_router
 from .authorization import configured_authorization
+from .coursework import coursework_router
+from .onboarding import onboarding_router
+from .openapi import install_openapi
+from .registration import registration_router
 
 ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
 
 
 class Settings(SchedulingSecuritySettings):
-    model_config = SettingsConfigDict(env_file=ROOT_DIRECTORY / ".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=ROOT_DIRECTORY / ".env", extra="ignore", populate_by_name=True
+    )
     academic_service_url: str = "http://127.0.0.1:8001"
     scheduling_service_url: str = "http://127.0.0.1:8002"
     notification_service_url: str = "http://127.0.0.1:8003"
@@ -35,6 +43,34 @@ class Settings(SchedulingSecuritySettings):
     enable_scheduling_sandbox: bool = False
     identity_database_url: SecretStr | None = None
     identity_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
+    registration_max_bytes: int = Field(default=5_000_000, ge=1024, le=10_000_000)
+    registration_max_pages: int = Field(default=5, ge=1, le=8)
+    registration_timeout_seconds: int = Field(default=20, ge=5, le=30)
+    registration_retention_seconds: int = Field(default=900, ge=60, le=900)
+    cors_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:5173"],
+        validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CORS_ORIGINS"),
+    )
+    course_cloud_enabled: bool = False
+    course_storage_bucket: str = Field(default="", max_length=222)
+    course_gemini_model: str = Field(default="", pattern=r"^[a-z0-9.-]{0,80}$")
+    gemini_api_key: SecretStr | None = None
+
+    @field_validator("cors_origins")
+    @classmethod
+    def exact_origins(cls, values):
+        if len(values) > 20:
+            raise ValueError("At most twenty explicit CORS origins are allowed")
+        for value in values:
+            parsed = urlsplit(value)
+            if (parsed.scheme not in {"https", "http"} or not parsed.hostname
+                    or "*" in value or parsed.username or parsed.password or parsed.path
+                    or parsed.query or parsed.fragment
+                    or (parsed.scheme == "http" and parsed.hostname not in {
+                        "localhost", "127.0.0.1", "::1"})):
+                raise ValueError("Use exact HTTPS origins or explicit loopback development origins")
+            _ = parsed.port
+        return values
 
 
 settings = Settings()
@@ -48,14 +84,21 @@ SERVICES = {
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     with configured_authorization(application, settings):
-        yield
+        with registration_routes.registration_store.lifecycle():
+            yield
 
 
 app = FastAPI(title="ClassSync API Gateway", version="1.0.0", lifespan=lifespan)
+install_openapi(app)
+app.include_router(onboarding_router(lambda: settings))
+app.include_router(announcement_router(lambda: settings))
+app.include_router(coursework_router(lambda: settings))
+registration_routes = registration_router(lambda: settings)
+app.include_router(registration_routes)
 install_identity_errors(app)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-ClassSync-Role"],
@@ -67,6 +110,8 @@ async def request_context(request: Request, call_next):
     request.state.request_id = request.headers.get("X-Request-ID", str(uuid4()))
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
+    if request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/"):
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -74,6 +119,7 @@ async def request_context(request: Request, call_next):
 async def http_error(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
+        headers=exc.headers,
         content={
             "error": {
                 "code": "request_rejected",
@@ -85,7 +131,7 @@ async def http_error(request: Request, exc: HTTPException):
 
 
 def require_authenticated(request: Request) -> dict:
-    return require_identity(request, settings)
+    return request_identity(request, settings, include_workspaces=True)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -99,16 +145,19 @@ def current_user(request: Request) -> dict:
 
 
 @app.get("/api/v1/services/{service_name}/health")
-async def service_health(service_name: str) -> dict:
+async def service_health(service_name: str, request: Request) -> dict:
     target = SERVICES.get(service_name)
-    if target is None:
+    if target is None or (settings.cloud_run_iam_enabled and service_name == "notification"):
         raise HTTPException(404, "Unknown service")
+    if settings.cloud_run_iam_enabled:
+        await run_in_threadpool(require_administrator, request, settings)
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            response = await client.get(f"{target}/health")
+        headers = await run_in_threadpool(service_headers, settings.cloud_run_iam_enabled, target)
+        async with httpx.AsyncClient(timeout=2.0, trust_env=False) as client:
+            response = await client.get(f"{target}/health", headers=headers)
         response.raise_for_status()
         return {"data": response.json()}
-    except httpx.HTTPError as error:
+    except (httpx.HTTPError, ValueError) as error:
         raise HTTPException(503, "Service unavailable") from error
 
 
@@ -151,22 +200,19 @@ async def service_proxy(service_name, path, request):
     if len(body) > 2_000_000:
         raise HTTPException(413, "Input exceeds the 2 MB request limit")
     try:
-        async with httpx.AsyncClient(timeout=45.0) as client:
+        target = getattr(settings, f"{service_name}_service_url")
+        headers = await run_in_threadpool(
+            service_headers, settings.cloud_run_iam_enabled, target,
+            forwarded_headers(request) | {"Content-Type": "application/json",
+                                           "X-Request-ID": request.state.request_id},
+        )
+        async with httpx.AsyncClient(timeout=45.0, trust_env=False) as client:
             response = await client.request(
                 request.method,
-                getattr(settings, f"{service_name}_service_url") + path,
+                target + path,
                 params=request.query_params,
                 content=body,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": request.headers.get("Authorization", ""),
-                    "X-Request-ID": request.state.request_id,
-                    **(
-                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
-                        if "X-ClassSync-Role" in request.headers
-                        else {}
-                    ),
-                },
+                headers=headers,
             )
         payload = response.json()
         if response.is_error:
@@ -190,6 +236,14 @@ async def service_proxy(service_name, path, request):
         raise HTTPException(
             503, f"{service_name.capitalize()} service unavailable; no server confirmation received"
         ) from error
+
+
+def forwarded_headers(request):
+    return {
+        "Authorization": request.headers.get("Authorization", ""),
+        **({"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
+           if "X-ClassSync-Role" in request.headers else {}),
+    }
 
 
 @app.api_route("/api/v1/scheduling/sandbox/{operation}", methods=["GET", "POST"])
@@ -230,6 +284,16 @@ async def academic_proxy(path, request, sandbox):
 @app.api_route("/api/v1/academic/sandbox/periods", methods=["GET", "POST"])
 async def sandbox_academic_periods(request: Request):
     return await academic_proxy("periods", request, True)
+
+
+@app.get("/api/v1/academic/sandbox/curriculum-catalog")
+async def sandbox_curriculum_catalog(request: Request):
+    return await academic_proxy("curriculum-catalog", request, True)
+
+
+@app.get("/api/v1/academic/curriculum-catalog")
+async def curriculum_catalog(request: Request):
+    return await academic_proxy("curriculum-catalog", request, False)
 
 
 @app.post("/api/v1/academic/sandbox/fixtures")
@@ -322,31 +386,30 @@ async def timetable_proxy(operation: str, request: Request):
         if request.method != "GET":
             raise HTTPException(404, "No anonymous publication operation exists")
     else:
-        if request.method != "GET" or operation.startswith("history/"):
+        if operation == "requests" and request.method == "POST":
+            await run_in_threadpool(request_identity, request, settings, UserRole.TEACHER)
+        elif request.method != "GET" or operation.startswith(("history/", "audit/")):
             await run_in_threadpool(require_administrator, request, settings)
         else:
             await run_in_threadpool(require_identity, request, settings)
     if "/events/" not in "/" + operation:
         return await service_proxy("scheduling", "/api/v1/timetables/" + operation, request)
-    client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None))
+    client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None), trust_env=False)
     try:
+        headers = await run_in_threadpool(
+            service_headers, settings.cloud_run_iam_enabled, settings.scheduling_service_url,
+            forwarded_headers(request),
+        )
         upstream = await client.send(
             client.build_request(
                 "GET",
                 settings.scheduling_service_url + "/api/v1/timetables/" + operation,
                 params=request.query_params,
-                headers={
-                    "Authorization": request.headers.get("Authorization", ""),
-                    **(
-                        {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
-                        if "X-ClassSync-Role" in request.headers
-                        else {}
-                    ),
-                },
+                headers=headers,
             ),
             stream=True,
         )
-    except httpx.HTTPError as error:
+    except (httpx.HTTPError, ValueError) as error:
         await client.aclose()
         raise HTTPException(503, "Timetable update service unavailable; reconnect later") from error
     if upstream.is_error:

@@ -20,6 +20,7 @@ import {
 import type { UserRole } from '../types/ui';
 
 export type ScreenKind =
+  | 'registration-scanner'
   | 'dashboard'
   | 'schedule'
   | 'schedule-create'
@@ -106,12 +107,11 @@ export const routeDefinitions = [
     role: 'student',
     title: 'Registration Form Scanner',
     description:
-      'Planned OVRF and registration-form scanning with reviewable subject and section extraction.',
-    kind: 'coming-soon',
+      'Privately review your registration form and match your verified published classes.',
+    kind: 'registration-scanner',
     navigationGroup: 'Academic',
     navigationLabel: 'Registration Form Scanner',
     icon: FileSearch,
-    plannedFeature: 'registration-scanner',
   }),
   make({
     id: 'student.rooms',
@@ -418,22 +418,21 @@ export const routeDefinitions = [
     id: 'administrator.ai-conflict-detection',
     path: '/admin/ai-conflict-detection',
     role: 'administrator',
-    title: 'AI Conflict Detection',
+    title: 'Independent Conflict Validation',
     description: 'Independent constraint validation. AI explanations are planned.',
     kind: 'conflicts',
-    navigationGroup: 'Scheduling',
     icon: Bot,
   }),
   make({
     id: 'administrator.ai-scheduling',
     path: '/admin/ai-scheduling',
     role: 'administrator',
-    title: 'AI-Powered Scheduling',
+    title: 'Schedule Generation',
     mobileLabel: 'Generate',
     description: 'Generate, validate and save a constraint-based weekly timetable.',
     kind: 'schedule-create',
     navigationGroup: 'Scheduling',
-    navigationLabel: 'AI-Powered Scheduling',
+    navigationLabel: 'Schedule Generation',
     icon: CalendarDays,
   }),
   make({
@@ -516,12 +515,12 @@ export const routeDefinitions = [
     id: 'administrator.academic-data',
     path: '/admin/academic',
     role: 'administrator',
-    title: 'Academic Management',
-    description: 'Manage saved academic periods and scheduling inputs.',
+    title: 'Academic Setup',
+    description: 'Set up an academic period and prepare its scheduling inputs in one workspace.',
     kind: 'academic-manage',
     academicKind: 'programs',
     navigationGroup: 'Academic Setup',
-    navigationLabel: 'Academic Years / Semesters',
+    navigationLabel: 'Academic Setup',
     icon: BookOpen,
   }),
   make({
@@ -737,7 +736,15 @@ export function rolePath(role: UserRole, suffix: string): string {
 }
 export function navigationForRole(role: UserRole): { title: string; items: RouteDefinition[] }[] {
   const items = routeDefinitions.filter(
-    (route) => route.role === role && route.navigationGroup && route.navigationLabel,
+    (route) =>
+      route.role === role &&
+      route.navigationGroup &&
+      route.navigationLabel &&
+      !(
+        role === 'administrator' &&
+        route.navigationGroup === 'Academic Setup' &&
+        !['administrator.academic-data', 'administrator.students'].includes(route.id)
+      ),
   );
   const groups = new Map<string, RouteDefinition[]>();
   for (const item of items) {
@@ -807,7 +814,13 @@ export function navigationOwner(path: string, mobile = false): RouteId | undefin
   const visited = new Set<RouteId>();
   while (route && !visited.has(route.id)) {
     visited.add(route.id);
-    if (mobile ? mobileNavigationIds[route.role].includes(route.id) : route.navigationLabel)
+    if (
+      mobile
+        ? mobileNavigationIds[route.role].includes(route.id)
+        : navigationForRole(route.role).some((group) =>
+            group.items.some((item) => item.id === route!.id),
+          )
+    )
       return route.id;
     const parent = navigationParents[route.id];
     route = parent ? routeDefinitions.find((item) => item.id === parent) : undefined;

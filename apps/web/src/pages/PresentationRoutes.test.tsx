@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DevelopmentRoleContext } from '../auth/development-role-context';
 import { routeDefinitions } from '../routes/route-config';
 import { schedulePreview } from '../data/schedule-preview';
+import { provisionalCdmRooms } from '../data/cdm-room-inventory';
 import { ProductScreenPage } from './ProductScreenPage';
 import { StudentDashboard } from './dashboards/StudentDashboard';
 import { PreviewCalendarView } from './PreviewCalendarView';
@@ -26,6 +27,7 @@ function open(path: string, role: 'student' | 'administrator' = 'administrator')
                 'schedule',
                 'calendar',
                 'notifications',
+                'requests',
                 'buildings',
                 'building-detail',
                 'room-detail',
@@ -45,6 +47,15 @@ function open(path: string, role: 'student' | 'administrator' = 'administrator')
 }
 
 describe('presentation journey integrity', () => {
+  it('filters Administrator classroom requests with selection-only status pills', () => {
+    open('/admin/requests');
+    expect(screen.getByRole('button', { name: /All 2/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Pending review', { selector: '.status' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Declined 1/ }));
+    expect(screen.getByText('Declined', { selector: '.status' })).toBeInTheDocument();
+    expect(screen.queryByText('Pending review', { selector: '.status' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Declined 1/ })).toHaveAttribute('aria-pressed', 'true');
+  });
   it('opens the structured Student calendar without legacy published fixtures', async () => {
     open('/student/dashboard', 'student');
     fireEvent.click(screen.getByRole('link', { name: 'View my schedule' }));
@@ -60,20 +71,27 @@ describe('presentation journey integrity', () => {
     fireEvent.click(screen.getByRole('link', { name: 'View full schedule' }));
     expect(screen.getByRole('heading', { level: 1, name: 'My Schedule' })).toBeInTheDocument();
   });
-  it.each(['PRRC', 'New Building', 'Court'])(
+  it.each([
+    ['PRRC', 27],
+    ['New Building', 24],
+    ['Campus Grounds', 1],
+    ['Montalban Sports Complex', 1],
+  ])(
     'opens only %s rooms and returns through the same building',
-    (building) => {
+    (building, count) => {
       open('/admin/buildings');
       expect(screen.queryByText(/rooms available today/)).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('link', { name: `View ${building} rooms` }));
       const main = within(screen.getByRole('main'));
       expect(main.getByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
+      expect(main.getByText(new RegExp(`Showing ${Math.min(Number(count), 6)} of ${count} provisional spaces`))).toBeInTheDocument();
       const card = main.getAllByRole('article')[0];
       fireEvent.click(within(card).getByRole('link'));
       fireEvent.click(screen.getByRole('link', { name: 'Back to building' }));
       expect(screen.getByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
       fireEvent.click(screen.getByRole('link', { name: 'Back to buildings' }));
-      expect(screen.getByRole('main').querySelectorAll('article')).toHaveLength(3);
+      expect(screen.getByRole('main').querySelectorAll('article')).toHaveLength(4);
+      expect(provisionalCdmRooms).toHaveLength(53);
     },
   );
   it.each(['', '?building=missing', '?building=Science+Building&building=Computing+Building'])(

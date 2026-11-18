@@ -5,11 +5,13 @@ import json
 from pathlib import Path
 from uuid import uuid4
 
+from alembic.script import ScriptDirectory
 from classync_contracts.identity import (
     MembershipAuthorizationError,
     VerifiedPrincipal,
     current_membership,
 )
+from classync_persistence import schema
 from classync_persistence.database import transaction
 from classync_persistence.membership_changes import audit_actor
 from classync_persistence.memberships import PostgresMembershipLookup, identity_context
@@ -21,6 +23,19 @@ from scripts.postgres_disposable import qualify
 from scripts.postgres_driver_qualification import denied, engine_for, require
 
 TABLES = ("tenants", "people", "students", "faculty", "memberships", "membership_audit")
+
+
+def identity_tables(target):
+    graph = ScriptDirectory(str(Path(schema.__file__).parent / "migrations"))
+    revisions = {item.revision for item in graph.walk_revisions(base="base", head=target)}
+    onboarding = ("account_claims", "faculty_invitations")
+    return TABLES + (onboarding if "0014_account_onboarding" in revisions else ())
+
+
+def require_identity_policies(policies, tables):
+    require({row[0] for row in policies} == set(tables)
+            and all(row[1] and row[2] for row in policies),
+            "Missing identity table or enabled/FORCE RLS; unexpected table inventory")
 
 
 def seed(session):
@@ -48,8 +63,40 @@ def seed(session):
                 "faculty": faculty, "roles": roles})
 
 
+def require_unique_student_bindings(bindings):
+    """Reject duplicate synthetic account-to-student assignments before SQL insertion."""
+    student_ids = [student_id for _uid, student_id in bindings if student_id is not None]
+    if len(student_ids) != len(set(student_ids)):
+        raise RuntimeError("Qualification fixtures require distinct synthetic student IDs")
+
+
+def add_synthetic_student(session, *, tenant, person_id, student_id):
+    session.execute(text(
+        "INSERT INTO classsync_identity.people (tenant_id,id) VALUES (:tenant,:person)"
+    ), {"tenant": tenant, "person": person_id})
+    session.execute(text(
+        "INSERT INTO classsync_identity.students (tenant_id,id,person_id) "
+        "VALUES (:tenant,:student,:person)"
+    ), {"tenant": tenant, "student": student_id, "person": person_id})
+
+
+def add_synthetic_faculty(session, *, tenant, person_id, faculty_id):
+    session.execute(text(
+        "INSERT INTO classsync_identity.faculty (tenant_id,id,person_id) "
+        "VALUES (:tenant,:faculty,:person)"
+    ), {"tenant": tenant, "faculty": faculty_id, "person": person_id})
+
+
 def constraint_cases(owner):
-    base = dict(tenant="tenant-a", uid="invalid", person="person-a", student="student-a",
+    # Isolate binding/check constraints from the newer one-account-per-record index.
+    # student-a is already linked, so reusing it would fail uniqueness before the FK.
+    with transaction(owner) as session:
+        session.execute(text("""
+            INSERT INTO classsync_identity.students VALUES
+                ('tenant-a', 'student-constraint-probe', 'person-a')
+        """))
+    base = dict(tenant="tenant-a", uid="invalid", person="person-a",
+                student="student-constraint-probe",
                 faculty=None, roles=["student"], state="active", revision=1)
     cases = [
         ("duplicate identity", {"uid": "uid-a"}, "23505"),
@@ -84,6 +131,7 @@ def constraint_cases(owner):
 
 
 def exercise(connection, *, target="head"):
+    tables = identity_tables(target)
     owner, runtime = engine_for(connection, bootstrap=True), engine_for(connection)
     migration_owner = "classsync_migrator_" + uuid4().hex
     try:
@@ -136,17 +184,16 @@ def exercise(connection, *, target="head"):
                 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
                 WHERE n.nspname = 'classsync_identity' AND c.relkind = 'r'
             """)).all()
-            require(len(policies) == len(TABLES) and all(row[1] and row[2] for row in policies),
-                    "Missing enabled/FORCE RLS")
+            require_identity_policies(policies, tables)
         rejected = constraint_cases(owner)
         # Non-superuser table owner is also subject to FORCE RLS on every table.
         with transaction(owner) as session:
             session.execute(text(f"SET LOCAL ROLE {migration_owner}"))
-            for table in TABLES:
+            for table in tables:
                 require(session.scalar(text(f"SELECT count(*) FROM classsync_identity.{table}"))
                         == 0, f"No-context owner bypassed FORCE RLS: {table}")
             identity_context(session, tenant_id="tenant-a", uid="uid-a")
-            for table in TABLES:
+            for table in tables:
                 key = "id" if table == "tenants" else "tenant_id"
                 require(session.scalar(text(
                     f"SELECT count(*) FROM classsync_identity.{table} WHERE {key} = 'tenant-b'"

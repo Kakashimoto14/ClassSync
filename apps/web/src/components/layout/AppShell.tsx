@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Bell, ChevronDown, LogOut, Menu, Search, Settings, UserRound } from 'lucide-react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useDevelopmentRole } from '../../auth/useDevelopmentRole';
@@ -31,12 +31,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const signOut = institutional ? university.signOut : preview.signOut;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [commandOpen, setCommandOpen] = useState(false);
   const main = useRef<HTMLElement>(null);
+  const commandTrigger = useRef<HTMLButtonElement>(null);
+  const commandMenu = useRef<HTMLElement>(null);
+  const commandItems = useRef<Array<HTMLAnchorElement | null>>([]);
   const closeMenu = useCallback(() => setMobileOpen(false), []);
 
   useEffect(() => {
     closeMenu();
     setQuery('');
+    setCommandOpen(false);
     // Also runs when switching screen families remounts the shell.
     main.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -57,6 +62,26 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => desktop.removeEventListener('change', onResize);
   }, [closeMenu]);
 
+  useEffect(() => {
+    if (commandOpen) commandItems.current[0]?.focus();
+    else commandItems.current = [];
+  }, [commandOpen]);
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        !commandMenu.current?.contains(target) &&
+        !commandTrigger.current?.contains(target)
+      )
+        setCommandOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    return () => document.removeEventListener('pointerdown', closeOutside);
+  }, [commandOpen]);
+
   if (!role) return <Navigate to="/dev/role-preview" replace />;
   const profile = institutional
     ? { name: 'University account', initials: 'CS', label: role === 'student' ? 'Student' : role }
@@ -64,14 +89,38 @@ export function AppShell({ children }: { children: ReactNode }) {
   const availableRoute = (route: RouteDefinition) =>
     !route.plannedFeature &&
     (!institutional ||
-      (['dashboard', 'schedule', 'rooms', 'notifications'].includes(route.kind) &&
+      ([
+        'dashboard',
+        'schedule',
+        'calendar',
+        'rooms',
+        'notifications',
+        'announcements',
+        'profile',
+        'settings',
+        'registration-scanner',
+        'academic-manage',
+        'requests',
+        'request-detail',
+        'request-create',
+        'conflicts',
+        'conflict-detail',
+        'schedule-create',
+        'schedule-drafts',
+        'schedule-draft-detail',
+        'audit',
+      ].includes(route.kind) &&
         route.roomMode !== 'availability'));
   const groups = navigationForRole(role);
   const bottomItems = mobileNavigationForRole(role).filter(availableRoute);
   const primaryItems = [...bottomItems];
   if (role !== 'student') {
     const requests = routeDefinitions.find((route) => route.path === rolePath(role, 'requests'));
-    if (requests && !primaryItems.some((item) => item.id === requests.id))
+    if (
+      requests &&
+      availableRoute(requests) &&
+      !primaryItems.some((item) => item.id === requests.id)
+    )
       primaryItems.splice(3, 0, requests);
   }
   const secondaryGroups = groups
@@ -100,6 +149,55 @@ export function AppShell({ children }: { children: ReactNode }) {
         )
         .slice(0, 5)
     : [];
+  const commandRoutes = roleRoutes.filter(
+    (route) =>
+      !route.path.includes(':') &&
+      ![
+        'academic-detail',
+        'building-detail',
+        'conflict-detail',
+        'request-detail',
+        'room-detail',
+        'schedule-draft-detail',
+      ].includes(route.kind),
+  );
+  const commandGroups = commandRoutes.reduce<Array<{ title: string; routes: RouteDefinition[] }>>(
+    (groups, route) => {
+      const title = route.navigationGroup ?? 'More destinations';
+      const group = groups.find((item) => item.title === title);
+      if (group) group.routes.push(route);
+      else groups.push({ title, routes: [route] });
+      return groups;
+    },
+    [],
+  );
+
+  const handleCommandKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Tab') {
+      setCommandOpen(false);
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setCommandOpen(false);
+      commandTrigger.current?.focus();
+      return;
+    }
+    const items = commandItems.current.filter(
+      (item): item is HTMLAnchorElement => Boolean(item?.isConnected),
+    );
+    if (!items.length) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLAnchorElement);
+    let nextIndex: number | undefined;
+    if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % items.length;
+    if (event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + items.length) % items.length;
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = items.length - 1;
+    if (nextIndex !== undefined) {
+      event.preventDefault();
+      items[nextIndex]?.focus();
+    }
+  };
   const owner = navigationOwner(location.pathname);
   const mobileOwner = navigationOwner(location.pathname, true);
   const leaveDemo = () => {
@@ -140,6 +238,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   ));
   const accountLinks = (
     <div className="account-links">
+      {institutional && (
+        <Link className="nav-item" to="/auth/account" onClick={closeMenu}>
+          {role === 'administrator' ? 'University accounts' : 'Account access'}
+        </Link>
+      )}
       {!institutional && (
         <>
           <Link className="nav-item" to={rolePath(role, 'profile')} onClick={closeMenu}>
@@ -178,10 +281,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {secondaryNavigation}
         </nav>
         <div className="sidebar-user">
-          <Link
-            className="sidebar-profile"
-            to={institutional ? '/auth/login' : rolePath(role, 'profile')}
-          >
+          <Link className="sidebar-profile" to={rolePath(role, 'profile')}>
             <span className="avatar">{profile.initials}</span>
             <span>
               <strong>{profile.name}</strong>
@@ -256,9 +356,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </p>
                 <Link
                   className="text-action"
-                  to={institutional ? '/auth/login' : '/dev/role-preview'}
+                  to={institutional ? '/auth/account' : '/dev/role-preview'}
                 >
-                  {institutional ? 'Check account access' : 'Switch preview role'}
+                  {institutional
+                    ? role === 'administrator'
+                      ? 'University accounts'
+                      : 'Account access'
+                    : 'Switch preview role'}
                 </Link>
               </div>
             </details>
@@ -268,35 +372,87 @@ export function AppShell({ children }: { children: ReactNode }) {
               </strong>
             )}
           </div>
-          <div
-            className="global-search"
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') setQuery('');
-            }}
-          >
-            <label className="header-search">
-              <Search size={18} aria-hidden="true" />
-              <input
-                aria-label="Search ClassSync"
-                placeholder="Find a page"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            {query.trim() && (
-              <div className="search-results">
-                <nav aria-label="Search destinations">
-                  {results.map((route) => (
-                    <Link to={route.path} key={route.id} onClick={() => setQuery('')}>
-                      <route.icon size={16} aria-hidden="true" />
-                      <span>{route.title}</span>
-                    </Link>
+          {role === 'administrator' ? (
+            <div className="global-search command-navigation">
+              <button
+                ref={commandTrigger}
+                className="header-search command-trigger"
+                type="button"
+                aria-label="Open page menu"
+                aria-haspopup="menu"
+                aria-expanded={commandOpen}
+                aria-controls="admin-command-menu"
+                onClick={() => setCommandOpen((open) => !open)}
+              >
+                <Search size={18} aria-hidden="true" />
+                <span>Choose a page</span>
+              </button>
+              {commandOpen && (
+                <nav
+                  id="admin-command-menu"
+                  ref={commandMenu}
+                  className="command-menu"
+                  role="menu"
+                  aria-label="Administrator destinations"
+                  aria-orientation="vertical"
+                  onKeyDown={handleCommandKeyDown}
+                >
+                  {commandGroups.map((group) => (
+                    <div role="group" aria-label={group.title} key={group.title}>
+                      <p>{group.title}</p>
+                      {group.routes.map((route) => (
+                        <Link
+                          role="menuitem"
+                          tabIndex={-1}
+                          key={route.id}
+                          to={route.path}
+                          ref={(element) => {
+                            const index = commandRoutes.findIndex((item) => item.id === route.id);
+                            commandItems.current[index] = element;
+                          }}
+                          onClick={() => setCommandOpen(false)}
+                          aria-current={location.pathname === route.path ? 'page' : undefined}
+                        >
+                          <route.icon size={16} aria-hidden="true" />
+                          <span>{route.title}</span>
+                        </Link>
+                      ))}
+                    </div>
                   ))}
                 </nav>
-                {!results.length && <p role="status">No matching pages in your workspace.</p>}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div
+              className="global-search"
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') setQuery('');
+              }}
+            >
+              <label className="header-search">
+                <Search size={18} aria-hidden="true" />
+                <input
+                  aria-label="Search ClassSync"
+                  placeholder="Find a page"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+              {query.trim() && (
+                <div className="search-results">
+                  <nav aria-label="Search destinations">
+                    {results.map((route) => (
+                      <Link to={route.path} key={route.id} onClick={() => setQuery('')}>
+                        <route.icon size={16} aria-hidden="true" />
+                        <span>{route.title}</span>
+                      </Link>
+                    ))}
+                  </nav>
+                  {!results.length && <p role="status">No matching pages in your workspace.</p>}
+                </div>
+              )}
+            </div>
+          )}
           {!institutional && (
             <Link
               className="icon-button header-alerts"

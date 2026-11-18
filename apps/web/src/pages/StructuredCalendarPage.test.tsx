@@ -9,7 +9,8 @@ vi.mock('../lib/publication-api', () => ({
   timetableRequest: vi.fn(),
   subscribeTimetable: () => () => {},
 }));
-const date = addDays(manilaToday(), 1);
+const today = '2026-10-30';
+const date = addDays(today, 1);
 const event = {
   id: 'class-a',
   assignment_id: 'a',
@@ -28,7 +29,12 @@ const event = {
     floor: null,
   },
 };
+let scheduledEvent = event;
 beforeEach(() => {
+  // Fake Date only: network promises and Testing Library's wait timers remain real.
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date(today + 'T08:00:00+08:00'));
+  scheduledEvent = event;
   sessionStorage.clear();
   vi.mocked(timetableRequest).mockImplementation(async (path) =>
     path.endsWith('periods')
@@ -42,7 +48,7 @@ beforeEach(() => {
                 academic_year: '2026-2027',
                 semester: 'first',
                 effective_start: '2026-01-01',
-                effective_end: '2026-12-31',
+                effective_end: '2027-12-31',
               },
             },
           ],
@@ -56,15 +62,53 @@ beforeEach(() => {
             { id: 'syn-bsit-3-A', program_id: 'bsit', year_level: 3, section_letter: 'A' },
           ],
           teachers: [event.teacher],
-          occurrences: [event],
+          occurrences: [scheduledEvent],
         },
   );
 });
 afterEach(() => {
+  vi.useRealTimers();
   vi.clearAllMocks();
   vi.unstubAllGlobals();
 });
 describe('shared role schedule context', () => {
+  it.each([
+    ['2026-10-30T16:15:00Z', '2026-10-31', '2026-11-01'],
+    ['2026-12-30T16:15:00Z', '2026-12-31', '2027-01-01'],
+  ])('navigates the month boundary in Manila at %s', async (instant, current, tomorrow) => {
+    vi.setSystemTime(new Date(instant));
+    expect(manilaToday()).toBe(current);
+    expect(addDays(manilaToday(), 1)).toBe(tomorrow);
+    scheduledEvent = {
+      ...event,
+      date: tomorrow,
+      starts_at: tomorrow + 'T09:00:00+08:00',
+      ends_at: tomorrow + 'T10:30:00+08:00',
+    };
+    render(
+      <MemoryRouter initialEntries={['/student/schedule']}>
+        <StructuredCalendarPage role="student" />
+      </MemoryRouter>,
+    );
+    expect(
+      await screen.findByRole('button', { name: `${calendarDateLabel(current)}, 0 classes` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: `${calendarDateLabel(tomorrow)}, 1 classes` }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Next month' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: `${calendarDateLabel(tomorrow)}, 1 classes` }),
+    );
+    await waitFor(() => expect(readWorkspace('student').date).toBe(tomorrow));
+    expect(
+      await within(document.querySelector('.ux-agenda') as HTMLElement).findByRole('button', {
+        name: /09:00.*Synthetic computing/,
+      }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Previous month' }));
+    await waitFor(() => expect(readWorkspace('student').date).toBe(current.slice(0, 7) + '-01'));
+  });
   it('defaults to a published sample identity and retains context from Home to Schedule', async () => {
     render(
       <MemoryRouter initialEntries={['/student/dashboard']}>
@@ -85,9 +129,12 @@ describe('shared role schedule context', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Open Schedule' }));
     fireEvent.click(screen.getByRole('button', { name: `${calendarDateLabel(date)}, 1 classes` }));
     expect(screen.queryByText('No classes on this date.')).not.toBeInTheDocument();
-    const row = await within(document.querySelector('.ux-agenda') as HTMLElement).findByRole('button', {
-      name: /09:00.*Synthetic computing/,
-    });
+    const row = await within(document.querySelector('.ux-agenda') as HTMLElement).findByRole(
+      'button',
+      {
+        name: /09:00.*Synthetic computing/,
+      },
+    );
     fireEvent.click(row);
     expect(screen.getByRole('dialog')).toHaveTextContent('Synthetic Room 1');
     fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
@@ -122,14 +169,12 @@ describe('shared role schedule context', () => {
     expect(screen.queryByLabelText('Next class')).not.toBeInTheDocument();
   });
   it('never requests a stale entered draft from anonymous review and provides sample recovery', async () => {
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(JSON.stringify({ data: { drafts: [] } }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-      );
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: { drafts: [] } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
     vi.stubGlobal('fetch', fetcher);
     render(
       <MemoryRouter initialEntries={['/student/dashboard?review=private-entered-draft']}>

@@ -10,6 +10,7 @@ from classync_contracts.academic import (
     AcademicReadiness,
     AcademicSnapshot,
 )
+from classync_contracts.cloud_run import service_headers
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.models import HealthResponse
 from classync_contracts.request_authorization import install_identity_errors
@@ -36,6 +37,7 @@ from pydantic_settings import SettingsConfigDict
 from .academic_input import academic_readiness
 from .authorization import configured_scheduling
 from .catalog import catalogs, synthetic_scenario
+from .classroom_requests import router as classroom_requests_router
 from .draft_repository import DraftError, DraftRepository, calendar_review_allowed
 from .engine import generate_week
 from .occurrences import occurrences
@@ -72,6 +74,7 @@ def connected_repository(request, owner):
 app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0", lifespan=lifespan)
 install_identity_errors(app)
 app.include_router(publication_router)
+app.include_router(classroom_requests_router)
 
 
 @app.get("/api/v1/scheduling/sandbox/calendar-samples", response_model=DraftList)
@@ -292,10 +295,14 @@ def persisted_academic_snapshot(period_id, request, sandbox):
         raise HTTPException(422, "Invalid academic period ID")
     path = f"/api/v1/academic/{'sandbox/' if sandbox else ''}periods/{period_id}"
     try:
-        with httpx.Client(timeout=10) as client:
+        headers = service_headers(
+            settings.cloud_run_iam_enabled, settings.academic_service_url,
+            {"Authorization": request.headers.get("Authorization", "")},
+        )
+        with httpx.Client(timeout=10, trust_env=False) as client:
             response = client.get(
                 settings.academic_service_url + path,
-                headers={"Authorization": request.headers.get("Authorization", "")},
+                headers=headers,
             )
         if response.is_error:
             message = (

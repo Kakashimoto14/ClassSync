@@ -3,6 +3,7 @@
 import asyncio
 import json
 from datetime import date, datetime, timedelta
+from uuid import UUID
 
 from classync_contracts.publication import PublicationCommand, RoomRestriction
 from classync_contracts.scheduling_security import require_administrator, require_sandbox
@@ -161,6 +162,25 @@ def history(period: str, request: Request, dataset: str = "institutional"):
                 "code": error.code, "message": str(error),
             }}) from error
     return {"versions": repo.history(tenant, dataset, period)}
+
+
+@router.get("/audit/{period}")
+def administrator_activity(
+    period: UUID, request: Request, limit: int = Query(100, ge=1, le=500)
+):
+    """Read redacted PostgreSQL activity for a verified institutional Administrator."""
+    settings = settings_only()
+    claims = require_administrator(request, settings)
+    if settings.scheduling_database_url is None:
+        raise HTTPException(503, "Institutional activity audit requires PostgreSQL storage")
+    require_local_publication(settings, False)
+    _, repo = scoped_repo(request, claims)
+    try:
+        return {"events": repo.administrator_activity(str(period), limit=limit)}
+    except DraftError as error:
+        raise HTTPException(error.status, detail={"error": {
+            "code": error.code, "message": str(error),
+        }}) from error
 
 
 def periods_for(request, sandbox, role, section, teacher, claims=None):
@@ -350,6 +370,17 @@ async def events(
 ):
     claims = identity(request)
     return await stream(period, request, False, start, end, claims["role"], "", "", after)
+
+
+@router.get("/rooms/{period}")
+def room_directory(period: UUID, request: Request):
+    repo, _, _, viewer = read_scope(request, False)
+    if not hasattr(repo, "room_directory"):
+        raise HTTPException(503, "Connected room directory is unavailable")
+    try:
+        return repo.room_directory(str(period), viewer)
+    except DraftError as error:
+        raise HTTPException(error.status, str(error)) from error
 
 
 def availability_for(request, sandbox, room_id, start, end):

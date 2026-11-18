@@ -8,7 +8,8 @@ export interface StudentRoom {
   floor?: string | null;
   alias?: string;
   aliasUnconfirmed?: boolean;
-  location?: string;
+  location?: string | null;
+  room_type?: string | null;
   classes: CalendarOccurrence[];
 }
 

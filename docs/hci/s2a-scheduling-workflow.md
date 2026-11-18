@@ -52,8 +52,10 @@ coverage and timetable. New routes retain typed role ownership. The approved Sof
 Rouge palette, Inter typography, Student bottom navigation and P0 storage are retained.
 
 Saved input snapshots retain structured stable program/section/resource references.
-The nine-program catalog and 59-space provisional CdM inventory are unchanged by
-draft saving. Synthetic room facilities, faculty and offerings do not become official
+At this S2A checkpoint, the nine-program catalog and then-current 59-space provisional
+CdM inventory were unchanged by draft saving. The inventory was superseded by the
+November 2026 row list; see `docs/audit/ROOM_INVENTORY_UPDATE.md`. Synthetic room
+facilities, faculty and offerings do not become official
 academic records merely because a draft was saved.
 
 ## Actual functional verification

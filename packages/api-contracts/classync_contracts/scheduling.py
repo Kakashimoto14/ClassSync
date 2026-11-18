@@ -6,9 +6,38 @@ The contract never accepts a role or a publication instruction.
 
 import hashlib
 import json
+from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
+
+
+class ActivityType(str, Enum):  # noqa: UP042 - explicit str Enum preserves supported runtime semantics
+    ACADEMIC_INSTRUCTION = "academic_instruction"
+    COMPUTER_LAB_INSTRUCTION = "computer_lab_instruction"
+    BSE_SCIENCE_INSTRUCTION = "bse_science_instruction"
+    PAHFIT = "pahfit"
+    SPORTS = "sports"
+    ASSEMBLY = "assembly"
+    ROTC = "rotc"
+    SPECIAL_BOOKING = "special_booking"
+
+
+def _validated_activity_type(value):
+    """Normalize allowlisted strings at Python construction boundaries."""
+    if isinstance(value, str) and not isinstance(value, ActivityType):
+        try:
+            return ActivityType(value)
+        except ValueError:
+            return value
+    return value
 
 
 class Contract(BaseModel):
@@ -49,6 +78,7 @@ class Section(Contract):
 class Teacher(Contract):
     id: str = Field(min_length=1, max_length=80)
     name: str
+    synthetic: bool = False
     availability: list[Window] = Field(default_factory=list)
     unavailable: list[Window] = Field(default_factory=list)
     preferred_days: list[int] = Field(default_factory=list)
@@ -67,6 +97,7 @@ class Room(Contract):
     condition: Literal["unknown", "operational", "maintenance"] = "unknown"
     room_type: str | None = None
     type_verified: bool = False
+    allowed_activity_types: list[ActivityType] | None = Field(default=None, min_length=1)
     capacity: int | None = Field(default=None, gt=0)
     capacity_verified: bool = False
     equipment: list[str] = Field(default_factory=list)
@@ -74,6 +105,13 @@ class Room(Contract):
     allowed_program_ids: list[str] | None = None
     availability: list[Window] = Field(default_factory=list)
     blocked: list[Window] = Field(default_factory=list)
+
+    @field_validator("allowed_activity_types", mode="before")
+    @classmethod
+    def validate_allowed_activity_types(cls, value):
+        if value is None or not isinstance(value, list):
+            return value
+        return [_validated_activity_type(item) for item in value]
 
 
 class SessionPattern(Contract):
@@ -94,7 +132,9 @@ class Offering(Contract):
     id: str = Field(min_length=1, max_length=80)
     subject_id: str = Field(min_length=1)
     subject_name: str = Field(min_length=1)
+    subject_code: str | None = Field(default=None, min_length=1, max_length=80)
     section_id: str
+    activity_type: ActivityType = ActivityType.ACADEMIC_INSTRUCTION
     eligible_teacher_ids: list[str] = Field(default_factory=list)
     eligible_room_ids: list[str] = Field(default_factory=list)
     required_weekly_minutes: int = Field(default=180, gt=0, le=10080)
@@ -111,6 +151,18 @@ class Offering(Contract):
     minimum_capacity: int | None = Field(default=None, gt=0)
     allowed_buildings: list[str] | None = None
 
+    @field_validator("activity_type", mode="before")
+    @classmethod
+    def validate_activity_type(cls, value):
+        return _validated_activity_type(value)
+
+    @model_serializer(mode="wrap")
+    def preserve_legacy_snapshot(self, handler):
+        value = handler(self)
+        if value.get("subject_code") is None:
+            value.pop("subject_code", None)
+        return value
+
     @model_validator(mode="after")
     def exact_minutes(self):
         if any(sum(p.durations) != self.required_weekly_minutes for p in self.patterns):
@@ -125,6 +177,8 @@ class Offering(Contract):
 class Enrollment(Contract):
     student_id: str = Field(min_length=1)
     offering_ids: list[str] = Field(min_length=1)
+    entry_cohort_year: int | None = Field(default=None, ge=1900, le=2200)
+    curriculum_version_id: str | None = None
 
 
 class Assignment(Contract):
@@ -301,9 +355,15 @@ def scheduling_input_hash(inputs: GenerationInput):
     """Preserve S1 hashes when optional S2B workload constraints are absent."""
     value = inputs.model_dump(mode="json")
     for teacher in value["teachers"]:
+        if not teacher.get("synthetic"):
+            teacher.pop("synthetic", None)
         for key in ("max_weekly_minutes", "max_daily_minutes"):
             if teacher.get(key) is None:
                 teacher.pop(key, None)
+    for enrollment in value["enrollments"]:
+        for key in ("entry_cohort_year", "curriculum_version_id"):
+            if enrollment.get(key) is None:
+                enrollment.pop(key, None)
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()

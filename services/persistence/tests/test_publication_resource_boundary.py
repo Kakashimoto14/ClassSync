@@ -6,17 +6,19 @@ from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
-from classync_contracts.academic import (
-    AcademicPeriod,
-    AcademicSnapshot,
-    RecordEnvelope,
-    RecordWrite,
+from classync_contracts.academic import RecordWrite
+from classync_contracts.scheduling import (
+    Assignment,
+    GenerationInput,
+    Offering,
+    Program,
+    Room,
+    Section,
+    Teacher,
 )
-from classync_contracts.scheduling import Assignment
 
 from scripts import postgres_publication_resource_qualification as resource
 from scripts.postgres_disposable import create_root
-from services.scheduling.app.academic_input import academic_readiness
 from services.scheduling.app.draft_rules import DraftError
 
 
@@ -36,28 +38,51 @@ def manual_draft(label, *, shared_ids=None):
     """Pure generated data for guard testing; actual qualifier never uses this placement."""
     period = "period-" + label
     records = resource.record_definitions(period, label, shared_ids=shared_ids)
-    snapshot = AcademicSnapshot(
-        period=AcademicPeriod(
-            id=period,
-            title="Invented portable fixture",
-            revision=8,
-            created_at="2026-10-28T00:00:00+00:00",
-            source="institutional",
-            calendar=resource.fixture_calendar(),
-        ),
-        records=[
-            RecordEnvelope(
-                revision=1,
-                updated_at="2026-10-28T00:00:00+00:00",
-                updated_by="synthetic-admin",
-                record=RecordWrite.model_validate({"expected_revision": 0, "record": row}).record,
+
+    # This tests the independent conflict-matrix guard, not institutional
+    # readiness. Build its explicit synthetic solver DTO without attesting
+    # invented records as approved institutional data or adding workload caps
+    # that would mask the conflict being tested. The actual qualifier retains
+    # its normal academic writes/readiness/solve path.
+    def model(kind, cls):
+        return [
+            cls.model_validate(
+                {key: value for key, value in row.items() if key in cls.model_fields}
             )
             for row in records
+            if row["kind"] == kind
+        ]
+
+    subject = next(row for row in records if row["kind"] == "subjects")
+    saved_offering = next(row for row in records if row["kind"] == "offerings")
+    rules = records[-1]
+    inputs = GenerationInput(
+        period_id=period,
+        data_version="portable-guard-v1",
+        synthetic=True,
+        scope_description="Invented portable conflict guard; no institutional readiness claim",
+        all_intended_offerings_supplied=True,
+        operating_windows=rules["operating_windows"],
+        enrollments=rules["enrollments"],
+        programs=model("programs", Program),
+        sections=model("sections", Section),
+        teachers=model("faculty", Teacher),
+        rooms=model("resources", Room),
+        offerings=[
+            Offering(
+                id=saved_offering["id"],
+                subject_id=subject["id"],
+                subject_name=subject["name"],
+                section_id=saved_offering["section_id"],
+                eligible_teacher_ids=saved_offering["teacher_ids"],
+                eligible_room_ids=saved_offering["room_ids"],
+                required_weekly_minutes=subject["required_weekly_minutes"],
+                patterns=subject["patterns"],
+                minimum_capacity=1,
+            )
         ],
     )
-    ready = academic_readiness(snapshot)
-    assert ready.ready and ready.inputs is not None, ready.model_dump()
-    offering = ready.inputs.offerings[0]
+    offering = inputs.offerings[0]
     assignment = Assignment(
         id="manual-session",
         offering_id=offering.id,
@@ -70,7 +95,7 @@ def manual_draft(label, *, shared_ids=None):
         end=540,
     )
     return SimpleNamespace(
-        input_snapshot=ready.inputs, generation_result=SimpleNamespace(assignments=[assignment])
+        input_snapshot=inputs, generation_result=SimpleNamespace(assignments=[assignment])
     )
 
 

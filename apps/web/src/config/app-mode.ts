@@ -26,12 +26,9 @@ export function resolveAppMode(input: ModeInput): AppMode {
     mode = 'presentation';
   }
   if (!mode) {
-    if (input.command === 'serve' && input.nodeEnv !== 'production') mode = 'sandbox';
-    else {
-      if (flags.includes('true') && flags.includes('false'))
-        throw new Error('Contradictory legacy ClassSync flags.');
-      mode = flags.includes('true') ? 'presentation' : 'institutional';
-    }
+    if (flags.includes('true') && flags.includes('false'))
+      throw new Error('Contradictory legacy ClassSync flags.');
+    mode = flags.includes('true') ? 'presentation' : 'institutional';
   }
   if (mode === 'presentation' && flags.includes('false'))
     throw new Error('Presentation requires preview and sample capabilities.');
@@ -55,6 +52,6 @@ export function capabilitiesFor(mode: AppMode) {
         ? 'Read-only presentation. Generation, saving and publishing require a connected authorized backend.'
         : mode === 'sandbox'
           ? 'Local development sandbox. Every request remains subject to backend authorization.'
-          : 'University identity and current permissions are required. Connected Student timetable reads are available through the authorized Gateway.',
+          : 'University identity and current permissions are required. Your classes and approved university workflows connect through the authorized Gateway.',
   });
 }

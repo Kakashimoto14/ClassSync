@@ -23,16 +23,16 @@ from sqlalchemy.engine import URL
 from scripts.postgres_disposable import qualify
 from scripts.postgres_driver_qualification import engine_for, require
 from scripts.postgres_publication_repository_qualification import (
-    FixtureCalls,
     academic_store,
     authorize_grants,
-    complete,
+    create_source_fixture,
     enrolled_projection_fixture,
     prepare_source,
     projection_membership_fixture,
     publish_command,
     repository,
     saved_draft,
+    seed_source,
 )
 from scripts.postgres_web_session_qualification import write_new_evidence
 from services.scheduling.tests.test_calendar import configuration
@@ -45,8 +45,12 @@ def exercise(connection, project, endpoint):
     owner, runtime = engine_for(connection, bootstrap=True), engine_for(connection)
     statuses = []
     try:
-        _base, _other, migrator = prepare_source(connection, owner, runtime)
+        _base, _other, migrator = prepare_source(
+            connection, owner, runtime, defer_fixture=True
+        )
         authorize_grants(connection, owner, migrator)
+        seed_source(connection, owner)
+        source, _other = create_source_fixture(runtime)
         with pytest.MonkeyPatch.context() as patch, emulator_firebase(
             patch, project=project, endpoint=endpoint,
         ) as (verifier, _sdk):
@@ -63,14 +67,28 @@ def exercise(connection, project, endpoint):
                 with transaction(owner) as db:
                     identity_context(db, tenant_id="tenant-a", uid=identity["localId"])
                     audit_actor(db, VerifiedPrincipal(uid="synthetic-operator"))
-                    db.execute(text("INSERT INTO classsync_identity.memberships "
-                        "SELECT tenant_id,:uid,person_id,student_id,faculty_id,roles,'active',1 "
-                        "FROM classsync_identity.memberships WHERE tenant_id='tenant-a' "
-                        "AND uid=:template"), {"uid": identity["localId"], "template": template})
+                    source = db.execute(text("""
+                        SELECT person_id,student_id,faculty_id,roles
+                        FROM classsync_identity.memberships
+                        WHERE tenant_id='tenant-a' AND uid=:template
+                    """), {"template": template}).one()
+                    if source.student_id is not None or source.faculty_id is not None:
+                        # Transfer the synthetic record binding; never create a second
+                        # account for a unique institutional student/faculty record.
+                        db.execute(text("DELETE FROM classsync_identity.memberships "
+                            "WHERE tenant_id='tenant-a' AND uid=:template"),
+                            {"template": template})
+                    db.execute(text("""
+                        INSERT INTO classsync_identity.memberships
+                            (tenant_id,uid,person_id,student_id,faculty_id,roles,state,revision)
+                        VALUES ('tenant-a',:uid,:person,:student,:faculty,:roles,'active',1)
+                    """), {"uid": identity["localId"], "person": source.person_id,
+                            "student": source.student_id, "faculty": source.faculty_id,
+                            "roles": source.roles})
 
             link(admin, "uid-admin")
             academic = academic_store(runtime, uid=admin["localId"])
-            snapshot = complete(FixtureCalls(academic))
+            snapshot = source
             snapshot = academic.save_calendar(snapshot.period.id, CalendarWrite(
                 expected_revision=snapshot.period.revision, calendar=configuration().calendar))
             snapshot = enrolled_projection_fixture(academic, snapshot)
@@ -125,7 +143,7 @@ def exercise(connection, project, endpoint):
                         "HTTP publication exact replay differs")
                 for identity, role, field, record in (
                         (admin, "administrator", "uid", admin["localId"]),
-                        (student, "student", "student_id", "student-a"),
+                        (student, "student", "student_id", "student-restore"),
                         (teacher, "teacher", "faculty_id", teacher_id)):
                     actual = request(client, "GET", calendar, identity, role=role)
                     expected_repo = repository(runtime, uid=identity["localId"], project=project)

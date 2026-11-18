@@ -1,13 +1,36 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
-import type { SessionPattern, Window } from '../../../../packages/shared-types/src/scheduling';
+import type { ActivityType, Assignment, SessionPattern, Window } from '../../../../packages/shared-types/src/scheduling';
 import { saveAcademicRecord, type AcademicKind, type AcademicRecord, type AcademicSnapshot } from '../lib/academic-api';
+import type { AcademicResource } from '../../../../packages/shared-types/src/scheduling';
 import { academicLabel, academicRecords } from '../lib/academic-labels';
+import { CurriculumSelection } from './CurriculumSelection';
+import { LockedAssignmentsEditor } from './LockedAssignmentsEditor';
+import { appMode } from '../config/runtime-config';
+import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const activityOptions: Array<{ value: ActivityType; label: string }> = [
+  { value: 'academic_instruction', label: 'Lecture / general instruction' },
+  { value: 'computer_lab_instruction', label: 'Computer laboratory instruction' },
+  { value: 'bse_science_instruction', label: 'BSEd Science laboratory instruction' },
+  { value: 'pahfit', label: 'PAHFIT' },
+  { value: 'sports', label: 'Sports activity' },
+  { value: 'assembly', label: 'Assembly' },
+  { value: 'rotc', label: 'ROTC' },
+  { value: 'special_booking', label: 'Approved special booking' },
+];
+const roomTypeOptions = [
+  ['lecture_classroom', 'Lecture classroom'],
+  ['computer_lab', 'Computer laboratory'],
+  ['science_lab', 'Science laboratory'],
+  ['special_activity', 'Special activity space'],
+  ['athletic_space', 'Athletic space'],
+] as const;
 const clock = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
-const minutes = (value: string) => { const [h, m] = value.split(':').map(Number); return h * 60 + m; };
 const comma = (text: string) => text.split(',').map(v => v.trim()).filter(Boolean);
+const timeSlots = Array.from({ length: 48 }, (_, index) => index * 30);
+const endTimeSlots = [...timeSlots.slice(1), 1440];
 
 function CommaField({ label, initial, onChange }: { label: string; initial: string; onChange: (text: string) => void }) {
   const [text, setText] = useState(initial);
@@ -15,18 +38,42 @@ function CommaField({ label, initial, onChange }: { label: string; initial: stri
 }
 
 export function WeeklyWindows({ label, value, onChange }: { label: string; value: Window[]; onChange: (value: Window[]) => void }) {
+  const [drafts, setDrafts] = useState<Array<{ start: number | null; end: number | null; days: number[] }>>([]);
+  const grouped = Array.from(value.reduce((groups, window) => {
+    const key = `${window.start}:${window.end}`;
+    const group = groups.get(key) ?? { start: window.start, end: window.end, days: [] as number[] };
+    if (!group.days.includes(window.day)) group.days.push(window.day);
+    groups.set(key, group);
+    return groups;
+  }, new Map<string, { start: number; end: number; days: number[] }>()).values());
+  const rows = [...grouped.map(window => ({ ...window, saved: true })), ...drafts.map(window => ({ ...window, saved: false }))];
+  const updateGroup = (index: number, change: (window: (typeof rows)[number]) => (typeof rows)[number]) => {
+    const current = rows[index];
+    const next = change(current);
+    if (!current.saved) {
+      if (next.days.length && next.start !== null && next.end !== null) {
+        onChange([...value, ...next.days.map(day => ({ day, start: next.start!, end: next.end! }))]);
+        setDrafts(drafts.filter((_, draftIndex) => draftIndex !== index - grouped.length));
+      } else {
+        setDrafts(drafts.map((draft, draftIndex) => draftIndex === index - grouped.length ? { start: next.start, end: next.end, days: next.days } : draft));
+      }
+      return;
+    }
+    const remaining = value.filter(window => window.start !== current.start || window.end !== current.end);
+    onChange([...remaining, ...next.days.map(day => ({ day, start: next.start!, end: next.end! }))]);
+  };
   return <fieldset className="academic-windows"><legend>{label}</legend>
-    {!value.length && <p className="muted">No windows supplied.</p>}
-    {value.map((w, i) => <div className="academic-window" key={i}>
-      <label>Day<select aria-label={`${label} day ${i + 1}`} value={w.day} onChange={e => onChange(value.map((v, n) => n === i ? { ...v, day: Number(e.target.value) } : v))}>{dayNames.map((d, n) => <option value={n} key={d}>{d}</option>)}</select></label>
-      <label>Start<input aria-label={`${label} start ${i + 1}`} type="time" step={1800} required value={clock(w.start)} onChange={e => onChange(value.map((v, n) => n === i ? { ...v, start: minutes(e.target.value) } : v))}/></label>
-      <label>End<input aria-label={`${label} end ${i + 1}`} type="time" step={1800} required disabled={w.end === 1440} value={clock(w.end % 1440)} onChange={e => onChange(value.map((v, n) => n === i ? { ...v, end: minutes(e.target.value) } : v))}/></label>
-      <Button type="button" variant="ghost" aria-label={`Remove ${label.toLowerCase()} window ${i + 1}`} onClick={() => onChange(value.filter((_, n) => n !== i))}>Remove</Button>
-      <label className="academic-checkbox"><input type="checkbox" aria-label={`${label} ends at midnight ${i + 1}`} checked={w.end === 1440} onChange={e => onChange(value.map((v,n) => n === i ? { ...v, end: e.target.checked ? 1440 : 720 } : v))}/>Ends at midnight</label>
-      {w.end <= w.start && <p className="academic-field-error">End must be later than start.</p>}
+    {!value.length && !drafts.length && <p className="muted">No windows supplied.</p>}
+    {rows.map((w, i) => <div className="academic-window" key={w.saved ? `${w.start}:${w.end}` : `new:${i}`}>
+      <fieldset className="academic-day-options"><legend>Days · window {i + 1}</legend>{dayNames.map((day, dayIndex) => <label className={`academic-checkbox${w.days.includes(dayIndex) ? ' is-selected' : ''}`} key={day}><input type="checkbox" aria-label={`${label} ${day} ${i + 1}`} checked={w.days.includes(dayIndex)} onChange={e => updateGroup(i, current => ({ ...current, days: e.target.checked ? [...current.days, dayIndex] : current.days.filter(selected => selected !== dayIndex) }))}/>{day.slice(0, 3)}</label>)}</fieldset>
+      <label>Start<select aria-label={`${label} start ${i + 1}`} required={w.days.length > 0} value={w.start ?? ''} onChange={e => updateGroup(i, current => ({ ...current, start: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose start time</option>{timeSlots.map(slot => <option key={slot} value={slot}>{clock(slot)}</option>)}</select></label>
+      <label>End<select aria-label={`${label} end ${i + 1}`} required={w.days.length > 0} disabled={w.end === 1440} value={w.end ?? ''} onChange={e => updateGroup(i, current => ({ ...current, end: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose end time</option>{endTimeSlots.map(slot => <option key={slot} value={slot}>{slot === 1440 ? '24:00 · midnight' : clock(slot)}</option>)}</select></label>
+      <Button type="button" variant="ghost" aria-label={`Remove ${label.toLowerCase()} window ${i + 1}`} onClick={() => w.saved ? onChange(value.filter(window => window.start !== w.start || window.end !== w.end)) : setDrafts(drafts.filter((_, draftIndex) => draftIndex !== i - grouped.length))}>Remove</Button>
+      <label className="academic-checkbox"><input type="checkbox" aria-label={`${label} ends at midnight ${i + 1}`} checked={w.end === 1440} onChange={e => updateGroup(i, current => ({ ...current, end: e.target.checked ? 1440 : 720 }))}/>Ends at midnight</label>
+      {w.start !== null && w.end !== null && w.end <= w.start && <p className="academic-field-error">End must be later than start.</p>}
     </div>)}
-    <Button type="button" variant="secondary" onClick={() => onChange([...value, { day: 0, start: 480, end: 720 }])}>Add {label.toLowerCase()} window</Button>
-    <p className="muted">30-minute boundaries. New rows are visible entry defaults; confirm the actual allowed times before saving.</p>
+    <Button type="button" variant="secondary" onClick={() => setDrafts([...drafts, { days: [], start: null, end: null }])}>Add {label.toLowerCase()} window</Button>
+    <p className="muted">Select every applicable day and confirm actual approved times. Menus use 30-minute intervals; they do not assert institutional availability.</p>
   </fieldset>;
 }
 
@@ -70,7 +117,7 @@ function initialRecord(kind: AcademicKind, period: string): AcademicRecord {
   if (kind === 'sections') return { ...base, kind, period_id: period, program_id: '', year_level: null, section_letter: null };
   if (kind === 'faculty') return { ...base, kind, name: '', subject_ids: [], availability: [] };
   if (kind === 'resources') return { ...base, kind, name: '', building: '', source: 'administrator-supplied', schedulable: false, condition: 'unknown', availability: [], verification_note: '' };
-  if (kind === 'offerings') return { ...base, kind, subject_id: '', section_id: '', teacher_ids: [], room_ids: [] };
+  if (kind === 'offerings') return { ...base, kind, subject_id: '', section_id: '', activity_type: 'academic_instruction', teacher_ids: [], room_ids: [] };
   return { id: 'rules', kind, operating_windows: [], options: { time_limit_seconds: 15, seed: 42 } };
 }
 
@@ -80,11 +127,60 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
   const [record, setRecord] = useState<AcademicRecord>(() => existing ? structuredClone(existing.record) as AcademicRecord : initialRecord(kind, snapshot.period.id));
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [locks, setLocks] = useState(() => JSON.stringify(record.kind === 'constraints' ? record.locked_assignments ?? [] : [], null, 2));
+  const [locks, setLocks] = useState<Assignment[]>(() => record.kind === 'constraints' ? structuredClone(record.locked_assignments ?? []) : []);
   const [enrollments, setEnrollments] = useState(() => JSON.stringify(record.kind === 'constraints' ? record.enrollments ?? [] : [], null, 2));
   const active = useRef(false);
-  const update = (name: string, value: unknown) => setRecord(r => ({ ...r, [name]: value }) as AcademicRecord);
-  const choices = (k: AcademicKind) => academicRecords(snapshot, k).map(r => ({ id: r.id, label: academicLabel(r, snapshot) }));
+  const update = (name: string, value: unknown) => setRecord(r => {
+    const next = { ...r, [name]: value } as AcademicRecord;
+    if (r.kind === 'subjects' && next.kind === 'subjects') {
+      if (['code', 'name', 'curriculum_version_id', 'curriculum_course_id'].includes(name)) next.curriculum_review_verified = false;
+      if (['required_weekly_minutes', 'patterns'].includes(name)) next.contact_minutes_verified = false;
+    } else if (r.kind === 'sections' && next.kind === 'sections') {
+      if (['entry_cohort_year', 'curriculum_version_id'].includes(name)) next.cohort_assignment_verified = false;
+      if (['year_level', 'section_letter', 'custom_label', 'program_id'].includes(name)) next.identity_verified = false;
+      if (name === 'population') next.population_verified = false;
+    } else if (r.kind === 'faculty' && next.kind === 'faculty') {
+      if (name === 'subject_ids') next.eligibility_verified = false;
+      if (['availability', 'unavailable'].includes(name)) next.availability_verified = false;
+      if (['max_weekly_minutes', 'max_daily_minutes'].includes(name)) next.workload_verified = false;
+    } else if (r.kind === 'resources' && next.kind === 'resources') {
+      if (['availability', 'blocked'].includes(name)) next.availability_verified = false;
+      if (name === 'room_type') next.type_verified = false;
+      if (name === 'capacity') next.capacity_verified = false;
+      if (name === 'equipment') next.equipment_verified = false;
+    } else if (r.kind === 'offerings' && next.kind === 'offerings') {
+      if (['subject_id', 'section_id', 'teacher_ids', 'room_ids', 'activity_type'].includes(name)) next.term_offering_verified = false;
+      if (['weekly_minutes_override', 'patterns_override'].includes(name)) next.override_requirements_verified = false;
+    } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'operating_windows') {
+      next.operating_windows_verified = false;
+    }
+    return next;
+  });
+  const changeLocks = (value: Assignment[]) => {
+    setLocks(value);
+    update('all_intended_offerings_supplied', false);
+    update('shared_scope_verified', false);
+  };
+  const choices = (k: AcademicKind) => {
+    const rows = academicRecords(snapshot, k);
+    if (k === 'resources' && record.kind === 'offerings') {
+      const subject = academicRecords(snapshot, 'subjects').find(r => r.id === record.subject_id);
+      const section = academicRecords(snapshot, 'sections').find(r => r.id === record.section_id);
+      const requiredType = record.required_room_type || (subject?.kind === 'subjects' ? subject.required_room_type : null);
+      const resources = rows.filter(r => r.kind === 'resources') as Array<AcademicResource & { id: string; kind: 'resources' }>;
+      return resources.filter(r => {
+        if (!r.active || !r.schedulable) return false;
+        if (r.allowed_activity_types && !r.allowed_activity_types.includes(record.activity_type ?? 'academic_instruction')) return false;
+        if (r.allowed_program_ids && (section?.kind !== 'sections' || !r.allowed_program_ids.includes(section.program_id))) return false;
+        if (requiredType && (r.room_type !== requiredType || !r.type_verified)) return false;
+        return true;
+      }).map(r => ({
+        id: r.id,
+        label: `${academicLabel(r, snapshot)}${r.condition !== 'operational' || !r.type_verified ? ' · verification required' : ''}`,
+      }));
+    }
+    return rows.map(r => ({ id: r.id, label: academicLabel(r, snapshot) }));
+  };
   const text = (label: string, name: string, value: string | null | undefined, required = false, disabled = false) => <label>{label}<input name={name} required={required} disabled={disabled} value={value ?? ''} onChange={e => update(name, e.target.value || (required ? '' : null))}/></label>;
   const number = (label: string, name: string, value: number | null | undefined, step = 1, min = 0) => <label>{label}<input name={name} type="number" min={min} step={step} value={value ?? ''} onChange={e => update(name, e.target.value === '' ? null : Number(e.target.value))}/></label>;
   const check = (label: string, name: string, value: boolean | undefined) => <label className="academic-checkbox"><input type="checkbox" checked={value ?? false} onChange={e => update(name, e.target.checked)}/>{label}</label>;
@@ -92,42 +188,60 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
     event.preventDefault(); if (active.current) return;
     active.current = true; setBusy(true); setError('');
     try {
-      const next = record.kind === 'constraints' ? { ...record, locked_assignments: JSON.parse(locks), enrollments: JSON.parse(enrollments) } : record;
-      if (next.kind === 'subjects' && next.required_weekly_minutes == null) throw new Error('Enter required weekly contact minutes.');
-      if (next.kind === 'subjects' && (!next.patterns?.length || next.patterns.some(p => p.durations.reduce((a, b) => a + b, 0) !== next.required_weekly_minutes))) throw new Error('Allowed meeting patterns must total the required weekly contact minutes.');
+      const next = record.kind === 'constraints' ? { ...record, locked_assignments: locks, enrollments: appMode === 'institutional' ? record.enrollments ?? [] : JSON.parse(enrollments) } : record;
+      if (next.kind === 'subjects' && next.required_weekly_minutes == null && !next.curriculum_version_id) throw new Error('Enter required weekly contact minutes.');
+      if (next.kind === 'subjects' && next.required_weekly_minutes != null && (!next.patterns?.length || next.patterns.some(p => p.durations.reduce((a, b) => a + b, 0) !== next.required_weekly_minutes))) throw new Error('Allowed meeting patterns must total the required weekly contact minutes.');
       onSaved(await saveAcademicRecord(snapshot.period.id, { expected_revision: existing?.revision ?? 0, record: next }));
     } catch (e) { setError(e instanceof Error ? e.message : 'Record save failed.'); }
     finally { active.current = false; setBusy(false); }
   }
   const program = record.kind === 'sections' ? academicRecords(snapshot, 'programs').find(p => p.id === record.program_id) : undefined;
+  const catalogProgram = record.kind === 'programs' ? suppliedAcademicProgramCatalog.find(item => item.id === record.id) : undefined;
+  const savedPrograms = academicRecords(snapshot, 'programs');
   const customSection = program?.kind === 'programs' && program.section_policy === 'custom';
   const cdm = record.kind === 'resources' && record.id.startsWith('cdm-');
   return <form className="workspace-card academic-record-form" onSubmit={submit} aria-label={`${existing ? 'Edit' : 'New'} ${kind} record`} aria-busy={busy}>
     <h2>{existing ? 'Edit' : 'New'} {kind === 'faculty' ? 'faculty member' : kind === 'constraints' ? 'scheduling constraints' : kind === 'offerings' ? 'subject offering' : kind.replace(/s$/, '')}</h2>
     <fieldset disabled={busy} className="academic-form-fields">
       {record.kind === 'programs' && <>
-        <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
-        <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label (for example TCP)</option></select></label>
-        <details><summary>Program naming rules</summary><CommaField label="Allowed year levels (optional, comma-separated)" initial={record.allowed_year_levels?.join(', ') ?? ''} onChange={value => update('allowed_year_levels', value.trim() ? comma(value).map(Number) : null)}/><p>No program length or number of sections is assumed.</p></details>
+        {existing && !catalogProgram ? <>
+          <p className="muted">This saved program is not in the current supplied catalog. Its existing identity is preserved; review the source before changing it.</p>
+          <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
+          <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label</option></select></label>
+        </> : <>
+          <label>Program from supplied catalog<select required={!existing} disabled={Boolean(existing)} value={catalogProgram?.id ?? ''} onChange={e => { const selected = suppliedAcademicProgramCatalog.find(item => item.id === e.target.value); if (selected) setRecord({ ...selected, kind: 'programs', active: true }); }}><option value="">Choose a configured program</option>{suppliedAcademicProgramCatalog.filter(item => existing ? item.id === record.id : !savedPrograms.some(saved => saved.id === item.id)).map(item => <option key={item.id} value={item.id}>{item.acronym} · {item.name}</option>)}</select></label>
+          <p className="muted">Only programs not already saved in this period are offered. This repository catalog is supplied data, not yet Registrar-verified; selecting a program does not confirm it is active for this term.</p>
+          {catalogProgram && <dl className="academic-program-preview"><div><dt>Institute</dt><dd>{record.institute}</dd></div><div><dt>Section format</dt><dd>{record.section_policy === 'custom' ? 'Program-specific label' : 'Year level and section letter'}</dd></div></dl>}
+        </>}
       </>}
       {record.kind === 'subjects' && <>
+        <CurriculumSelection record={record} onChange={setRecord}/>
+        {check('Curriculum source or code equivalency reviewed with Registrar', 'curriculum_review_verified', record.curriculum_review_verified)}
+        {text('Registrar/source review reference', 'curriculum_review_reference', record.curriculum_review_reference, record.curriculum_review_verified)}
+        {check('Contact minutes and delivery patterns approved', 'contact_minutes_verified', record.contact_minutes_verified)}
+        {text('Approved minutes/pattern reference', 'contact_minutes_reference', record.contact_minutes_reference, record.contact_minutes_verified)}
+        {!record.curriculum_version_id && <p className="muted">A subject without an exact versioned source requires an approved Registrar exception or equivalency before institutional readiness can pass.</p>}
         <div className="academic-field-grid">{text('Subject code', 'code', record.code, true)}{text('Subject name', 'name', record.name, true)}{number('Required weekly contact minutes', 'required_weekly_minutes', record.required_weekly_minutes, 30, 30)}</div>
-        <p className="muted">180 minutes is a proposed default. Contact minutes are not academic credit units.</p>
+        <p className="muted">{record.curriculum_version_id ? 'No contact-minute default is applied to prospectus courses. Enter the approved minutes and meeting patterns.' : '180 minutes is a proposed default. Contact minutes are not academic credit units.'}</p>
         <ChoiceList label="Associated programs" options={choices('programs')} value={record.program_ids ?? []} onChange={v => update('program_ids', v)}/>
         <Patterns weekly={record.required_weekly_minutes ?? null} value={record.patterns ?? []} onChange={v => update('patterns', v)}/>
-        <details><summary>Classroom requirements</summary>{text('Required room type', 'required_room_type', record.required_room_type)}<CommaField label="Required equipment (comma-separated)" initial={record.required_equipment?.join(', ') ?? ''} onChange={value => update('required_equipment', comma(value))}/>{number('Minimum classroom capacity', 'minimum_capacity', record.minimum_capacity, 1, 1)}</details>
+        <details><summary>Classroom requirements</summary><label>Required room type<select value={record.required_room_type ?? ''} onChange={e => update('required_room_type', e.target.value || null)}><option value="">No specific type</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><CommaField label="Required equipment (comma-separated)" initial={record.required_equipment?.join(', ') ?? ''} onChange={value => update('required_equipment', comma(value))}/>{number('Minimum classroom capacity', 'minimum_capacity', record.minimum_capacity, 1, 1)}</details>
       </>}
       {record.kind === 'sections' && <>
+        <CurriculumSelection record={record} onChange={setRecord}/>
         <label>Program<select required value={record.program_id} onChange={e => { update('program_id', e.target.value); update('custom_label', null); }}><option value="">Choose program</option>{choices('programs').map(p => <option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
-        {customSection ? text('Program-specific section label', 'custom_label', record.custom_label, true) : <div className="academic-field-grid">{number('Year level', 'year_level', record.year_level, 1, 1)}<label>Section identifier<input required pattern="[A-Z]{1,3}" value={record.section_letter ?? ''} placeholder="A" onChange={e => update('section_letter', e.target.value.toUpperCase())}/></label></div>}
+        {customSection ? text('Program-specific section label', 'custom_label', record.custom_label, true) : <div className="academic-field-grid"><label>Year level<select required value={record.year_level ?? ''} onChange={e => update('year_level', e.target.value ? Number(e.target.value) : null)}><option value="">Choose year level</option>{[1, 2, 3, 4].map(year => <option key={year} value={year}>{year}</option>)}</select></label><label>Section identifier<select required value={record.section_letter ?? ''} onChange={e => update('section_letter', e.target.value || null)}><option value="">Choose section</option>{'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => <option key={letter} value={letter}>{letter}</option>)}</select></label></div>}
         <p className="muted">Belongs to {snapshot.period.title}. Section identifiers are separate from stable database IDs.</p>
         <details><summary>Verified student population</summary>{number('Student population', 'population', record.population, 1, 1)}{check('Population is verified', 'population_verified', record.population_verified)}</details>
+        <details><summary>Institutional section verification</summary>{number('Entry cohort year', 'entry_cohort_year', record.entry_cohort_year, 1, 1900)}{check('Cohort-to-curriculum assignment is verified', 'cohort_assignment_verified', record.cohort_assignment_verified)}{check('Official section identity is verified', 'identity_verified', record.identity_verified)}{text('Verification source/reference', 'verification_reference', record.verification_reference, record.cohort_assignment_verified || record.identity_verified || record.population_verified)}</details>
       </>}
       {record.kind === 'faculty' && <>
+        {record.synthetic && <p role="status">Synthetic candidate · cannot satisfy institutional scheduling or publication.</p>}
         <div className="academic-field-grid">{text('Faculty name', 'name', record.name, true)}{text('Institutional faculty identifier (optional)', 'institutional_id', record.institutional_id)}</div>
         <ChoiceList label="Eligible teaching subjects" options={choices('subjects')} value={record.subject_ids ?? []} onChange={v => update('subject_ids', v)}/>
         <WeeklyWindows label="Faculty availability" value={record.availability ?? []} onChange={v => update('availability', v)}/>
         <details><summary>Workload and unavailable times</summary><div className="academic-field-grid">{number('Maximum weekly teaching minutes', 'max_weekly_minutes', record.max_weekly_minutes, 30)}{number('Maximum daily teaching minutes', 'max_daily_minutes', record.max_daily_minutes, 30)}</div><WeeklyWindows label="Faculty unavailable" value={record.unavailable ?? []} onChange={v => update('unavailable', v)}/></details>
+        {check('Subject eligibility is verified', 'eligibility_verified', record.eligibility_verified)}{check('Availability is verified', 'availability_verified', record.availability_verified)}{check('Workload is verified', 'workload_verified', record.workload_verified)}{text('Verification source/reference', 'verification_reference', record.verification_reference, record.eligibility_verified || record.availability_verified || record.workload_verified)}
         {existing && <p>Referenced by {academicRecords(snapshot, 'offerings').filter(o => o.kind === 'offerings' && o.teacher_ids?.includes(record.id)).length} offerings in this period. Manage assignments in Subject Offerings.</p>}
       </>}
       {record.kind === 'resources' && <>
@@ -136,37 +250,46 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         {record.alias && <p>{record.alias}{record.alias_unconfirmed ? ' · unconfirmed label' : ''}</p>}
         <label>Known operational condition<select value={record.condition ?? 'unknown'} onChange={e => update('condition', e.target.value)}><option value="unknown">Unknown / unverified</option><option value="operational">Confirmed operational</option><option value="maintenance">Maintenance / unavailable</option></select></label>
         {check('Explicitly eligible for scheduling', 'schedulable', record.schedulable)}
-        <div className="academic-field-grid">{text('Room type', 'room_type', record.room_type)}{number('Capacity (if supplied)', 'capacity', record.capacity, 1, 1)}</div>
+        <div className="academic-field-grid"><label>Room type<select disabled={cdm} value={record.room_type ?? ''} onChange={e => update('room_type', e.target.value || null)}><option value="">Unspecified</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{number('Capacity (if supplied)', 'capacity', record.capacity, 1, 1)}</div>
+        {cdm && <p className="muted">The inventory designation is a classification only. Facilities must verify the room type, operation, equipment, capacity and availability separately.</p>}
         {check('Room type is verified', 'type_verified', record.type_verified)}{check('Capacity is verified', 'capacity_verified', record.capacity_verified)}
         <CommaField label="Equipment (comma-separated)" initial={record.equipment?.join(', ') ?? ''} onChange={value => update('equipment', comma(value))}/>{check('Equipment list is verified', 'equipment_verified', record.equipment_verified)}
         <label>Verification source / note<textarea rows={3} value={record.verification_note ?? ''} onChange={e => update('verification_note', e.target.value)}/></label>
         <WeeklyWindows label="Resource availability" value={record.availability ?? []} onChange={v => update('availability', v)}/>
+        {check('Availability and blocked windows are verified', 'availability_verified', record.availability_verified)}
         <details><summary>Resource restrictions</summary><WeeklyWindows label="Resource blocked" value={record.blocked ?? []} onChange={v => update('blocked', v)}/><label className="academic-checkbox"><input type="checkbox" checked={record.allowed_program_ids != null} onChange={e => update('allowed_program_ids', e.target.checked ? [] : null)}/>Restrict to selected programs</label>{record.allowed_program_ids != null && <ChoiceList label="Allowed programs" options={choices('programs')} value={record.allowed_program_ids} onChange={v => update('allowed_program_ids', v)}/>}</details>
       </>}
       {record.kind === 'offerings' && <>
         <label>Subject<select required value={record.subject_id} onChange={e => update('subject_id', e.target.value)}><option value="">Choose subject</option>{choices('subjects').map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
         <label>Section<select required value={record.section_id} onChange={e => update('section_id', e.target.value)}><option value="">Choose section</option>{choices('sections').map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
+        <label>Activity type<select value={record.activity_type ?? 'academic_instruction'} onChange={e => { update('activity_type', e.target.value as ActivityType); update('room_ids', []); }}><option value="">Choose activity type</option>{activityOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
         <ChoiceList label="Assigned or eligible faculty" options={choices('faculty')} value={record.teacher_ids ?? []} onChange={v => update('teacher_ids', v)}/>
-        <ChoiceList label="Eligible classrooms" options={choices('resources')} value={record.room_ids ?? []} onChange={v => update('room_ids', v)}/>
+        <ChoiceList label="Activity-compatible schedulable rooms" options={choices('resources')} value={record.room_ids ?? []} onChange={v => update('room_ids', v)}/>
+        <p className="muted">The inventory marks room purpose only. Verification-required rooms cannot pass scheduling readiness; selected rooms do not imply availability.</p>
         <p className="muted">One selected faculty member is assigned for all sessions. Empty selections are incomplete and block readiness. Subject contact-hour patterns apply unless explicitly overridden.</p>
+        <p className="muted">Create an offering only when that subject is confirmed for this term and section. A prospectus requirement does not create a current offering.</p>
+        {check('This is an actual approved offering for this period/section', 'term_offering_verified', record.term_offering_verified)}{text('Term offering source/reference', 'verification_reference', record.verification_reference, record.term_offering_verified || record.override_requirements_verified)}
         <details><summary>Offering-specific requirements</summary>{number('Weekly contact-minute override', 'weekly_minutes_override', record.weekly_minutes_override, 30, 30)}
-          <label className="academic-checkbox"><input type="checkbox" checked={record.patterns_override != null} onChange={e => { const subject = academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id); update('patterns_override', e.target.checked && subject?.kind === 'subjects' ? structuredClone(subject.patterns ?? []) : null); }}/>Override allowed meeting patterns</label>
+          <label className="academic-checkbox"><input type="checkbox" checked={record.patterns_override != null} onChange={e => { const subject = academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id); update('patterns_override', e.target.checked && subject?.kind === 'subjects' ? structuredClone(subject.patterns ?? []) : null); update('override_requirements_verified', false); }}/>Override allowed meeting patterns</label>
           {record.patterns_override != null && <Patterns weekly={record.weekly_minutes_override ?? (academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id) as { required_weekly_minutes?: number } | undefined)?.required_weekly_minutes ?? null} value={record.patterns_override} onChange={v => update('patterns_override', v)}/>}
-          {text('Required room-type override', 'required_room_type', record.required_room_type)}{number('Minimum capacity override', 'minimum_capacity', record.minimum_capacity, 1, 1)}
+          {(record.weekly_minutes_override != null || record.patterns_override != null) && check('Offering-specific minutes and patterns approved', 'override_requirements_verified', record.override_requirements_verified)}
+          <label>Required room-type override<select value={record.required_room_type ?? ''} onChange={e => update('required_room_type', e.target.value || null)}><option value="">No override</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{number('Minimum capacity override', 'minimum_capacity', record.minimum_capacity, 1, 1)}
           <CommaField label="Additional required equipment" initial={record.required_equipment?.join(', ') ?? ''} onChange={value => update('required_equipment', comma(value))}/><CommaField label="Allowed buildings (optional, comma-separated)" initial={record.allowed_buildings?.join(', ') ?? ''} onChange={value => update('allowed_buildings', value.trim() ? comma(value) : null)}/>
         </details>
       </>}
       {record.kind === 'constraints' && <>
         <WeeklyWindows label="Operating hours" value={record.operating_windows ?? []} onChange={v => update('operating_windows', v)}/>
+        {check('Operating windows are approved for this academic period', 'operating_windows_verified', record.operating_windows_verified)}{text('Calendar/rules source/reference', 'verification_reference', record.verification_reference, record.operating_windows_verified)}
         <label>Transition buffer<select value={record.transition_buffer_minutes ?? 0} onChange={e => update('transition_buffer_minutes', Number(e.target.value))}>{[0, 30, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}</select></label>
         {check('I have supplied all intended offerings for this period', 'all_intended_offerings_supplied', record.all_intended_offerings_supplied)}
         <p className="muted">This is an administrator scope declaration, not independent verification of school-wide coverage.</p>
-        <details><summary>Solver, locked assignments and enrollments</summary>
+        <p className="muted">Include shared ICS, IBE and ITE rooms/faculty/locked sessions in this same period. Separate periods are not checked against each other.</p>
+        {check('Shared ICS/IBE/ITE offerings, faculty, rooms and fixed commitments were reviewed in this period', 'shared_scope_verified', record.shared_scope_verified)}{text('Shared-scope review source/reference', 'shared_scope_reference', record.shared_scope_reference, record.shared_scope_verified)}
+        <details><summary>Solver, fixed assignments and enrollment conflicts</summary>
           <label>Solver time limit (seconds)<input type="number" min={1} max={30} step={1} value={record.options?.time_limit_seconds ?? 5} onChange={e => update('options', { ...record.options, time_limit_seconds: Number(e.target.value) })}/></label>
           <label>Deterministic seed<input type="number" min={0} max={2147483647} value={record.options?.seed ?? 42} onChange={e => update('options', { ...record.options, seed: Number(e.target.value) })}/></label>
-          <label>Existing locked assignments JSON<textarea rows={5} value={locks} onChange={e => setLocks(e.target.value)}/></label>
-          <label>Explicit cross-section enrollments JSON<textarea rows={5} value={enrollments} onChange={e => setEnrollments(e.target.value)}/></label>
-          <p className="muted">Use stable record IDs. All references and locked placements are validated. No student enrollment is inferred.</p>
+          <LockedAssignmentsEditor snapshot={snapshot} value={locks} onChange={changeLocks}/>
+          {appMode === 'institutional' ? <p className="muted">Individual student roster entry is not available in this workflow. Enter only a verified aggregate section population; no student records are imported.</p> : <label>Explicit synthetic cross-section enrollment conflicts JSON<textarea rows={5} value={enrollments} onChange={e => setEnrollments(e.target.value)}/><p className="muted">Synthetic test identities only. No institutional roster is inferred or imported.</p></label>}
         </details>
       </>}
       {'active' in record && check('Active in this academic period', 'active', record.active)}

@@ -83,6 +83,10 @@ class FirebaseTokenVerifier:
                 or claims.get("firebase", {}).get("tenant") is not None
             ):
                 raise ValueError("Unexpected verified identity binding")
-            return VerifiedPrincipal(uid=claims["uid"])
+            return VerifiedPrincipal(
+                uid=claims["uid"], email=claims.get("email"),
+                email_verified=claims.get("email_verified") is True,
+                auth_time=claims.get("auth_time"),
+            )
         except (ValueError, KeyError, AttributeError, TypeError) as error:
             raise TokenVerificationError(TokenErrorCode.INVALID) from error

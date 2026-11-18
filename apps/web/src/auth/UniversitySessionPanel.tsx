@@ -1,73 +1,79 @@
+import { useEffect, useRef } from 'react';
+import { Link, useLocation, useInRouterContext } from 'react-router-dom';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { useUniversitySession } from './university-session-context';
-import { Link, useLocation, useInRouterContext } from 'react-router-dom';
+import { workspaceDestination } from './access';
+import type { UserRole } from '../types/ui';
 
-function StudentWorkspaceLink() {
-  const location = useLocation();
-  const target = new URLSearchParams(location.search).get('returnTo');
+const names: Record<UserRole, string> = {
+  student: 'Student',
+  teacher: 'Teacher',
+  administrator: 'Administrator',
+};
+const messages = {
+  checking: ['Checking university access', 'We’re checking your current membership.'],
+  'signed-out': ['Signed out', 'Sign in to continue.'],
+  'role-required': [
+    'Choose a workspace',
+    'Your university has granted access to more than one workspace.',
+  ],
+  'verification-required': [
+    'Email verification required',
+    'Use the link in your inbox to verify your email.',
+  ],
+  expired: ['Session expired', 'Sign out, then sign in again to continue.'],
+  denied: [
+    'University access is not active',
+    'If you have a university account, check your setup or contact your university.',
+  ],
+  unavailable: ['Access check unavailable', 'Try again to confirm your current membership.'],
+  offline: ['You are offline', 'Reconnect to check your university access.'],
+} as const;
+
+function WorkspaceLink({ role }: { role: UserRole }) {
+  const { search } = useLocation();
   return (
     <Link
       className="button"
-      to={
-        target && /^\/student\/(dashboard|schedule|calendar|rooms)(\?|$)/.test(target)
-          ? target
-          : '/student/dashboard'
-      }
+      to={workspaceDestination(role, new URLSearchParams(search).get('returnTo'))}
     >
-      Open Student workspace
+      Open {names[role]} workspace
     </Link>
   );
 }
-
-const roles = [
-  ['student', 'Student'],
-  ['teacher', 'Teacher'],
-  ['administrator', 'Administrator'],
-] as const;
-const messages = {
-  checking: ['Checking university access', 'Verifying your identity and current membership.'],
-  'signed-out': ['Signed out', 'Sign in below to check your current university access.'],
-  'role-required': [
-    'Choose a role to verify',
-    'Only roles granted by your university can be used.',
-  ],
-  denied: [
-    'Current membership required',
-    'Access could not be verified. Check another role or contact your university.',
-  ],
-  unavailable: [
-    'Access check unavailable',
-    'Access is hidden until your current membership can be checked. Retry or sign out.',
-  ],
-  offline: [
-    'You are offline',
-    'Access is hidden until your connection returns and current membership is checked again.',
-  ],
-} as const;
 
 export function UniversitySessionPanel() {
   const inRouter = useInRouterContext();
   const { state, refresh, signOut } = useUniversitySession();
   const section = useRef<HTMLElement>(null);
   const exiting = useRef(false);
+  const choosing = useRef(false);
   useEffect(() => {
-    if (exiting.current && state.status === 'signed-out') {
+    if (
+      (exiting.current && state.status === 'signed-out') ||
+      (choosing.current && state.status !== 'checking')
+    ) {
       section.current?.focus();
       exiting.current = false;
+      choosing.current = false;
     }
   }, [state.status]);
-  const checking = state.status === 'checking';
-  const roleDisabled = checking || state.status === 'offline';
-  const authorized = state.status === 'authorized';
-  const [title, message] = authorized
-    ? [
-        `${roles.find(([role]) => role === state.membership.role)?.[1]} membership verified`,
-        state.membership.role === 'student'
-          ? 'Your identity and current Student role are verified.'
-          : 'Your identity and current role are verified. Connected schedules are not available yet.',
-      ]
-    : messages[state.status];
+
+  const roles =
+    state.status === 'role-required'
+      ? state.availableRoles
+      : state.status === 'authorized'
+        ? state.membership.available_roles
+        : undefined;
+  const [title, message] =
+    state.status === 'authorized'
+      ? [
+          names[state.membership.role] + ' membership verified',
+          'Your identity and current university role are verified.',
+        ]
+      : messages[state.status];
+
   return (
     <section
       className="university-session"
@@ -75,42 +81,35 @@ export function UniversitySessionPanel() {
       ref={section}
       tabIndex={-1}
     >
-      <Alert
-        tone={authorized ? 'success' : state.status === 'denied' ? 'danger' : 'info'}
-        title={title}
-      >
+      <Alert tone={state.status === 'authorized' ? 'success' : 'info'} title={title}>
         {message}
       </Alert>
-      {authorized && state.membership.role === 'student' && inRouter && <StudentWorkspaceLink />}
-      {state.status !== 'signed-out' && (
-        <fieldset className="university-session__roles" aria-busy={checking}>
-          <legend>Check a workspace role</legend>
-          {roles.map(([role, label]) => (
+      {state.status === 'authorized' && inRouter && <WorkspaceLink role={state.membership.role} />}
+      {roles && roles.length > 1 && (
+        <fieldset className="university-session__roles">
+          <legend>Available workspaces</legend>
+          {roles.map((role) => (
             <Button
               key={role}
               variant="secondary"
-              aria-pressed={authorized && state.membership.role === role}
-              aria-disabled={roleDisabled}
+              aria-pressed={state.status === 'authorized' && state.membership.role === role}
               onClick={() => {
-                if (!roleDisabled) refresh(role);
+                choosing.current = true;
+                refresh(role);
               }}
             >
-              Check {label} access
+              {names[role]}
             </Button>
           ))}
         </fieldset>
       )}
       {state.status !== 'signed-out' && (
         <div className="university-session__actions">
-          <Button
-            variant="secondary"
-            aria-disabled={checking}
-            onClick={() => {
-              if (!checking) refresh();
-            }}
-          >
-            Retry access check
-          </Button>
+          {(state.status === 'denied' || state.status === 'unavailable') && (
+            <Button variant="secondary" onClick={() => refresh()}>
+              Retry access check
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={() => {
@@ -125,4 +124,3 @@ export function UniversitySessionPanel() {
     </section>
   );
 }
-import { useEffect, useRef } from 'react';

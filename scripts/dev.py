@@ -31,6 +31,19 @@ def main():
     children = []
     stopped = Event()
 
+    # A worktree-local .venv may contain editable installs that still point at the
+    # primary checkout. Prefer this checkout's shared packages for every child service.
+    package_paths = [
+        ROOT / "packages" / "api-contracts",
+        ROOT / "packages" / "persistence",
+        ROOT,
+    ]
+    inherited_pythonpath = os.environ.get("PYTHONPATH")
+    pythonpath_entries = [str(path) for path in package_paths]
+    if inherited_pythonpath:
+        pythonpath_entries.append(inherited_pythonpath)
+    pythonpath = os.pathsep.join(pythonpath_entries)
+
     def commands():
         if sys.stdin.readline().strip() == "stop":
             stopped.set()
@@ -38,6 +51,8 @@ def main():
     env = {
         **os.environ,
         "CLASSSYNC_ENV": "development",
+        "PYTHONPATH": pythonpath,
+        "VITE_CLASSSYNC_MODE": "sandbox",
         "ENABLE_SCHEDULING_SANDBOX": "true",
         "ACADEMIC_SERVICE_URL": f"http://127.0.0.1:{args.base_port + 1}",
         "SCHEDULING_SERVICE_URL": f"http://127.0.0.1:{args.base_port + 2}",

@@ -152,7 +152,7 @@ describe('UI-02 operations dashboards', () => {
       </MemoryRouter>,
     );
     const resources = screen.getByRole('region', { name: 'Classroom resources' });
-    expect(within(resources).getByText('59')).toBeInTheDocument();
+    expect(within(resources).getByText('53')).toBeInTheDocument();
     expect(within(resources).queryByText('Maintenance')).not.toBeInTheDocument();
     expect(within(resources).queryByText('LAB-04')).not.toBeInTheDocument();
     expect(

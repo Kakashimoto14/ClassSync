@@ -401,6 +401,8 @@ textarea {
   display: flex;
   gap: var(--space-2);
   min-height: var(--header-height);
+  height: var(--header-height);
+  max-height: var(--header-height);
   padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px
     max(16px, env(safe-area-inset-left));
   background: var(--surface);
@@ -408,6 +410,7 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 5;
+  overflow: visible;
 }
 .topbar-start {
   display: flex;
@@ -2265,9 +2268,12 @@ tr:hover td {
     overflow-y: auto;
     min-height: 0;
     overscroll-behavior: contain;
-    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(135 46 73 / 22%) transparent;
     padding: 4px 4px 16px;
   }
+  .sidebar-navigation::-webkit-scrollbar { width: 5px; }
+  .sidebar-navigation::-webkit-scrollbar-thumb { background: rgb(135 46 73 / 22%); border-radius: 999px; }
   .sidebar .nav-item:hover,
   .sidebar summary:hover {
     background: var(--primary-soft);

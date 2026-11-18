@@ -1,6 +1,20 @@
 {
   "GenerationInput": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -77,6 +91,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -154,9 +194,27 @@
             "title": "Subject Name",
             "type": "string"
           },
+          "subject_code": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subject Code"
+          },
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -390,6 +448,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -592,6 +666,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -1154,6 +1233,20 @@
   },
   "ReadinessResult": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -1268,6 +1361,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -1474,9 +1593,27 @@
             "title": "Subject Name",
             "type": "string"
           },
+          "subject_code": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subject Code"
+          },
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -1710,6 +1847,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -1912,6 +2065,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -2026,6 +2184,20 @@
   },
   "ValidationInput": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -2102,6 +2274,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -2308,9 +2506,27 @@
             "title": "Subject Name",
             "type": "string"
           },
+          "subject_code": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subject Code"
+          },
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -2544,6 +2760,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -2746,6 +2978,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -2996,6 +3233,20 @@
   },
   "DraftDetail": {
     "$defs": {
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -3134,6 +3385,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -3462,9 +3739,27 @@
             "title": "Subject Name",
             "type": "string"
           },
+          "subject_code": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subject Code"
+          },
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -3697,6 +3992,22 @@
             "default": false,
             "title": "Type Verified",
             "type": "boolean"
+          },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
           },
           "capacity": {
             "anyOf": [
@@ -3958,6 +4269,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -4508,6 +4824,42 @@
             "default": false,
             "title": "All Intended Offerings Supplied",
             "type": "boolean"
+          },
+          "operating_windows_verified": {
+            "default": false,
+            "title": "Operating Windows Verified",
+            "type": "boolean"
+          },
+          "shared_scope_verified": {
+            "default": false,
+            "title": "Shared Scope Verified",
+            "type": "boolean"
+          },
+          "shared_scope_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Shared Scope Reference"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "title": "AcademicConstraints",
@@ -4525,6 +4877,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -4606,6 +4963,34 @@
             ],
             "default": null,
             "title": "Institutional Id"
+          },
+          "eligibility_verified": {
+            "default": false,
+            "title": "Eligibility Verified",
+            "type": "boolean"
+          },
+          "availability_verified": {
+            "default": false,
+            "title": "Availability Verified",
+            "type": "boolean"
+          },
+          "workload_verified": {
+            "default": false,
+            "title": "Workload Verified",
+            "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -4642,6 +5027,10 @@
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "teacher_ids": {
             "items": {
@@ -4733,6 +5122,29 @@
             ],
             "default": null,
             "title": "Allowed Buildings"
+          },
+          "term_offering_verified": {
+            "default": false,
+            "title": "Term Offering Verified",
+            "type": "boolean"
+          },
+          "override_requirements_verified": {
+            "default": false,
+            "title": "Override Requirements Verified",
+            "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -4764,7 +5176,8 @@
           "source": {
             "enum": [
               "development-entered",
-              "institutional"
+              "institutional",
+              "synthetic-review"
             ],
             "title": "Source",
             "type": "string"
@@ -4948,6 +5361,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -5023,6 +5452,11 @@
             "maxLength": 1000,
             "title": "Verification Note",
             "type": "string"
+          },
+          "availability_verified": {
+            "default": false,
+            "title": "Availability Verified",
+            "type": "boolean"
           },
           "alias": {
             "anyOf": [
@@ -5124,6 +5558,42 @@
             "title": "Period Id",
             "type": "string"
           },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
+          },
+          "cohort_assignment_verified": {
+            "default": false,
+            "title": "Cohort Assignment Verified",
+            "type": "boolean"
+          },
+          "identity_verified": {
+            "default": false,
+            "title": "Identity Verified",
+            "type": "boolean"
+          },
           "population": {
             "anyOf": [
               {
@@ -5141,6 +5611,19 @@
             "default": false,
             "title": "Population Verified",
             "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -5182,6 +5665,66 @@
             "minLength": 1,
             "title": "Name",
             "type": "string"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
+          },
+          "curriculum_course_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Course Id"
+          },
+          "curriculum_review_verified": {
+            "default": false,
+            "title": "Curriculum Review Verified",
+            "type": "boolean"
+          },
+          "curriculum_review_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Review Reference"
+          },
+          "contact_minutes_verified": {
+            "default": false,
+            "title": "Contact Minutes Verified",
+            "type": "boolean"
+          },
+          "contact_minutes_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Contact Minutes Reference"
           },
           "year_level": {
             "anyOf": [
@@ -5292,6 +5835,20 @@
         ],
         "title": "AcademicSubject",
         "type": "object"
+      },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
       },
       "Assignment": {
         "additionalProperties": false,
@@ -5448,6 +6005,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -6021,7 +6604,8 @@
           "source": {
             "enum": [
               "development-entered",
-              "institutional"
+              "institutional",
+              "synthetic-review"
             ],
             "title": "Source",
             "type": "string"
@@ -6047,6 +6631,20 @@
         ],
         "title": "AcademicPeriod",
         "type": "object"
+      },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
       },
       "Assignment": {
         "additionalProperties": false,
@@ -6203,6 +6801,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [
@@ -6409,9 +7033,27 @@
             "title": "Subject Name",
             "type": "string"
           },
+          "subject_code": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subject Code"
+          },
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "eligible_teacher_ids": {
             "items": {
@@ -6685,6 +7327,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -6917,6 +7575,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -7204,7 +7867,8 @@
           "source": {
             "enum": [
               "development-entered",
-              "institutional"
+              "institutional",
+              "synthetic-review"
             ],
             "title": "Source",
             "type": "string"
@@ -7632,6 +8296,42 @@
             "default": false,
             "title": "All Intended Offerings Supplied",
             "type": "boolean"
+          },
+          "operating_windows_verified": {
+            "default": false,
+            "title": "Operating Windows Verified",
+            "type": "boolean"
+          },
+          "shared_scope_verified": {
+            "default": false,
+            "title": "Shared Scope Verified",
+            "type": "boolean"
+          },
+          "shared_scope_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Shared Scope Reference"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "title": "AcademicConstraints",
@@ -7649,6 +8349,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "synthetic": {
+            "default": false,
+            "title": "Synthetic",
+            "type": "boolean"
           },
           "availability": {
             "items": {
@@ -7730,6 +8435,34 @@
             ],
             "default": null,
             "title": "Institutional Id"
+          },
+          "eligibility_verified": {
+            "default": false,
+            "title": "Eligibility Verified",
+            "type": "boolean"
+          },
+          "availability_verified": {
+            "default": false,
+            "title": "Availability Verified",
+            "type": "boolean"
+          },
+          "workload_verified": {
+            "default": false,
+            "title": "Workload Verified",
+            "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -7766,6 +8499,10 @@
           "section_id": {
             "title": "Section Id",
             "type": "string"
+          },
+          "activity_type": {
+            "$ref": "#/$defs/ActivityType",
+            "default": "academic_instruction"
           },
           "teacher_ids": {
             "items": {
@@ -7857,6 +8594,29 @@
             ],
             "default": null,
             "title": "Allowed Buildings"
+          },
+          "term_offering_verified": {
+            "default": false,
+            "title": "Term Offering Verified",
+            "type": "boolean"
+          },
+          "override_requirements_verified": {
+            "default": false,
+            "title": "Override Requirements Verified",
+            "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -8023,6 +8783,22 @@
             "title": "Type Verified",
             "type": "boolean"
           },
+          "allowed_activity_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/ActivityType"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Allowed Activity Types"
+          },
           "capacity": {
             "anyOf": [
               {
@@ -8098,6 +8874,11 @@
             "maxLength": 1000,
             "title": "Verification Note",
             "type": "string"
+          },
+          "availability_verified": {
+            "default": false,
+            "title": "Availability Verified",
+            "type": "boolean"
           },
           "alias": {
             "anyOf": [
@@ -8199,6 +8980,42 @@
             "title": "Period Id",
             "type": "string"
           },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
+          },
+          "cohort_assignment_verified": {
+            "default": false,
+            "title": "Cohort Assignment Verified",
+            "type": "boolean"
+          },
+          "identity_verified": {
+            "default": false,
+            "title": "Identity Verified",
+            "type": "boolean"
+          },
           "population": {
             "anyOf": [
               {
@@ -8216,6 +9033,19 @@
             "default": false,
             "title": "Population Verified",
             "type": "boolean"
+          },
+          "verification_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verification Reference"
           }
         },
         "required": [
@@ -8257,6 +9087,66 @@
             "minLength": 1,
             "title": "Name",
             "type": "string"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
+          },
+          "curriculum_course_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Course Id"
+          },
+          "curriculum_review_verified": {
+            "default": false,
+            "title": "Curriculum Review Verified",
+            "type": "boolean"
+          },
+          "curriculum_review_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Review Reference"
+          },
+          "contact_minutes_verified": {
+            "default": false,
+            "title": "Contact Minutes Verified",
+            "type": "boolean"
+          },
+          "contact_minutes_reference": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Contact Minutes Reference"
           },
           "year_level": {
             "anyOf": [
@@ -8368,6 +9258,20 @@
         "title": "AcademicSubject",
         "type": "object"
       },
+      "ActivityType": {
+        "enum": [
+          "academic_instruction",
+          "computer_lab_instruction",
+          "bse_science_instruction",
+          "pahfit",
+          "sports",
+          "assembly",
+          "rotc",
+          "special_booking"
+        ],
+        "title": "ActivityType",
+        "type": "string"
+      },
       "Assignment": {
         "additionalProperties": false,
         "properties": {
@@ -8444,6 +9348,32 @@
             "minItems": 1,
             "title": "Offering Ids",
             "type": "array"
+          },
+          "entry_cohort_year": {
+            "anyOf": [
+              {
+                "maximum": 2200,
+                "minimum": 1900,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entry Cohort Year"
+          },
+          "curriculum_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curriculum Version Id"
           }
         },
         "required": [

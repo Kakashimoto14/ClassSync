@@ -1,5 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  AlertCircle,
+  BookOpen,
+  CalendarClock,
+  CheckCircle2,
+  ClipboardList,
+  DoorOpen,
+  RefreshCw,
+  UsersRound,
+} from 'lucide-react';
 import {
   checkAcademicReadiness,
   listAcademicPeriods,
@@ -7,7 +17,6 @@ import {
 } from '../lib/academic-api';
 import {
   listSchedulingDrafts,
-  schedulingSandboxEnabled,
   type DraftList,
 } from '../lib/scheduling-api';
 import { timetableRequest } from '../lib/publication-api';
@@ -19,6 +28,8 @@ import {
   type WorkspacePeriod,
 } from '../lib/workspace-context';
 import { presentationData, presentationOnlyBuild } from '../lib/presentation-sample';
+import { appMode } from '../config/runtime-config';
+import { readinessActionForIssue } from '../lib/readiness-navigation';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 
@@ -89,12 +100,9 @@ function ConnectedOverview() {
     [publicationError, setPublicationError] = useState(false);
   const [error, setError] = useState(''),
     [loading, setLoading] = useState(true),
+    [checking, setChecking] = useState(false),
     [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!schedulingSandboxEnabled) {
-      setLoading(false);
-      return;
-    }
     let ignore = false;
     setLoading(true);
     setError('');
@@ -117,21 +125,33 @@ function ConnectedOverview() {
     };
   }, [retry]);
   useEffect(() => {
-    if (!period || !schedulingSandboxEnabled) return;
+    if (!period) {
+      setChecked(undefined);
+      setPublished(undefined);
+      setChecking(false);
+      return;
+    }
     let ignore = false;
+    setChecking(true);
     setChecked(undefined);
     setError('');
     setPublished(undefined);
     setPublicationError(false);
     rememberWorkspace('administrator', { ...readWorkspace('administrator'), period });
-    checkAcademicReadiness(period)
+    const readinessRequest = checkAcademicReadiness(period);
+    readinessRequest
       .then((v) => {
         if (!ignore) setChecked(v);
       })
       .catch((e) => {
         if (!ignore) setError(e.message);
+      })
+      .finally(() => {
+        if (!ignore) setChecking(false);
       });
-    timetableRequest<{ periods: WorkspacePeriod[] }>('sandbox/periods')
+    timetableRequest<{ periods: WorkspacePeriod[] }>(
+      appMode === 'sandbox' ? 'sandbox/periods' : 'periods',
+    )
       .then((v) => {
         if (!ignore) setPublished(v.periods);
       })
@@ -142,197 +162,280 @@ function ConnectedOverview() {
       ignore = true;
     };
   }, [period, retry]);
-  const selected = periods.find((p) => p.id === period),
-    latest = drafts?.drafts.find((d) => d.period_id === period);
+  const selected = periods.find((p) => p.id === period);
+  const currentReadiness = checked?.period.id === period ? checked : undefined;
+  const periodDrafts = useMemo(
+    () =>
+      (drafts?.drafts ?? [])
+        .filter((draft) => draft.period_id === period)
+        .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)),
+    [drafts, period],
+  );
+  const latest = periodDrafts[0];
   const currentDraft =
-    latest?.data_version === `academic:${period}:revision:${checked?.period.revision}` &&
-    latest.validated;
+    latest?.data_version === `academic:${period}:revision:${currentReadiness?.period.revision}` &&
+    latest.validated === true;
+  const blockers = currentReadiness?.issues.filter((issue) => issue.severity === 'blocking') ?? [];
+  const warnings = currentReadiness?.issues.filter((issue) => issue.severity !== 'blocking') ?? [];
+  const shownBlockers = blockers.slice(0, 3);
+  const publication = published?.find((item) => item.id === period && (item.revision ?? 0) > 0);
+  const periodQuery = period ? `?period=${encodeURIComponent(period)}` : '';
   const action = !period
-    ? { label: 'Set up academic data', to: '/admin/academic' }
-    : !checked?.ready
-      ? {
-          label: 'Review Requirements',
-          to: `/admin/ai-scheduling?period=${encodeURIComponent(period)}`,
-        }
-      : currentDraft
-        ? {
-            label: 'Review Timetable',
-            to: `/admin/schedule-manager/drafts/${latest!.id}?source=academic`,
-          }
-        : {
-            label: 'Generate Weekly Schedule',
-            to: `/admin/ai-scheduling?period=${encodeURIComponent(period)}`,
-          };
-  const issues = checked?.issues.filter((i) => i.severity === 'blocking').slice(0, 3) ?? [];
-  const publication = published?.find((p) => p.id === period && (p.revision ?? 0) > 0);
-  if (!schedulingSandboxEnabled)
-    return (
-      <section className="workspace-card">
-        <h1>Scheduling overview</h1>
-        <p>
-          The connected scheduling workspace requires verified Administrator access. This preview
-          does not grant backend permissions.
-        </p>
-      </section>
-    );
+    ? { label: 'Set up academic period', to: '/admin/academic' }
+    : !currentReadiness
+      ? null
+      : !currentReadiness.ready
+        ? blockers[0]
+          ? {
+              label: 'Resolve next blocker',
+              to: readinessActionForIssue(blockers[0], period).to,
+            }
+          : { label: 'Review scheduling readiness', to: `/admin/ai-scheduling${periodQuery}` }
+        : currentDraft
+          ? {
+              label: 'Review saved draft',
+              to: `/admin/schedule-manager/drafts/${encodeURIComponent(latest!.id)}?source=academic`,
+            }
+          : { label: 'Generate weekly schedule', to: `/admin/ai-scheduling${periodQuery}` };
+  const workspaceLabel =
+    appMode === 'institutional'
+      ? 'Institutional workspace'
+      : appMode === 'sandbox'
+        ? 'Development sandbox'
+        : 'Read-only presentation';
+
   return (
-    <section className="admin-overview">
-      <div className="ux-section-heading">
-        <h1>Scheduling overview</h1>
-        <span className="source-label">Local academic sandbox</span>
-      </div>
-      <label className="admin-period-selector">
-        Academic period
-        <select value={period} onChange={(e) => setPeriod(e.target.value)}>
-          <option value="">Choose a period</option>
-          {periods.map((p) => (
-            <option value={p.id} key={p.id}>
-              {periodLabel(p)}
-            </option>
-          ))}
-        </select>
-      </label>
-      {loading && <p role="status">Loading scheduling context…</p>}
+    <section className="admin-overview admin-command-center" aria-labelledby="admin-dashboard-title">
+      <header className="admin-command-header">
+        <div className="admin-command-title">
+          <h1 id="admin-dashboard-title">Scheduling overview</h1>
+          <StatusBadge tone={appMode === 'institutional' ? 'success' : 'neutral'}>
+            {workspaceLabel}
+          </StatusBadge>
+        </div>
+        <div className="admin-command-controls">
+          <label className="admin-period-selector">
+            <span className="visually-hidden">Academic period</span>
+            <select
+              aria-label="Academic period"
+              value={period}
+              disabled={loading || periods.length === 0}
+              onChange={(event) => setPeriod(event.target.value)}
+            >
+              <option value="">Choose an academic period</option>
+              {periods.map((item) => (
+                <option value={item.id} key={item.id}>
+                  {periodLabel(item)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button
+            variant="secondary"
+            className="admin-refresh-button"
+            aria-label="Refresh scheduling readiness"
+            title="Refresh scheduling data"
+            disabled={loading || checking}
+            onClick={() => setRetry((value) => value + 1)}
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+            <span>Refresh</span>
+          </Button>
+        </div>
+      </header>
+
+      {loading && (
+        <div className="admin-command-skeleton" role="status" aria-label="Loading scheduling data">
+          <span className="visually-hidden">Loading scheduling data…</span>
+          <div className="admin-kpi-ribbon" aria-hidden="true">
+            {[0, 1, 2, 3].map((item) => <div className="admin-kpi-skeleton" key={item} />)}
+          </div>
+          <div className="admin-workflow-skeleton" aria-hidden="true" />
+        </div>
+      )}
+
       {error && (
-        <div role="alert" className="workspace-card">
-          <h2>Scheduling status unavailable</h2>
-          <p>{error}</p>
-          <Button variant="secondary" onClick={() => setRetry((n) => n + 1)}>
+        <div role="alert" className="workspace-card admin-command-error">
+          <div>
+            <h2>Scheduling data is unavailable</h2>
+            <p>{error}</p>
+          </div>
+          <Button variant="secondary" onClick={() => setRetry((value) => value + 1)}>
             Retry
           </Button>
         </div>
       )}
-      <div className="admin-overview-content">
-        {!loading && !error && (!period || checked) && (
-          <article className="workspace-card admin-next-step">
-            <StatusBadge tone={checked?.ready ? 'success' : 'warning'}>
-              {checked
-                ? checked.ready
-                  ? 'Ready to generate'
-                  : 'Requirements need attention'
-                : 'Setup required'}
-            </StatusBadge>
-            <h2>{action.label}</h2>
-            <p>
-              {selected ? periodLabel(selected) : 'Choose or create an academic period to begin.'}
-            </p>
-            <Link className="button" to={action.to}>
-              {action.label}
+
+      {!loading && !error && period && currentReadiness && (
+        <>
+          <nav className="admin-kpi-ribbon" aria-label="Academic period summary">
+            <Link className="admin-kpi-card" to={`/admin/sections${periodQuery}`}>
+              <span className="admin-kpi-icon"><UsersRound size={18} aria-hidden="true" /></span>
+              <span className="admin-kpi-copy"><span>Active sections</span><strong>{currentReadiness.sections}</strong><small>Configured this period</small></span>
             </Link>
-            {currentDraft && (
-              <Link
-                className="button button--secondary"
-                to={`/admin/ai-scheduling?period=${period}`}
-              >
-                Generate another candidate
-              </Link>
-            )}
-          </article>
-        )}
-        {period && !checked && !error && !loading && (
-          <p role="status">Checking academic readiness…</p>
-        )}
-        {issues.length > 0 && (
-          <section className="workspace-card admin-attention">
-            <h2>Needs attention</h2>
-            <ul>
-              {issues.map((i, n) => (
-                <li key={n}>
-                  <p>{i.message}</p>
-                  <Link
-                    className="button button--secondary"
-                    to={`/admin/ai-scheduling?period=${period}#readiness-issues`}
-                  >
-                    Review requirement
+            <Link className="admin-kpi-card" to={`/admin/offerings${periodQuery}`}>
+              <span className="admin-kpi-icon"><BookOpen size={18} aria-hidden="true" /></span>
+              <span className="admin-kpi-copy"><span>Subject offerings</span><strong>{currentReadiness.offerings}</strong><small>{currentReadiness.offerings ? 'Saved for this period' : 'Setup needed'}</small></span>
+            </Link>
+            <Link className="admin-kpi-card" to={`/admin/academic/resources${periodQuery}`}>
+              <span className="admin-kpi-icon"><DoorOpen size={18} aria-hidden="true" /></span>
+              <span className="admin-kpi-copy"><span>Schedulable spaces</span><strong>{currentReadiness.eligible_resources}</strong><small>Candidate count · suitability checked per offering</small></span>
+            </Link>
+            <Link className="admin-kpi-card" to="/admin/schedule-manager/drafts?source=academic">
+              <span className="admin-kpi-icon"><ClipboardList size={18} aria-hidden="true" /></span>
+              <span className="admin-kpi-copy"><span>Saved drafts</span><strong>{periodDrafts.length}</strong><small>Recent results · open draft list</small></span>
+            </Link>
+          </nav>
+
+          <div className="admin-command-body">
+            <section className="workspace-card admin-readiness-card" aria-labelledby="admin-readiness-title">
+              <div className="admin-card-heading">
+                <div>
+                  <p className="admin-card-eyebrow">{selected ? periodLabel(selected) : 'Selected academic period'}</p>
+                  <h2 id="admin-readiness-title">Academic readiness</h2>
+                </div>
+                <StatusBadge tone={currentReadiness.ready ? 'success' : 'warning'}>
+                  {currentReadiness.ready ? 'Ready to generate' : `${blockers.length} ${blockers.length === 1 ? 'blocker' : 'blockers'}`}
+                </StatusBadge>
+              </div>
+              <div className="admin-readiness-summary">
+                <p>
+                  {currentReadiness.ready
+                    ? 'The saved inputs pass current readiness checks. Generation creates a draft for review.'
+                    : 'Resolve the blocking items below before generating a schedule.'}
+                </p>
+                {action && <Link className="button" to={action.to}>{action.label}</Link>}
+                {currentDraft && (
+                  <Link className="admin-secondary-action" to={`/admin/ai-scheduling${periodQuery}`}>
+                    Generate another candidate
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-        {checked && (
-          <section className="workspace-card admin-status">
-            <h2>Academic scope</h2>
-            <dl className="admin-status-list">
-              <div>
-                <dt>Active sections</dt>
-                <dd>{checked.sections}</dd>
+                )}
               </div>
-              <div>
-                <dt>Subject offerings</dt>
-                <dd>{checked.offerings}</dd>
-              </div>
-              <div>
-                <dt>Classroom candidates</dt>
-                <dd>{checked.eligible_resources}</dd>
-              </div>
-              <div>
-                <dt>{drafts?.has_more ? 'Recent matching drafts' : 'Saved drafts'}</dt>
-                <dd>{drafts?.drafts.filter((d) => d.period_id === period).length ?? 0}</dd>
-              </div>
-            </dl>
-            <p className="muted">Room candidates still require per-offering suitability checks.</p>
-            <p>
-              {publicationError
-                ? 'Publication status unavailable'
-                : !published
-                  ? 'Checking publication…'
-                  : publication
-                    ? `Published sample revision ${publication.revision}`
-                    : 'No published version for this period'}
-            </p>
-          </section>
-        )}
-        {drafts && !error && (
-          <section className="workspace-card admin-activity">
-            <h2>Recent scheduling activity</h2>
-            {latest ? (
-              <>
-                <p className="source-label">Latest saved draft · Unpublished</p>
-                <h3>{latest.title}</h3>
-                <p>
-                  {new Date(latest.created_at).toLocaleString('en', {
-                    timeZone: 'Asia/Manila',
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })}{' '}
-                  · {latest.session_count} sessions
-                </p>
-                <p>
-                  {latest.validated
-                    ? `Snapshot validated · ${latest.hard_conflict_count} hard conflicts`
-                    : 'Validation unavailable'}
-                </p>
-                <Link
-                  className="button button--secondary"
-                  to={`/admin/schedule-manager/drafts/${latest.id}?source=academic`}
-                >
-                  Open saved draft
-                </Link>
-              </>
-            ) : (
-              <p>No saved draft recorded for this selected period.</p>
-            )}
-          </section>
-        )}
-      </div>
-      <nav className="admin-tool-links" aria-label="Scheduling tools">
-        <Link className="button button--secondary" to="/admin/academic">
-          Academic Setup
-        </Link>
-        <Link
-          className="button button--secondary"
-          to="/admin/schedule-manager/drafts?source=academic"
-        >
-          Saved Drafts
-        </Link>
-        <Link className="button button--secondary" to="/admin/calendar">
-          Published Timetables
-        </Link>
-        <Link className="button button--secondary" to="/admin/conflicts">
-          Conflict Center
-        </Link>
-      </nav>
+
+              {blockers.length > 0 ? (
+                <div className="admin-readiness-list" aria-label="Blocking readiness issues">
+                  {shownBlockers.map((issue, index) => {
+                    const destination = readinessActionForIssue(issue, period);
+                    return (
+                      <div className="admin-readiness-row" key={`${issue.code}-${issue.record_id ?? index}`}>
+                        <AlertCircle size={18} aria-hidden="true" />
+                        <p>{issue.message}</p>
+                        <Link to={destination.to}>{destination.label}<span aria-hidden="true"> →</span></Link>
+                      </div>
+                    );
+                  })}
+                  {blockers.length > shownBlockers.length && (
+                    <details className="admin-more-issues">
+                      <summary>Show {blockers.length - shownBlockers.length} more blockers</summary>
+                      {blockers.slice(shownBlockers.length).map((issue, index) => {
+                        const destination = readinessActionForIssue(issue, period);
+                        return (
+                          <div className="admin-readiness-row" key={`${issue.code}-${issue.record_id ?? index}`}>
+                            <AlertCircle size={18} aria-hidden="true" />
+                            <p>{issue.message}</p>
+                            <Link to={destination.to}>{destination.label}<span aria-hidden="true"> →</span></Link>
+                          </div>
+                        );
+                      })}
+                    </details>
+                  )}
+                </div>
+              ) : (
+                <div className="admin-readiness-complete" role="status">
+                  <CheckCircle2 size={19} aria-hidden="true" />
+                  <span>No blocking requirements. Review any data notes before generation.</span>
+                </div>
+              )}
+              {warnings.length > 0 && (
+                <details className="admin-readiness-warnings">
+                  <summary>{warnings.length} {warnings.length === 1 ? 'data note' : 'data notes'}</summary>
+                  <ul>{warnings.map((issue, index) => <li key={`${issue.code}-${issue.record_id ?? index}`}>{issue.message}</li>)}</ul>
+                </details>
+              )}
+            </section>
+
+            <aside className="admin-command-aside" aria-label="Publication and draft activity">
+              <section className="workspace-card admin-publication-card" aria-labelledby="admin-publication-title">
+                <div className="admin-card-heading">
+                  <div>
+                    <p className="admin-card-eyebrow">Publication</p>
+                    <h2 id="admin-publication-title">Published timetable</h2>
+                  </div>
+                  <StatusBadge tone={publicationError ? 'warning' : publication ? 'success' : 'neutral'}>
+                    {publicationError
+                      ? 'Unavailable'
+                      : !published
+                        ? 'Checking'
+                        : publication
+                          ? `Published · Rev ${publication.revision}`
+                          : 'Unpublished'}
+                  </StatusBadge>
+                </div>
+                <p>{selected ? periodLabel(selected) : periodLabel(currentReadiness.period)}</p>
+                {publicationError ? (
+                  <p className="admin-state-note" role="status">Publication status is unavailable.</p>
+                ) : !published ? (
+                  <p className="admin-state-note" role="status">Checking publication status…</p>
+                ) : !publication ? (
+                  <p className="admin-state-note">No published timetable is recorded for this period.</p>
+                ) : null}
+                <Link className="admin-inline-action" to={`/admin/calendar${periodQuery}`}>View timetable <span aria-hidden="true">→</span></Link>
+              </section>
+
+              <section className="workspace-card admin-activity-card" aria-labelledby="admin-activity-title">
+                <div className="admin-card-heading">
+                  <div>
+                    <p className="admin-card-eyebrow">Recent activity</p>
+                    <h2 id="admin-activity-title">Latest saved draft</h2>
+                  </div>
+                  <CalendarClock size={19} aria-hidden="true" />
+                </div>
+                {checking && !currentReadiness ? (
+                  <p className="admin-state-note" role="status">Checking this period…</p>
+                ) : latest ? (
+                  <>
+                    <p className="admin-draft-title">{latest.title}</p>
+                    <p className="admin-state-note">
+                      {new Date(latest.created_at).toLocaleString('en', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' })}
+                      {' · '}{latest.session_count} sessions
+                    </p>
+                    <StatusBadge tone={latest.validated === true ? 'success' : 'warning'}>
+                      {latest.validated === true
+                        ? `${latest.hard_conflict_count ?? 0} hard conflicts`
+                        : 'Validation not confirmed'}
+                    </StatusBadge>
+                    <Link className="admin-inline-action" to={`/admin/schedule-manager/drafts/${encodeURIComponent(latest.id)}?source=academic`}>Open draft <span aria-hidden="true">→</span></Link>
+                  </>
+                ) : (
+                  <p className="admin-state-note">No saved draft is recorded in the loaded results for this period.</p>
+                )}
+              </section>
+            </aside>
+          </div>
+          {drafts?.has_more && (
+            <p className="admin-data-note">Draft count reflects the recent results loaded here. <Link to="/admin/schedule-manager/drafts?source=academic">Open all drafts</Link>.</p>
+          )}
+        </>
+      )}
+
+      {!loading && !error && !period && (
+        <section className="workspace-card admin-period-empty">
+          <div>
+            <p className="admin-card-eyebrow">Academic setup</p>
+            <h2>Choose or create an academic period</h2>
+            <p>Once selected, this dashboard will show saved records, readiness, and schedule activity for that period.</p>
+          </div>
+          <Link className="button" to="/admin/academic">Open Academic Setup</Link>
+          {periods.length === 0 && <p className="admin-state-note">No periods are available yet.</p>}
+        </section>
+      )}
+
+      {!loading && !error && period && !currentReadiness && (
+        <div className="admin-checking-state" role="status" aria-live="polite">
+          <span className="admin-inline-skeleton" aria-hidden="true" />
+          <span>Checking academic readiness…</span>
+        </div>
+      )}
     </section>
   );
 }

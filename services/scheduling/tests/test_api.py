@@ -29,7 +29,7 @@ def test_service_real_generate_and_validate(sandbox):
     )
     assert validation.json()["valid"]
     assert client.get("/api/v1/scheduling/sandbox/scenario").json()["synthetic"]
-    assert len(client.get("/api/v1/scheduling/sandbox/catalogs").json()["cdm_spaces"]) == 59
+    assert len(client.get("/api/v1/scheduling/sandbox/catalogs").json()["cdm_spaces"]) == 53
 
 
 def test_gateway_to_service_roundtrip(sandbox, monkeypatch):

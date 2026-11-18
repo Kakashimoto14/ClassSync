@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: classsync-api
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeployTrigger: "off"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    maxShutdownDelaySeconds: 60
+    envVars:
+      - key: CLASSSYNC_SERVICE
+        value: all
+      - key: CLASSSYNC_ENV
+        value: production
+      - key: ALLOW_UNAUTHENTICATED_DEVELOPMENT
+        value: "false"
+      - key: ENABLE_SCHEDULING_SANDBOX
+        value: "false"
+      - key: ENABLE_TEST_IDENTITY_ADAPTERS
+        value: "false"
+      - key: CLOUD_RUN_IAM_ENABLED
+        value: "false"
+      - key: FIREBASE_USE_ADC
+        value: "false"
+      - key: FIREBASE_PROJECT_ID
+        value: classsync-f444c
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: INSTITUTIONAL_TENANT_ID
+        sync: false
+      - key: IDENTITY_DATABASE_URL
+        sync: false
+      - key: IDENTITY_DATABASE_TRANSPORT
+        value: verify-full
+      - key: ACADEMIC_DATABASE_URL
+        sync: false
+      - key: ACADEMIC_DATABASE_TRANSPORT
+        value: verify-full
+      - key: SCHEDULING_DATABASE_URL
+        sync: false
+      - key: SCHEDULING_DATABASE_TRANSPORT
+        value: verify-full
+      - key: DATABASE_POOL_SIZE
+        value: "2"
+      - key: CORS_ALLOWED_ORIGINS
+        value: '["https://class-sync-bhiv.vercel.app"]'
+      - key: ACADEMIC_SERVICE_URL
+        value: http://127.0.0.1:8001
+      - key: SCHEDULING_SERVICE_URL
+        value: http://127.0.0.1:8002
+      - key: NOTIFICATION_SERVICE_URL
+        value: http://127.0.0.1:8003
+      - key: COURSE_CLOUD_ENABLED
+        value: "false"

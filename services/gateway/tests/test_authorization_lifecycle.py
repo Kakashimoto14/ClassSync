@@ -1,15 +1,26 @@
 from types import SimpleNamespace
 
 import pytest
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 from services.gateway.app import authorization as providers
 from services.gateway.app.main import Settings
 
 
+@pytest.mark.parametrize("value", [0, 6])
+def test_pool_budget_rejects_invalid_or_expanded_pool(value):
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, database_pool_size=value)
+
+
 def settings(**changes):
-    return Settings(_env_file=None, firebase_project_id="synthetic-project",
-                    institutional_tenant_id="tenant-a", identity_database_url=None, **changes)
+    return Settings(
+        _env_file=None,
+        firebase_project_id="synthetic-project",
+        institutional_tenant_id="tenant-a",
+        identity_database_url=None,
+        **changes,
+    )
 
 
 def configured(**changes):
@@ -84,15 +95,20 @@ def test_loopback_transport_cannot_enable_non_test_runtime(environment):
         providers.connection_configuration(configured(classsync_env=environment))
 
 
-@pytest.mark.parametrize("url", [
-    "sqlite:///original.sqlite3", "postgresql://user@127.0.0.1:19999/postgres",
-    "postgresql+psycopg://user@/postgres", "postgresql+psycopg://127.0.0.1:19999/postgres",
-    "postgresql+psycopg://user@127.0.0.1/postgres",
-    "postgresql+psycopg://user@127.0.0.1:19999/postgres?host=other",
-    "postgresql+psycopg://user:private-sentinel@127.0.0.1:19999/postgres",
-    "postgresql+psycopg://user@localhost:19999/postgres",
-    "postgresql+psycopg://user@127.0.0.1:5432/postgres",
-])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "sqlite:///original.sqlite3",
+        "postgresql://user@127.0.0.1:19999/postgres",
+        "postgresql+psycopg://user@/postgres",
+        "postgresql+psycopg://127.0.0.1:19999/postgres",
+        "postgresql+psycopg://user@127.0.0.1/postgres",
+        "postgresql+psycopg://user@127.0.0.1:19999/postgres?host=other",
+        "postgresql+psycopg://user:private-sentinel@127.0.0.1:19999/postgres",
+        "postgresql+psycopg://user@localhost:19999/postgres",
+        "postgresql+psycopg://user@127.0.0.1:5432/postgres",
+    ],
+)
 def test_invalid_or_ambiguous_local_configuration_is_redacted(url):
     value = configured()
     value.identity_database_url = SecretStr(url)

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { expect, it } from 'vitest';
 import { nextClass, studentOccurrence, timeRange } from './student-presentation';
 import data from '../data/presentation-timetable.v1.json';
