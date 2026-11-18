@@ -171,7 +171,9 @@ it('clears private fields when the Firebase user changes', async () => {
     throw new Error('This scan is unavailable or expired.');
   });
   act(() => identity('student-b'));
-  await screen.findByText('This scan is unavailable or expired.');
+  await waitFor(() =>
+    expect(source.request.mock.calls.filter(([path]) => path === 'onboarding')).toHaveLength(2),
+  );
   expect(screen.queryByLabelText('Student number')).not.toBeInTheDocument();
   expect(screen.queryByDisplayValue('SYN-OOI')).not.toBeInTheDocument();
 });

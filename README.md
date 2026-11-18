@@ -8,6 +8,7 @@ ClassSync is a university scheduling system for academic records, conflict-aware
 - **Services:** Python FastAPI Gateway, Academic and Scheduling services; OR-Tools CP-SAT generation with independent schedule validation.
 - **Identity and data:** Firebase Authentication proves identity. PostgreSQL is the selected authority for current membership, academic data, schedules, drafts and publication; protected APIs must authorize against current server-side membership. SQLite remains in local sandbox/demo paths. Firestore is optional unless an approved rubric or later owner decision requires it.
 - **Readiness:** local implementation is substantial, but production hosting, institutional identity, real Registrar data, backup/restore, security configuration and end-to-end provider behavior remain unverified. The current audit and ordered completion plan are in [docs/audit/](docs/audit/MASTER_IMPLEMENTATION_PLAN.md).
+- **Vercel build:** the deployment build now runs `npm run build` in institutional mode; it does not publish the read-only sample entrance. Production sign-in still requires valid Firebase and Gateway configuration, and must not be considered operational until those provider-backed checks pass.
 
 The previous Firestore authority document is retained as a [superseded proposal](docs/production/firestore-authority.md); its qualification receipts are historical evidence, not the current architecture decision.
 

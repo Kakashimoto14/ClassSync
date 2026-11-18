@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('pointerdown', closeOutside);
   }, [commandOpen]);
 
-  if (!role) return <Navigate to="/dev/role-preview" replace />;
+  if (!role) return <Navigate to={institutional ? '/auth/login' : '/dev/role-preview'} replace />;
   const profile = institutional
     ? { name: 'University account', initials: 'CS', label: role === 'student' ? 'Student' : role }
     : previewProfiles[role];
