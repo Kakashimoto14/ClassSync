@@ -1,5 +1,132 @@
 # ClassSync — autonomy status ledger
 
+## 19 November 2026 01:06 SGT — student portal password setup and local qualification
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `981d654058ab5b05f2dc0285d4a797efce63c7cd`.
+The main worktree remains clean at `fa248229eef753297fbc9a49a884a475e6920ea5`; port 5173 was
+not touched. Implemented the post-OTP password step: the browser links/updates the Firebase
+password provider, then the Gateway verifies the provider and the OTP challenge before marking
+`password_configured` and granting student membership. Student-number/password login now resolves
+the roster email only inside the Gateway, verifies Turnstile, authenticates through Firebase
+Identity Toolkit, checks active membership and returns only a Firebase custom token. Missing roster
+and invalid credential responses share a generic message. Added migration `0020_student_portal_password`
+and regression coverage. `FIREBASE_WEB_API_KEY` is documented in the ignored-environment examples.
+README, security guidance and the traceability row now reflect the implemented flow and its limits.
+
+Fresh serial checks:
+
+- `.venv\Scripts\python.exe -m pytest` — **1,128 passed**, one existing Starlette/httpx
+  deprecation warning, 121.57 seconds. Pytest's configured test paths are `services`; the separately
+  targeted PostgreSQL migration qualification regression file was also run. After the
+  missing-roster Firebase credential request was added to reduce a timing signal, the final full
+  serial rerun was **1,128 passed**, one deprecation warning, 101.94 seconds.
+- `.venv\Scripts\python.exe -m pytest services/gateway/tests/test_onboarding.py
+  services/gateway/tests/test_turnstile.py scripts/tests/test_postgres_qualification_regressions.py -q`
+  — **33 passed**, one Starlette/httpx deprecation warning.
+- `npm run test:web` — **847 passed across 63 files**. The first full run exposed a React warning in
+  the test-only Turnstile mock; the mock was moved to an effect and the complete suite was rerun.
+  The rerun passed with no React warning; after the final Gateway timing-path change, the full Web
+  suite was rerun again and passed **847 tests across 63 files**.
+- `npm run lint`, `npm run typecheck`, and `npm run build` — PASS. Build emitted no Firebase
+  mixed-import or oversized-chunk warning; largest JavaScript chunk: `index` 328.65 kB.
+- `.venv\Scripts\python.exe -m ruff check services packages scripts` — NOT RUN successfully:
+  Ruff is not installed in the isolated worktree environment (`No module named ruff`). No network
+  installation was attempted.
+- `git diff --check` — PASS. PostgreSQL migration/RLS execution, Auth Emulator, Resend delivery,
+  provider-backed login and connected browser acceptance were not run.
+
+The authorized local-only bootstrap still creates synthetic academic setup records in its guarded
+SQLite sandbox. This change does not import a student roster or set canonical CdM room capacities,
+and does not create a published revision. A synthetic roster and solver output must not be presented
+as an official student identity roster, Facilities verification or authoritative published
+timetable. Production seed/publication remains blocked on verified institutional data and a
+successful independent validation path. P4d remains **PARTIAL**; local unit/build gates do not
+qualify external identity, PostgreSQL or browser behavior. Next: review and commit this feature
+checkpoint as specifically authorized, merge to `main`, and push both named branches; preserve the
+separate external qualification and production-readiness gates.
+
+## 19 November 2026 00:01 SGT — local checkpoint and stale-ref cleanup
+
+Committed the feature-worktree implementation/evidence from the preceding checkpoint as
+`9b5cde2cefebdd18a3df8a38e8c9699f9db6d89c` (`feat(auth): add Turnstile and student email
+verification`). The focused auth, bootstrap, validation and build evidence is in the entry below.
+The branch remains local-only; feature/main were not merged or pushed because the complete Python
+and Web suites are not green, and student-number/password login plus post-OTP password creation
+remain unimplemented. Port 5173, the `main` worktree, ignored environments and databases remain
+untouched.
+
+Performed the explicitly authorized stale-ref cleanup after confirming only `main` and
+`feature/auth-onboarding-saas` were checked out: deleted remote
+`origin/codex/classsync-main-checkpoint-20261114` (GitHub returned `[deleted]`), local
+`codex/classsync-main-checkpoint-20261114`, and local `release/mvp-staging-qualification`; expired
+local reflogs and ran `git gc --prune=now`. The named local/remote-tracking refs are absent. GC
+reported zero loose/pruneable objects but warned of an empty worktree `refs` directory as garbage;
+no data was manually removed. A subsequent `git ls-remote` could not reach GitHub, so there is no
+second remote read-after-delete receipt. `git worktree prune --dry-run --verbose` reported no
+prunable worktrees. Branch-local unique old commits were intentionally made unreachable under the
+owner's cleanup instruction; GitHub's server-side unreachable-object retention is outside this
+local verification.
+
+The final README now describes the private Notification verification endpoint and clearly says
+provider delivery is unqualified. Do not represent this local checkpoint as merged, pushed,
+production-ready or fully qualified. Next gate: diagnose the unchanged-limit solver `UNKNOWN`
+result and resolve/retest the complete local suites; then complete missing password setup and
+student-number sign-in before reconsidering merge/push.
+
+## 18 November 2026 23:52 SGT — authentication and bootstrap continuation checkpoint
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`; base/current committed HEAD before this change is
+`49e1b69f414bffcd455848eb34a24b7fc15580a4`. The worktree has the authorized local changes listed
+in Git status; the separate `main` worktree at `fa248229eef753297fbc9a49a884a475e6920ea5` is
+clean. Port 5173 and ignored databases/evidence were left untouched.
+
+This change adds a Cloudflare Turnstile widget and Gateway Siteverify boundary, a CdM campus login
+layout, tenant/UID-scoped OTP storage and delivery, a PostgreSQL migration at
+`0019_student_email_challenges`, updated onboarding/API qualification checks, a synthetic local-only
+`scripts/seed_bootstrap_cdm.py`, and README/security/traceability notes. The seed refuses non-sandbox
+SQLite filenames and does not create student identity records, set room capacities, assert official
+availability or publish a timetable. OTP email delivery requires an explicitly configured Resend
+sender and private service token; no code is emitted to logs. Exact Google-roster mismatch text is
+preserved.
+
+Fresh checks in this turn:
+
+- Focused Python: `.venv\\Scripts\\python.exe -m pytest scripts/tests/test_bootstrap_cdm.py
+  services/gateway/tests/test_onboarding.py services/gateway/tests/test_turnstile.py
+  services/notification/tests/test_email_verification.py
+  services/persistence/tests/test_identity_qualification_inventory.py -q` — **35 passed**, one
+  Starlette/httpx deprecation warning.
+- Focused Web: `npm run test -- --run src/pages/InstitutionalEntrance.test.tsx
+  src/auth/AccountOnboardingPanel.test.tsx` — **13 passed across 2 files**.
+- Web `npm run lint` and `npm run typecheck` — both exit 0.
+- Web `npm run build` — PASS; chunks: React 318.51 kB, Firebase 243.27 kB, UI 47.83 kB, app
+  325.20 kB; no mixed-import or chunk-size warning.
+- `.venv\\Scripts\\python.exe -m pip check` — PASS, no broken requirements.
+- `.venv\\Scripts\\python.exe -m ruff check services packages scripts` — unavailable: `ruff` is not
+  installed in this environment.
+- `git diff --check` — PASS.
+
+The last full Python suite at the pre-correction snapshot reported 1,119 passed and 2 failed. The
+stale identity-inventory expectation was corrected and the affected focused regression now passes;
+the scheduling draft regression returned solver `UNKNOWN` at its unchanged 8-second limit. The last
+full Web suite reported 843 passed and one timeout; its test file passed when run alone. The full
+suites have not been rerun to a clean result and are not green evidence. Do not alter solver limits
+or weaken constraints to mask this. No actual PostgreSQL migration/RLS run, Auth Emulator, Resend,
+Cloudflare Siteverify, connected login/browser journey, password setup, student-number/password
+login, native 200% zoom, or keyboard-only end-to-end check was performed. Direct browser calls to
+Firebase Auth can bypass the current Gateway Turnstile check, so it is not a hard auth boundary.
+
+The feature branch is four commits behind `main` and currently shares its history ancestor; the
+feature diff contains no unique committed feature work relative to `main` yet. The working tree
+contains the planned implementation and focused tests. Because a full-suite solver failure remains
+and production auth gates are unverified, do not call this release-ready. Next: finish review of the
+changed files and retain this as a feature checkpoint; only merge/push after the regression gate is
+resolved or an explicit quality-gate disposition is recorded. The stale branch deletion and local
+GC are separately authorized but should be done only after verifying the final target refs and
+worktree safety.
+
 ## 18 November 2026 22:26 SGT — final target-branch rewrite and remote verification
 
 The final pre-ledger-push rewritten refs were `feature/auth-onboarding-saas`

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { AccountOnboardingPanel } from './AccountOnboardingPanel';
@@ -10,6 +11,7 @@ const source = vi.hoisted(() => ({
   updateName: vi.fn(),
   resend: vi.fn(),
   refresh: vi.fn(),
+  setPassword: vi.fn(),
 }));
 vi.mock('./account-actions', () => ({
   accountRequest: source.request,
@@ -17,7 +19,14 @@ vi.mock('./account-actions', () => ({
   updateAccountName: source.updateName,
   resendVerification: source.resend,
   refreshVerifiedAccount: source.refresh,
+  setStudentPortalPassword: source.setPassword,
   accountError: () => 'Request failed.',
+}));
+vi.mock('../auth/TurnstileWidget', () => ({
+  TurnstileWidget: ({ onToken }: { onToken: (token: string) => void }) => {
+    useEffect(() => onToken('test-token'), [onToken]);
+    return <div aria-label="Human verification" />;
+  },
 }));
 beforeEach(() => {
   vi.clearAllMocks();
@@ -80,9 +89,13 @@ it('checks student ID against the verified account email and refreshes current m
     listener(profile('student-a'));
     return vi.fn();
   });
-  source.request.mockImplementation(async (_path, method) => method === 'POST'
-    ? { status: 'verified' }
-    : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' });
+  source.request.mockImplementation(async (path) => path === 'student-verification-challenges'
+    ? { challenge_id: '00000000-0000-0000-0000-000000000001', masked_email: 'j***@student.pnm.edu.ph', expires_in_seconds: 300, resend_after_seconds: 60 }
+    : path === 'verify-student'
+      ? { status: 'verified' }
+      : path === 'complete-student-onboarding'
+        ? { status: 'active', password_configured: true }
+      : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' });
   render(panel(refresh));
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), {
@@ -91,22 +104,43 @@ it('checks student ID against the verified account email and refreshes current m
   expect(screen.getByLabelText('Registered student email')).toHaveValue(
     'juan.delacruz@student.pnm.edu.ph',
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
   await waitFor(() =>
     expect(source.request).toHaveBeenCalledWith(
-      'verify-student',
+      'student-verification-challenges',
       'POST',
       {
         student_id: '24-98096',
+        turnstile_token: 'test-token',
       },
       undefined,
       'student-a',
     ),
   );
-  expect(
-    await screen.findByText('Student record verified. Refresh your account to continue.'),
-  ).toBeInTheDocument();
-  expect(source.updateName).not.toHaveBeenCalled();
+  expect(await screen.findByText(/A code was sent to j\*\*\*/)).toBeInTheDocument();
+  for (let index = 0; index < 6; index += 1)
+    fireEvent.change(screen.getByLabelText(`Verification digit ${index + 1}`), {
+      target: { value: String(index + 1) },
+    });
+  fireEvent.click(screen.getByRole('button', { name: 'Verify and sign in' }));
+  await waitFor(() => expect(source.request).toHaveBeenCalledWith(
+    'verify-student', 'POST', {
+      student_id: '24-98096', challenge_id: '00000000-0000-0000-0000-000000000001', code: '123456',
+      turnstile_token: 'test-token',
+    }, undefined, 'student-a',
+  ));
+  expect(await screen.findByRole('heading', { name: 'Create your portal password' })).toBeInTheDocument();
+  expect(screen.getByText('24-98096')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'campus-pass-2026' } });
+  fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'campus-pass-2026' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Create portal password' }));
+  await waitFor(() => expect(source.setPassword).toHaveBeenCalledWith('campus-pass-2026', 'student-a'));
+  await waitFor(() => expect(source.request).toHaveBeenCalledWith(
+    'complete-student-onboarding', 'POST', {
+      student_id: '24-98096', challenge_id: '00000000-0000-0000-0000-000000000001',
+      turnstile_token: 'test-token',
+    }, undefined, 'student-a',
+  ));
   expect(refresh).toHaveBeenCalledOnce();
 });
 
@@ -124,7 +158,7 @@ it('shows the exact anti-enumeration Registrar error for a roster mismatch', asy
   render(panel());
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), { target: { value: '24-98096' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
   expect(await screen.findByText(registrarError)).toBeInTheDocument();
 });
 
@@ -136,11 +170,11 @@ it('rejects malformed student IDs in the form before sending a roster lookup', a
   render(panel());
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), { target: { value: 'student-a' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Verify student record' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
   expect(await screen.findByRole('status')).toHaveTextContent(/Use the format 12-12345/);
   expect(screen.getByText(/Use the format 12-12345/, { selector: '#student-number-error' }))
     .toBeInTheDocument();
   expect(source.request).not.toHaveBeenCalledWith(
-    'verify-student', expect.anything(), expect.anything(), expect.anything(), expect.anything(),
+    'student-verification-challenges', expect.anything(), expect.anything(), expect.anything(), expect.anything(),
   );
 });

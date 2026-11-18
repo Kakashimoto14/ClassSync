@@ -7,13 +7,14 @@ import {
   type UniversitySessionContextValue,
 } from '../auth/university-session-context';
 
-const actions = vi.hoisted(() => ({ create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn() }));
+const actions = vi.hoisted(() => ({ create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn(), verify: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('../auth/account-actions', async (original) => ({
   ...(await original<typeof import('../auth/account-actions')>()),
   createStudentAccount: actions.create,
   recoverPassword: actions.recover,
   signInToAccount: actions.signIn,
   signInWithGoogle: actions.google,
+  verifyHumanChallenge: actions.verify,
 }));
 
 function entrance(path = '/', overrides: Partial<UniversitySessionContextValue> = {}) {
@@ -41,16 +42,24 @@ function entrance(path = '/', overrides: Partial<UniversitySessionContextValue> 
 
 beforeEach(() => vi.clearAllMocks());
 
+it('shows the CdM campus access login and a non-production verification widget', async () => {
+  entrance();
+  expect(screen.getByRole('heading', { name: 'Welcome, CdMian!' })).toBeInTheDocument();
+  expect(screen.getByText('CAMPUS ACCESS')).toBeInTheDocument();
+  expect(screen.getByText('Signing in for the first time?')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
+  expect(await screen.findByText(/test verification ready/i)).toBeInTheDocument();
+  expect(screen.queryByText(/sample agenda/i)).not.toBeInTheDocument();
+});
+
 it('offers one login with persistent labels and associated validation errors', async () => {
   entrance();
   for (const name of ['Student', 'Teacher', 'Admin'])
     expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-  expect(screen.getByLabelText('Email')).toHaveFocus();
-  expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(
-    'Enter your university email address.',
-  );
-  fireEvent.change(screen.getByLabelText('Email'), {
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
+  expect(screen.getByLabelText('Student Number or Institutional Email')).toHaveFocus();
+  expect(screen.getByLabelText('Student Number or Institutional Email')).toBeRequired();
+  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
     target: { value: 'student@synthetic.invalid' },
   });
   fireEvent.change(screen.getByLabelText('Password'), {
@@ -61,13 +70,29 @@ it('offers one login with persistent labels and associated validation errors', a
     'aria-pressed',
     'true',
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
   await waitFor(() =>
     expect(actions.signIn).toHaveBeenCalledWith(
       'student@synthetic.invalid',
       'Synthetic-password-42!',
     ),
   );
+});
+
+it('routes student-number sign-in through the Gateway with the one-use Turnstile token', async () => {
+  entrance();
+  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
+    target: { value: '23-01425' },
+  });
+  fireEvent.change(screen.getByLabelText('Password'), {
+    target: { value: 'campus-pass-2026' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
+
+  await waitFor(() => expect(actions.signIn).toHaveBeenCalledWith(
+    '23-01425', 'campus-pass-2026', 'test-token',
+  ));
+  expect(actions.verify).not.toHaveBeenCalled();
 });
 
 it('validates confirmation before student account creation and submits no role', async () => {

@@ -3,12 +3,19 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { accountRequest, createStudentAccount, recoverPassword } from './account-actions';
 
 const fixture = vi.hoisted(() => ({
-  auth: { currentUser: null as null | { uid: string; getIdToken: ReturnType<typeof vi.fn> } },
+  auth: { currentUser: null as null | {
+    uid: string; getIdToken: ReturnType<typeof vi.fn>; email?: string;
+    providerData?: Array<{ providerId: string }>;
+  } },
   signup: vi.fn(),
   google: vi.fn(),
   googleProvider: vi.fn(),
   verify: vi.fn(),
   reset: vi.fn(),
+  passwordSignIn: vi.fn(),
+  customTokenSignIn: vi.fn(),
+  linkCredential: vi.fn(),
+  updatePassword: vi.fn(),
 }));
 vi.mock('../config/runtime-config', () => ({ appMode: 'institutional' }));
 vi.mock('../lib/firebase', () => ({ firebaseApp: {} }));
@@ -22,6 +29,11 @@ vi.mock('firebase/auth', () => ({
   signInWithPopup: fixture.google,
   sendEmailVerification: fixture.verify,
   sendPasswordResetEmail: fixture.reset,
+  signInWithEmailAndPassword: fixture.passwordSignIn,
+  signInWithCustomToken: fixture.customTokenSignIn,
+  EmailAuthProvider: { credential: (email: string, password: string) => ({ email, password }) },
+  linkWithCredential: fixture.linkCredential,
+  updatePassword: fixture.updatePassword,
 }));
 beforeEach(() => {
   vi.clearAllMocks();
@@ -62,6 +74,43 @@ it('starts Google sign-in through Firebase and does not create a client-selected
 it('does not disclose an unknown account through password recovery', async () => {
   fixture.reset.mockRejectedValue({ code: 'auth/user-not-found' });
   await expect(recoverPassword('unknown@synthetic.invalid')).resolves.toBeUndefined();
+});
+
+it('exchanges a student number and Turnstile token for a Firebase custom-token session', async () => {
+  fixture.auth.currentUser = null;
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({ data: { custom_token: 'firebase-custom-token' } }),
+  } as unknown as Response);
+  const { signInToAccount } = await import('./account-actions');
+
+  await signInToAccount('23-01425', 'campus-pass-2026', 'turnstile-token');
+
+  expect(fetch).toHaveBeenCalledWith('/api/v1/auth/student-password-login', expect.objectContaining({
+    method: 'POST', credentials: 'omit', cache: 'no-store',
+    body: JSON.stringify({
+      student_id: '23-01425', password: 'campus-pass-2026', turnstile_token: 'turnstile-token',
+    }),
+  }));
+  expect(fixture.customTokenSignIn).toHaveBeenCalledWith(fixture.auth, 'firebase-custom-token');
+  fetch.mockRestore();
+});
+
+it('links a password provider to a recently authenticated first-time Google account', async () => {
+  const user = {
+    uid: 'student-a', email: 'juan.delacruz@student.pnm.edu.ph',
+    providerData: [{ providerId: 'google.com' }], getIdToken: vi.fn(),
+  };
+  fixture.auth.currentUser = user;
+  fixture.linkCredential.mockResolvedValue(undefined);
+  const { setStudentPortalPassword } = await import('./account-actions');
+
+  await setStudentPortalPassword('campus-pass-2026', 'student-a');
+
+  expect(fixture.linkCredential).toHaveBeenCalledWith(user, {
+    email: 'juan.delacruz@student.pnm.edu.ph', password: 'campus-pass-2026',
+  });
 });
 
 it('does not send a mutation when the account changes during token acquisition', async () => {

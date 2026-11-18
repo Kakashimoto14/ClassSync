@@ -14,6 +14,8 @@ The previous Firestore authority document is retained as a [superseded proposal]
 
 The code catalog now reflects the uploaded November 2026 room rows: 53 physical spaces, 41 marked schedulable by the source and 12 excluded. Focused catalog, readiness, directory, and Administrator selector checks pass locally. The document summary still conflicts (37/16), and Facilities has not verified operation, type, capacity, equipment, or current availability; no room is made solver-eligible by the source designation alone. See [the room inventory mapping](docs/audit/ROOM_INVENTORY_UPDATE.md). Student registration and onboarding forms use ID format `12-12345` and the institutional email placeholder `juan.delacruz@student.pnm.edu.ph`. The Gateway now validates the ID and lowercase email format and binds only an active roster record with an exact Firebase-verified email match. Existing student rows remain unverified until authorized Registrar data is populated; this local code change does not itself provide or verify that roster. See the [master plan](docs/audit/MASTER_IMPLEMENTATION_PLAN.md).
 
+The institutional login uses the CdM campus access layout and Cloudflare Turnstile. First-time students verify a Registrar roster match with a five-minute single-use email code, then link a Firebase password provider; the Gateway records password setup and grants the student membership only after checking Firebase's current provider state. Migration `0020_student_portal_password` adds that membership gate. Returning students may submit their student number and password to `POST /api/v1/auth/student-password-login`; the Gateway resolves the roster email internally, authenticates against Firebase Identity Toolkit, checks the active membership, and returns only a Firebase custom token. Unknown student IDs and invalid passwords share the same response, and shaped IDs follow the Firebase credential-request path to reduce the missing-roster timing signal. Configure `FIREBASE_WEB_API_KEY` (Firebase's public web API key), `TURNSTILE_SECRET_KEY`, `OTP_HMAC_SECRET` (32+ random bytes), `NOTIFICATION_SERVICE_TOKEN`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in ignored environment settings before provider-backed use. The Gateway enforces Turnstile for student lookup, OTP challenge, OTP verification, password completion, and student-number sign-in; the direct Firebase email/password and Google provider calls still cannot be forced through that Gateway check by this code alone. Provider delivery, migration/RLS execution, Auth Emulator, live roster matching, and connected browser acceptance remain unverified. The local bootstrap remains synthetic and does not create an institutional roster, verified room capacity, or official timetable.
+
 ## Workspace
 
 | Path                      | Purpose                                                                                |
@@ -64,6 +66,15 @@ Generation and Conflict Center are labeled as deterministic OR-Tools and indepen
 no language-model copilot is connected. Their empty states link to the next required action.
 Inline form and selection transitions respect the browser's reduced-motion preference.
 
+For local review of the owner-provided bootstrap scenario, run
+`python -m scripts.seed_bootstrap_cdm --database-path var/bootstrap-sandbox/classsync.bootstrap-sandbox.sqlite3`.
+The script is idempotent and refuses database filenames without the isolated sandbox suffix. It
+creates synthetic program/subject/section/faculty/offering inputs in SQLite, leaves the supplied
+53-room catalog at its current provisional state, and writes an `owner_bootstrap_seed` manifest.
+It does not create student identities, apply the owner-proposed room capacity of 40, verify room
+eligibility, or publish a timetable. Those production operations require authorized Registrar
+and Facilities data and verified tenant configuration.
+
 Several Administrator routes are still previews or placeholders, including student record lists,
 building views, operational reports, and sample communications. Their contents are not live campus
 records. See the [Administrator workspace audit](docs/hci/admin-workspace-audit.md) for the
@@ -107,14 +118,16 @@ Run `npm run lint`, `npm run typecheck`, `npm run test:web`, and `npm run build`
 
 Academic and scheduling endpoints independently enforce authorization. The S1/S2 examples above describe historical sandbox milestones. Connected local sign-in and publication use isolated synthetic records; hosting, approved academic inputs and institutional release remain separately gated. See [rules and assumptions](docs/scheduling/rules-and-assumptions.md) before supplying institutional data.
 
-P4d local qualification status (18 Nov 2026): latest in-process gates pass with 1115 Python tests,
-843 Web tests, Web lint/typecheck/build, and Ruff. The activity-only PostgreSQL audit qualification
-was previously verified with disposable data; this turn did not rerun external PostgreSQL or Auth
-Emulator qualification. The connected schedule-to-publication browser flow, native 200% zoom, and
-keyboard-only end-to-end journey remain open. The student verification code is fail-closed when no
-matching active Registrar roster record exists; roster ingestion/population and institutional
-acceptance remain required. External qualification scripts and dependency scans are deferred to
-CI/pre-release and are not a manual PowerShell prerequisite for local development. See [P4d
+P4d remains PARTIAL. On 18 Nov 2026, focused onboarding checks passed (35 Python tests and 13 Web
+tests), Web lint/typecheck passed, and the production Web build passed with no chunk/import warnings
+(largest JavaScript chunk 325.20 kB). The most recent full Python run before the final qualification
+fixture correction had 1,119 passed and 2 failures; one stale inventory assertion has since passed
+in isolation, while the scheduling regression returned `UNKNOWN` at its unchanged 8-second limit.
+The most recent full Web run had 843 passed and one timeout; that test file passed when run alone.
+Neither full suite has been rerun to a clean result. Ruff is unavailable in this isolated environment.
+PostgreSQL/Auth Emulator/browser/provider qualification, native 200% zoom and keyboard-only journeys
+remain open. The student verification code fails closed without a matching active Registrar roster
+record; roster ingestion/population and institutional acceptance remain required. See [P4d
 acceptance](docs/autonomy/P4D_ADMIN_ACCEPTANCE.md) and the [current evidence ledger](docs/autonomy/STATUS.md);
 local checks do not establish production readiness.
 
@@ -129,8 +142,10 @@ The root `Dockerfile` keeps the existing single-service mode used by Cloud Run C
 opt-in-by-default multi-service image for the root `render.yaml` blueprint. That mode runs the
 three internal APIs on loopback and exposes only the Gateway. It performs no migrations or seeding;
 Neon runtime-role DSNs, Firebase service credentials, institutional tenant, and exact CORS origins
-must be supplied through the hosting provider's secret settings. The Notification API remains a
-health-only stub. This Render Free blueprint is for qualification or preview only: its documented
-cold starts, ephemeral local disk, resource limits, and Render's stated non-production guidance do
-not satisfy ClassSync's production reliability gates. It is not deployed, and `vercel.json` remains
-the presentation build. See [Render qualification setup](docs/infrastructure/render-free-qualification.md).
+must be supplied through the hosting provider's secret settings. Notification now exposes a private
+verification-email endpoint, but real delivery requires the private service token and verified
+Resend sender configuration; no provider delivery has been qualified. This Render Free blueprint
+is for qualification or preview only: its documented cold starts, ephemeral local disk, resource
+limits, and Render's stated non-production guidance do not satisfy ClassSync's production reliability
+gates. It is not deployed, and `vercel.json` remains the presentation build. See [Render
+qualification setup](docs/infrastructure/render-free-qualification.md).

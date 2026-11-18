@@ -33,6 +33,13 @@
   min-width: 0;
   padding: clamp(1.4rem, 3.2vw, 3rem);
 }
+.connected-entrance__eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--entry-red);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
 .connected-entrance__header {
   margin-bottom: 1.8rem;
 }
@@ -353,6 +360,27 @@
   outline: 2px solid var(--entry-focus);
   outline-offset: 3px;
 }
+.account-onboarding__otp-digits {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.45rem;
+  max-width: 350px;
+}
+.connected-entrance .account-onboarding__otp-digits input {
+  min-width: 0;
+  min-height: 52px;
+  padding-inline: 0.25rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.account-onboarding__otp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.account-onboarding__otp { animation: entrance-reveal 180ms ease-out both; }
+.account-onboarding__otp-actions .button { width: auto; }
 
 .entrance-error,
 .entrance-hint,
@@ -456,4 +484,126 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* CdM institutional entrance: restrained campus brand, clear access hierarchy. */
+.connected-entrance {
+  --entry-navy: #29252a;
+  --entry-muted: #68616a;
+  --entry-red: #872e49;
+  --entry-line: #e7dfe2;
+  --entry-border: #c8bcc1;
+  --entry-focus: #872e49;
+  background: #f5f1f2;
+}
+.connected-entrance__access {
+  grid-column: 1;
+  grid-row: 1;
+  padding: clamp(1.5rem, 3.2vw, 3.25rem);
+  animation: entrance-reveal 220ms ease-out both;
+}
+.connected-entrance__story {
+  grid-column: 2;
+  grid-row: 1;
+  color: #fff;
+  background: linear-gradient(155deg, #76243e 0%, #4b1d31 100%);
+  animation: entrance-reveal 260ms ease-out both;
+}
+.connected-entrance__story h2,
+.connected-entrance__story > p { color: #fff; }
+.connected-entrance__story h2 > span { color: #e6c56f; }
+.connected-entrance__portal-brand {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: clamp(2.5rem, 9vh, 6rem);
+}
+.connected-entrance__portal-brand .classsync-logo picture { width: min(14rem, 100%); }
+.connected-entrance__portal-brand > span,
+.connected-entrance__service-label {
+  color: #f0d98e;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+.connected-entrance__features {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  margin: 2rem 0 3rem;
+  list-style: none;
+}
+.connected-entrance__features li {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.8rem;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.connected-entrance__features svg { color: #e6c56f; }
+.connected-entrance__form { gap: 0.75rem; }
+.connected-entrance__first-time {
+  display: grid;
+  justify-items: stretch;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+  text-align: center;
+}
+.connected-entrance__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--entry-muted);
+  font-size: 0.78rem;
+}
+.connected-entrance__divider::before,
+.connected-entrance__divider::after {
+  height: 1px;
+  flex: 1;
+  content: '';
+  background: var(--entry-line);
+}
+.connected-entrance__first-time .button { width: 100%; }
+.connected-entrance__first-time .entrance-hint { margin-top: -0.25rem; }
+.connected-entrance__callout {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--entry-line);
+  border-radius: 10px;
+  background: #fbf8f9;
+  color: var(--entry-navy);
+  text-align: left;
+}
+.connected-entrance__callout strong { font-size: 0.84rem; }
+.connected-entrance__callout p,
+.connected-entrance__help {
+  margin: 0.35rem 0 0;
+  color: var(--entry-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+.connected-entrance__help { text-align: center; }
+.turnstile-field {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 76px;
+  align-content: start;
+}
+.turnstile-field__widget { min-height: 60px; }
+.connected-entrance .button:not(.button--secondary):not(.button--ghost) {
+  border-color: var(--entry-red);
+  background: var(--entry-red);
+}
+.connected-entrance .button:not(.button--secondary):not(.button--ghost):hover:not(:disabled) {
+  background: #6f253c;
+}
+.connected-entrance :is(a, button, input, summary):focus-visible {
+  outline-color: #872e49;
+  box-shadow: 0 0 0 3px #f3dfe6;
+}
+@media (max-width: 700px) {
+  .connected-entrance__access { grid-column: 1; grid-row: 1; }
+  .connected-entrance__story { grid-column: 1; grid-row: 2; }
+  .connected-entrance__portal-brand { margin-bottom: 1.5rem; }
+  .connected-entrance__service-label { display: block; }
 }

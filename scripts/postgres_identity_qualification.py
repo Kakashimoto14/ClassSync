@@ -29,7 +29,12 @@ def identity_tables(target):
     graph = ScriptDirectory(str(Path(schema.__file__).parent / "migrations"))
     revisions = {item.revision for item in graph.walk_revisions(base="base", head=target)}
     onboarding = ("account_claims", "faculty_invitations")
-    return TABLES + (onboarding if "0014_account_onboarding" in revisions else ())
+    challenges = ("email_verification_challenges",)
+    return (
+        TABLES
+        + (onboarding if "0014_account_onboarding" in revisions else ())
+        + (challenges if "0019_student_email_challenges" in revisions else ())
+    )
 
 
 def require_identity_policies(policies, tables):

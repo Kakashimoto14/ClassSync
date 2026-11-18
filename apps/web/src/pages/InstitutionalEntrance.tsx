@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowRight, CalendarDays, CircleAlert, Eye, EyeOff, MapPin } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
 import { Button } from '../components/ui/Button';
@@ -10,7 +10,9 @@ import {
   recoverPassword,
   signInWithGoogle,
   signInToAccount,
+  verifyHumanChallenge,
 } from '../auth/account-actions';
+import { TurnstileWidget } from '../auth/TurnstileWidget';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
@@ -23,77 +25,30 @@ const verifyPath = '/auth/verify';
 const onboardingPath = '/auth/student-onboarding';
 const accountPath = '/auth/account';
 const STUDENT_EMAIL_PATTERN = /^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$/;
-
-function presentationUrl() {
-  try {
-    const url = new URL(import.meta.env.VITE_CLASSSYNC_PRESENTATION_URL);
-    const local = devServer && url.protocol === 'http:' && url.hostname === '127.0.0.1';
-    if (
-      (url.protocol === 'https:' || local) &&
-      !url.username &&
-      !url.password &&
-      url.origin !== window.location.origin
-    )
-      return url.href;
-  } catch {
-    // A separate presentation origin is optional.
-  }
-}
+const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
 function ProductPreview() {
   return (
-    <aside className="connected-entrance__story" aria-label="ClassSync schedule preview">
+    <aside className="connected-entrance__story" aria-label="ClassSync campus services">
+      <div className="connected-entrance__portal-brand">
+        <ClassSyncLogo size="medium" decorative />
+        <span>COLEGIO DE MONTALBAN · CLASSSYNC PORTAL</span>
+      </div>
       <h2>
-        Campus, in sync<span>.</span>
+        Smarter schedules.<br />Better campus days<span>.</span>
       </h2>
-      <p>Know what&apos;s next, where to go, and what&apos;s changed.</p>
-      <figure className="entrance-preview">
-        <figcaption>
-          <span className="entrance-preview__icon">
-            <CalendarDays size={20} aria-hidden="true" />
-          </span>
-          <span>
-            <strong>Today on campus</strong>
-            <small>Sample agenda &middot; Monday</small>
-          </span>
-        </figcaption>
-        <div className="entrance-preview__week" aria-label="Sample week, Monday selected">
-          <span className="entrance-preview__day">Mon</span>
-          <span>Tue</span>
-          <span>Wed</span>
-          <span>Thu</span>
-          <span>Fri</span>
-        </div>
-        <ol className="entrance-preview__agenda">
-          <li>
-            <time dateTime="09:00">9:00</time>
-            <div>
-              <strong>Human&ndash;Computer Interaction</strong>
-              <small>Room NB 204</small>
-            </div>
-            <span className="entrance-preview__next">Next</span>
-          </li>
-          <li>
-            <time dateTime="11:00">11:00</time>
-            <div>
-              <strong>Database Systems</strong>
-              <small>Room PRRC 103</small>
-            </div>
-          </li>
-        </ol>
-        <div className="entrance-preview__update">
-          <MapPin size={17} aria-hidden="true" />
-          <div>
-            <strong>Room changed</strong>
-            <small>Human&ndash;Computer Interaction moved to NB 204.</small>
-          </div>
-        </div>
-      </figure>
+      <p>Academic and scheduling services for the Colegio de Montalban community.</p>
+      <ul className="connected-entrance__features">
+        <li><CalendarDays size={19} aria-hidden="true" />View class schedules and room assignments</li>
+        <li><DoorOpen size={19} aria-hidden="true" />Check building and laboratory availability</li>
+        <li><ShieldCheck size={19} aria-hidden="true" />Stay informed about official schedule updates</li>
+      </ul>
+      <small className="connected-entrance__service-label">ACADEMIC &amp; SCHEDULING SERVICES</small>
     </aside>
   );
 }
 
-export function EntranceLayout({ children, preview }: { children: ReactNode; preview?: string }) {
+export function EntranceLayout({ children }: { children: ReactNode }) {
   const synthetic = devServer && import.meta.env.VITE_CLASSSYNC_SYNTHETIC_PREVIEW === 'true';
   return (
     <main className="connected-entrance">
@@ -110,11 +65,6 @@ export function EntranceLayout({ children, preview }: { children: ReactNode; pre
             )}
           </header>
           {children}
-          {preview && (
-            <a className="connected-entrance__sample" href={preview} rel="noreferrer">
-              Explore the sample workspace <ArrowRight size={15} aria-hidden="true" />
-            </a>
-          )}
         </section>
         <ProductPreview />
       </div>
@@ -133,7 +83,6 @@ export function InstitutionalEntrance() {
   const mode =
     path === '/auth/signup' ? 'signup' : path === '/auth/forgot-password' ? 'recovery' : 'login';
   const statusPage = [verifyPath, onboardingPath, invitePath, accountPath].includes(path);
-  const preview = presentationUrl();
   const statusHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     statusHeading.current?.focus();
@@ -172,7 +121,7 @@ export function InstitutionalEntrance() {
       ? 'Create your account'
       : mode === 'recovery'
         ? 'Reset your password'
-        : 'Welcome back';
+    : 'Welcome, CdMian!';
   const title =
     path === verifyPath
       ? 'Verify your email'
@@ -185,7 +134,7 @@ export function InstitutionalEntrance() {
             : formTitle;
 
   return (
-    <EntranceLayout preview={preview}>
+    <EntranceLayout>
       {canSignIn ? (
         <CredentialsForm
           key={mode}
@@ -261,6 +210,9 @@ function CredentialsForm({
   const [errors, setErrors] = useState<LoginValidationErrors & { confirmation?: string }>({});
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileRevision, setTurnstileRevision] = useState(0);
+  const onTurnstileToken = useCallback((value: string) => setTurnstileToken(value), []);
   const heading = useRef<HTMLHeadingElement>(null);
   const emailField = useRef<HTMLInputElement>(null);
   const passwordField = useRef<HTMLInputElement>(null);
@@ -275,7 +227,11 @@ function CredentialsForm({
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
-    const validation: typeof errors = validateLogin(email.trim(), password);
+    const studentNumberLogin = mode === 'login' && STUDENT_ID_PATTERN.test(email.trim());
+    const validation: typeof errors = studentNumberLogin
+      ? {}
+      : validateLogin(email.trim(), password);
+    if (studentNumberLogin && !password) validation.password = 'Enter your password.';
     if (recovery) delete validation.password;
     if (signup && !STUDENT_EMAIL_PATTERN.test(email.trim()))
       validation.email = 'Use a lowercase institutional email such as juan.delacruz@student.pnm.edu.ph.';
@@ -294,14 +250,27 @@ function CredentialsForm({
         await recoverPassword(email);
         setNotice('If your account can receive a reset link, check your email for the next steps.');
       } else if (signup) await createStudentAccount(email, password);
-      else await signInToAccount(email, password);
+      else {
+        if (studentNumberLogin) {
+          await signInToAccount(email, password, turnstileToken);
+        } else {
+          await verifyHumanChallenge(turnstileToken);
+          await signInToAccount(email, password);
+        }
+      }
     } catch (failure) {
       setError(
-        mode === 'login'
-          ? 'We could not sign you in. Check your email and password, or try resetting your password.'
+        mode === 'login' && studentNumberLogin
+          ? 'Invalid student number or password.'
+          : mode === 'login'
+            ? 'We could not sign you in. Check your email and password, or try resetting your password.'
           : accountError(failure),
       );
     } finally {
+      if (mode === 'login' && turnstileToken) {
+        setTurnstileToken('');
+        setTurnstileRevision((revision) => revision + 1);
+      }
       setBusy(false);
     }
   }
@@ -312,16 +281,22 @@ function CredentialsForm({
     setError('');
     setNotice('');
     try {
+      await verifyHumanChallenge(turnstileToken);
       await signInWithGoogle();
     } catch (failure) {
       setError(accountError(failure));
     } finally {
+      if (turnstileToken) {
+        setTurnstileToken('');
+        setTurnstileRevision((revision) => revision + 1);
+      }
       setBusy(false);
     }
   }
 
   return (
     <>
+      {mode === 'login' && <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>}
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -332,26 +307,22 @@ function CredentialsForm({
             ? 'Create your account with the email on your student record, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
-              : 'Sign in to your ClassSync account.'}
+              : 'Sign in to stay connected to your campus schedule and rooms.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
-        {!recovery && !invited && (
-          <>
-            <Button type="button" variant="secondary" disabled={busy} onClick={continueWithGoogle}>
-              Continue with Google
-            </Button>
-            <p className="entrance-hint">Or continue with your email</p>
-          </>
-        )}
         <div className="auth-field">
-          <label htmlFor="entrance-email">Email</label>
+          <label htmlFor="entrance-email">
+            {mode === 'login' ? 'Student Number or Institutional Email' : 'Email'}
+          </label>
           <input
             id="entrance-email"
             ref={emailField}
-            type="email"
-            placeholder={signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
+            type={mode === 'login' ? 'text' : 'email'}
+            placeholder={mode === 'login'
+              ? '23-01425 or juan.delacruz@student.pnm.edu.ph'
+              : signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
             autoComplete="username"
-            inputMode="email"
+            inputMode={mode === 'login' ? 'text' : 'email'}
             autoCapitalize="none"
             spellCheck={false}
             required
@@ -452,6 +423,7 @@ function CredentialsForm({
             Forgot password?
           </Link>
         )}
+        {mode === 'login' && <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />}
         {error && (
           <p className="entrance-error" role="alert">
             {error}
@@ -469,9 +441,23 @@ function CredentialsForm({
               ? 'Create account'
               : recovery
                 ? 'Send reset link'
-                : 'Sign in'}
+                : 'Sign in to ClassSync →'}
         </Button>
       </form>
+      {mode === 'login' && !invited && (
+        <div className="connected-entrance__first-time">
+          <span className="connected-entrance__divider">or</span>
+          <Button type="button" variant="secondary" disabled={busy} onClick={continueWithGoogle}>
+            Continue with Google
+          </Button>
+          <p className="entrance-hint">Use the email registered in your student record.</p>
+          <aside className="connected-entrance__callout">
+            <strong>Signing in for the first time?</strong>
+            <p>Continue with Google using the email registered in your student record. Verify your account before accessing campus schedules.</p>
+          </aside>
+          <p className="connected-entrance__help">Need help signing in? Visit the Office of the Registrar.</p>
+        </div>
+      )}
       <div className="connected-entrance__secondary">
         {mode === 'login' ? (
           invited ? (
