@@ -30,31 +30,33 @@ Fresh checks:
 - `npm run test:artifacts` — **5 passed** across institutional, connected, presentation and
   legacy-flag deployment artifact checks.
 - Feature `.venv` full `pytest -q` — **1,115 passed**, one Starlette/httpx deprecation warning.
-- `git diff --check` — PASS. Current working-tree `git grep` for `Example Student` / `Student` returns no
-  matches. Ruff is unavailable in the isolated `.venv` and no wheel is cached; `ruff check` is
+- `git diff --check` — PASS. Current working-tree scan for the removed personal identifiers returns
+  no matches. Ruff is unavailable in the isolated `.venv` and no wheel is cached; `ruff check` is
   therefore unverified. A first artifact run caught the removed Vercel SPA rewrite for direct
   role-preview URLs; restoring the rewrite made all five artifact tests pass. The guarded route
   itself remains unavailable in institutional mode.
 
 The authorized `feature/auth-onboarding-saas` and `main` refs have been rewritten: tracked source
 blobs and commit messages replace the personal examples, and commits use the repository-local
-GitHub noreply identity. `git log -S'Example Student' feature/auth-onboarding-saas main` and corresponding
-`git grep` checks on both refs return no matches. The automatic review rejected rewriting local
-release/checkpoint branches because they were outside the specifically named feature/main scope;
-`refs/original` backups and the two `origin/*` tracking refs also still point to pre-rewrite
-objects. GitHub HTTPS access failed with a network connection error, so force-with-lease updates
-have not reached origin. Do not call the remote PII cleanup complete until the two remote refs are
-updated and checked. Cloudflare Turnstile credentials/server-side configuration,
+GitHub noreply identity. Branch-scoped Git history and source searches for the removed identifiers
+return no matches. The two refs were force-pushed with explicit leases, then fetched; local branch
+and `origin/*` object IDs match (`feature/auth-onboarding-saas` `0accd84`, `main` `0d1f955`). The
+automatic review rejected rewriting the local and remote checkpoint branch and local release
+branch because they were outside the specifically named feature/main refs. Those branches still
+retain the old history and were not changed. Filter-branch backup refs for feature/main were
+removed after verification. GitHub HTTPS later became unavailable again; the successful push and
+fetch outputs are the evidence for the two target refs. Do not call every repository ref scrubbed
+until the checkpoint and release refs are separately authorized and rewritten. Cloudflare
+Turnstile credentials/server-side configuration,
 six-digit OTP delivery, the account-password-by-student-number mapping, and an authorized
 Registrar roster/faculty/capacity/schedule dataset are absent. No seed script was created because
 the requested sample capacities, student/faculty identities and published timetable would invent
 institutional facts. No production deployment, live data, database migration, cloud setting or
 port-5173 process was changed.
 
-Next safe action: finish the clean evidence commit/merge, verify branch-specific history once more,
-and retry the two explicitly authorized force-with-lease pushes only when origin is reachable.
-Production OTP/Turnstile and seeding remain blocked pending institution data and
-secrets/configuration.
+Next safe action: commit and merge this corrected status entry, then verify the final two target
+refs. Ask separately before rewriting the checkpoint and release branches. Production
+OTP/Turnstile and seeding remain blocked pending institution data and secrets/configuration.
 
 ## 15 November 2026 14:29 SGT — Administrator task-flow and screen audit
 
