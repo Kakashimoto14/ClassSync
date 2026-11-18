@@ -1,5 +1,54 @@
 # ClassSync — autonomy status ledger
 
+## 18 November 2026 22:10 SGT — Production hardening and PII cleanup checkpoint
+
+Base feature HEAD: `345bcbc65bb18f20c83947efddfd4a8582019cb4`. Local changes are on
+`feature/auth-onboarding-saas`; the separate `main` worktree and its untracked
+`.codex-attachments/` remain preserved. Replaced the exposed personal student-email example in
+README, onboarding/auth source and tests, Gateway tests, and audit documentation with the neutral
+institutional example `juan.delacruz@student.pnm.edu.ph`. Changed the Vercel build command from
+the presentation target to `npm run build`; kept the SPA rewrite so a direct role-preview URL is
+handled by the guarded client route, while institutional mode redirects to sign-in. Updated
+README to state that provider-backed production sign-in remains unqualified. Set repository-local
+Git identity to `Kakashimoto14 <Kakashimoto14@users.noreply.github.com>`; global Git config is
+unchanged.
+
+Fresh checks:
+
+- Focused onboarding UI tests — **12 passed across 2 files**.
+- Scanner account-switch regression — **9 passed** after correcting its race-prone setup
+  expectation; it now waits for the replacement account's onboarding read and retains the
+  private-field-clearing assertions.
+- Full `npm run test:web` — **843 passed across 63 files**.
+- `npm run lint --workspace=@classync/web` — PASS.
+- `npm run typecheck --workspace=@classync/web` — PASS.
+- `npm run build` — PASS; institutional build emitted no Firebase import or oversized-chunk
+  warnings (largest chunk 322.13 kB).
+- `npm run test:artifacts` — **5 passed** across institutional, connected, presentation and
+  legacy-flag deployment artifact checks.
+- Feature `.venv` full `pytest -q` — **1,115 passed**, one Starlette/httpx deprecation warning.
+- `git diff --check` — PASS. Current working-tree `git grep` for `Example Student` / `Student` returns no
+  matches. Ruff is unavailable in the isolated `.venv` and no wheel is cached; `ruff check` is
+  therefore unverified. A first artifact run caught the removed Vercel SPA rewrite for direct
+  role-preview URLs; restoring the rewrite made all five artifact tests pass. The guarded route
+  itself remains unavailable in institutional mode.
+
+PII history has **not yet been rewritten**: current commits still carry the configured historical
+author name/email, and the known email appears in older commit trees. GitHub HTTPS access failed
+with a network connection error during this session, so remote refs cannot be refreshed or a
+force-with-lease push verified. Cloudflare Turnstile credentials/server-side configuration,
+six-digit OTP delivery, the account-password-by-student-number mapping, and an authorized
+Registrar roster/faculty/capacity/schedule dataset are absent. No seed script was created because
+the requested sample capacities, student/faculty identities and published timetable would invent
+institutional facts. No production deployment, live data, database migration, cloud setting or
+port-5173 process was changed.
+
+Next safe action: finalize the local source commit and carefully rewrite local commit metadata and
+historical source blobs on the authorized feature/main refs, preserving all worktrees and the
+untracked attachment folder. Then verify clean histories and attempt remote synchronization only
+when origin is reachable. Production OTP/Turnstile and seeding remain blocked pending institution
+data and secrets/configuration.
+
 ## 15 November 2026 14:29 SGT — Administrator task-flow and screen audit
 
 Base/current HEAD remains `7165fa130e413f8dc8893b85d30ecbe530ef8173` on
