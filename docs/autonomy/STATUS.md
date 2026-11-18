@@ -2,7 +2,10 @@
 
 ## 18 November 2026 22:10 SGT — Production hardening and PII cleanup checkpoint
 
-Base feature HEAD: `345bcbc65bb18f20c83947efddfd4a8582019cb4`. Local changes are on
+Base feature HEAD: `345bcbc65bb18f20c83947efddfd4a8582019cb4`. The source cleanup was committed
+as `9dfc16a` and merged locally to `main` as `7e757ca` before rewriting history. Current rewritten
+heads are `feature/auth-onboarding-saas` at `7d56ebd54743ba00f931030a43ceba40904358f8` and `main`
+at `1d545013f58ebbe6c5d2d3f69b17634523cbbd03`. Local changes are on
 `feature/auth-onboarding-saas`; the separate `main` worktree and its untracked
 `.codex-attachments/` remain preserved. Replaced the exposed personal student-email example in
 README, onboarding/auth source and tests, Gateway tests, and audit documentation with the neutral
@@ -33,21 +36,25 @@ Fresh checks:
   role-preview URLs; restoring the rewrite made all five artifact tests pass. The guarded route
   itself remains unavailable in institutional mode.
 
-PII history has **not yet been rewritten**: current commits still carry the configured historical
-author name/email, and the known email appears in older commit trees. GitHub HTTPS access failed
-with a network connection error during this session, so remote refs cannot be refreshed or a
-force-with-lease push verified. Cloudflare Turnstile credentials/server-side configuration,
+The authorized `feature/auth-onboarding-saas` and `main` refs have been rewritten: tracked source
+blobs and commit messages replace the personal examples, and commits use the repository-local
+GitHub noreply identity. `git log -S'Example Student' feature/auth-onboarding-saas main` and corresponding
+`git grep` checks on both refs return no matches. The automatic review rejected rewriting local
+release/checkpoint branches because they were outside the specifically named feature/main scope;
+`refs/original` backups and the two `origin/*` tracking refs also still point to pre-rewrite
+objects. GitHub HTTPS access failed with a network connection error, so force-with-lease updates
+have not reached origin. Do not call the remote PII cleanup complete until the two remote refs are
+updated and checked. Cloudflare Turnstile credentials/server-side configuration,
 six-digit OTP delivery, the account-password-by-student-number mapping, and an authorized
 Registrar roster/faculty/capacity/schedule dataset are absent. No seed script was created because
 the requested sample capacities, student/faculty identities and published timetable would invent
 institutional facts. No production deployment, live data, database migration, cloud setting or
 port-5173 process was changed.
 
-Next safe action: finalize the local source commit and carefully rewrite local commit metadata and
-historical source blobs on the authorized feature/main refs, preserving all worktrees and the
-untracked attachment folder. Then verify clean histories and attempt remote synchronization only
-when origin is reachable. Production OTP/Turnstile and seeding remain blocked pending institution
-data and secrets/configuration.
+Next safe action: finish the clean evidence commit/merge, verify branch-specific history once more,
+and retry the two explicitly authorized force-with-lease pushes only when origin is reachable.
+Production OTP/Turnstile and seeding remain blocked pending institution data and
+secrets/configuration.
 
 ## 15 November 2026 14:29 SGT — Administrator task-flow and screen audit
 
