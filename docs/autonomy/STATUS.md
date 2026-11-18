@@ -42,9 +42,14 @@ and does not create a published revision. A synthetic roster and solver output m
 as an official student identity roster, Facilities verification or authoritative published
 timetable. Production seed/publication remains blocked on verified institutional data and a
 successful independent validation path. P4d remains **PARTIAL**; local unit/build gates do not
-qualify external identity, PostgreSQL or browser behavior. Next: review and commit this feature
-checkpoint as specifically authorized, merge to `main`, and push both named branches; preserve the
-separate external qualification and production-readiness gates.
+qualify external identity, PostgreSQL or browser behavior. The work was committed on feature as
+`a2ae4217a337d1d1a8316d15d3dabde289c1d22f` (`feat(auth): complete student portal password
+onboarding`) and merged into main as `9b2fd1045ce6583b95c8414ea46d9cce51b03b58`. The merge tree
+matches the feature worktree; both worktrees were clean after integration. `git push origin
+feature/auth-onboarding-saas main` reported updates from `49e1b69` to `a2ae421` and from `fa24822`
+to `9b2fd10`. A subsequent `git ls-remote` could not connect to GitHub, so remote read-after-write
+verification is unavailable in this session. Preserve the separate external qualification and
+production-readiness gates.
 
 ## 19 November 2026 00:01 SGT — local checkpoint and stale-ref cleanup
 
