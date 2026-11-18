@@ -1,5 +1,22 @@
 # ClassSync — autonomy status ledger
 
+## 18 November 2026 22:26 SGT — final target-branch rewrite and remote verification
+
+The final pre-ledger-push rewritten refs were `feature/auth-onboarding-saas`
+`4625db465899dd1c2b899c6897bf47f37c5f63e9` and `main`
+`e58ecfd4c0a1beb75be14dcc255d707851c63c2c`. Both were force-pushed using explicit leases and
+fetched from `origin`; the fetched OIDs matched those local refs. The two filter-branch backup refs
+created by this rewrite were removed after that verification. Branch-scoped source/history checks
+for the removed personal identifiers found no matches, and the last five feature commits use the
+repository-local GitHub noreply identity. The docs-only ledger update in this commit follows those
+verified pushed refs; it contains no former personal identifier values.
+
+This does **not** scrub every repository ref. Automatic review rejected rewriting the remote
+`codex/classsync-main-checkpoint-20261114` branch and local `release/mvp-staging-qualification`
+branch because the explicit Git rewrite scope named feature/main. The checkpoint branch remains
+on origin and the release branch remains local. They retain older history and need separate owner
+authorization before any rewrite. No other refs or user files were changed.
+
 ## 18 November 2026 22:10 SGT — Production hardening and PII cleanup checkpoint
 
 Base feature HEAD: `345bcbc65bb18f20c83947efddfd4a8582019cb4`. The source cleanup was committed
