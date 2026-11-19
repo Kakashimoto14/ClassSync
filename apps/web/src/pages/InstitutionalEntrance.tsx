@@ -20,6 +20,7 @@ import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
 import { AccountAdministrationPanel } from '../auth/AccountAdministrationPanel';
 import { devServer } from '../config/runtime-config';
 import './institutional-entrance.css';
+import '../styles/pages/auth.css';
 
 const invitePath = '/auth/teacher-invite';
 const verifyPath = '/auth/verify';
@@ -36,7 +37,6 @@ function ProductPreview() {
       variants={entranceItem}
     >
       <div className="connected-entrance__portal-brand">
-        <ClassSyncLogo size="medium" decorative />
         <span>COLEGIO DE MONTALBAN · CLASSSYNC PORTAL</span>
       </div>
       <h2>
@@ -77,7 +77,7 @@ export function EntranceLayout({ children }: { children: ReactNode }) {
         <motion.section className="connected-entrance__access" aria-label="ClassSync account access" variants={entranceItem}>
           <header className="connected-entrance__header">
             <Link to="/" aria-label="ClassSync home">
-              <ClassSyncLogo size="large" decorative />
+              <ClassSyncLogo size="medium" decorative />
             </Link>
             {synthetic && (
               <p className="connected-entrance__preview">
@@ -160,17 +160,6 @@ export function InstitutionalEntrance() {
     <EntranceLayout>
       {canSignIn ? (
         <>
-          {!available && loginEntry && (
-            <>
-              <div className="entrance-availability" role="status">
-                <CircleAlert size={17} aria-hidden="true" />
-                <div><strong>Sign-in service is unavailable</strong><p>Check your connection and try again.</p></div>
-              </div>
-              <Button type="button" variant="secondary" onClick={() => refresh()}>
-                Try again
-              </Button>
-            </>
-          )}
           <CredentialsForm
             key={mode}
             mode={mode}
@@ -335,7 +324,16 @@ function CredentialsForm({
 
   return (
     <>
-      {mode === 'login' && <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>}
+      {mode === 'login' && (
+        <div className="connected-entrance__eyebrow-row">
+          <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>
+          {!invited && (
+            <Link to="/auth/signup" className="connected-entrance__signup-link">
+              Create account
+            </Link>
+          )}
+        </div>
+      )}
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -346,7 +344,7 @@ function CredentialsForm({
             ? 'Create your account with the email on your student record, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
-              : 'Sign in with your student number, institutional email, or Google account.'}
+              : 'Use your student number, campus email, or Google account.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
         <div className="auth-field">
@@ -489,27 +487,29 @@ function CredentialsForm({
           <Button type="button" variant="secondary" disabled={busy || !serviceAvailable} onClick={continueWithGoogle}>
             Continue with Google
           </Button>
-          <p className="entrance-hint">Use the email registered in your student record.</p>
           <aside className="connected-entrance__callout">
             <strong>Signing in for the first time?</strong>
-            <p>Continue with Google using the email registered in your student record. We will send a code to your email, then help you create a private password for future sign-ins using your student number.</p>
+            <p>Use your registered Google email, verify the code, and set a password.</p>
           </aside>
-          <p className="connected-entrance__help">Need help signing in? Visit the Office of the Registrar.</p>
+          <p
+            className="connected-entrance__help"
+            role={serviceAvailable ? undefined : 'status'}
+          >
+            {serviceAvailable
+              ? 'Need help signing in? Visit the Office of the Registrar.'
+              : 'Sign-in service unavailable. Reload to try again.'}
+          </p>
         </div>
       )}
-      <div className="connected-entrance__secondary">
-        {mode === 'login' ? (
-          invited ? (
+      {(mode !== 'login' || invited) && (
+        <div className="connected-entrance__secondary">
+          {mode === 'login' ? (
             <Link to="/auth/login">Back to regular sign in</Link>
           ) : (
-            <>
-              New to ClassSync? <Link to="/auth/signup">Create an account</Link>
-            </>
-          )
-        ) : (
-          <Link to={{ pathname: '/auth/login', search }}>Back to sign in</Link>
-        )}
-      </div>
+            <Link to={{ pathname: '/auth/login', search }}>Back to sign in</Link>
+          )}
+        </div>
+      )}
     </>
   );
 }
