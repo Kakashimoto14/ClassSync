@@ -14,6 +14,7 @@ const TEST_SITE_KEY = '1x00000000000000000000AA';
 export function TurnstileWidget({ onToken }: { onToken: (token: string) => void }) {
   const target = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState('Loading human verification…');
+  const [configured, setConfigured] = useState(true);
   useEffect(() => {
     if (import.meta.env.MODE === 'test') {
       onToken('test-token');
@@ -23,7 +24,7 @@ export function TurnstileWidget({ onToken }: { onToken: (token: string) => void 
     const explicitKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
     if (!import.meta.env.DEV && !explicitKey) {
       onToken('');
-      setStatus('Human verification is not configured.');
+      setConfigured(false);
       return;
     }
     const siteKey = explicitKey || TEST_SITE_KEY;
@@ -63,9 +64,13 @@ export function TurnstileWidget({ onToken }: { onToken: (token: string) => void 
     };
   }, [onToken]);
   return (
-    <div className="turnstile-field" role="group" aria-label="Human verification">
+    <div
+      className={`turnstile-field${configured ? '' : ' turnstile-field--unavailable'}`}
+      role="group"
+      aria-label="Human verification"
+    >
       <div ref={target} className="turnstile-field__widget" />
-      <span className="entrance-hint" role="status">{status}</span>
+      {configured && <span className="entrance-hint" role="status">{status}</span>}
     </div>
   );
 }

@@ -1,5 +1,43 @@
 # ClassSync — autonomy status ledger
 
+## 20 November 2026 05:06 SGT — responsive sign-in and container import path
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `750aa8ac04a505c12de6a5b3f734c3291199ff45`.
+The existing development server on port 5173 was not touched. Temporary Vite preview servers
+started for browser checks were stopped. The main worktree was not modified. No credentials,
+provider calls, hosted services, or database writes were used.
+
+Updated the responsive login entrance and its actual imported page stylesheet, Turnstile's
+unconfigured visual state, Docker's container `PYTHONPATH`, README guidance, and login tests.
+Below 768px the form is a single-column card with the campus showcase hidden; 768–959px remains
+single-column; desktop uses a two-panel card. The unavailable Turnstile state no longer reserves a
+large blank region. The production/container code change is `ENV PYTHONPATH=/app`.
+
+Fresh local verification:
+
+- `npm run lint` — PASS.
+- `npm run typecheck` — PASS.
+- `npm run test --workspace=@classync/web -- --run src/pages/InstitutionalEntrance.test.tsx` —
+  PASS, 10 tests.
+- `npm run test:web` — PASS, 846 tests across 63 files.
+- `npm run build` — PASS; no Vite chunk-size or mixed Firebase import warnings. Largest reported
+  JavaScript chunks: app 329.71 kB, React 318.51 kB, Firebase 243.27 kB, Motion 125.02 kB.
+- Real Chrome via Playwright against isolated local Vite preview (ports 5197 and 5198): login and
+  account creation UI checked at 360×800, 390×844, 767×900, 768×1024, 959×900, 960×800,
+  1024×768, 1366×768, and 1440×900. No horizontal overflow. At 360–767px the access surface
+  filled the available card width and the showcase was hidden; 768–959px remained centered and
+  single-column. At 1366×768 and 1440×900, the 700px-tall desktop card and all form/showcase
+  content fit without page scrolling. Account creation used a local UI fixture with a synthetic
+  authentication response; no account was created. This is responsive UI evidence only, not a
+  live provider/authentication test.
+
+Not run: Docker image build, Python tests (no Python application source was changed), live
+Firebase/Turnstile/Registrar checks, native browser zoom control, or screen-reader testing. P4d
+and production readiness remain partial; provider-backed authentication and deployment gates remain
+open. Next: review the diff, commit the responsive login slice, merge to `main`, and push the
+authorized branches. Evidence follows this worktree and does not alter production data.
+
 ## 20 November 2026 03:05 SGT — institutional login lock, visual refresh, and operator provisioning CLI
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch

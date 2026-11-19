@@ -97,7 +97,7 @@ it('routes student-number sign-in through the Gateway with the one-use Turnstile
 
 it('validates confirmation before student account creation and submits no role', async () => {
   entrance();
-  fireEvent.click(screen.getByRole('link', { name: 'Create an account' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Create account' }));
   expect(screen.getByRole('heading', { name: 'Create your account' })).toHaveFocus();
   expect(screen.getByLabelText('Email')).toHaveAttribute(
     'placeholder',
@@ -128,7 +128,7 @@ it('validates confirmation before student account creation and submits no role',
 
 it('requires the registered institutional email pattern for student account creation', async () => {
   entrance();
-  fireEvent.click(screen.getByRole('link', { name: 'Create an account' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Create account' }));
   fireEvent.change(screen.getByLabelText('Email'), {
     target: { value: 'Student.Name@student.pnm.edu.ph' },
   });
@@ -190,11 +190,12 @@ it('uses the server-authorized workspace even when an external return target was
   expect(await screen.findByRole('heading', { name: 'Student workspace' })).toBeInTheDocument();
 });
 
-it('shows a retryable unavailable state without accepting credentials', () => {
-  const refresh = entrance('/', { available: false, state: { status: 'unavailable' } });
-  expect(screen.getByText('Sign-in service is unavailable')).toBeInTheDocument();
+it('shows the unavailable state without accepting credentials', () => {
+  entrance('/', { available: false, state: { status: 'unavailable' } });
+  expect(screen.getByText('Sign-in service unavailable. Reload to try again.')).toHaveAttribute(
+    'role',
+    'status',
+  );
   expect(screen.getByLabelText('Student Number or Institutional Email')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeDisabled();
-  fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-  expect(refresh).toHaveBeenCalledOnce();
 });
