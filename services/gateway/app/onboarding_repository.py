@@ -271,7 +271,7 @@ class OnboardingRepository:
                 raise HTTPException(403, "Verification code could not be confirmed",
                                     headers={"Cache-Control": "no-store"})
             expected = hmac.new(
-                secret, f"{principal.uid}\0{challenge_id}\0{code}".encode("utf-8"), "sha256"
+                secret, f"{principal.uid}\0{challenge_id}\0{code}".encode(), "sha256"
             ).digest()
             if not hmac.compare_digest(expected, bytes(row["otp_hmac"])):
                 db.execute(text("""

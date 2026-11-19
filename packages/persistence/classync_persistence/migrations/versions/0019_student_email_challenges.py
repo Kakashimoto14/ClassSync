@@ -25,7 +25,10 @@ def upgrade():
             FOREIGN KEY (tenant_id,student_id)
                 REFERENCES classsync_identity.students(tenant_id,id),
             CHECK (expires_at > created_at AND expires_at <= created_at + interval '5 minutes'),
-            CHECK (resend_after >= created_at AND resend_after <= created_at + interval '60 seconds')
+            CHECK (
+                resend_after >= created_at
+                AND resend_after <= created_at + interval '60 seconds'
+            )
         )
     """)
     op.execute("""
@@ -38,8 +41,12 @@ def upgrade():
         ON classsync_identity.email_verification_challenges
             (tenant_id,uid,challenge_id) WHERE consumed_at IS NULL
     """)
-    op.execute("ALTER TABLE classsync_identity.email_verification_challenges ENABLE ROW LEVEL SECURITY")
-    op.execute("ALTER TABLE classsync_identity.email_verification_challenges FORCE ROW LEVEL SECURITY")
+    op.execute(
+        "ALTER TABLE classsync_identity.email_verification_challenges ENABLE ROW LEVEL SECURITY"
+    )
+    op.execute(
+        "ALTER TABLE classsync_identity.email_verification_challenges FORCE ROW LEVEL SECURITY"
+    )
     op.execute("""
         CREATE POLICY email_verification_challenge_owner
         ON classsync_identity.email_verification_challenges

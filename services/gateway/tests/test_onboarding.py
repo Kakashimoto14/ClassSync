@@ -1,15 +1,14 @@
 import time
 from unittest.mock import Mock
+from uuid import UUID
 
 import pytest
-from uuid import UUID
 from classync_contracts.identity import VerifiedPrincipal
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from services.gateway.app import main
-from services.gateway.app import onboarding
+from services.gateway.app import main, onboarding
 from services.gateway.app.onboarding import STUDENT_VERIFICATION_ERROR
 from services.gateway.app.onboarding_repository import student_record_matches
 

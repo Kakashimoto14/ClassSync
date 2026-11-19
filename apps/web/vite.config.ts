@@ -97,6 +97,12 @@ export default defineConfig(({ command, mode }) => {
               moduleId.includes('/node_modules/lucide-react/') ||
               moduleId.includes('/node_modules/@tanstack/react-query/')
             ) return 'ui-vendor';
+            if (
+              moduleId.includes('/node_modules/motion/') ||
+              moduleId.includes('/node_modules/framer-motion/') ||
+              moduleId.includes('/node_modules/motion-dom/') ||
+              moduleId.includes('/node_modules/motion-utils/')
+            ) return 'motion-vendor';
           },
         },
       },

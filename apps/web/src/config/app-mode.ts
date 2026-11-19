@@ -25,6 +25,13 @@ export function resolveAppMode(input: ModeInput): AppMode {
       throw new Error('Presentation target contradicts app mode.');
     mode = 'presentation';
   }
+  if (input.command === 'build' && !input.presentationTarget) {
+    if (mode !== undefined && mode !== 'institutional')
+      throw new Error('Distributable builds require institutional mode or an explicit presentation target.');
+    // Legacy preview flags remain accepted for compatibility but can never
+    // change the capability mode of an institutional/distributable artifact.
+    return 'institutional';
+  }
   if (!mode) {
     if (flags.includes('true') && flags.includes('false'))
       throw new Error('Contradictory legacy ClassSync flags.');
@@ -32,7 +39,7 @@ export function resolveAppMode(input: ModeInput): AppMode {
   }
   if (mode === 'presentation' && flags.includes('false'))
     throw new Error('Presentation requires preview and sample capabilities.');
-  if (mode === 'institutional' && flags.includes('true'))
+  if (mode === 'institutional' && flags.includes('true') && input.command !== 'build')
     throw new Error('Institutional mode cannot enable preview capabilities.');
   if (mode === 'sandbox' && (input.command === 'build' || input.nodeEnv === 'production'))
     throw new Error('Sandbox is restricted to the development server; never distributable.');

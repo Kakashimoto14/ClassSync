@@ -10,8 +10,9 @@
 }
 
 .auth-brand {
-  background: linear-gradient(135deg, var(--color-navy-900), var(--color-primary-900));
-  color: #FFFFFF;
+  background: linear-gradient(155deg, #fdf8fa 0%, #f4f1f6 52%, #edf2f7 100%);
+  border-inline-end: 1px solid #e8e4ec;
+  color: #0f172a;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -27,7 +28,7 @@
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.15), transparent 70%);
+  background: radial-gradient(circle, rgba(135, 46, 73, 0.08), transparent 70%);
   top: -200px;
   right: -200px;
   pointer-events: none;
@@ -35,10 +36,10 @@
 
 .auth-brand .eyebrow,
 .auth-brand-copy > p:last-child {
-  color: var(--color-slate-300);
+  color: #475569;
 }
 .auth-brand .eyebrow {
-  color: var(--color-primary-300);
+  color: #872e49;
 }
 
 .auth-brand-copy {
@@ -48,7 +49,7 @@
 .auth-brand h2 {
   font-size: clamp(1.75rem, 3vw, 2.75rem);
   max-width: 20ch;
-  color: #FFFFFF;
+  color: #0f172a;
 }
 .auth-brand .classsync-logo__tagline {
   display: none;

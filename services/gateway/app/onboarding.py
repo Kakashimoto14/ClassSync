@@ -9,11 +9,11 @@ from threading import Lock
 from uuid import UUID, uuid4
 
 import httpx
-from classync_contracts.firebase import initialize_firebase
 from classync_contracts.cloud_run import service_headers
+from classync_contracts.firebase import initialize_firebase
 from classync_contracts.request_authorization import request_principal
-from firebase_admin import auth as firebase_auth
 from fastapi import APIRouter, HTTPException, Request, Response
+from firebase_admin import auth as firebase_auth
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.concurrency import run_in_threadpool
 
@@ -148,7 +148,7 @@ def onboarding_router(settings):
         secret = config.otp_hmac_secret.get_secret_value().encode("utf-8")
         digest = hmac.new(
             secret,
-            f"{principal.uid}\0{challenge_id}\0{code}".encode("utf-8"),
+            f"{principal.uid}\0{challenge_id}\0{code}".encode(),
             "sha256",
         ).digest()
         masked = repository.issue_student_challenge(

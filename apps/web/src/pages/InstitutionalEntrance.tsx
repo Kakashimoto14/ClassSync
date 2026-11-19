@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
+import { MotionConfig, motion } from 'motion/react';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
 import { Button } from '../components/ui/Button';
 import { validateLogin, workspaceDestination, type LoginValidationErrors } from '../auth/access';
@@ -29,7 +30,11 @@ const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
 function ProductPreview() {
   return (
-    <aside className="connected-entrance__story" aria-label="ClassSync campus services">
+    <motion.aside
+      className="connected-entrance__story"
+      aria-label="ClassSync campus services"
+      variants={entranceItem}
+    >
       <div className="connected-entrance__portal-brand">
         <ClassSyncLogo size="medium" decorative />
         <span>COLEGIO DE MONTALBAN · CLASSSYNC PORTAL</span>
@@ -38,22 +43,38 @@ function ProductPreview() {
         Smarter schedules.<br />Better campus days<span>.</span>
       </h2>
       <p>Academic and scheduling services for the Colegio de Montalban community.</p>
-      <ul className="connected-entrance__features">
-        <li><CalendarDays size={19} aria-hidden="true" />View class schedules and room assignments</li>
-        <li><DoorOpen size={19} aria-hidden="true" />Check building and laboratory availability</li>
-        <li><ShieldCheck size={19} aria-hidden="true" />Stay informed about official schedule updates</li>
+      <ul className="connected-entrance__features entrance-preview-card">
+        <li><span className="entrance-preview-card__icon"><CalendarDays size={19} aria-hidden="true" /></span><span><strong>Live Class Schedules</strong><small>Class times and room assignments</small></span></li>
+        <li><span className="entrance-preview-card__icon"><DoorOpen size={19} aria-hidden="true" /></span><span><strong>Campus Room Availability</strong><small>Buildings and learning spaces</small></span></li>
+        <li><span className="entrance-preview-card__icon"><ShieldCheck size={19} aria-hidden="true" /></span><span><strong>Instant Schedule Alerts</strong><small>Official changes and updates</small></span></li>
       </ul>
       <small className="connected-entrance__service-label">ACADEMIC &amp; SCHEDULING SERVICES</small>
-    </aside>
+    </motion.aside>
   );
 }
+
+const entranceItem = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' as const } },
+};
+
+const entranceFrame = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
+};
 
 export function EntranceLayout({ children }: { children: ReactNode }) {
   const synthetic = devServer && import.meta.env.VITE_CLASSSYNC_SYNTHETIC_PREVIEW === 'true';
   return (
-    <main className="connected-entrance">
-      <div className="connected-entrance__frame">
-        <section className="connected-entrance__access" aria-label="ClassSync account access">
+    <MotionConfig reducedMotion="user">
+    <motion.main
+      className="connected-entrance"
+      initial="hidden"
+      animate="visible"
+      variants={entranceFrame}
+    >
+      <motion.div className="connected-entrance__frame" variants={entranceFrame}>
+        <motion.section className="connected-entrance__access" aria-label="ClassSync account access" variants={entranceItem}>
           <header className="connected-entrance__header">
             <Link to="/" aria-label="ClassSync home">
               <ClassSyncLogo size="large" decorative />
@@ -65,10 +86,11 @@ export function EntranceLayout({ children }: { children: ReactNode }) {
             )}
           </header>
           {children}
-        </section>
+        </motion.section>
         <ProductPreview />
-      </div>
-    </main>
+      </motion.div>
+    </motion.main>
+    </MotionConfig>
   );
 }
 
@@ -115,13 +137,14 @@ export function InstitutionalEntrance() {
   if (state.status === 'role-required' && path !== accountPath)
     return <Navigate replace to={{ pathname: accountPath, search }} />;
 
-  const canSignIn = available && signedOut;
+  const loginEntry = path === '/auth/login' || path === '';
+  const canSignIn = (available && signedOut) || (loginEntry && mode === 'login');
   const formTitle =
     mode === 'signup'
       ? 'Create your account'
       : mode === 'recovery'
         ? 'Reset your password'
-    : 'Welcome, CdMian!';
+        : 'Welcome to ClassSync';
   const title =
     path === verifyPath
       ? 'Verify your email'
@@ -136,13 +159,27 @@ export function InstitutionalEntrance() {
   return (
     <EntranceLayout>
       {canSignIn ? (
-        <CredentialsForm
-          key={mode}
-          mode={mode}
-          title={formTitle}
-          search={search}
-          invited={invited}
-        />
+        <>
+          {!available && loginEntry && (
+            <>
+              <div className="entrance-availability" role="status">
+                <CircleAlert size={17} aria-hidden="true" />
+                <div><strong>Sign-in service is unavailable</strong><p>Check your connection and try again.</p></div>
+              </div>
+              <Button type="button" variant="secondary" onClick={() => refresh()}>
+                Try again
+              </Button>
+            </>
+          )}
+          <CredentialsForm
+            key={mode}
+            mode={mode}
+            title={formTitle}
+            search={search}
+            invited={invited}
+            serviceAvailable={available}
+          />
+        </>
       ) : (
         <>
           <h1 ref={statusHeading} tabIndex={-1}>
@@ -196,11 +233,13 @@ function CredentialsForm({
   title,
   search,
   invited,
+  serviceAvailable = true,
 }: {
   mode: 'login' | 'signup' | 'recovery';
   title: string;
   search: string;
   invited: boolean;
+  serviceAvailable?: boolean;
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -307,7 +346,7 @@ function CredentialsForm({
             ? 'Create your account with the email on your student record, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
-              : 'Sign in to stay connected to your campus schedule and rooms.'}
+              : 'Sign in with your student number, institutional email, or Google account.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
         <div className="auth-field">
@@ -434,7 +473,7 @@ function CredentialsForm({
             {notice}
           </p>
         )}
-        <Button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy || !serviceAvailable}>
           {busy
             ? 'Please wait…'
             : signup
@@ -447,13 +486,13 @@ function CredentialsForm({
       {mode === 'login' && !invited && (
         <div className="connected-entrance__first-time">
           <span className="connected-entrance__divider">or</span>
-          <Button type="button" variant="secondary" disabled={busy} onClick={continueWithGoogle}>
+          <Button type="button" variant="secondary" disabled={busy || !serviceAvailable} onClick={continueWithGoogle}>
             Continue with Google
           </Button>
           <p className="entrance-hint">Use the email registered in your student record.</p>
           <aside className="connected-entrance__callout">
             <strong>Signing in for the first time?</strong>
-            <p>Continue with Google using the email registered in your student record. Verify your account before accessing campus schedules.</p>
+            <p>Continue with Google using the email registered in your student record. We will send a code to your email, then help you create a private password for future sign-ins using your student number.</p>
           </aside>
           <p className="connected-entrance__help">Need help signing in? Visit the Office of the Registrar.</p>
         </div>

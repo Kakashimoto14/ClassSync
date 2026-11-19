@@ -38,8 +38,6 @@ test('actual Vite builds reject unsafe configuration before emitting artifacts',
     [{ VITE_CLASSSYNC_MODE: 'sandbox', NODE_ENV: 'development' }, ['--mode', 'development']],
     [{ VITE_CLASSSYNC_MODE: 'typo' }],
     [{ VITE_ENABLE_ROLE_PREVIEW: 'TRUE' }],
-    [{ VITE_ENABLE_ROLE_PREVIEW: 'true', VITE_ENABLE_PRESENTATION_SAMPLE: 'false' }],
-    [{ VITE_CLASSSYNC_MODE: 'institutional', VITE_ENABLE_ROLE_PREVIEW: 'true' }],
     [{ CLASSSYNC_BUILD_TARGET: 'presentation', VITE_CLASSSYNC_MODE: 'institutional' }],
     [{ CLASSSYNC_BUILD_TARGET: 'presentation', VITE_ENABLE_PRESENTATION_SAMPLE: 'false' }],
     [{ VERCEL_GIT_COMMIT_SHA: '0'.repeat(40) }],
@@ -57,7 +55,7 @@ test('actual Vite builds reject unsafe configuration before emitting artifacts',
     assert.notEqual(result.status, 0, JSON.stringify(env));
     assert.match(
       result.stderr + result.stdout,
-      /Sandbox|Invalid VITE|Legacy ClassSync|Contradictory|Institutional|Presentation|Release commit|[Cc]onnected/,
+      /Sandbox|Invalid VITE|Legacy ClassSync|Contradictory|Institutional|Presentation|Release commit|[Cc]onnected|Distributable/,
     );
   });
 });
@@ -86,7 +84,11 @@ test('connected build uses institutional mode without requiring a Storage bucket
 for (const [name, env, expected] of [
   ['ordinary', {}, 'institutional'],
   ['presentation', { CLASSSYNC_BUILD_TARGET: 'presentation' }, 'presentation'],
-  ['legacy-preview', { VITE_ENABLE_ROLE_PREVIEW: 'true' }, 'presentation'],
+  [
+    'legacy-preview',
+    { VITE_ENABLE_ROLE_PREVIEW: 'true', VITE_ENABLE_PRESENTATION_SAMPLE: 'true' },
+    'institutional',
+  ],
 ])
   test(`${name} production metadata, SPA refresh and static/API boundaries`, async () => {
     const built = build(env, name);
