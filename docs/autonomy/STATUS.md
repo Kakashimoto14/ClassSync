@@ -35,8 +35,11 @@ Fresh local verification:
 Not run: Docker image build, Python tests (no Python application source was changed), live
 Firebase/Turnstile/Registrar checks, native browser zoom control, or screen-reader testing. P4d
 and production readiness remain partial; provider-backed authentication and deployment gates remain
-open. Next: review the diff, commit the responsive login slice, merge to `main`, and push the
-authorized branches. Evidence follows this worktree and does not alter production data.
+open. No production data was touched.
+
+Git integration: feature commit `a325b843786421267c998cbf315a802375dbe043`; merge commit
+`4010055` on `main`. `git push origin feature/auth-onboarding-saas main` succeeded and updated
+both refs (`750aa8a..a325b84` and `aa780fe..4010055`).
 
 ## 20 November 2026 03:05 SGT — institutional login lock, visual refresh, and operator provisioning CLI
 
