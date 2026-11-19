@@ -43,8 +43,11 @@ Production readiness and P4d remain **PARTIAL**. Preserve all hosted-data, provi
 Files changed in this milestone: `README.md`; frontend app-mode/runtime, preview-session, login
 page, styles, Vite chunk config and tests under `apps/web`; OTP import/format cleanup and tests under
 `services/gateway`; formatting-only updates to migrations `0019`/`0020`; production artifact test;
-new operator CLI and tests. Next: inspect the complete staged diff and verify final repository status
-before making the owner-authorized commit and merge.
+new operator CLI and tests. Final staged review passed (`git diff --cached --check`); commit
+`9cfb86771f4db3030632c2855bc1298bc1cf2c07` was created on the feature branch, merged into `main` as
+`711083d85f074b0b1a8717b2c5640c0ab7fee57c`, and both refs were pushed successfully by `git push
+origin feature/auth-onboarding-saas main`. The post-push `git ls-remote` read-after-write check was
+blocked by unavailable GitHub connectivity; both local worktrees are clean.
 
 ## 19 November 2026 01:06 SGT — student portal password setup and local qualification
 
