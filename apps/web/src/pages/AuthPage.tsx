@@ -1,11 +1,17 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { demoDestination } from '../auth/access';
 import { useDevelopmentRole } from '../auth/useDevelopmentRole';
-import { appMode } from '../config/runtime-config';
+import { institutionalAccessRequired } from '../config/runtime-config';
 import { EntranceLayout, InstitutionalEntrance } from './InstitutionalEntrance';
 
 export function AuthPage() {
-  return appMode === 'institutional' ? <InstitutionalEntrance /> : <SampleEntrance />;
+  const { pathname } = useLocation();
+  const loginEntry = pathname.replace(/\/+$/, '') === '/auth/login';
+  return institutionalAccessRequired || loginEntry ? (
+    <InstitutionalEntrance />
+  ) : (
+    <SampleEntrance />
+  );
 }
 
 function SampleEntrance() {

@@ -22,11 +22,15 @@ describe('operating mode exhaustive compatibility matrix', () => {
                 const both = [rolePreview, presentationSample];
                 const expected: AppMode = presentationTarget
                   ? 'presentation'
-                  : (mode ?? (both.includes('true') ? 'presentation' : 'institutional'));
+                  : command === 'build'
+                    ? 'institutional'
+                    : (mode ?? (both.includes('true') ? 'presentation' : 'institutional'));
                 const invalid =
                   (presentationTarget && mode !== undefined && mode !== 'presentation') ||
-                  (expected === 'presentation' && both.includes('false')) ||
-                  (expected === 'institutional' && both.includes('true')) ||
+                  (command === 'build' && !presentationTarget && mode !== undefined && mode !== 'institutional') ||
+                  (command !== 'build' && expected === 'presentation' && both.includes('false')) ||
+                  (command !== 'build' && expected === 'institutional' && both.includes('true')) ||
+                  (presentationTarget && expected === 'presentation' && both.includes('false')) ||
                   (expected === 'sandbox' && (command === 'build' || nodeEnv === 'production'));
                 if (invalid) expect(() => resolveAppMode(input)).toThrow();
                 else expect(resolveAppMode(input)).toBe(expected);
@@ -45,5 +49,9 @@ describe('operating mode exhaustive compatibility matrix', () => {
     expect(capabilitiesFor('presentation').liveRequests).toBe(false);
     expect(capabilitiesFor('sandbox').description).toMatch(/backend authorization/);
     expect(Object.isFrozen(capabilitiesFor('sandbox'))).toBe(true);
+  });
+  it('locks distributable builds to institutional mode despite stale legacy preview flags', () => {
+    expect(resolveAppMode({ command: 'build', rolePreview: 'true', presentationSample: 'true' }))
+      .toBe('institutional');
   });
 });

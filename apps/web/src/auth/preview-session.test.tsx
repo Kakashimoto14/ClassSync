@@ -105,13 +105,13 @@ describe('bounded tab preview storage', () => {
     expect(disabled.readPreviewSession()).toBeNull();
   });
 
-  it('requires an explicit demo build flag outside development', async () => {
+  it('ignores legacy demo flags outside development builds', async () => {
     vi.resetModules();
     vi.stubEnv('DEV', false);
     vi.stubEnv('VITE_ENABLE_ROLE_PREVIEW', 'true');
     const demo = await import('./preview-session');
-    expect(demo.previewEnabled).toBe(true);
+    expect(demo.previewEnabled).toBe(false);
     demo.writePreviewSession('student');
-    expect(demo.readPreviewSession()).toBe('student');
+    expect(demo.readPreviewSession()).toBeNull();
   });
 });

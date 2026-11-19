@@ -24,6 +24,10 @@ export const appMode =
         })();
 
 export const capabilities = capabilitiesFor(appMode);
+// A distributable/institutional build always uses the connected access screen.
+// Runtime preview flags are never consulted by AuthPage for its login entry.
+export const institutionalAccessRequired =
+  appMode === 'institutional' || (import.meta.env.PROD && appMode !== 'presentation');
 export function requireLiveCapability() {
   if (!capabilities.liveRequests)
     throw Object.assign(new Error(capabilities.description), { status: 403 });

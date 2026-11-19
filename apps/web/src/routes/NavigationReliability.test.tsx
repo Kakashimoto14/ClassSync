@@ -119,7 +119,7 @@ describe('real route tree preview continuity', () => {
     const path = '/teacher/change-requests/detail/?id=request-room-access#record';
     const { router } = open(path);
     expect(router.state.location.pathname).toBe('/auth/login');
-    fireEvent.click(screen.getByRole('link', { name: 'Explore ClassSync' }));
+    await act(() => router.navigate(`/dev/role-preview?returnTo=${encodeURIComponent(path)}`));
     await act(async () => {});
     fireEvent.click(screen.getByRole('button', { name: 'Open teacher demo' }));
     await act(async () => {});

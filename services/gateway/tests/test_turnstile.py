@@ -1,5 +1,5 @@
-from pydantic import SecretStr
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from services.gateway.app import main
 

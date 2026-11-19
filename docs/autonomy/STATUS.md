@@ -1,5 +1,51 @@
 # ClassSync — autonomy status ledger
 
+## 20 November 2026 03:05 SGT — institutional login lock, visual refresh, and operator provisioning CLI
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `795546fca1a894e59e2ce70944eb3ae9dea2ba24`.
+The separate `main` worktree was inspected and clean at `9d2a16c`; port 5173, ignored
+virtual environments, and databases were not touched. Institutional/distributable builds now
+ignore legacy preview flags, and `/auth/login` always renders the real account form; preview
+sampling remains available only through the explicit preview route/build. The sign-in page uses a
+light architectural split layout with reduced-motion-aware Motion entrance transitions. Added an
+operator-only `scripts/provision_live_accounts.py` that requires repeated live-write confirmation,
+TLS PostgreSQL, a matching existing tenant/Firebase project, attributable Administrator grants,
+and existing active Registrar/faculty records. It does not invent roster, faculty, or tenant data.
+Added regression tests for these guards, corrected stale production-artifact expectations, and
+resolved Ruff findings in the OTP paths and migrations without changing behavior.
+
+Fresh local evidence:
+
+- `.venv\Scripts\python.exe -m pytest` — **1,128 passed**, one existing Starlette/httpx
+  deprecation warning, 101.34 seconds. Pytest's configured `testpaths` is `services`; this count
+  covers service tests.
+- `.venv\Scripts\python.exe -m pytest scripts/tests/test_provision_live_accounts.py -q` —
+  **13 passed**. These are unit tests only; the operator CLI was not invoked against live services.
+- `npm run test:web` — **846 passed across 63 files**, 180.86 seconds.
+- `npm run test:artifacts` — **5 passed**. It built and inspected ordinary institutional,
+  explicit presentation, connected institutional, and legacy-flag institutional artifacts; old
+  preview flags did not enable preview behavior in the standard distributable build.
+- `npm run lint` — PASS, zero warnings; `npm run typecheck` — PASS.
+- `npm run build` — PASS with no Vite chunk-size or mixed Firebase import warnings. Largest
+  JavaScript chunks: app `330.19 kB`, React `318.51 kB`, Firebase `243.27 kB`, Motion `125.02 kB`.
+- `.venv\Scripts\python.exe -m ruff check services packages scripts` — PASS, all checks passed.
+
+`docs/autonomy/APPROVALS.md` and the explicit owner request authorize local implementation,
+commit, merge and push. No account provisioning, real database migration, Firebase mutation, hosted
+configuration, or deployment was performed. The CLI has no distributed transaction across Firebase
+and PostgreSQL: on a later database failure, newly created Firebase accounts are deleted best-effort;
+an existing Firebase password change cannot be rolled back automatically. Live target, backups,
+operator authority, Firebase tenant, roster/faculty evidence, PostgreSQL migration/RLS execution,
+provider-backed browser flow, native 200% zoom and keyboard-only use remain external or manual gates.
+Production readiness and P4d remain **PARTIAL**. Preserve all hosted-data, provider, and release gates.
+
+Files changed in this milestone: `README.md`; frontend app-mode/runtime, preview-session, login
+page, styles, Vite chunk config and tests under `apps/web`; OTP import/format cleanup and tests under
+`services/gateway`; formatting-only updates to migrations `0019`/`0020`; production artifact test;
+new operator CLI and tests. Next: inspect the complete staged diff and verify final repository status
+before making the owner-authorized commit and merge.
+
 ## 19 November 2026 01:06 SGT — student portal password setup and local qualification
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch

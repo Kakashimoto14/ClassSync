@@ -1,8 +1,12 @@
 import type { UserRole } from '../types/ui';
-import { appMode } from '../config/runtime-config';
+import { appMode, devServer } from '../config/runtime-config';
 
 // This enables sample UI only. It never grants backend permissions.
-export const previewEnabled = appMode !== 'institutional';
+// Preview identities are usable only in the explicit presentation build or
+// local sandbox server. Stale environment flags cannot restore a production session.
+export const previewEnabled =
+  appMode === 'presentation' ||
+  (appMode === 'sandbox' && (devServer || import.meta.env.MODE === 'test'));
 export const previewSessionKey = 'classsync.preview.v1';
 export const previewSessionLifetime = 8 * 60 * 60 * 1000;
 export interface PreviewSession {

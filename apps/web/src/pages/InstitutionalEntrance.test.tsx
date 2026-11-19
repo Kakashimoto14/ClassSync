@@ -44,7 +44,7 @@ beforeEach(() => vi.clearAllMocks());
 
 it('shows the CdM campus access login and a non-production verification widget', async () => {
   entrance();
-  expect(screen.getByRole('heading', { name: 'Welcome, CdMian!' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Welcome to ClassSync' })).toBeInTheDocument();
   expect(screen.getByText('CAMPUS ACCESS')).toBeInTheDocument();
   expect(screen.getByText('Signing in for the first time?')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
@@ -192,8 +192,9 @@ it('uses the server-authorized workspace even when an external return target was
 
 it('shows a retryable unavailable state without accepting credentials', () => {
   const refresh = entrance('/', { available: false, state: { status: 'unavailable' } });
-  expect(screen.getByText('University sign-in is unavailable')).toBeInTheDocument();
-  expect(screen.queryByLabelText('Email')).not.toBeInTheDocument();
+  expect(screen.getByText('Sign-in service is unavailable')).toBeInTheDocument();
+  expect(screen.getByLabelText('Student Number or Institutional Email')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
   expect(refresh).toHaveBeenCalledOnce();
 });

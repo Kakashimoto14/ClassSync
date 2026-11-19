@@ -41,5 +41,7 @@ def downgrade():
     """)
     op.execute("ALTER TABLE classsync_identity.email_verification_challenges "
                "DROP CONSTRAINT email_verification_verified_consumed")
-    op.execute("ALTER TABLE classsync_identity.email_verification_challenges DROP COLUMN verified_at")
+    op.execute(
+        "ALTER TABLE classsync_identity.email_verification_challenges DROP COLUMN verified_at"
+    )
     op.execute("ALTER TABLE classsync_identity.students DROP COLUMN password_configured")

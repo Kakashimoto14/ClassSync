@@ -3,36 +3,40 @@ import { DevelopmentRoleProvider } from '../auth/DevelopmentRoleProvider';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthPage } from './AuthPage';
-import { previewSessionKey } from '../auth/preview-session';
+import { UniversitySessionContext } from '../auth/university-session-context';
+
+vi.mock('../auth/TurnstileWidget', () => ({
+  TurnstileWidget: () => <div aria-label="Human verification" />,
+}));
 
 beforeEach(() => sessionStorage.clear());
 
 describe('honest sign-in entry', () => {
-  it.each([
-    ['teacher', '/teacher/schedule'],
-    ['student', '/student/dashboard'],
-    ['administrator', '/admin/dashboard'],
-  ])('continues a valid %s session only to a role-owned destination', (role, destination) => {
-    sessionStorage.setItem(
-      previewSessionKey,
-      JSON.stringify({ version: 1, role, startedAt: Date.now() }),
-    );
+  it('always shows the real sign-in form at /auth/login, even with a preview session', () => {
+    sessionStorage.setItem('classsync.preview.v1', JSON.stringify({
+      version: 1, role: 'administrator', startedAt: Date.now(),
+    }));
     render(
       <MemoryRouter initialEntries={['/auth/login?returnTo=%2Fteacher%2Fschedule']}>
-        <DevelopmentRoleProvider>
-          <AuthPage />
-        </DevelopmentRoleProvider>
+        <UniversitySessionContext.Provider value={{
+          available: true,
+          state: { status: 'signed-out' },
+          refresh: vi.fn(),
+          signOut: vi.fn(),
+        }}>
+          <DevelopmentRoleProvider><AuthPage /></DevelopmentRoleProvider>
+        </UniversitySessionContext.Provider>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('link', { name: 'Continue to workspace' })).toHaveAttribute(
-      'href',
-      destination,
-    );
-    expect(screen.getByRole('link', { name: 'Choose another role' })).toHaveAttribute(
-      'href',
-      '/dev/role-preview?returnTo=%2Fteacher%2Fschedule',
-    );
-    expect(screen.queryByRole('link', { name: 'Explore ClassSync' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Welcome to ClassSync' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Student Number or Institutional Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Human verification')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
+    expect(screen.getByText('Signing in for the first time?')).toBeInTheDocument();
+    expect(screen.queryByText('Explore ClassSync')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sample preview · You are not signed in.')).not.toBeInTheDocument();
   });
   it('provides sample navigation without requesting credentials or live identity', () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
