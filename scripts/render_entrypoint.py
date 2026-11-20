@@ -9,6 +9,7 @@ import signal
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Event
 from urllib.error import URLError
 from urllib.request import urlopen
@@ -94,6 +95,32 @@ def stop_children(children):
                 child.wait(timeout=5)
 
 
+def start_internal_services(plan, environ, *, popen=subprocess.Popen, opener=urlopen,
+                            sleep=time.sleep):
+    """Start every private API before polling health checks concurrently."""
+    internal_services = plan[:-1]
+    children = []
+    try:
+        for _name, command, _port in internal_services:
+            children.append(popen(command, env=environ))
+
+        with ThreadPoolExecutor(max_workers=len(internal_services)) as executor:
+            checks = {
+                executor.submit(
+                    wait_for_health, child, name, port, opener=opener, sleep=sleep
+                ): name
+                for (name, _command, port), child in zip(
+                    internal_services, children, strict=True
+                )
+            }
+            for check in as_completed(checks):
+                check.result()
+    except Exception:
+        stop_children(children)
+        raise
+    return children
+
+
 def main(environ=os.environ, *, popen=subprocess.Popen, opener=urlopen, sleep=time.sleep):
     port = deployment_port(environ)
     shutdown = Event()
@@ -107,11 +134,12 @@ def main(environ=os.environ, *, popen=subprocess.Popen, opener=urlopen, sleep=ti
         for signum in (signal.SIGTERM, signal.SIGINT):
             prior_handlers[signum] = signal.signal(signum, request_shutdown)
 
-        for name, command, service_port in deployment_plan(port):
-            child = popen(command, env=environ)
-            children.append(child)
-            if name != "gateway":
-                wait_for_health(child, name, service_port, opener=opener, sleep=sleep)
+        plan = deployment_plan(port)
+        children.extend(
+            start_internal_services(plan, environ, popen=popen, opener=opener, sleep=sleep)
+        )
+        _name, gateway_command, _gateway_port = plan[-1]
+        children.append(popen(gateway_command, env=environ))
 
         while not shutdown.wait(0.25):
             for _name, child in zip(

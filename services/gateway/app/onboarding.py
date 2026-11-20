@@ -16,7 +16,7 @@ from classync_contracts.firebase import initialize_firebase
 from classync_contracts.request_authorization import request_principal
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response
 from firebase_admin import auth as firebase_auth
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from starlette.concurrency import run_in_threadpool
 
 from .turnstile import verify_turnstile_token
@@ -30,7 +30,7 @@ STUDENT_ID_PATTERN = r"^[0-9]{2}-[0-9]{5}$"
 LOGIN_WINDOW_SECONDS = 60
 LOGIN_MAX_ATTEMPTS = 5
 logger = logging.getLogger(__name__)
-_LOGIN_ATTEMPTS: OrderedDict[str, deque[float]] = OrderedDict()
+_LOGIN_ATTEMPTS: OrderedDict[tuple[str, str], deque[float]] = OrderedDict()
 _LOGIN_LOCK = Lock()
 
 
@@ -43,31 +43,46 @@ class StudentClaim(Input):
 
 
 class StudentVerificationChallenge(StudentClaim):
-    turnstile_token: str = Field(min_length=1, max_length=2048)
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
 
 
 class StudentVerification(Input):
     student_id: str = Field(min_length=8, max_length=8, pattern=STUDENT_ID_PATTERN)
     challenge_id: UUID
-    code: str = Field(min_length=6, max_length=6, pattern=r"^[0-9]{6}$")
-    turnstile_token: str = Field(min_length=1, max_length=2048)
+    code: SecretStr = Field(min_length=6, max_length=6)
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
+
+    @field_validator("code")
+    @classmethod
+    def numeric_one_time_code(cls, value):
+        if not re.fullmatch(r"[0-9]{6}", value.get_secret_value()):
+            raise ValueError("Verification code is invalid")
+        return value
 
 
 class StudentPasswordCompletion(StudentClaim):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
     challenge_id: UUID
-    turnstile_token: str = Field(min_length=1, max_length=2048)
+    password: SecretStr = Field(min_length=12, max_length=128)
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
+
+    @field_validator("password")
+    @classmethod
+    def strong_password(cls, value):
+        validate_strong_password(value)
+        return value
 
 
 class StudentPasswordLogin(Input):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
     student_id: str = Field(min_length=8, max_length=8, pattern=STUDENT_ID_PATTERN)
-    password: str = Field(min_length=8, max_length=128)
-    turnstile_token: str = Field(min_length=1, max_length=2048)
+    password: SecretStr = Field(min_length=8, max_length=128)
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
 
 
 class PasswordResetRequest(Input):
     email: str = Field(min_length=3, max_length=320)
-    turnstile_token: str = Field(min_length=1, max_length=2048)
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
 
     @field_validator("email")
     @classmethod
@@ -75,6 +90,22 @@ class PasswordResetRequest(Input):
         if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
             raise ValueError("Enter a valid email address")
         return value
+
+
+class PasswordResetCompletion(Input):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
+    oob_code: SecretStr = Field(min_length=1, max_length=2048)
+    password: SecretStr = Field(min_length=12, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def strong_password(cls, value):
+        validate_strong_password(value)
+        return value
+
+
+class GoogleSignIn(Input):
+    turnstile_token: SecretStr = Field(min_length=1, max_length=2048)
 
 
 class ClaimDecision(Input):
@@ -130,7 +161,7 @@ async def _send_password_reset(config, email: str) -> None:
             {"X-ClassSync-Service-Token":
              config.notification_service_token.get_secret_value()},
         )
-        async with httpx.AsyncClient(timeout=25.0, trust_env=False) as client:
+        async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
             sent = await client.post(
                 notification_url + "/internal/v1/password-reset-email",
                 json={"email": email, "reset_url": reset_url},
@@ -158,11 +189,30 @@ class FacultyInvitation(Input):
 
 
 class InvitationAccept(Input):
-    token: str = Field(min_length=40, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
+    token: SecretStr = Field(min_length=40, max_length=128)
+
+    @field_validator("token")
+    @classmethod
+    def opaque_token(cls, value):
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", value.get_secret_value()):
+            raise ValueError("Invitation token is invalid")
+        return value
 
 
 class RevokeMembership(Input):
     expected_revision: int = Field(strict=True, ge=1)
+
+
+def validate_strong_password(value: SecretStr) -> None:
+    password = value.get_secret_value()
+    if not (
+        len(password) >= 12
+        and re.search(r"[A-Z]", password)
+        and re.search(r"[a-z]", password)
+        and re.search(r"[0-9]", password)
+        and re.search(r"[^A-Za-z0-9]", password)
+    ):
+        raise ValueError("Password does not meet the security requirements")
 
 
 def onboarding_router(settings):
@@ -209,10 +259,51 @@ def onboarding_router(settings):
     ):
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        await verify_turnstile_token(body.turnstile_token, config)
         limit_student_login(request)
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         background_tasks.add_task(_send_password_reset, config, body.email)
         return {"data": {"accepted": True}}
+
+    @router.post("/google-sign-in")
+    async def google_sign_in(body: GoogleSignIn, request: Request, response: Response):
+        response.headers["Cache-Control"] = "no-store"
+        limit_student_login(request)
+        request_principal(request, settings())
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), settings())
+        return {"data": {"accepted": True}}
+
+    @router.post("/complete-password-reset")
+    async def complete_password_reset(body: PasswordResetCompletion, request: Request,
+                                      response: Response):
+        response.headers["Cache-Control"] = "no-store"
+        limit_student_login(request)
+        config = settings()
+        if config.firebase_web_api_key is None:
+            raise HTTPException(503, "Password reset is unavailable")
+        try:
+            async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
+                result = await client.post(
+                    "https://identitytoolkit.googleapis.com/v1/accounts:resetPassword",
+                    params={"key": config.firebase_web_api_key.get_secret_value()},
+                    json={
+                        "oobCode": body.oob_code.get_secret_value(),
+                        "newPassword": body.password.get_secret_value(),
+                    },
+                    follow_redirects=False,
+                )
+            if result.status_code == 400:
+                raise HTTPException(400, "This password reset link is invalid or expired")
+            result.raise_for_status()
+        except HTTPException:
+            raise
+        except (httpx.HTTPError, ValueError) as error:
+            logger.warning(
+                "password_reset_completion_failed",
+                extra={"reason_code": "firebase_reset_unavailable",
+                       "failure_type": type(error).__name__},
+            )
+            raise HTTPException(503, "Password reset is unavailable") from error
+        return {"data": {"updated": True}}
 
     @router.get("/onboarding")
     def status(request: Request, response: Response):
@@ -228,10 +319,11 @@ def onboarding_router(settings):
     @router.post("/student-verification-challenges", status_code=202)
     async def request_student_verification(body: StudentVerificationChallenge, request: Request,
                                            response: Response):
+        limit_student_login(request)
         principal, repository = context(request, write=True)
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        await verify_turnstile_token(body.turnstile_token, config)
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         if not config.otp_hmac_secret or not config.notification_service_token:
             raise HTTPException(503, "Email verification is unavailable")
         challenge_id = uuid4()
@@ -252,7 +344,7 @@ def onboarding_router(settings):
                 {"X-ClassSync-Service-Token":
                  config.notification_service_token.get_secret_value()},
             )
-            async with httpx.AsyncClient(timeout=6.0, trust_env=False) as client:
+            async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
                 sent = await client.post(
                     notification_url + "/internal/v1/verification-email",
                     json={"email": principal.email, "code": code},
@@ -267,32 +359,47 @@ def onboarding_router(settings):
 
     @router.post("/verify-student")
     async def verify_student(body: StudentVerification, request: Request, response: Response):
+        limit_student_login(request)
         principal, repository = context(request, write=True)
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        await verify_turnstile_token(body.turnstile_token, config)
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         if not config.otp_hmac_secret:
             raise HTTPException(503, "Email verification is unavailable")
         secret = config.otp_hmac_secret.get_secret_value().encode("utf-8")
         return {"data": repository.verify_student_challenge(
-            principal, body.student_id, body.challenge_id, body.code, secret
+            principal, body.student_id, body.challenge_id, body.code.get_secret_value(), secret
         )}
 
     @router.post("/complete-student-onboarding")
     async def complete_student_onboarding(body: StudentPasswordCompletion, request: Request,
                                           response: Response):
-        principal, repository = context(request, write=True)
+        limit_student_login(request)
+        principal, repository = context(request, write=True, privileged=True)
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        await verify_turnstile_token(body.turnstile_token, config)
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         try:
             app = await run_in_threadpool(initialize_firebase, config)
             firebase_user = await run_in_threadpool(firebase_auth.get_user, principal.uid, app=app)
+            providers = {item.provider_id for item in firebase_user.provider_data}
+            if "google.com" not in providers or firebase_user.email != principal.email:
+                raise HTTPException(403, "Verify your registered student email before continuing")
+            await run_in_threadpool(
+                firebase_auth.update_user,
+                principal.uid,
+                password=body.password.get_secret_value(),
+                app=app,
+            )
+        except HTTPException:
+            raise
         except Exception as error:
+            logger.warning(
+                "student_password_update_failed",
+                extra={"reason_code": "firebase_password_update_failed",
+                       "failure_type": type(error).__name__},
+            )
             raise HTTPException(503, "Account service unavailable") from error
-        providers = {item.provider_id for item in firebase_user.provider_data}
-        if "password" not in providers or firebase_user.email != principal.email:
-            raise HTTPException(403, "Set a portal password before completing student setup")
         result = repository.complete_student_onboarding(
             principal, body.student_id, body.challenge_id
         )
@@ -303,8 +410,8 @@ def onboarding_router(settings):
                                      response: Response):
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        await verify_turnstile_token(body.turnstile_token, config)
         limit_student_login(request)
+        await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         repository = getattr(request.app.state, "onboarding_repository", None)
         if repository is None:
             raise HTTPException(503, "Student sign-in is unavailable")
@@ -313,7 +420,7 @@ def onboarding_router(settings):
         if config.firebase_web_api_key is None:
             raise HTTPException(503, "Student sign-in is unavailable")
         try:
-            async with httpx.AsyncClient(timeout=6.0, trust_env=False) as client:
+            async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
                 result = await client.post(
                     "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
                     params={"key": config.firebase_web_api_key.get_secret_value()},
@@ -321,7 +428,7 @@ def onboarding_router(settings):
                     # student number. A synthetic unmatched address avoids a
                     # fast-path timing signal for missing roster IDs.
                     json={"email": email or "unmatched-student-login@student.pnm.edu.ph",
-                          "password": body.password,
+                          "password": body.password.get_secret_value(),
                           "returnSecureToken": True},
                     follow_redirects=False,
                 )
@@ -377,7 +484,7 @@ def onboarding_router(settings):
     @router.post("/faculty-invitations/accept")
     def accept(body: InvitationAccept, request: Request):
         principal, repository = context(request, write=True)
-        return {"data": repository.accept(principal, body.token)}
+        return {"data": repository.accept(principal, body.token.get_secret_value())}
 
     @router.delete("/faculty-invitations/{invitation_id}")
     def revoke_invite(invitation_id: UUID, request: Request):
@@ -397,9 +504,10 @@ def onboarding_router(settings):
 def limit_student_login(request):
     now = time.monotonic()
     address = request.client.host if request.client else "unknown"
+    bucket_key = (address, request.url.path)
     with _LOGIN_LOCK:
-        bucket = _LOGIN_ATTEMPTS.setdefault(address, deque())
-        _LOGIN_ATTEMPTS.move_to_end(address)
+        bucket = _LOGIN_ATTEMPTS.setdefault(bucket_key, deque())
+        _LOGIN_ATTEMPTS.move_to_end(bucket_key)
         while bucket and bucket[0] <= now - LOGIN_WINDOW_SECONDS:
             bucket.popleft()
         if len(bucket) >= LOGIN_MAX_ATTEMPTS:

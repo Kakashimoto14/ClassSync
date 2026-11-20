@@ -18,6 +18,8 @@ HEADERS = {"Authorization": "Bearer e30.e30.synthetic-signature"}
 @pytest.fixture
 def setup(identity_adapters, monkeypatch):
     verifier, _ = identity_adapters(main)
+    with onboarding._LOGIN_LOCK:
+        onboarding._LOGIN_ATTEMPTS.clear()
     repository = Mock()
     repository.status.return_value = {"status": "unlinked"}
     monkeypatch.setattr(main.app.state, "onboarding_repository", repository, raising=False)
@@ -320,6 +322,7 @@ def test_password_completion_rechecks_turnstile_before_firebase_or_membership(se
         "student_id": "23-01425",
         "challenge_id": "00000000-0000-0000-0000-000000000001",
         "turnstile_token": "invalid-token",
+        "password": "Campus-password-26!",
     })
 
     assert result.status_code == 403
@@ -344,13 +347,38 @@ def test_password_completion_requires_firebase_password_provider(setup, monkeypa
         "student_id": "23-01425",
         "challenge_id": "00000000-0000-0000-0000-000000000001",
         "turnstile_token": "test-token",
+        "password": "Campus-password-26!",
     })
 
     assert result.status_code == 403
     assert result.json()["error"]["message"] == (
-        "Set a portal password before completing student setup"
+        "Verify your registered student email before continuing"
     )
     repository.complete_student_onboarding.assert_not_called()
+
+
+def test_student_auth_mutations_apply_ip_rate_limit(setup, monkeypatch):
+    client, _, _ = setup
+    monkeypatch.setattr(main.settings, "firebase_web_api_key", None)
+    payload = {
+        "student_id": "23-01425", "password": "Campus-password-26!",
+        "turnstile_token": "test-token",
+    }
+    results = [client.post("/api/v1/auth/student-password-login", json=payload)
+               for _ in range(6)]
+    assert [result.status_code for result in results] == [503, 503, 503, 503, 503, 429]
+    assert results[-1].headers["retry-after"] == "60"
+
+
+@pytest.mark.parametrize("password", [
+    "short-1!", "alllowercase-123!", "ALLUPPERCASE-123!", "NoNumberPassword!!",
+    "NoSpecialPassword123",
+])
+def test_password_completion_rejects_weak_password_at_contract_boundary(password):
+    result = TestClient(main.app).post("/api/v1/auth/complete-password-reset", json={
+        "oob_code": "opaque-code", "password": password,
+    })
+    assert result.status_code == 422
 
 
 def test_student_number_login_does_not_reveal_missing_roster_records(setup, monkeypatch):
@@ -436,7 +464,7 @@ def test_student_number_login_never_returns_the_roster_email(setup, monkeypatch)
     assert result.json() == {"data": {"custom_token": "custom-token"}}
     assert "juan.delacruz@student.pnm.edu.ph" not in result.text
     assert observed == {
-        "client": {"timeout": 6.0, "trust_env": False},
+        "client": {"timeout": 15.0, "trust_env": False},
         "url": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
         "params": {"key": "public-key"},
         "body": {"email": "juan.delacruz@student.pnm.edu.ph",

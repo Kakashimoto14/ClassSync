@@ -1,6 +1,7 @@
 """Private transactional email delivery boundary for ClassSync."""
 
 import hmac
+import logging
 import re
 from typing import Literal
 from urllib.parse import parse_qs, urlsplit
@@ -11,6 +12,7 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -45,13 +47,20 @@ class Settings(BaseSettings):
 class VerificationEmail(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     email: str = Field(min_length=3, max_length=320)
-    code: str = Field(min_length=6, max_length=6, pattern=r"^[0-9]{6}$")
+    code: SecretStr = Field(min_length=6, max_length=6)
+
+    @field_validator("code")
+    @classmethod
+    def six_numeric_digits(cls, value: SecretStr) -> SecretStr:
+        if not re.fullmatch(r"[0-9]{6}", value.get_secret_value()):
+            raise ValueError("Verification code is invalid")
+        return value
 
 
 class PasswordResetEmail(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     email: str = Field(min_length=3, max_length=320)
-    reset_url: str = Field(min_length=1, max_length=2048)
+    reset_url: SecretStr = Field(min_length=1, max_length=2048)
 
     @field_validator("email")
     @classmethod
@@ -62,8 +71,9 @@ class PasswordResetEmail(BaseModel):
 
     @field_validator("reset_url")
     @classmethod
-    def same_origin_action_url(cls, value: str) -> str:
-        parsed = urlsplit(value)
+    def same_origin_action_url(cls, value: SecretStr) -> SecretStr:
+        value_text = value.get_secret_value()
+        parsed = urlsplit(value_text)
         origin = urlsplit(settings.classsync_web_url)
         query = parse_qs(parsed.query)
         if (
@@ -86,6 +96,10 @@ app = FastAPI(title="ClassSync Notification Service", version="1.0.0")
 async def deliver_email(email: str, subject: str, text: str, html: str) -> None:
     if settings.email_provider == "resend":
         if not settings.resend_api_key or not settings.resend_from_email:
+            logger.error(
+                "email_provider_not_configured",
+                extra={"reason_code": "resend_not_configured"},
+            )
             raise HTTPException(503, "Email delivery is unavailable")
         endpoint = "https://api.resend.com/emails"
         payload = {
@@ -101,6 +115,10 @@ async def deliver_email(email: str, subject: str, text: str, html: str) -> None:
         }
     else:
         if not settings.brevo_api_key or not settings.brevo_sender_email:
+            logger.error(
+                "email_provider_not_configured",
+                extra={"reason_code": "brevo_not_configured"},
+            )
             raise HTTPException(503, "Email delivery is unavailable")
         endpoint = "https://api.brevo.com/v3/smtp/email"
         payload = {
@@ -116,10 +134,23 @@ async def deliver_email(email: str, subject: str, text: str, html: str) -> None:
             "Accept": "application/json",
         }
     try:
-        async with httpx.AsyncClient(timeout=8.0, trust_env=False) as client:
+        async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
             result = await client.post(endpoint, json=payload, headers=headers)
             result.raise_for_status()
+    except httpx.HTTPStatusError as error:
+        logger.error(
+            "email_provider_rejected_delivery",
+            extra={"reason_code": f"{settings.email_provider}_http_{error.response.status_code}"},
+        )
+        raise HTTPException(503, "Email delivery is unavailable") from error
+    except httpx.TimeoutException as error:
+        logger.error("email_provider_timeout", extra={"reason_code": "notification_timeout"})
+        raise HTTPException(503, "Email delivery is unavailable") from error
     except httpx.HTTPError as error:
+        logger.error(
+            "email_provider_request_failed",
+            extra={"reason_code": "email_provider_unavailable"},
+        )
         raise HTTPException(503, "Email delivery is unavailable") from error
 
 
@@ -142,7 +173,9 @@ async def verification_email(
         raise HTTPException(422, "Student email address is invalid")
     from .email_templates import render_verification_email
 
-    html, text = render_verification_email(body.code, settings.classsync_web_url)
+    html, text = render_verification_email(
+        body.code.get_secret_value(), settings.classsync_web_url
+    )
     await deliver_email(body.email, "Your ClassSync verification code", text, html)
     return {"data": {"accepted": True}}
 
@@ -159,6 +192,6 @@ async def password_reset_email(
         raise HTTPException(403, "Service authorization required")
     from .email_templates import render_password_reset_email
 
-    html, text = render_password_reset_email(body.reset_url)
+    html, text = render_password_reset_email(body.reset_url.get_secret_value())
     await deliver_email(body.email, "Reset your ClassSync password", text, html)
     return {"data": {"accepted": True}}

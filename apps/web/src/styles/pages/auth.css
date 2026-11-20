@@ -496,7 +496,8 @@
     grid-template-rows: minmax(0, 1fr);
     width: min(980px, 100%);
     max-width: 980px;
-    height: min(600px, calc(100dvh - 24px));
+    height: auto;
+    min-height: 540px;
     max-height: min(600px, calc(100dvh - 24px));
     overflow: hidden;
     border-radius: 20px;
@@ -507,7 +508,9 @@
     grid-row: 1;
     min-height: 0;
     padding: 20px 28px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .connected-entrance__story {
@@ -634,6 +637,17 @@
   .connected-entrance__desktop-footer a:hover {
     text-decoration: underline;
   }
+
+.connected-entrance__first-time .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-mark {
+  flex: 0 0 18px;
+}
 
   .connected-entrance .turnstile-field {
     display: flex;

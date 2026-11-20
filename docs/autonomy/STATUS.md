@@ -2315,3 +2315,49 @@ Therefore the outside-shell commands in the handoff have not yet produced eviden
   refs to `origin`. Earlier approval text prohibiting those Git actions is superseded for this exact
   request. Hosted deployment, cloud provisioning/settings, spending, live-data import, and original
   database migration remain unauthorized.
+
+## 20 November 2026 — Auth cold-start and request hardening
+
+- **Target/state:** inspected and modified only `feature/auth-onboarding-saas`, starting at
+  `9ae2676296df0077712a6750415aaafee5632b79`; port 5173 was not touched. Main worktree was
+  independently inspected: branch `main`, clean at `097f7e8e8020a2ad8657db1ab65c03612bbaa77d`.
+- **Changes:** Render's `scripts/render_entrypoint.py` now starts Academic, Scheduling, and
+  Notification before polling their health endpoints concurrently; a partial startup failure stops
+  children already started. Gateway exposes `/api/v1/health` for non-blocking auth-screen warm-up.
+  Auth HTTP calls use a 45-second timeout and retry one transient 502/503/504 response. External
+  Firebase Identity Toolkit, Turnstile, notification, email-provider, and service-health HTTP
+  clients use 15-second timeouts (the existing long-lived solver proxy/SSE timeouts are unchanged).
+- **Authentication/security:** Google popup invocation is synchronous in the click handler and uses
+  an existing Turnstile token; only after Firebase resolves does the client send its ID token and
+  challenge to Gateway. Popup-blocked browsers fall back to Firebase redirect with a short-lived,
+  one-use session challenge. Password setup and reset send `SecretStr`-backed passwords to Gateway;
+  server validation enforces 12+ characters with upper/lowercase, digit, and special character.
+  Gateway auth request DTOs protect password, OTP, Turnstile, reset, and invitation secrets; auth
+  responses are no-store, response headers include the security baseline and request ID, and a
+  bounded five-per-minute per-IP/per-endpoint auth limiter returns `429`/`Retry-After`. CORS accepts strict JSON
+  arrays or comma-separated exact origins from either supported environment variable. Error logs
+  use reason codes without identity or secret values. This limiter is per process, so production
+  still requires the configured edge limiter for distributed enforcement.
+- **Tests:** full serial Python suite: `.venv/Scripts/python.exe -m pytest` — **1,147 passed**,
+  one Starlette/httpx TestClient deprecation warning, 106.76 seconds. Full web suite:
+  `npm run test:web` — **855 passed across 65 files**, 194.59 seconds. `npm run lint`,
+  `npm run typecheck`, `npm run build`, and `.venv/Scripts/ruff.exe check` all passed. Build emitted
+  no Vite import/chunk warning; final largest JavaScript chunk was 337.04 kB. Focused auth/backend
+  qualification also passed: **74 Python tests** and **27 web tests** before the complete suites.
+  After the final per-endpoint rate-limit and failed-Google-sign-in cleanup changes, the directly
+  affected tests were rerun: **41 Python tests** and **27 web tests** passed; frontend lint,
+  typecheck, Ruff, and `git diff --check` were rerun cleanly.
+- **Evidence/limits:** no live Render startup, remote Firebase Auth, Turnstile, Resend/Brevo delivery,
+  Google popup/redirect in a real browser, device viewport/zoom, or keyboard/screen-reader journey was
+  exercised. `npm run test:web` is a React/Vitest suite, not connected E2E evidence. Reset notification
+  still runs in in-process FastAPI background tasks; process termination can lose delivery, so a
+  durable outbox remains a production reliability task. Production readiness remains unverified.
+- **Files changed:** `README.md`, `apps/web/src/auth/AccountOnboardingPanel.test.tsx`,
+  `apps/web/src/auth/AccountOnboardingPanel.tsx`, `apps/web/src/auth/account-actions.test.ts`,
+  `apps/web/src/auth/account-actions.ts`, `apps/web/src/pages/InstitutionalEntrance.test.tsx`,
+  `apps/web/src/pages/InstitutionalEntrance.tsx`, `apps/web/src/styles/pages/auth.css`,
+  `scripts/render_entrypoint.py`, `services/gateway/app/coursework_cloud.py`,
+  `services/gateway/app/main.py`, `services/gateway/app/onboarding.py`,
+  `services/gateway/app/turnstile.py`, Gateway tests for CORS, headers, rate limiting, security
+  contracts and concurrent startup, `services/notification/app/main.py`, its email tests, and this
+  ledger. No database, provider, cloud setting, credential, original data, or dev server was changed.
