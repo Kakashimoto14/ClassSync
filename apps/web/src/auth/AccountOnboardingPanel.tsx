@@ -13,6 +13,8 @@ import {
   type AccountProfile,
 } from './account-actions';
 import { TurnstileWidget } from './TurnstileWidget';
+import { PasswordStrengthChecklist } from './PasswordStrengthChecklist';
+import { passwordStrengthComplete } from './password-strength';
 
 export function AccountOnboardingPanel({ entryRole }: { entryRole?: 'student' | 'teacher' } = {}) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
@@ -180,12 +182,8 @@ function PendingAccount({
   const completePasswordSetup = async (event: FormEvent) => {
     event.preventDefault();
     if (busy || !challenge) return;
-    if (newPassword.length < 8 || newPassword.length > 128) {
-      setMessage('Choose a password between 8 and 128 characters.');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setMessage('The passwords do not match.');
+    if (newPassword.length > 128 || !passwordStrengthComplete(newPassword, confirmPassword)) {
+      setMessage('Meet all six password requirements before continuing.');
       return;
     }
     setBusy(true);
@@ -364,15 +362,16 @@ function PendingAccount({
               <p>Student Number <strong>{studentId}</strong></p>
               <label htmlFor="student-new-password">New Password</label>
               <input id="student-new-password" type="password" autoComplete="new-password"
-                minLength={8} maxLength={128} required disabled={busy} value={newPassword}
+                minLength={12} maxLength={128} required disabled={busy} value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)} />
               <label htmlFor="student-confirm-password">Confirm Password</label>
               <input id="student-confirm-password" type="password" autoComplete="new-password"
-                minLength={8} maxLength={128} required disabled={busy} value={confirmPassword}
+                minLength={12} maxLength={128} required disabled={busy} value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)} />
-              <p className="entrance-hint">Use at least 8 characters. Your password stays with your ClassSync account.</p>
+              <PasswordStrengthChecklist password={newPassword} confirmPassword={confirmPassword} />
+              <p className="entrance-hint">Your password stays with your ClassSync account.</p>
               <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
-              <Button type="submit" disabled={busy}>{busy ? 'Securing your account…' : 'Create portal password'}</Button>
+              <Button type="submit" disabled={busy || !passwordStrengthComplete(newPassword, confirmPassword)}>{busy ? 'Securing your account…' : 'Create portal password'}</Button>
             </form> : null
           )}
           {status.claim_state === 'rejected' && (

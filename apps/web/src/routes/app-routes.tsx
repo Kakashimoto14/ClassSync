@@ -24,6 +24,7 @@ export const appRoutes: RouteObject[] = [
             ? [
                 'auth/signup',
                 'auth/forgot-password',
+                'auth/reset-password',
                 'auth/verify',
                 'auth/student-onboarding',
                 'auth/teacher-invite',

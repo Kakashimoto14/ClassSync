@@ -131,10 +131,10 @@ it('checks student ID against the verified account email and refreshes current m
   ));
   expect(await screen.findByRole('heading', { name: 'Create your portal password' })).toBeInTheDocument();
   expect(screen.getByText('24-98096')).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'campus-pass-2026' } });
-  fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'campus-pass-2026' } });
+  fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'Campus-pass-2026!' } });
+  fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'Campus-pass-2026!' } });
   fireEvent.click(screen.getByRole('button', { name: 'Create portal password' }));
-  await waitFor(() => expect(source.setPassword).toHaveBeenCalledWith('campus-pass-2026', 'student-a'));
+  await waitFor(() => expect(source.setPassword).toHaveBeenCalledWith('Campus-pass-2026!', 'student-a'));
   await waitFor(() => expect(source.request).toHaveBeenCalledWith(
     'complete-student-onboarding', 'POST', {
       student_id: '24-98096', challenge_id: '00000000-0000-0000-0000-000000000001',

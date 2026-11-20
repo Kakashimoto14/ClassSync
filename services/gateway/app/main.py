@@ -15,6 +15,7 @@ from classync_contracts.scheduling_security import (
     require_sandbox,
 )
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, SecretStr, field_validator
@@ -128,7 +129,42 @@ async def http_error(request: Request, exc: HTTPException):
         content={
             "error": {
                 "code": "request_rejected",
-                "message": str(exc.detail),
+                "message": safe_public_error_message(exc.detail),
+                "requestId": request.state.request_id,
+            }
+        },
+    )
+
+
+def safe_public_error_message(detail: object) -> str:
+    """Avoid returning database/provider diagnostics through the public API."""
+    if not isinstance(detail, str):
+        return "The request could not be completed. Please try again."
+    message = detail.strip()
+    if (
+        not message
+        or len(message) > 240
+        or "\n" in message
+        or "\r" in message
+        or re.search(
+            r"https?://|neondb|classsync_[a-z0-9_]+|\b(database|table|schema|sql|"
+            r"traceback|stack trace|exception)\b|^\s*[\[{]",
+            message,
+            flags=re.IGNORECASE,
+        )
+    ):
+        return "The request could not be completed. Please try again."
+    return message
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error(request: Request, _exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": "invalid_request",
+                "message": "The request could not be validated. Check the provided fields.",
                 "requestId": request.state.request_id,
             }
         },

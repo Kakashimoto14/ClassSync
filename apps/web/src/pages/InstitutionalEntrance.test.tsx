@@ -7,7 +7,10 @@ import {
   type UniversitySessionContextValue,
 } from '../auth/university-session-context';
 
-const actions = vi.hoisted(() => ({ create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn(), verify: vi.fn().mockResolvedValue(undefined) }));
+const actions = vi.hoisted(() => ({
+  create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn(),
+  verify: vi.fn().mockResolvedValue(undefined), resetVerify: vi.fn(), resetComplete: vi.fn(),
+}));
 vi.mock('../auth/account-actions', async (original) => ({
   ...(await original<typeof import('../auth/account-actions')>()),
   createStudentAccount: actions.create,
@@ -15,6 +18,8 @@ vi.mock('../auth/account-actions', async (original) => ({
   signInToAccount: actions.signIn,
   signInWithGoogle: actions.google,
   verifyHumanChallenge: actions.verify,
+  verifyPasswordResetCode: actions.resetVerify,
+  completePasswordReset: actions.resetComplete,
 }));
 
 function entrance(path = '/', overrides: Partial<UniversitySessionContextValue> = {}) {
@@ -46,14 +51,14 @@ it('shows the CdM campus access login and a non-production verification widget',
   entrance();
   expect(screen.getByRole('heading', { name: 'Welcome to ClassSync' })).toBeInTheDocument();
   expect(screen.getByText('CAMPUS ACCESS')).toBeInTheDocument();
-  expect(screen.getByText('Signing in for the first time?')).toBeInTheDocument();
+  expect(screen.getAllByText('Signing in for the first time?')).toHaveLength(2);
   expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
   expect(await screen.findByText(/test verification ready/i)).toBeInTheDocument();
   expect(screen.queryByText(/sample agenda/i)).not.toBeInTheDocument();
 });
 
-it('offers one login with persistent labels and associated validation errors', async () => {
-  entrance();
+it('offers one login, refreshes the server-authorized session after sign-in, and keeps labels associated', async () => {
+  const refresh = entrance();
   for (const name of ['Student', 'Teacher', 'Admin'])
     expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
@@ -77,6 +82,7 @@ it('offers one login with persistent labels and associated validation errors', a
       'Synthetic-password-42!',
     ),
   );
+  expect(refresh).toHaveBeenCalledOnce();
 });
 
 it('routes student-number sign-in through the Gateway with the one-use Turnstile token', async () => {
@@ -109,10 +115,9 @@ it('validates confirmation before student account creation and submits no role',
   fireEvent.change(screen.getByLabelText('Password', { exact: true }), {
     target: { value: 'Synthetic-password-42!' },
   });
+  expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
-  expect(screen.getByLabelText('Confirm password')).toHaveAccessibleDescription(
-    'Enter the same password again.',
-  );
+  expect(screen.getByLabelText('Confirm password')).toBeRequired();
   expect(actions.create).not.toHaveBeenCalled();
   fireEvent.change(screen.getByLabelText('Confirm password'), {
     target: { value: 'Synthetic-password-42!' },
@@ -148,11 +153,12 @@ it('offers Google sign-in and delegates identity verification to the server sess
   entrance();
   fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
   await waitFor(() => expect(actions.google).toHaveBeenCalledOnce());
+  expect(actions.verify).toHaveBeenCalledOnce();
 });
 
 it('offers recovery without an enumeration-sensitive success message', async () => {
   entrance();
-  fireEvent.click(screen.getByRole('link', { name: 'Forgot password?' }));
+  fireEvent.click(screen.getAllByRole('link', { name: 'Forgot password?' })[0]);
   expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('Email'), {
     target: { value: 'student@synthetic.invalid' },
@@ -162,6 +168,21 @@ it('offers recovery without an enumeration-sensitive success message', async () 
     /If your account can receive a reset link/,
   );
   expect(actions.recover).toHaveBeenCalledWith('student@synthetic.invalid');
+});
+
+it('uses the same access card for password reset and requires all strength rules', async () => {
+  actions.resetVerify.mockResolvedValue(undefined);
+  entrance('/auth/reset-password?mode=resetPassword&oobCode=opaque-code');
+  expect(await screen.findByRole('heading', { name: 'Create a new password' })).toBeInTheDocument();
+  expect(await screen.findByText(/Password reset link is ready/i)).toBeInTheDocument();
+  const submit = screen.getByRole('button', { name: 'Save new password' });
+  expect(submit).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'Campus-pass-26!' } });
+  fireEvent.change(screen.getByLabelText('Confirm password'), { target: { value: 'Campus-pass-26!' } });
+  expect(submit).toBeEnabled();
+  fireEvent.click(submit);
+  await waitFor(() => expect(actions.resetComplete).toHaveBeenCalledWith('opaque-code', 'Campus-pass-26!'));
+  expect(await screen.findByRole('status')).toHaveTextContent(/password has been changed/i);
 });
 
 it('routes an invitation through the universal sign-in', async () => {
