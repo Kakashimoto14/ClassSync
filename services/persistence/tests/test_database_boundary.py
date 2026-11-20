@@ -1,6 +1,7 @@
 import json
 from types import SimpleNamespace
 
+import classync_persistence.database as database
 import pytest
 from classync_persistence.database import postgres_engine
 from sqlalchemy.engine import URL
@@ -28,6 +29,30 @@ def test_shared_engine_hides_parameters_and_does_not_connect_on_creation():
         assert engine.pool.checkedout() == 0
     finally:
         engine.dispose()
+
+
+def test_shared_engine_preserves_pre_ping_and_passes_only_explicit_connect_args(monkeypatch):
+    observed = {}
+    sentinel = object()
+
+    def capture(url, **kwargs):
+        observed.update(url=url, **kwargs)
+        return sentinel
+
+    monkeypatch.setattr(database, "create_engine", capture)
+    connect_args = {
+        "sslmode": "verify-full",
+        "sslrootcert": "explicit-ca.pem",
+        "require_auth": "scram-sha-256",
+        "gssencmode": "disable",
+    }
+
+    engine = postgres_engine(URL.create("postgresql+psycopg", database="identity"),
+                             connect_args=connect_args)
+
+    assert engine is sentinel
+    assert observed["pool_pre_ping"] is True
+    assert observed["connect_args"] == connect_args
 
 
 @pytest.mark.parametrize("directory", ["persistence", "api-contracts"])

@@ -2,6 +2,7 @@
 fastapi>=0.115,<1
 uvicorn[standard]>=0.34,<1
 httpx>=0.28,<1
+certifi==2026.10.19
 -e ../../packages/api-contracts
 -e ../../packages/persistence
 pytest>=9.0.3,<10

@@ -2367,3 +2367,38 @@ Therefore the outside-shell commands in the handoff have not yet produced eviden
   `9ae2676..817cf22` for the feature branch and `097f7e8..df539fc` for `main`. Both worktrees were
   clean immediately after the merge. A subsequent `git ls-remote` read-back could not connect to
   GitHub, so no separate remote-ref read-back was obtained.
+
+## 20 November 2026 — Gateway Identity PostgreSQL TLS root
+
+- **Target/state:** root worktree branch `main`, base SHA
+  `8c0c3fdba62913df73f29f6f3548b2dc4ad0c388`. Only the existing Gateway identity connection path
+  was changed; no other database transport, schema, migration, database data, credential, or running
+  development server was changed.
+- **Implementation:** `services/gateway/app/authorization.py` continues to use the existing shared
+  `postgres_engine` and its `pool_pre_ping=True`; the identity-only configuration now passes
+  `sslmode=verify-full`, `sslrootcert=certifi.where()`, `require_auth=scram-sha-256`, and
+  `gssencmode=disable`. Academic and Scheduling connection behavior is unchanged. PostgreSQL URL
+  query parameters remain rejected, preventing a URL from conflicting with or weakening these
+  transport settings. `certifi==2026.10.19` is an explicit Gateway dependency. The existing Docker
+  build installs Gateway requirements, so no Dockerfile change is needed. Gateway environment
+  examples and README document the URL and CA behavior.
+- **Verification:** `services/gateway/tests/test_authorization_lifecycle.py` and
+  `services/persistence/tests/test_database_boundary.py` — **46 passed**; identity engine
+  construction is verified without opening a connection, the configured URL driver and pool
+  pre-ping are checked, and explicit TLS connect args are asserted. Final full serial Python suite
+  `.venv/Scripts/python.exe -m pytest` — **1,152 passed**, one existing Starlette/httpx deprecation
+  warning, 97.98 seconds. Ruff on the touched Python files passed; `.venv/Scripts/python.exe -m pip
+  check` reported no broken requirements; Gateway auth imports and Certifi CA bundle resolution
+  succeeded; `git diff --check` passed.
+- **Provider boundary:** the local `IDENTITY_DATABASE_URL` is not configured, so a real Neon
+  `SELECT 1` and a live membership query could not be run. The existing request boundary continues
+  to mask database failures as `membership_unavailable` without exposing URLs or credentials.
+  After deployment, TLS success still depends on a valid Neon endpoint/credential and the configured
+  database role having required schema/table grants. FORCE RLS tenant context, correct tenant ID,
+  and an active membership row must also be valid; absent or revoked membership is an authorization
+  denial, while connection/permission failures can remain unavailable errors.
+- **Files changed:** `.env.example`, `.env.gateway.example`, `README.md`,
+  `packages/persistence/README.md`, `services/gateway/app/authorization.py`,
+  `services/gateway/requirements.txt`, `services/gateway/tests/test_authorization_lifecycle.py`,
+  `services/persistence/tests/test_database_boundary.py`, and this ledger. Changes remain local and
+  uncommitted; Render settings and deployment were not changed.

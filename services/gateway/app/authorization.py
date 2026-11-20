@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 
+import certifi
 from classync_contracts.request_authorization import AuthorizationAdapters
 from classync_contracts.token_verification import FirebaseTokenVerifier
 from classync_persistence.configuration import postgres_configuration
@@ -20,7 +21,13 @@ def connection_configuration(settings):
         firebase_project_id=settings.firebase_project_id,
         tenant_id=settings.institutional_tenant_id,
         application_name="classsync-gateway-identity",
-        tls_root_cert=settings.postgres_tls_root_cert,
+        # Identity uses Certifi's CA bundle only; academic/scheduling retain
+        # their own configured TLS root behavior.
+        tls_root_cert=(
+            certifi.where()
+            if settings.identity_database_transport == "verify-full"
+            else None
+        ),
     )
 
 

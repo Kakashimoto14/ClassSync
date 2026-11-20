@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import certifi
 import pytest
 from pydantic import SecretStr, ValidationError
 
@@ -104,6 +105,8 @@ def test_loopback_transport_cannot_enable_non_test_runtime(environment):
         "postgresql+psycopg://127.0.0.1:19999/postgres",
         "postgresql+psycopg://user@127.0.0.1/postgres",
         "postgresql+psycopg://user@127.0.0.1:19999/postgres?host=other",
+        "postgresql+psycopg://user@neon.example.net:5432/postgres?sslmode=require",
+        "postgresql+psycopg://user@neon.example.net:5432/postgres?sslmode=disable",
         "postgresql+psycopg://user:private-sentinel@127.0.0.1:19999/postgres",
         "postgresql+psycopg://user@localhost:19999/postgres",
         "postgresql+psycopg://user@127.0.0.1:5432/postgres",
@@ -129,10 +132,45 @@ def test_default_transport_requires_verified_tls_and_scram():
     value = configured(classsync_env="production", identity_database_transport="verify-full")
     _, parameters = providers.connection_configuration(value)
     assert parameters["sslmode"] == "verify-full"
-    assert parameters["sslrootcert"] == "system"
+    assert parameters["sslrootcert"] == certifi.where()
     assert parameters["require_auth"] == "scram-sha-256"
     assert parameters["connect_timeout"] == 5
     assert parameters["options"] == "-c statement_timeout=5000 -c lock_timeout=1500"
+
+
+def test_identity_engine_uses_existing_pool_with_certifi_ssl_connect_args(monkeypatch):
+    calls = {}
+    engine = SimpleNamespace(dispose=lambda: None)
+
+    def capture(url, **kwargs):
+        calls.update(url=url, **kwargs)
+        return engine
+
+    monkeypatch.setattr(providers, "postgres_engine", capture)
+    value = configured(classsync_env="production", identity_database_transport="verify-full")
+    app = SimpleNamespace(state=SimpleNamespace())
+
+    with providers.configured_authorization(app, value):
+        assert app.state.authorization_adapters.memberships.engine is engine
+
+    assert calls["connect_args"]["sslmode"] == "verify-full"
+    assert calls["connect_args"]["sslrootcert"] == certifi.where()
+    assert calls["connect_args"]["require_auth"] == "scram-sha-256"
+    assert calls["connect_args"]["gssencmode"] == "disable"
+    assert calls["pool_timeout"] == 3
+    assert calls["pool_size"] == value.database_pool_size
+    assert calls["max_overflow"] == 0
+
+
+def test_verified_identity_engine_initializes_without_opening_a_connection():
+    value = configured(classsync_env="production", identity_database_transport="verify-full")
+    app = SimpleNamespace(state=SimpleNamespace())
+
+    with providers.configured_authorization(app, value):
+        engine = app.state.authorization_adapters.memberships.engine
+        assert engine.url.drivername == "postgresql+psycopg"
+        assert engine.pool._pre_ping is True
+        assert engine.pool.checkedout() == 0
 
 
 def test_configured_provider_conflict_creates_no_engine(monkeypatch):
