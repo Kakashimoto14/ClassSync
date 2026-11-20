@@ -39,6 +39,96 @@ def test_onboarding_requires_token_and_never_takes_subject_or_role_from_payload(
     repository.submit_claim.assert_not_called()
 
 
+def test_password_reset_request_verifies_turnstile_and_sends_only_clean_app_link(
+    setup, monkeypatch
+):
+    client, _, _ = setup
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("service-secret"))
+    monkeypatch.setattr(main.settings, "classsync_web_url", "https://class-sync-bhiv.vercel.app")
+    observed = {}
+
+    class FirebaseAuth:
+        class ActionCodeSettings:
+            def __init__(self, *, url):
+                observed["continue_url"] = url
+
+        @staticmethod
+        def generate_password_reset_link(email, *, action_code_settings, app):
+            observed["email"] = email
+            observed["firebase_app"] = app
+            return (
+                "https://classsync-f444c.firebaseapp.com/__/auth/action?mode=resetPassword"
+                "&oobCode=opaque-code&apiKey=secret-key"
+            )
+
+    class Result:
+        def raise_for_status(self):
+            return None
+
+    class Client:
+        def __init__(self, **kwargs):
+            observed["client"] = kwargs
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, url, *, json, headers):
+            observed.update({"url": url, "body": json, "headers": headers})
+            return Result()
+
+    monkeypatch.setattr(onboarding, "initialize_firebase", lambda *_: "firebase-app")
+    monkeypatch.setattr(onboarding, "firebase_auth", FirebaseAuth)
+    monkeypatch.setattr(onboarding.httpx, "AsyncClient", Client)
+    result = client.post("/api/v1/auth/request-password-reset", json={
+        "email": "juan.delacruz@student.pnm.edu.ph",
+        "turnstile_token": "single-use-turnstile-token",
+    })
+
+    assert result.status_code == 200
+    assert result.json() == {"data": {"accepted": True}}
+    assert observed["continue_url"] == (
+        "https://class-sync-bhiv.vercel.app/auth/reset-password"
+    )
+    assert observed["email"] == "juan.delacruz@student.pnm.edu.ph"
+    assert observed["url"] == "http://127.0.0.1:8003/internal/v1/password-reset-email"
+    assert observed["body"] == {
+        "email": "juan.delacruz@student.pnm.edu.ph",
+        "reset_url": "https://class-sync-bhiv.vercel.app/auth/reset-password?oobCode=opaque-code",
+    }
+    assert "classsync-f444c" not in result.text + str(observed["body"])
+    assert "apiKey" not in result.text + str(observed["body"])
+
+
+def test_password_reset_request_is_generic_for_unknown_accounts(setup, monkeypatch):
+    client, _, _ = setup
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("service-secret"))
+
+    class FirebaseAuth:
+        class ActionCodeSettings:
+            def __init__(self, *, url):
+                pass
+
+        class UserNotFoundError(Exception):
+            pass
+
+        @staticmethod
+        def generate_password_reset_link(*_args, **_kwargs):
+            raise FirebaseAuth.UserNotFoundError()
+
+    monkeypatch.setattr(onboarding, "initialize_firebase", lambda *_: "firebase-app")
+    monkeypatch.setattr(onboarding, "firebase_auth", FirebaseAuth)
+    result = client.post("/api/v1/auth/request-password-reset", json={
+        "email": "unknown@student.pnm.edu.ph",
+        "turnstile_token": "single-use-turnstile-token",
+    })
+
+    assert result.status_code == 200
+    assert result.json() == {"data": {"accepted": True}}
+
+
 def test_unverified_identity_can_only_read_pending_status(setup, monkeypatch):
     client, verifier, repository = setup
     monkeypatch.setattr(

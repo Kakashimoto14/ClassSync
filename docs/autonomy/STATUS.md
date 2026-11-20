@@ -1,5 +1,58 @@
 # ClassSync — autonomy status ledger
 
+## 20 November 2026 10:48 SGT — branded password reset and login polish
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `2f18ad6e7346f6870e3d9b05fbb9b6a693d320ca`.
+Main was inspected and remained clean at `e6c892cd1e8ed1b9361b7f2775cbe842275d9284` before
+merge. Port 5173 was not touched. Temporary frontend-only Vite servers on 5207 and 5208 were
+stopped after local Chrome/Playwright checks. No live Firebase, Turnstile, email provider, hosted
+database, or production data was used.
+
+Password reset now follows the unauthenticated Turnstile-protected Gateway endpoint
+`POST /api/v1/auth/request-password-reset`. Gateway sends the generic accepted response before
+generating a Firebase Admin password action link and dispatching the notification task; it
+extracts the action code and gives Notification only a clean ClassSync reset URL.
+Notification validates the configured frontend origin and reset route, then sends a branded HTML
+message through the existing Resend or Brevo provider selection. Account-not-found and delivery
+failures return the same generic accepted response; internal logs omit user email and reset URLs.
+Dispatch currently uses FastAPI's in-process background task, so process termination can lose an
+accepted reset email; a durable queue/outbox is required for a production reliability guarantee.
+The login recovery and authenticated profile recovery screens both use this flow and require a
+fresh challenge token. Login errors now use an alert pill, long Gateway calls announce the
+connecting state, and desktop form/showcase spacing is balanced without changing mobile rules.
+
+Files changed include `services/gateway/app/main.py`, `services/gateway/app/onboarding.py`,
+`services/notification/app/main.py`, `services/notification/app/email_templates.py`, related
+Gateway/Notification tests, `apps/web/src/auth/account-actions.ts`,
+`apps/web/src/pages/InstitutionalEntrance.tsx`, `apps/web/src/pages/AccountProfilePage.tsx`,
+their tests and `apps/web/src/styles/pages/auth.css`, plus `.env.example` and `README.md`.
+
+Fresh local verification (all serial):
+
+- `\.venv\Scripts\python.exe -m pytest` — **1,137 passed**, one existing Starlette/httpx
+  deprecation warning, 137.06 seconds on the final backend implementation.
+- `npm run test:web` — **853 passed across 65 files** after updating the profile recovery flow.
+- `npm run lint` — PASS; `npm run typecheck` — PASS; `npm run build` — PASS.
+  Build emitted no chunk-size or Firebase mixed-import warnings; largest JavaScript chunk was the
+  app entry at 334.84 kB (gzip 85.93 kB).
+- `\.venv\Scripts\ruff.exe check` — PASS. Focused Gateway/Notification pytest — **33 passed**,
+  one existing Starlette/httpx deprecation warning.
+- `git diff --check` — PASS before this status update; final staged check remains required.
+- Real Chrome via Playwright on temporary local Vite: at 1366×640, the card is 980×600 at y=20,
+  document height is 640, Google button ends at y=560, showcase feature card spans y=273–484,
+  and first-time callout spans y=500–564. At 390×844, the one-column card is 358px wide, the
+  showcase is hidden, and document width/height match the viewport. No page errors were captured.
+  This is rendered local UI verification, not live authentication or provider delivery.
+
+Remaining gates: actual Firebase password-reset settings, live Turnstile verification, Resend or
+Brevo sender configuration and delivery, native browser zoom, screen-reader testing, and hosted
+PostgreSQL qualification remain UNVERIFIED. Production readiness is not claimed. No live data or
+hosted configuration changed.
+
+Next authorized action: inspect/stage this feature work, commit, merge into `main`, and push both
+branches as authorized by the owner; then verify resulting local/remote refs.
+
 ## 20 November 2026 09:41 SGT — authentication polish, Turnstile stability, and transactional email
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch

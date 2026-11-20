@@ -75,9 +75,26 @@ it('starts Google sign-in through Firebase and does not create a client-selected
   expect(fixture.google).toHaveBeenCalledWith(fixture.auth, provider);
 });
 
-it('does not disclose an unknown account through password recovery', async () => {
-  fixture.reset.mockRejectedValue({ code: 'auth/user-not-found' });
-  await expect(recoverPassword('unknown@synthetic.invalid')).resolves.toBeUndefined();
+it('requests password recovery through the Gateway once with its Turnstile token', async () => {
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({ data: { accepted: true } }),
+  } as unknown as Response);
+  await expect(recoverPassword('juan.delacruz@student.pnm.edu.ph', 'one-use-token'))
+    .resolves.toBeUndefined();
+  expect(fetch).toHaveBeenCalledOnce();
+  expect(fetch).toHaveBeenCalledWith('/api/v1/auth/request-password-reset', expect.objectContaining({
+    method: 'POST',
+    signal: expect.any(AbortSignal),
+    credentials: 'omit',
+    cache: 'no-store',
+    body: JSON.stringify({
+      email: 'juan.delacruz@student.pnm.edu.ph', turnstile_token: 'one-use-token',
+    }),
+  }));
+  expect(fixture.reset).not.toHaveBeenCalled();
+  fetch.mockRestore();
 });
 
 it('verifies a reset action code and only submits passwords meeting the portal minimum', async () => {

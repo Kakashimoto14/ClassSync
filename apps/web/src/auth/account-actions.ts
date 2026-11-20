@@ -18,7 +18,7 @@ export async function signInToAccount(
   if (/^[0-9]{2}-[0-9]{5}$/.test(identifier.trim())) {
     const response = await fetch(identityEndpoint('/auth/student-password-login'), {
       method: 'POST',
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(30_000),
       credentials: 'omit',
       cache: 'no-store',
       redirect: 'error',
@@ -54,15 +54,24 @@ export async function createStudentAccount(email: string, password: string) {
   await sdk.sendEmailVerification(result.user);
 }
 
-export async function recoverPassword(email: string) {
-  const { auth, sdk } = await provider();
-  try {
-    await sdk.sendPasswordResetEmail(auth, email.trim());
-  } catch (error) {
-    // Keep the same response for an unknown account, including projects where
-    // enumeration protection has not yet been configured.
-    if ((error as { code?: string }).code !== 'auth/user-not-found') throw error;
-  }
+export async function recoverPassword(email: string, turnstileToken: string) {
+  if (!email.trim() || !turnstileToken)
+    throw new Error('Complete the email and human verification check first.');
+  const response = await fetch(identityEndpoint('/auth/request-password-reset'), {
+    method: 'POST',
+    signal: AbortSignal.timeout(30_000),
+    credentials: 'omit',
+    cache: 'no-store',
+    redirect: 'error',
+    referrerPolicy: 'no-referrer',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.trim(), turnstile_token: turnstileToken }),
+  });
+  if (!response.headers.get('content-type')?.includes('application/json'))
+    throw new Error('Password reset is temporarily unavailable. Try again later.');
+  const payload = await response.json();
+  if (!response.ok || payload?.data?.accepted !== true)
+    throw new Error('Password reset is temporarily unavailable. Try again later.');
 }
 
 export async function verifyPasswordResetCode(code: string) {
@@ -90,7 +99,7 @@ export async function verifyHumanChallenge(token: string) {
   if (!token) throw new Error('Complete the human verification check first.');
   const response = await fetch(identityEndpoint('/auth/verify-turnstile'), {
     method: 'POST',
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(30_000),
     credentials: 'omit',
     cache: 'no-store',
     redirect: 'error',

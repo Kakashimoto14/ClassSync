@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { AlertCircle, CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { MotionConfig, motion } from 'motion/react';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
@@ -256,6 +256,7 @@ function CredentialsForm({
   const [confirmation, setConfirmation] = useState('');
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [errors, setErrors] = useState<LoginValidationErrors & { confirmation?: string }>({});
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -276,6 +277,15 @@ function CredentialsForm({
   useEffect(() => {
     heading.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!busy) {
+      setConnecting(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setConnecting(true), 4_000);
+    return () => window.clearTimeout(timer);
+  }, [busy]);
 
   useEffect(() => {
     if (!resetting) return;
@@ -330,7 +340,7 @@ function CredentialsForm({
         setConfirmation('');
         setNotice('Your password has been changed. You can now sign in.');
       } else if (recovery) {
-        await recoverPassword(email);
+        await recoverPassword(email, turnstileToken);
         setNotice('If your account can receive a reset link, check your email for the next steps.');
       } else if (signup) await createStudentAccount(email, password);
       else {
@@ -348,9 +358,11 @@ function CredentialsForm({
           ? 'Invalid student number or password.'
           : mode === 'login'
             ? 'We could not sign you in. Check your email and password, or try resetting your password.'
+          : recovery
+            ? 'We could not reach the reset service. Please try again in a moment.'
           : accountError(failure),
       );
-      if (mode === 'login' && turnstileToken) {
+      if ((mode === 'login' || recovery) && turnstileToken) {
         setTurnstileToken('');
         turnstileRef.current?.reset();
       }
@@ -385,7 +397,7 @@ function CredentialsForm({
         <div className="connected-entrance__eyebrow-row">
           <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>
           {!invited && (
-            <Link to="/auth/signup" className="connected-entrance__signup-link">
+              <Link to="/auth/signup" className="connected-entrance__signup-link connected-entrance__signup-link--mobile">
               Create account
             </Link>
           )}
@@ -527,11 +539,17 @@ function CredentialsForm({
         )}
         {(signup || resetting) && <PasswordStrengthChecklist password={password} confirmPassword={confirmation} />}
         {resetting && resetCodeChecking && <p role="status">Checking your password reset link…</p>}
-        {mode === 'login' && <TurnstileWidget ref={turnstileRef} onToken={onTurnstileToken} />}
-        {error && (
-          <p className="entrance-error" role="alert">
-            {error}
+        {(mode === 'login' || recovery) && <TurnstileWidget ref={turnstileRef} onToken={onTurnstileToken} />}
+        {connecting && busy && (
+          <p className="connected-entrance__connecting" role="status">
+            Connecting to ClassSync server…
           </p>
+        )}
+        {error && (
+          <div className="connected-entrance__alert" role="alert">
+            <AlertCircle size={17} aria-hidden="true" />
+            <span>{error}</span>
+          </div>
         )}
         {notice && (
           <p className="entrance-notice" role="status">
@@ -570,6 +588,12 @@ function CredentialsForm({
               ? 'Need help signing in? Visit the Office of the Registrar.'
               : 'Sign-in service unavailable. Reload to try again.'}
           </p>
+        </div>
+      )}
+      {mode === 'login' && !invited && (
+        <div className="connected-entrance__desktop-footer">
+          <span>New student? <Link to="/auth/signup">Create account</Link></span>
+          <span>Need help? Office of the Registrar</span>
         </div>
       )}
       {(mode !== 'login' || invited) && (
