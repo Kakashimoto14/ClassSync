@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
   observeAccountProfile,
@@ -8,6 +8,8 @@ import {
 } from '../auth/account-actions';
 import { useUniversitySession } from '../auth/university-session-context';
 import { Button } from '../components/ui/Button';
+import { TurnstileWidget } from '../auth/TurnstileWidget';
+import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
 import type { UserRole } from '../types/ui';
 
 export function AccountProfilePage({
@@ -23,6 +25,8 @@ export function AccountProfilePage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const base = role === 'administrator' ? '/admin' : `/${role}`;
   useEffect(() => {
     let closed = false;
@@ -73,16 +77,18 @@ export function AccountProfilePage({
     }
   }
   async function reset() {
-    if (!authorized || !profile?.email || busy) return;
+    if (!authorized || !profile?.email || !turnstileToken || busy) return;
     setBusy(true);
     setError('');
     setNotice('');
     try {
-      await recoverPassword(profile.email);
+      await recoverPassword(profile.email, turnstileToken);
       setNotice('Password recovery requested. Check your email for the next steps.');
     } catch {
       setError('Password recovery could not be requested. Try again.');
     } finally {
+      turnstileRef.current?.reset();
+      setTurnstileToken('');
       setBusy(false);
     }
   }
@@ -134,9 +140,10 @@ export function AccountProfilePage({
             <p>Your account name does not change your university record or permissions.</p>
             <Button disabled={busy}>{busy ? 'Saving…' : 'Save account name'}</Button>
           </form>
+          <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} />
           <div className="draft-actions">
             <Button
-              disabled={busy || !profile.email}
+              disabled={busy || !profile.email || !turnstileToken}
               variant="secondary"
               onClick={() => void reset()}
             >

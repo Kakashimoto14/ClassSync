@@ -1,18 +1,20 @@
 """Narrow pending-user endpoints; uploaded evidence never confers a role."""
 
 import hmac
+import logging
 import re
 import secrets
 import time
 from collections import OrderedDict, deque
 from threading import Lock
+from urllib.parse import parse_qs, urlencode, urlsplit
 from uuid import UUID, uuid4
 
 import httpx
 from classync_contracts.cloud_run import service_headers
 from classync_contracts.firebase import initialize_firebase
 from classync_contracts.request_authorization import request_principal
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response
 from firebase_admin import auth as firebase_auth
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.concurrency import run_in_threadpool
@@ -27,6 +29,7 @@ STUDENT_LOGIN_ERROR = "Invalid student number or password."
 STUDENT_ID_PATTERN = r"^[0-9]{2}-[0-9]{5}$"
 LOGIN_WINDOW_SECONDS = 60
 LOGIN_MAX_ATTEMPTS = 5
+logger = logging.getLogger(__name__)
 _LOGIN_ATTEMPTS: OrderedDict[str, deque[float]] = OrderedDict()
 _LOGIN_LOCK = Lock()
 
@@ -62,9 +65,83 @@ class StudentPasswordLogin(Input):
     turnstile_token: str = Field(min_length=1, max_length=2048)
 
 
+class PasswordResetRequest(Input):
+    email: str = Field(min_length=3, max_length=320)
+    turnstile_token: str = Field(min_length=1, max_length=2048)
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value):
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+            raise ValueError("Enter a valid email address")
+        return value
+
+
 class ClaimDecision(Input):
     approve: bool = Field(strict=True)
     verification_reference: str = Field(min_length=1, max_length=500)
+
+
+async def _send_password_reset(config, email: str) -> None:
+    try:
+        firebase_app = await run_in_threadpool(initialize_firebase, config)
+        action_settings = firebase_auth.ActionCodeSettings(
+            url=f"{config.classsync_web_url}/auth/reset-password"
+        )
+        firebase_link = await run_in_threadpool(
+            firebase_auth.generate_password_reset_link,
+            email,
+            action_code_settings=action_settings,
+            app=firebase_app,
+        )
+    except firebase_auth.UserNotFoundError:
+        return
+    except Exception as error:
+        logger.warning(
+            "password_reset_link_generation_failed",
+            extra={"failure_type": type(error).__name__},
+        )
+        return
+
+    parsed_link = urlsplit(firebase_link)
+    query = parse_qs(parsed_link.query)
+    code = next(iter(query.get("oobCode", [])), None)
+    if not code:
+        nested = next(iter(query.get("link", [])), None)
+        if nested:
+            code = next(iter(parse_qs(urlsplit(nested).query).get("oobCode", [])), None)
+    if not code or len(code) > 2048:
+        logger.warning("password_reset_link_missing_action_code")
+        return
+
+    reset_url = (
+        f"{config.classsync_web_url}/auth/reset-password?"
+        f"{urlencode({'oobCode': code})}"
+    )
+    if not config.notification_service_token:
+        logger.warning("password_reset_notification_unavailable")
+        return
+    try:
+        notification_url = config.notification_service_url
+        headers = await run_in_threadpool(
+            service_headers,
+            config.cloud_run_iam_enabled,
+            notification_url,
+            {"X-ClassSync-Service-Token":
+             config.notification_service_token.get_secret_value()},
+        )
+        async with httpx.AsyncClient(timeout=25.0, trust_env=False) as client:
+            sent = await client.post(
+                notification_url + "/internal/v1/password-reset-email",
+                json={"email": email, "reset_url": reset_url},
+                headers=headers,
+            )
+            sent.raise_for_status()
+    except (httpx.HTTPError, ValueError) as error:
+        logger.warning(
+            "password_reset_notification_failed",
+            extra={"failure_type": type(error).__name__},
+        )
 
 
 class FacultyInvitation(Input):
@@ -122,6 +199,20 @@ def onboarding_router(settings):
         if repository is None:
             raise HTTPException(503, "Account linking is unavailable; try again later")
         return principal, repository
+
+    @router.post("/request-password-reset")
+    async def request_password_reset(
+        body: PasswordResetRequest,
+        request: Request,
+        response: Response,
+        background_tasks: BackgroundTasks,
+    ):
+        response.headers["Cache-Control"] = "no-store"
+        config = settings()
+        await verify_turnstile_token(body.turnstile_token, config)
+        limit_student_login(request)
+        background_tasks.add_task(_send_password_reset, config, body.email)
+        return {"data": {"accepted": True}}
 
     @router.get("/onboarding")
     def status(request: Request, response: Response):

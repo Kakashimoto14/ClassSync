@@ -103,7 +103,7 @@ it('routes student-number sign-in through the Gateway with the one-use Turnstile
 
 it('validates confirmation before student account creation and submits no role', async () => {
   entrance();
-  fireEvent.click(screen.getByRole('link', { name: 'Create account' }));
+  fireEvent.click(screen.getAllByRole('link', { name: 'Create account' })[0]);
   expect(screen.getByRole('heading', { name: 'Create your account' })).toHaveFocus();
   expect(screen.getByLabelText('Email')).toHaveAttribute(
     'placeholder',
@@ -133,7 +133,7 @@ it('validates confirmation before student account creation and submits no role',
 
 it('requires the registered institutional email pattern for student account creation', async () => {
   entrance();
-  fireEvent.click(screen.getByRole('link', { name: 'Create account' }));
+  fireEvent.click(screen.getAllByRole('link', { name: 'Create account' })[0]);
   fireEvent.change(screen.getByLabelText('Email'), {
     target: { value: 'Student.Name@student.pnm.edu.ph' },
   });
@@ -164,10 +164,8 @@ it('offers recovery without an enumeration-sensitive success message', async () 
     target: { value: 'student@synthetic.invalid' },
   });
   fireEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
-  expect(await screen.findByRole('status')).toHaveTextContent(
-    /If your account can receive a reset link/,
-  );
-  expect(actions.recover).toHaveBeenCalledWith('student@synthetic.invalid');
+  expect(await screen.findByText(/If your account can receive a reset link/)).toBeInTheDocument();
+  expect(actions.recover).toHaveBeenCalledWith('student@synthetic.invalid', 'test-token');
 });
 
 it('uses the same access card for password reset and requires all strength rules', async () => {

@@ -3,7 +3,7 @@
 import hmac
 import re
 from typing import Literal
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 import httpx
 from classync_contracts.models import HealthResponse
@@ -48,8 +48,79 @@ class VerificationEmail(BaseModel):
     code: str = Field(min_length=6, max_length=6, pattern=r"^[0-9]{6}$")
 
 
+class PasswordResetEmail(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    email: str = Field(min_length=3, max_length=320)
+    reset_url: str = Field(min_length=1, max_length=2048)
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+            raise ValueError("Student email address is invalid")
+        return value
+
+    @field_validator("reset_url")
+    @classmethod
+    def same_origin_action_url(cls, value: str) -> str:
+        parsed = urlsplit(value)
+        origin = urlsplit(settings.classsync_web_url)
+        query = parse_qs(parsed.query)
+        if (
+            parsed.scheme != origin.scheme
+            or parsed.netloc != origin.netloc
+            or parsed.path != "/auth/reset-password"
+            or parsed.fragment
+            or set(query) != {"oobCode"}
+            or len(query["oobCode"]) != 1
+            or not re.fullmatch(r"[A-Za-z0-9_-]{1,2048}={0,2}", query["oobCode"][0])
+        ):
+            raise ValueError("Password reset action link is invalid")
+        return value
+
+
 settings = Settings()
 app = FastAPI(title="ClassSync Notification Service", version="1.0.0")
+
+
+async def deliver_email(email: str, subject: str, text: str, html: str) -> None:
+    if settings.email_provider == "resend":
+        if not settings.resend_api_key or not settings.resend_from_email:
+            raise HTTPException(503, "Email delivery is unavailable")
+        endpoint = "https://api.resend.com/emails"
+        payload = {
+            "from": settings.resend_from_email,
+            "to": [email],
+            "subject": subject,
+            "text": text,
+            "html": html,
+        }
+        headers = {
+            "Authorization": f"Bearer {settings.resend_api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+        }
+    else:
+        if not settings.brevo_api_key or not settings.brevo_sender_email:
+            raise HTTPException(503, "Email delivery is unavailable")
+        endpoint = "https://api.brevo.com/v3/smtp/email"
+        payload = {
+            "sender": {"name": settings.brevo_sender_name, "email": settings.brevo_sender_email},
+            "to": [{"email": email}],
+            "subject": subject,
+            "textContent": text,
+            "htmlContent": html,
+        }
+        headers = {
+            "api-key": settings.brevo_api_key.get_secret_value(),
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+    try:
+        async with httpx.AsyncClient(timeout=8.0, trust_env=False) as client:
+            result = await client.post(endpoint, json=payload, headers=headers)
+            result.raise_for_status()
+    except httpx.HTTPError as error:
+        raise HTTPException(503, "Email delivery is unavailable") from error
 
 
 @app.get("/health", response_model=HealthResponse, tags=["operations"])
@@ -72,45 +143,22 @@ async def verification_email(
     from .email_templates import render_verification_email
 
     html, text = render_verification_email(body.code, settings.classsync_web_url)
-    if settings.email_provider == "resend":
-        if not settings.resend_api_key or not settings.resend_from_email:
-            raise HTTPException(503, "Email delivery is unavailable")
-        endpoint = "https://api.resend.com/emails"
-        payload = {
-            "from": settings.resend_from_email,
-            "to": [body.email],
-            "subject": "Your ClassSync verification code",
-            "text": text,
-            "html": html,
-        }
-        headers = {
-            "Authorization": f"Bearer {settings.resend_api_key.get_secret_value()}",
-            "Content-Type": "application/json",
-        }
-    else:
-        if not settings.brevo_api_key or not settings.brevo_sender_email:
-            raise HTTPException(503, "Email delivery is unavailable")
-        endpoint = "https://api.brevo.com/v3/smtp/email"
-        payload = {
-            "sender": {"name": settings.brevo_sender_name, "email": settings.brevo_sender_email},
-            "to": [{"email": body.email}],
-            "subject": "Your ClassSync verification code",
-            "textContent": text,
-            "htmlContent": html,
-        }
-        headers = {
-            "api-key": settings.brevo_api_key.get_secret_value(),
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-    try:
-        async with httpx.AsyncClient(timeout=8.0, trust_env=False) as client:
-            result = await client.post(
-                endpoint,
-                json=payload,
-                headers=headers,
-            )
-            result.raise_for_status()
-    except httpx.HTTPError as error:
-        raise HTTPException(503, "Email delivery is unavailable") from error
+    await deliver_email(body.email, "Your ClassSync verification code", text, html)
+    return {"data": {"accepted": True}}
+
+
+@app.post("/internal/v1/password-reset-email", status_code=202)
+async def password_reset_email(
+    body: PasswordResetEmail,
+    x_classsync_service_token: str | None = Header(default=None),
+):
+    token = settings.notification_service_token
+    if token is None or not x_classsync_service_token or not hmac.compare_digest(
+        token.get_secret_value(), x_classsync_service_token
+    ):
+        raise HTTPException(403, "Service authorization required")
+    from .email_templates import render_password_reset_email
+
+    html, text = render_password_reset_email(body.reset_url)
+    await deliver_email(body.email, "Reset your ClassSync password", text, html)
     return {"data": {"accepted": True}}

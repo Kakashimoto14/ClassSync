@@ -129,3 +129,47 @@ def test_verification_email_can_use_brevo_with_configured_sender(monkeypatch):
         {"email": "juan.delacruz@student.pnm.edu.ph"}
     ]
     assert "654321" in observed["payload"]["htmlContent"]
+
+
+def test_password_reset_email_uses_configured_transactional_provider(monkeypatch):
+    observed = {}
+
+    class Result:
+        def raise_for_status(self):
+            return None
+
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, url, *, json, headers):
+            observed.update({"url": url, "payload": json, "headers": headers})
+            return Result()
+
+    monkeypatch.setattr(main.settings, "email_provider", "brevo")
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("internal"))
+    monkeypatch.setattr(main.settings, "brevo_api_key", SecretStr("brevo-secret"))
+    monkeypatch.setattr(main.settings, "brevo_sender_email", "no-reply@example.org")
+    monkeypatch.setattr(main.httpx, "AsyncClient", Client)
+
+    result = TestClient(main.app).post(
+        "/internal/v1/password-reset-email",
+        headers={"X-ClassSync-Service-Token": "internal"},
+        json={
+            "email": "juan.delacruz@student.pnm.edu.ph",
+            "reset_url": "https://class-sync-bhiv.vercel.app/auth/reset-password?oobCode=opaque-code",
+        },
+    )
+
+    assert result.status_code == 202
+    assert observed["url"] == "https://api.brevo.com/v3/smtp/email"
+    assert observed["payload"]["to"] == [{"email": "juan.delacruz@student.pnm.edu.ph"}]
+    assert "Reset Password" in observed["payload"]["htmlContent"]
+    assert "opaque-code" in observed["payload"]["htmlContent"]
+    assert "https://class-sync-bhiv.vercel.app" not in observed["payload"]["textContent"]

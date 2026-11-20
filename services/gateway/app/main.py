@@ -40,6 +40,7 @@ class Settings(SchedulingSecuritySettings):
     academic_service_url: str = "http://127.0.0.1:8001"
     scheduling_service_url: str = "http://127.0.0.1:8002"
     notification_service_url: str = "http://127.0.0.1:8003"
+    classsync_web_url: str = "http://localhost:5173"
     allow_unauthenticated_development: bool = False
     classsync_env: str = "production"
     enable_scheduling_sandbox: bool = False
@@ -77,6 +78,26 @@ class Settings(SchedulingSecuritySettings):
                 raise ValueError("Use exact HTTPS origins or explicit loopback development origins")
             _ = parsed.port
         return values
+
+    @field_validator("classsync_web_url")
+    @classmethod
+    def exact_frontend_origin(cls, value):
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.path not in {"", "/"}
+            or parsed.query
+            or parsed.fragment
+            or (parsed.scheme == "http" and parsed.hostname not in {
+                "localhost", "127.0.0.1", "::1"
+            })
+        ):
+            raise ValueError("Use an HTTPS application origin")
+        _ = parsed.port
+        return f"{parsed.scheme}://{parsed.netloc}"
 
 
 settings = Settings()

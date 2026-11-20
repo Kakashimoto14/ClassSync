@@ -12,6 +12,7 @@ const fixture = vi.hoisted(() => ({
   update: vi.fn(),
   recover: vi.fn(),
   signOut: vi.fn(),
+  onTurnstileToken: vi.fn(),
 }));
 vi.mock('../auth/account-actions', () => ({
   observeAccountProfile: async (next: (value: unknown) => void) => {
@@ -27,6 +28,13 @@ vi.mock('../auth/university-session-context', () => ({
     signOut: fixture.signOut,
   }),
 }));
+vi.mock('../auth/TurnstileWidget', () => ({
+  TurnstileWidget: ({ onToken }: { onToken: (token: string) => void }) => (
+    <button type="button" onClick={() => onToken('single-use-test-token')}>
+      Verify challenge
+    </button>
+  ),
+}));
 beforeEach(() => {
   fixture.profile = {
     uid: 'synthetic-user',
@@ -37,6 +45,7 @@ beforeEach(() => {
   fixture.update.mockReset();
   fixture.recover.mockReset();
   fixture.signOut.mockReset();
+  fixture.onTurnstileToken.mockReset();
 });
 const show = () =>
   render(
@@ -74,8 +83,10 @@ it('reports password recovery failure without pretending an email was sent', asy
   fixture.recover.mockRejectedValue(new Error('Offline'));
   show();
   await screen.findByLabelText('Account name');
+  fireEvent.click(screen.getByRole('button', { name: 'Verify challenge' }));
   fireEvent.click(screen.getByRole('button', { name: 'Send password reset email' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('could not be requested');
+  expect(fixture.recover).toHaveBeenCalledWith(fixture.profile.email, 'single-use-test-token');
   expect(
     screen.queryByText('Password recovery requested. Check your email for the next steps.'),
   ).not.toBeInTheDocument();
