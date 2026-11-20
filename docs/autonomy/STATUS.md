@@ -1,5 +1,61 @@
 # ClassSync — autonomy status ledger
 
+## 20 November 2026 09:41 SGT — authentication polish, Turnstile stability, and transactional email
+
+Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch
+`feature/auth-onboarding-saas`, base HEAD `af834b95c5a3ce7a5310249b7e1ab5044a93f9d4`.
+The main worktree was inspected and remained clean at `90a21802b16d7880aab995f0be41364addc21fac`.
+Port 5173 was not touched. A temporary Vite preview on port 5201 was stopped after browser
+inspection. No live Firebase, Turnstile, email provider, hosted database, or production data was
+used.
+
+Updated the responsive sign-in experience, keeping the existing mobile rules intact. On desktop,
+the first-time login callout now lives at the bottom of the right campus panel, the password
+recovery link sits beside its label, and duplicate Turnstile success text is removed. The widget
+stores callbacks in refs, survives parent renders without resetting, and is reset only after a
+failed login attempt; student-number sign-in sends its single-use challenge token once to Gateway.
+Successful Firebase sign-in refreshes the server-authorized university session, which owns the
+role-specific redirect. Added the reusable six-rule password checklist to student account
+creation, post-OTP portal-password setup, and password-reset completion. Reset links are verified
+and completed through Firebase Auth SDK actions. Gateway validation and HTTP error envelopes now
+mask raw request/database/provider diagnostics while preserving the Registrar's generic identity
+message. Notification email delivery now renders an escaped table-based ClassSync verification
+email and supports configured Resend or Brevo transactional APIs; provider configuration remains
+fail-closed.
+
+Changed files include `apps/web/src/pages/InstitutionalEntrance.tsx`,
+`apps/web/src/styles/pages/auth.css`, `apps/web/src/auth/TurnstileWidget.tsx`,
+`apps/web/src/auth/PasswordStrengthChecklist.tsx`, `apps/web/src/auth/password-strength.ts`,
+`apps/web/src/auth/account-actions.ts`, `services/gateway/app/main.py`,
+`services/notification/app/main.py`, `services/notification/app/email_templates.py`, tests,
+`.env.example`, and `README.md`.
+
+Fresh local verification:
+
+- `\.venv\Scripts\python.exe -m pytest` — **1,133 passed**, one existing
+  Starlette/httpx deprecation warning, 110.49 seconds. This is the repository-configured service
+  suite; it does not run hosted-provider or disposable PostgreSQL qualification.
+- Focused auth/notification pytest — **31 passed**, one existing Starlette/httpx deprecation
+  warning.
+- Focused auth component Vitest — **29 passed** across five files.
+- `npm run test:web` — **853 passed across 65 files**.
+- `npm run lint` — PASS; `npm run typecheck` — PASS; `npm run build` — PASS. Production build
+  emitted no Firebase mixed-import or oversized-chunk warnings; largest JavaScript chunk was
+  `react-vendor` at 318.51 kB (gzip 101.36 kB).
+- `.venv\Scripts\python.exe -m ruff check services packages` — PASS.
+- Real Chrome through Playwright against isolated local Vite on port 5201: at 1366×640, the
+  desktop card measures 980×600 at y=20, the document remains 1366×640 without scrolling, both
+  panels report no content overflow, the Google button ends at y=576, and the desktop helper ends
+  at y=603. At 1440×900 all card contents remain in bounds. At 390×844 the existing one-column
+  layout remains 358px wide with no horizontal/vertical page overflow and the showcase is hidden.
+  This qualifies rendering only; it is not real provider sign-in or native browser zoom testing.
+- `git diff --check` — PASS before this status update; final diff check remains required.
+
+Remaining gates: live Firebase/Turnstile/Registrar verification, actual Resend/Brevo delivery and
+sender approval, Firebase password-reset action URL settings, native Chrome zoom, screen-reader
+testing, and external PostgreSQL qualification remain UNVERIFIED. P4d/production readiness is not
+claimed complete. No live data or hosted configuration changed.
+
 ## 20 November 2026 05:06 SGT — responsive sign-in and container import path
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch

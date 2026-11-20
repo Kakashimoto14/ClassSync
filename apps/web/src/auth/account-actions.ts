@@ -65,6 +65,27 @@ export async function recoverPassword(email: string) {
   }
 }
 
+export async function verifyPasswordResetCode(code: string) {
+  if (!code || code.length > 2048) throw new Error('This password reset link is invalid or expired.');
+  const { auth, sdk } = await provider();
+  try {
+    await sdk.verifyPasswordResetCode(auth, code);
+  } catch {
+    throw new Error('This password reset link is invalid or expired.');
+  }
+}
+
+export async function completePasswordReset(code: string, password: string) {
+  if (!code || code.length > 2048 || password.length < 12 || password.length > 128)
+    throw new Error('Choose a password that meets all requirements.');
+  const { auth, sdk } = await provider();
+  try {
+    await sdk.confirmPasswordReset(auth, code, password);
+  } catch {
+    throw new Error('The password could not be changed. Request a new reset link and try again.');
+  }
+}
+
 export async function verifyHumanChallenge(token: string) {
   if (!token) throw new Error('Complete the human verification check first.');
   const response = await fetch(identityEndpoint('/auth/verify-turnstile'), {
@@ -116,6 +137,14 @@ export function accountError(error: unknown) {
   return 'The request could not be confirmed. Check your connection and try again.';
 }
 
+function safeAccountServiceMessage(message: unknown) {
+  if (typeof message !== 'string' || message.length > 240 || /[\r\n]/.test(message) ||
+      message.trimStart().startsWith('{') || message.trimStart().startsWith('[') ||
+      /https?:\/\/|neondb|classsync_[a-z0-9_]+|\b(database|table|schema|sql|traceback|stack trace|exception)\b/i.test(message))
+    return 'Account service unavailable. Please try again later.';
+  return message;
+}
+
 export interface OnboardingStatus {
   email_verified: boolean;
   claim_state: 'pending' | 'approved' | 'rejected' | null;
@@ -161,8 +190,8 @@ export async function updateAccountName(
 export async function setStudentPortalPassword(password: string, expectedUid?: string) {
   const { auth, sdk } = await provider();
   const user = currentAccount(auth, expectedUid);
-  if (!user.email || password.length < 8 || password.length > 128)
-    throw new Error('Use a password between 8 and 128 characters.');
+  if (!user.email || password.length < 12 || password.length > 128)
+    throw new Error('Choose a password that meets all requirements.');
   const hasPassword = () => user.providerData.some((provider) => provider.providerId === 'password');
   if (hasPassword()) {
     await sdk.updatePassword(user, password);
@@ -224,9 +253,9 @@ export async function accountRequest<T>(
   if (!response.ok)
     throw new Error(
       typeof payload?.error?.message === 'string'
-        ? payload.error.message
+        ? safeAccountServiceMessage(payload.error.message)
         : typeof payload?.detail === 'string'
-          ? payload.detail
+          ? safeAccountServiceMessage(payload.detail)
         : 'Account request could not be confirmed.',
     );
   return payload.data as T;

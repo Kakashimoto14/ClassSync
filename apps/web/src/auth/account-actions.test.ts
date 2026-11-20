@@ -16,6 +16,8 @@ const fixture = vi.hoisted(() => ({
   customTokenSignIn: vi.fn(),
   linkCredential: vi.fn(),
   updatePassword: vi.fn(),
+  verifyResetCode: vi.fn(),
+  confirmReset: vi.fn(),
 }));
 vi.mock('../config/runtime-config', () => ({ appMode: 'institutional' }));
 vi.mock('../lib/firebase', () => ({ firebaseApp: {} }));
@@ -29,6 +31,8 @@ vi.mock('firebase/auth', () => ({
   signInWithPopup: fixture.google,
   sendEmailVerification: fixture.verify,
   sendPasswordResetEmail: fixture.reset,
+  verifyPasswordResetCode: fixture.verifyResetCode,
+  confirmPasswordReset: fixture.confirmReset,
   signInWithEmailAndPassword: fixture.passwordSignIn,
   signInWithCustomToken: fixture.customTokenSignIn,
   EmailAuthProvider: { credential: (email: string, password: string) => ({ email, password }) },
@@ -74,6 +78,23 @@ it('starts Google sign-in through Firebase and does not create a client-selected
 it('does not disclose an unknown account through password recovery', async () => {
   fixture.reset.mockRejectedValue({ code: 'auth/user-not-found' });
   await expect(recoverPassword('unknown@synthetic.invalid')).resolves.toBeUndefined();
+});
+
+it('verifies a reset action code and only submits passwords meeting the portal minimum', async () => {
+  fixture.verifyResetCode.mockResolvedValue('juan.delacruz@student.pnm.edu.ph');
+  fixture.confirmReset.mockResolvedValue(undefined);
+  const { verifyPasswordResetCode, completePasswordReset } = await import('./account-actions');
+  await verifyPasswordResetCode('opaque-action-code');
+  await expect(completePasswordReset('opaque-action-code', 'Short-1!')).rejects.toThrow(
+    'Choose a password that meets all requirements.',
+  );
+  await completePasswordReset('opaque-action-code', 'Campus-password-26!');
+  expect(fixture.verifyResetCode).toHaveBeenCalledWith(fixture.auth, 'opaque-action-code');
+  expect(fixture.confirmReset).toHaveBeenCalledWith(
+    fixture.auth,
+    'opaque-action-code',
+    'Campus-password-26!',
+  );
 });
 
 it('exchanges a student number and Turnstile token for a Firebase custom-token session', async () => {
@@ -166,4 +187,18 @@ it('bounds token acquisition and does not send a timed-out mutation', async () =
   } finally {
     vi.useRealTimers();
   }
+});
+
+it('replaces raw database diagnostics in account service responses with a safe message', async () => {
+  fixture.auth.currentUser = { uid: 'synthetic', getIdToken: vi.fn().mockResolvedValue('token') };
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: false,
+    status: 500,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({ error: { message: 'relation classsync_identity.memberships does not exist' } }),
+  } as unknown as Response);
+  await expect(accountRequest('onboarding')).rejects.toThrow(
+    'Account service unavailable. Please try again later.',
+  );
+  fetch.mockRestore();
 });

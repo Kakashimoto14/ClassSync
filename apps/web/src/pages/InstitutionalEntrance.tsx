@@ -12,8 +12,13 @@ import {
   signInWithGoogle,
   signInToAccount,
   verifyHumanChallenge,
+  completePasswordReset,
+  verifyPasswordResetCode,
 } from '../auth/account-actions';
 import { TurnstileWidget } from '../auth/TurnstileWidget';
+import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
+import { PasswordStrengthChecklist } from '../auth/PasswordStrengthChecklist';
+import { passwordStrengthComplete } from '../auth/password-strength';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
@@ -29,7 +34,7 @@ const accountPath = '/auth/account';
 const STUDENT_EMAIL_PATTERN = /^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$/;
 const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
-function ProductPreview() {
+function ProductPreview({ showLoginHint }: { showLoginHint: boolean }) {
   return (
     <motion.aside
       className="connected-entrance__story"
@@ -48,7 +53,12 @@ function ProductPreview() {
         <li><span className="entrance-preview-card__icon"><DoorOpen size={19} aria-hidden="true" /></span><span><strong>Campus Room Availability</strong><small>Buildings and learning spaces</small></span></li>
         <li><span className="entrance-preview-card__icon"><ShieldCheck size={19} aria-hidden="true" /></span><span><strong>Instant Schedule Alerts</strong><small>Official changes and updates</small></span></li>
       </ul>
-      <small className="connected-entrance__service-label">ACADEMIC &amp; SCHEDULING SERVICES</small>
+      {showLoginHint && (
+        <aside className="connected-entrance__callout connected-entrance__story-callout">
+          <strong>Signing in for the first time?</strong>
+          <p>Use your registered Google email, verify the code, and set a password.</p>
+        </aside>
+      )}
     </motion.aside>
   );
 }
@@ -63,7 +73,7 @@ const entranceFrame = {
   visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
 };
 
-export function EntranceLayout({ children }: { children: ReactNode }) {
+export function EntranceLayout({ children, showLoginHint = false }: { children: ReactNode; showLoginHint?: boolean }) {
   const synthetic = devServer && import.meta.env.VITE_CLASSSYNC_SYNTHETIC_PREVIEW === 'true';
   return (
     <MotionConfig reducedMotion="user">
@@ -87,7 +97,7 @@ export function EntranceLayout({ children }: { children: ReactNode }) {
           </header>
           {children}
         </motion.section>
-        <ProductPreview />
+        <ProductPreview showLoginHint={showLoginHint} />
       </motion.div>
     </motion.main>
     </MotionConfig>
@@ -102,8 +112,14 @@ export function InstitutionalEntrance() {
   const invited = path === invitePath || target === invitePath;
   const search = target ? '?' + new URLSearchParams({ returnTo: target }) : '';
   const signedOut = state.status === 'signed-out';
-  const mode =
-    path === '/auth/signup' ? 'signup' : path === '/auth/forgot-password' ? 'recovery' : 'login';
+  const mode = path === '/auth/signup'
+    ? 'signup'
+    : path === '/auth/forgot-password'
+      ? 'recovery'
+      : path === '/auth/reset-password'
+        ? 'reset'
+        : 'login';
+  const resetCode = new URLSearchParams(location.search).get('oobCode') ?? '';
   const statusPage = [verifyPath, onboardingPath, invitePath, accountPath].includes(path);
   const statusHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -144,7 +160,9 @@ export function InstitutionalEntrance() {
       ? 'Create your account'
       : mode === 'recovery'
         ? 'Reset your password'
-        : 'Welcome to ClassSync';
+        : mode === 'reset'
+          ? 'Create a new password'
+          : 'Welcome to ClassSync';
   const title =
     path === verifyPath
       ? 'Verify your email'
@@ -157,7 +175,7 @@ export function InstitutionalEntrance() {
             : formTitle;
 
   return (
-    <EntranceLayout>
+    <EntranceLayout showLoginHint={canSignIn && mode === 'login' && !invited}>
       {canSignIn ? (
         <>
           <CredentialsForm
@@ -167,6 +185,7 @@ export function InstitutionalEntrance() {
             search={search}
             invited={invited}
             serviceAvailable={available}
+            resetCode={resetCode}
           />
         </>
       ) : (
@@ -222,12 +241,14 @@ function CredentialsForm({
   title,
   search,
   invited,
+  resetCode,
   serviceAvailable = true,
 }: {
-  mode: 'login' | 'signup' | 'recovery';
+  mode: 'login' | 'signup' | 'recovery' | 'reset';
   title: string;
   search: string;
   invited: boolean;
+  resetCode: string;
   serviceAvailable?: boolean;
 }) {
   const [email, setEmail] = useState('');
@@ -239,7 +260,7 @@ function CredentialsForm({
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
-  const [turnstileRevision, setTurnstileRevision] = useState(0);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const onTurnstileToken = useCallback((value: string) => setTurnstileToken(value), []);
   const heading = useRef<HTMLHeadingElement>(null);
   const emailField = useRef<HTMLInputElement>(null);
@@ -247,24 +268,53 @@ function CredentialsForm({
   const confirmationField = useRef<HTMLInputElement>(null);
   const signup = mode === 'signup';
   const recovery = mode === 'recovery';
+  const resetting = mode === 'reset';
+  const [resetCodeValid, setResetCodeValid] = useState(false);
+  const [resetCodeChecking, setResetCodeChecking] = useState(resetting);
+  const session = useUniversitySession();
 
   useEffect(() => {
     heading.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (!resetting) return;
+    let active = true;
+    if (!resetCode) {
+      setResetCodeValid(false);
+      setResetCodeChecking(false);
+      setError('This password reset link is invalid or expired. Request a new one.');
+      return () => { active = false; };
+    }
+    setResetCodeChecking(true);
+    void verifyPasswordResetCode(resetCode).then(
+      () => {
+        if (active) {
+          setResetCodeValid(true);
+          setNotice('Password reset link is ready. Choose a new password below.');
+        }
+      },
+      () => {
+        if (active) setError('This password reset link is invalid or expired. Request a new one.');
+      },
+    ).finally(() => { if (active) setResetCodeChecking(false); });
+    return () => { active = false; };
+  }, [resetCode, resetting]);
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
     const studentNumberLogin = mode === 'login' && STUDENT_ID_PATTERN.test(email.trim());
-    const validation: typeof errors = studentNumberLogin
+    const validation: typeof errors = (studentNumberLogin || resetting)
       ? {}
       : validateLogin(email.trim(), password);
     if (studentNumberLogin && !password) validation.password = 'Enter your password.';
     if (recovery) delete validation.password;
     if (signup && !STUDENT_EMAIL_PATTERN.test(email.trim()))
       validation.email = 'Use a lowercase institutional email such as juan.delacruz@student.pnm.edu.ph.';
-    if (signup && password.length < 12) validation.password = 'Use at least 12 characters.';
-    if (signup && confirmation !== password)
+    if ((signup || resetting) && !passwordStrengthComplete(password, confirmation))
+      validation.password = 'Meet all six password requirements before continuing.';
+    if ((signup || resetting) && confirmation !== password)
       validation.confirmation = 'Enter the same password again.';
     setErrors(validation);
     setError('');
@@ -274,7 +324,12 @@ function CredentialsForm({
     if (validation.confirmation) return confirmationField.current?.focus();
     setBusy(true);
     try {
-      if (recovery) {
+      if (resetting) {
+        await completePasswordReset(resetCode, password);
+        setPassword('');
+        setConfirmation('');
+        setNotice('Your password has been changed. You can now sign in.');
+      } else if (recovery) {
         await recoverPassword(email);
         setNotice('If your account can receive a reset link, check your email for the next steps.');
       } else if (signup) await createStudentAccount(email, password);
@@ -285,6 +340,7 @@ function CredentialsForm({
           await verifyHumanChallenge(turnstileToken);
           await signInToAccount(email, password);
         }
+        session.refresh();
       }
     } catch (failure) {
       setError(
@@ -294,11 +350,11 @@ function CredentialsForm({
             ? 'We could not sign you in. Check your email and password, or try resetting your password.'
           : accountError(failure),
       );
-    } finally {
       if (mode === 'login' && turnstileToken) {
         setTurnstileToken('');
-        setTurnstileRevision((revision) => revision + 1);
+        turnstileRef.current?.reset();
       }
+    } finally {
       setBusy(false);
     }
   }
@@ -311,13 +367,14 @@ function CredentialsForm({
     try {
       await verifyHumanChallenge(turnstileToken);
       await signInWithGoogle();
+      session.refresh();
     } catch (failure) {
       setError(accountError(failure));
-    } finally {
       if (turnstileToken) {
         setTurnstileToken('');
-        setTurnstileRevision((revision) => revision + 1);
+        turnstileRef.current?.reset();
       }
+    } finally {
       setBusy(false);
     }
   }
@@ -347,7 +404,7 @@ function CredentialsForm({
               : 'Use your student number, campus email, or Google account.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
-        <div className="auth-field">
+        {!resetting && <div className="auth-field">
           <label htmlFor="entrance-email">
             {mode === 'login' ? 'Student Number or Institutional Email' : 'Email'}
           </label>
@@ -377,22 +434,31 @@ function CredentialsForm({
               {errors.email}
             </p>
           )}
-        </div>
+        </div>}
         {!recovery && (
           <div className="auth-field">
-            <label htmlFor="entrance-password">Password</label>
+            {mode === 'login' ? (
+              <div className="connected-entrance__password-label-row">
+                <label htmlFor="entrance-password">Password</label>
+                <Link className="connected-entrance__recovery connected-entrance__recovery--desktop" to={{ pathname: '/auth/forgot-password', search }}>
+                  Forgot password?
+                </Link>
+              </div>
+            ) : <label htmlFor="entrance-password">{resetting ? 'New password' : 'Password'}</label>}
             <div className="entrance-password">
               <input
                 id="entrance-password"
                 ref={passwordField}
                 type={visible ? 'text' : 'password'}
-                autoComplete={signup ? 'new-password' : 'current-password'}
+                autoComplete={signup || resetting ? 'new-password' : 'current-password'}
+                minLength={signup || resetting ? 12 : undefined}
+                maxLength={signup || resetting ? 128 : undefined}
                 required
                 disabled={busy}
                 value={password}
                 aria-invalid={!!errors.password}
                 aria-describedby={
-                  [signup && 'entrance-password-hint', errors.password && 'entrance-password-error']
+                  [(signup || resetting) && 'entrance-password-hint', errors.password && 'entrance-password-error']
                     .filter(Boolean)
                     .join(' ') || undefined
                 }
@@ -415,9 +481,9 @@ function CredentialsForm({
                 )}
               </button>
             </div>
-            {signup && (
+            {(signup || resetting) && (
               <p id="entrance-password-hint" className="entrance-hint">
-                Use at least 12 characters.
+                Use the checklist to create a strong password.
               </p>
             )}
             {errors.password && (
@@ -427,7 +493,12 @@ function CredentialsForm({
             )}
           </div>
         )}
-        {signup && (
+        {mode === 'login' && (
+          <Link className="connected-entrance__recovery connected-entrance__recovery--mobile" to={{ pathname: '/auth/forgot-password', search }}>
+            Forgot password?
+          </Link>
+        )}
+        {(signup || resetting) && (
           <div className="auth-field">
             <label htmlFor="entrance-confirm">Confirm password</label>
             <input
@@ -435,6 +506,8 @@ function CredentialsForm({
               ref={confirmationField}
               type={visible ? 'text' : 'password'}
               autoComplete="new-password"
+              minLength={12}
+              maxLength={128}
               required
               disabled={busy}
               value={confirmation}
@@ -452,15 +525,9 @@ function CredentialsForm({
             )}
           </div>
         )}
-        {mode === 'login' && (
-          <Link
-            className="connected-entrance__recovery"
-            to={{ pathname: '/auth/forgot-password', search }}
-          >
-            Forgot password?
-          </Link>
-        )}
-        {mode === 'login' && <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />}
+        {(signup || resetting) && <PasswordStrengthChecklist password={password} confirmPassword={confirmation} />}
+        {resetting && resetCodeChecking && <p role="status">Checking your password reset link…</p>}
+        {mode === 'login' && <TurnstileWidget ref={turnstileRef} onToken={onTurnstileToken} />}
         {error && (
           <p className="entrance-error" role="alert">
             {error}
@@ -471,13 +538,17 @@ function CredentialsForm({
             {notice}
           </p>
         )}
-        <Button type="submit" disabled={busy || !serviceAvailable}>
+        <Button type="submit" disabled={busy || !serviceAvailable ||
+          ((signup || resetting) && !passwordStrengthComplete(password, confirmation)) ||
+          (resetting && (resetCodeChecking || !resetCodeValid))}>
           {busy
             ? 'Please wait…'
             : signup
               ? 'Create account'
               : recovery
                 ? 'Send reset link'
+                : resetting
+                  ? 'Save new password'
                 : 'Sign in to ClassSync →'}
         </Button>
       </form>
@@ -487,7 +558,7 @@ function CredentialsForm({
           <Button type="button" variant="secondary" disabled={busy || !serviceAvailable} onClick={continueWithGoogle}>
             Continue with Google
           </Button>
-          <aside className="connected-entrance__callout">
+          <aside className="connected-entrance__callout connected-entrance__callout--mobile">
             <strong>Signing in for the first time?</strong>
             <p>Use your registered Google email, verify the code, and set a password.</p>
           </aside>

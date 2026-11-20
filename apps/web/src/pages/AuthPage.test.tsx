@@ -34,7 +34,7 @@ describe('honest sign-in entry', () => {
     expect(screen.getByLabelText('Human verification')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
-    expect(screen.getByText('Signing in for the first time?')).toBeInTheDocument();
+    expect(screen.getAllByText('Signing in for the first time?')).toHaveLength(2);
     expect(screen.queryByText('Explore ClassSync')).not.toBeInTheDocument();
     expect(screen.queryByText('Sample preview · You are not signed in.')).not.toBeInTheDocument();
   });
