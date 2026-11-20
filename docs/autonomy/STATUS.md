@@ -2361,3 +2361,9 @@ Therefore the outside-shell commands in the handoff have not yet produced eviden
   `services/gateway/app/turnstile.py`, Gateway tests for CORS, headers, rate limiting, security
   contracts and concurrent startup, `services/notification/app/main.py`, its email tests, and this
   ledger. No database, provider, cloud setting, credential, original data, or dev server was changed.
+- **Git delivery:** implementation commit `817cf225032120104d7f10e40bd821a9a414e55a` was created
+  on `feature/auth-onboarding-saas`; merge commit `df539fc7fa4feeb1b39fc1912f5f4e73d2d9a08a` was
+  created on `main`. `git push origin feature/auth-onboarding-saas main` succeeded and reported
+  `9ae2676..817cf22` for the feature branch and `097f7e8..df539fc` for `main`. Both worktrees were
+  clean immediately after the merge. A subsequent `git ls-remote` read-back could not connect to
+  GitHub, so no separate remote-ref read-back was obtained.
