@@ -1,12 +1,27 @@
 import { appMode } from '../config/runtime-config';
 import { firebaseApp } from '../lib/firebase';
 import { identityEndpoint } from './university-session-driver';
+import * as firebaseAuthSdk from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, type User } from 'firebase/auth';
+
+const AUTH_TIMEOUT_MS = 45_000;
+const GOOGLE_CHALLENGE_KEY = 'classsync.google.challenge';
+
+async function fetchAuthWithRetry(input: RequestInfo | URL, init: RequestInit) {
+  for (let attempt = 0; ; attempt += 1) {
+    const response = await fetch(input, { ...init, signal: AbortSignal.timeout(AUTH_TIMEOUT_MS) });
+    if (attempt === 0 && [502, 503, 504].includes(response.status)) {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 800));
+      continue;
+    }
+    return response;
+  }
+}
 
 async function provider() {
   if (appMode !== 'institutional') throw new Error('University access is not connected.');
   if (!firebaseApp) throw new Error('University access is not connected.');
-  const sdk = await import('firebase/auth');
-  return { auth: sdk.getAuth(firebaseApp), sdk };
+  return { auth: getAuth(firebaseApp), sdk: firebaseAuthSdk };
 }
 
 export async function signInToAccount(
@@ -16,9 +31,8 @@ export async function signInToAccount(
 ) {
   const { auth, sdk } = await provider();
   if (/^[0-9]{2}-[0-9]{5}$/.test(identifier.trim())) {
-    const response = await fetch(identityEndpoint('/auth/student-password-login'), {
+    const response = await fetchAuthWithRetry(identityEndpoint('/auth/student-password-login'), {
       method: 'POST',
-      signal: AbortSignal.timeout(30_000),
       credentials: 'omit',
       cache: 'no-store',
       redirect: 'error',
@@ -41,11 +55,53 @@ export async function signInToAccount(
   await sdk.signInWithEmailAndPassword(auth, identifier.trim(), password);
 }
 
-export async function signInWithGoogle() {
-  const { auth, sdk } = await provider();
-  const google = new sdk.GoogleAuthProvider();
+export function signInWithGoogle(turnstileToken: string) {
+  if (!turnstileToken) throw new Error('Complete the human verification check first.');
+  if (appMode !== 'institutional' || !firebaseApp) throw new Error('University access is not connected.');
+  const auth = getAuth(firebaseApp);
+  const google = new GoogleAuthProvider();
   google.setCustomParameters({ prompt: 'select_account' });
-  return sdk.signInWithPopup(auth, google);
+  const redirectFallback = () => {
+    sessionStorage.setItem(GOOGLE_CHALLENGE_KEY, JSON.stringify({ token: turnstileToken, at: Date.now() }));
+    return signInWithRedirect(auth, google).then(() => undefined);
+  };
+  try {
+    return signInWithPopup(auth, google).catch((error: { code?: string }) => {
+      if (error.code !== 'auth/popup-blocked') throw error;
+      return redirectFallback();
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code !== 'auth/popup-blocked') throw error;
+    return redirectFallback();
+  }
+}
+
+export async function verifyGoogleSignIn(user: User, turnstileToken: string) {
+  const token = await user.getIdToken();
+  const response = await fetchAuthWithRetry(identityEndpoint('/auth/google-sign-in'), {
+    method: 'POST', credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ turnstile_token: turnstileToken }),
+  });
+  if (!response.ok) throw new Error('Unable to verify this sign-in. Please try again.');
+}
+
+export async function completeGoogleRedirectSignIn() {
+  if (!firebaseApp || appMode !== 'institutional') return null;
+  const raw = sessionStorage.getItem(GOOGLE_CHALLENGE_KEY);
+  if (!raw) return null;
+  sessionStorage.removeItem(GOOGLE_CHALLENGE_KEY);
+  try {
+    const pending = JSON.parse(raw) as { token?: string; at?: number };
+    if (!pending.token || !pending.at || Date.now() - pending.at > 240_000) return null;
+    const result = await getRedirectResult(getAuth(firebaseApp));
+    if (!result) return null;
+    await verifyGoogleSignIn(result.user, pending.token);
+    return result;
+  } catch {
+    await firebaseAuthSdk.signOut(getAuth(firebaseApp)).catch(() => undefined);
+    return null;
+  }
 }
 
 export async function createStudentAccount(email: string, password: string) {
@@ -57,9 +113,8 @@ export async function createStudentAccount(email: string, password: string) {
 export async function recoverPassword(email: string, turnstileToken: string) {
   if (!email.trim() || !turnstileToken)
     throw new Error('Complete the email and human verification check first.');
-  const response = await fetch(identityEndpoint('/auth/request-password-reset'), {
+  const response = await fetchAuthWithRetry(identityEndpoint('/auth/request-password-reset'), {
     method: 'POST',
-    signal: AbortSignal.timeout(30_000),
     credentials: 'omit',
     cache: 'no-store',
     redirect: 'error',
@@ -87,9 +142,12 @@ export async function verifyPasswordResetCode(code: string) {
 export async function completePasswordReset(code: string, password: string) {
   if (!code || code.length > 2048 || password.length < 12 || password.length > 128)
     throw new Error('Choose a password that meets all requirements.');
-  const { auth, sdk } = await provider();
   try {
-    await sdk.confirmPasswordReset(auth, code, password);
+    const response = await fetchAuthWithRetry(identityEndpoint('/auth/complete-password-reset'), {
+      method: 'POST', credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oob_code: code, password }),
+    });
+    if (!response.ok) throw new Error('Password reset failed');
   } catch {
     throw new Error('The password could not be changed. Request a new reset link and try again.');
   }
@@ -97,9 +155,8 @@ export async function completePasswordReset(code: string, password: string) {
 
 export async function verifyHumanChallenge(token: string) {
   if (!token) throw new Error('Complete the human verification check first.');
-  const response = await fetch(identityEndpoint('/auth/verify-turnstile'), {
+  const response = await fetchAuthWithRetry(identityEndpoint('/auth/verify-turnstile'), {
     method: 'POST',
-    signal: AbortSignal.timeout(30_000),
     credentials: 'omit',
     cache: 'no-store',
     redirect: 'error',
@@ -196,30 +253,11 @@ export async function updateAccountName(
   return profileOf(user);
 }
 
-export async function setStudentPortalPassword(password: string, expectedUid?: string) {
-  const { auth, sdk } = await provider();
-  const user = currentAccount(auth, expectedUid);
-  if (!user.email || password.length < 12 || password.length > 128)
-    throw new Error('Choose a password that meets all requirements.');
-  const hasPassword = () => user.providerData.some((provider) => provider.providerId === 'password');
-  if (hasPassword()) {
-    await sdk.updatePassword(user, password);
-  } else {
-    try {
-      await sdk.linkWithCredential(user, sdk.EmailAuthProvider.credential(user.email, password));
-    } catch (error) {
-      if ((error as { code?: string }).code !== 'auth/provider-already-linked') throw error;
-      await sdk.updatePassword(user, password);
-    }
-  }
-  if (auth.currentUser !== user) throw new Error('Your account changed. Sign in again.');
-}
-
 export async function accountRequest<T>(
   path: string,
   method = 'GET',
   body?: unknown,
-  timeoutMs = 10_000,
+  timeoutMs = AUTH_TIMEOUT_MS,
   expectedUid?: string,
 ): Promise<T> {
   const { auth } = await provider();
@@ -240,9 +278,8 @@ export async function accountRequest<T>(
     clearTimeout(timeout);
   }
   if (auth.currentUser !== user) throw new Error('Sign in to continue.');
-  const response = await fetch(identityEndpoint('/auth/' + path), {
+  const request: RequestInit = {
     method,
-    signal: AbortSignal.timeout(timeoutMs),
     credentials: 'omit',
     cache: 'no-store',
     redirect: 'error',
@@ -252,7 +289,20 @@ export async function accountRequest<T>(
       'Content-Type': body instanceof Blob ? body.type : 'application/json',
     },
     ...(body === undefined ? {} : { body: body instanceof Blob ? body : JSON.stringify(body) }),
-  });
+  };
+  let response: Response | undefined;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    response = await fetch(identityEndpoint('/auth/' + path), {
+      ...request,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (attempt === 0 && [502, 503, 504].includes(response.status)) {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 800));
+      continue;
+    }
+    break;
+  }
+  if (!response) throw new Error('Account service unavailable.');
   if (auth.currentUser !== user) throw new Error('Sign in to continue.');
   if (response.status === 204 && response.ok) return undefined as T;
   if (!response.headers.get('content-type')?.includes('application/json'))

@@ -18,6 +18,8 @@ const fixture = vi.hoisted(() => ({
   updatePassword: vi.fn(),
   verifyResetCode: vi.fn(),
   confirmReset: vi.fn(),
+  redirect: vi.fn(),
+  redirectResult: vi.fn(),
 }));
 vi.mock('../config/runtime-config', () => ({ appMode: 'institutional' }));
 vi.mock('../lib/firebase', () => ({ firebaseApp: {} }));
@@ -26,6 +28,8 @@ vi.mock('./university-session-driver', () => ({
 }));
 vi.mock('firebase/auth', () => ({
   getAuth: () => fixture.auth,
+  signInWithRedirect: fixture.redirect,
+  getRedirectResult: fixture.redirectResult,
   createUserWithEmailAndPassword: fixture.signup,
   GoogleAuthProvider: fixture.googleProvider,
   signInWithPopup: fixture.google,
@@ -60,14 +64,14 @@ it('creates a Firebase account then requests verification without any role API c
   fetch.mockRestore();
 });
 
-it('starts Google sign-in through Firebase and does not create a client-selected role', async () => {
+it('opens Google popup synchronously with an existing Turnstile token', async () => {
   const provider = { setCustomParameters: vi.fn() };
   fixture.googleProvider.mockImplementation(function () {
     return provider;
   });
   fixture.google.mockResolvedValue({ user: { uid: 'google-student' } });
 
-  await expect(import('./account-actions').then(({ signInWithGoogle }) => signInWithGoogle()))
+  await expect(import('./account-actions').then(({ signInWithGoogle }) => signInWithGoogle('turnstile-once')))
     .resolves.toEqual({ user: { uid: 'google-student' } });
 
   expect(fixture.googleProvider).toHaveBeenCalledOnce();
@@ -97,9 +101,38 @@ it('requests password recovery through the Gateway once with its Turnstile token
   fetch.mockRestore();
 });
 
+it('retries a transient auth-service 503 once with the cold-start timeout', async () => {
+  const fetch = vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ error: { message: 'warming' } }),
+    } as unknown as Response)
+    .mockResolvedValueOnce({
+      ok: true,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ data: { accepted: true } }),
+    } as unknown as Response);
+
+  await expect(recoverPassword('juan.delacruz@student.pnm.edu.ph', 'one-use-token'))
+    .resolves.toBeUndefined();
+
+  expect(fetch).toHaveBeenCalledTimes(2);
+  for (const [, options] of fetch.mock.calls) {
+    expect(options?.signal).toBeInstanceOf(AbortSignal);
+    expect((options?.signal as AbortSignal).aborted).toBe(false);
+  }
+  fetch.mockRestore();
+});
+
 it('verifies a reset action code and only submits passwords meeting the portal minimum', async () => {
   fixture.verifyResetCode.mockResolvedValue('juan.delacruz@student.pnm.edu.ph');
-  fixture.confirmReset.mockResolvedValue(undefined);
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({ data: { updated: true } }),
+  } as unknown as Response);
   const { verifyPasswordResetCode, completePasswordReset } = await import('./account-actions');
   await verifyPasswordResetCode('opaque-action-code');
   await expect(completePasswordReset('opaque-action-code', 'Short-1!')).rejects.toThrow(
@@ -107,11 +140,10 @@ it('verifies a reset action code and only submits passwords meeting the portal m
   );
   await completePasswordReset('opaque-action-code', 'Campus-password-26!');
   expect(fixture.verifyResetCode).toHaveBeenCalledWith(fixture.auth, 'opaque-action-code');
-  expect(fixture.confirmReset).toHaveBeenCalledWith(
-    fixture.auth,
-    'opaque-action-code',
-    'Campus-password-26!',
-  );
+  expect(fetch).toHaveBeenCalledWith('/api/v1/auth/complete-password-reset', expect.objectContaining({
+    method: 'POST', body: JSON.stringify({ oob_code: 'opaque-action-code', password: 'Campus-password-26!' }),
+  }));
+  fetch.mockRestore();
 });
 
 it('exchanges a student number and Turnstile token for a Firebase custom-token session', async () => {
@@ -135,20 +167,12 @@ it('exchanges a student number and Turnstile token for a Firebase custom-token s
   fetch.mockRestore();
 });
 
-it('links a password provider to a recently authenticated first-time Google account', async () => {
-  const user = {
-    uid: 'student-a', email: 'juan.delacruz@student.pnm.edu.ph',
-    providerData: [{ providerId: 'google.com' }], getIdToken: vi.fn(),
-  };
-  fixture.auth.currentUser = user;
-  fixture.linkCredential.mockResolvedValue(undefined);
-  const { setStudentPortalPassword } = await import('./account-actions');
-
-  await setStudentPortalPassword('campus-pass-2026', 'student-a');
-
-  expect(fixture.linkCredential).toHaveBeenCalledWith(user, {
-    email: 'juan.delacruz@student.pnm.edu.ph', password: 'campus-pass-2026',
-  });
+it('opens the Firebase popup before returning control to any network continuation', async () => {
+  fixture.google.mockReturnValue(new Promise(() => undefined));
+  const { signInWithGoogle } = await import('./account-actions');
+  void signInWithGoogle('turnstile-ready');
+  expect(fixture.google).toHaveBeenCalledOnce();
+  expect(fixture.google).toHaveBeenCalledWith(fixture.auth, expect.anything());
 });
 
 it('does not send a mutation when the account changes during token acquisition', async () => {

@@ -1,7 +1,11 @@
 """Server-side Cloudflare Turnstile verification for auth-sensitive routes."""
 
+import logging
+
 import httpx
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 async def verify_turnstile_token(token: str, settings) -> None:
@@ -12,7 +16,7 @@ async def verify_turnstile_token(token: str, settings) -> None:
             return
         raise HTTPException(503, "Human verification is unavailable")
     try:
-        async with httpx.AsyncClient(timeout=5.0, trust_env=False) as client:
+        async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
             result = await client.post(
                 "https://challenges.cloudflare.com/turnstile/v0/siteverify",
                 data={"secret": settings.turnstile_secret_key.get_secret_value(),
@@ -21,6 +25,12 @@ async def verify_turnstile_token(token: str, settings) -> None:
             result.raise_for_status()
             verified = result.json().get("success") is True
     except (httpx.HTTPError, ValueError, AttributeError) as error:
+        logger.warning(
+            "turnstile_siteverify_unavailable",
+            extra={"reason_code": "turnstile_unavailable",
+                   "failure_type": type(error).__name__},
+        )
         raise HTTPException(503, "Human verification is unavailable") from error
     if not verified:
+        logger.warning("turnstile_token_rejected", extra={"reason_code": "turnstile_failed"})
         raise HTTPException(403, "Human verification failed")

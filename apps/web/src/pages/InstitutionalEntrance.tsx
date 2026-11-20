@@ -14,7 +14,10 @@ import {
   verifyHumanChallenge,
   completePasswordReset,
   verifyPasswordResetCode,
+  completeGoogleRedirectSignIn,
+  verifyGoogleSignIn,
 } from '../auth/account-actions';
+import { identityEndpoint } from '../auth/university-session-driver';
 import { TurnstileWidget } from '../auth/TurnstileWidget';
 import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
 import { PasswordStrengthChecklist } from '../auth/PasswordStrengthChecklist';
@@ -125,6 +128,22 @@ export function InstitutionalEntrance() {
   useEffect(() => {
     statusHeading.current?.focus();
   }, [path]);
+  useEffect(() => {
+    if (mode !== 'login' && mode !== 'recovery') return;
+    const controller = new AbortController();
+    void fetch(identityEndpoint('/health'), {
+      method: 'GET', cache: 'no-store', credentials: 'omit', signal: controller.signal,
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [mode]);
+  useEffect(() => {
+    if (mode !== 'login') return;
+    let active = true;
+    void completeGoogleRedirectSignIn().then((result) => {
+      if (result && active) refresh();
+    });
+    return () => { active = false; };
+  }, [mode, refresh]);
 
   if (state.status === 'authorized' && path !== accountPath)
     return <Navigate replace to={workspaceDestination(state.membership.role, target)} />;
@@ -373,14 +392,23 @@ function CredentialsForm({
 
   async function continueWithGoogle() {
     if (busy) return;
+    if (!turnstileToken) {
+      setError('Complete the human verification check first.');
+      return;
+    }
     setBusy(true);
     setError('');
     setNotice('');
     try {
-      await verifyHumanChallenge(turnstileToken);
-      await signInWithGoogle();
-      session.refresh();
+      // Call Firebase synchronously from this gesture before any network await.
+      const popupPromise = signInWithGoogle(turnstileToken);
+      const result = await popupPromise;
+      if (result?.user) {
+        await verifyGoogleSignIn(result.user, turnstileToken);
+        session.refresh();
+      }
     } catch (failure) {
+      await Promise.resolve(session.signOut()).catch(() => undefined);
       setError(accountError(failure));
       if (turnstileToken) {
         setTurnstileToken('');
@@ -574,6 +602,7 @@ function CredentialsForm({
         <div className="connected-entrance__first-time">
           <span className="connected-entrance__divider">or</span>
           <Button type="button" variant="secondary" disabled={busy || !serviceAvailable} onClick={continueWithGoogle}>
+            <GoogleMark />
             Continue with Google
           </Button>
           <aside className="connected-entrance__callout connected-entrance__callout--mobile">
@@ -606,5 +635,16 @@ function CredentialsForm({
         </div>
       )}
     </>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg className="google-mark" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z" />
+      <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.2A20 20 0 0 0 24 44Z" />
+      <path fill="#FBBC05" d="M12.8 27.8a12 12 0 0 1 0-7.6V15H5.9a20 20 0 0 0 0 18l6.9-5.2Z" />
+      <path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.9-5.9C34.1 5.9 29.5 4 24 4A20 20 0 0 0 5.9 15l6.9 5.2C14.4 15.5 18.8 12 24 12Z" />
+    </svg>
   );
 }

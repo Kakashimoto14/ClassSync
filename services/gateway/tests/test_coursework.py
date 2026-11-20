@@ -221,6 +221,28 @@ def test_cors_allowed_origins_environment_name_is_supported(monkeypatch):
     assert settings.cors_origins == ["https://class-sync-bhiv.vercel.app"]
 
 
+def test_cors_origins_accepts_comma_separated_environment_values(monkeypatch):
+    monkeypatch.delenv("CORS_ALLOWED_ORIGINS", raising=False)
+    monkeypatch.setenv(
+        "CORS_ORIGINS", "https://class-sync-bhiv.vercel.app, https://portal.example.edu"
+    )
+
+    settings = main.Settings(_env_file=None)
+
+    assert settings.cors_origins == [
+        "https://class-sync-bhiv.vercel.app", "https://portal.example.edu"
+    ]
+
+
+def test_cors_origins_accepts_json_and_csv_constructor_values():
+    assert main.Settings(
+        _env_file=None, cors_origins='["https://class-sync-bhiv.vercel.app"]'
+    ).cors_origins == ["https://class-sync-bhiv.vercel.app"]
+    assert main.Settings(
+        _env_file=None, cors_origins="https://one.example,https://two.example"
+    ).cors_origins == ["https://one.example", "https://two.example"]
+
+
 def test_coursework_openapi_has_all_verbs_and_validated_inputs():
     schema = main.app.openapi()
     assert set(schema["paths"]["/api/v1/coursework/preferences"]) == {

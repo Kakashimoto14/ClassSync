@@ -77,7 +77,7 @@ def test_verification_email_sends_only_to_configured_resend_endpoint(monkeypatch
     )
 
     assert result.status_code == 202
-    assert observed["client"] == {"timeout": 8.0, "trust_env": False}
+    assert observed["client"] == {"timeout": 15.0, "trust_env": False}
     assert observed["url"] == "https://api.resend.com/emails"
     assert observed["payload"]["to"] == ["juan.delacruz@student.pnm.edu.ph"]
     assert "123456" in observed["payload"]["text"]

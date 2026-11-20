@@ -7,7 +7,6 @@ import {
   refreshVerifiedAccount,
   resendVerification,
   accountError,
-  setStudentPortalPassword,
   type OnboardingStatus,
   observeAccountProfile,
   type AccountProfile,
@@ -189,11 +188,10 @@ function PendingAccount({
     setBusy(true);
     setMessage('');
     try {
-      await setStudentPortalPassword(newPassword, profile.uid);
       await accountRequest(
         'complete-student-onboarding', 'POST', {
           student_id: studentId.trim(), challenge_id: challenge.challenge_id,
-          turnstile_token: turnstileToken,
+          turnstile_token: turnstileToken, password: newPassword,
         }, undefined, profile.uid,
       );
       setStatus(await accountRequest<OnboardingStatus>(

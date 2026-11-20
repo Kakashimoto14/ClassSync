@@ -159,7 +159,7 @@ class GoogleCoursework:
     async def _advisory(self, prompt):
         async with (
             asyncio.timeout(ADVISORY_DEADLINE_SECONDS),
-            httpx.AsyncClient(timeout=5, follow_redirects=False, trust_env=False) as client,
+            httpx.AsyncClient(timeout=15, follow_redirects=False, trust_env=False) as client,
         ):
             async with client.stream(
                 "POST",

@@ -73,7 +73,7 @@ def test_turnstile_forwards_secret_and_token_to_siteverify_without_proxy(monkeyp
 
     assert result.status_code == 200
     assert observed == {
-        "client": {"timeout": 5.0, "trust_env": False},
+        "client": {"timeout": 15.0, "trust_env": False},
         "url": "https://challenges.cloudflare.com/turnstile/v0/siteverify",
         "data": {"secret": "turnstile-secret", "response": "single-use-token"},
     }

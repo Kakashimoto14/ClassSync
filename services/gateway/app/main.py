@@ -1,7 +1,9 @@
+import json
+import logging
 import re
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
@@ -14,23 +16,24 @@ from classync_contracts.scheduling_security import (
     require_administrator,
     require_sandbox,
 )
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, SecretStr, field_validator
-from pydantic_settings import SettingsConfigDict
+from pydantic_settings import NoDecode, SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
 from .announcements import announcement_router
 from .authorization import configured_authorization
 from .coursework import coursework_router
-from .onboarding import onboarding_router
+from .onboarding import limit_student_login, onboarding_router
 from .openapi import install_openapi
 from .registration import registration_router
 from .turnstile import verify_turnstile_token
 
 ROOT_DIRECTORY = Path(__file__).resolve().parents[3]
+logger = logging.getLogger(__name__)
 
 
 class Settings(SchedulingSecuritySettings):
@@ -54,7 +57,7 @@ class Settings(SchedulingSecuritySettings):
     registration_max_pages: int = Field(default=5, ge=1, le=8)
     registration_timeout_seconds: int = Field(default=20, ge=5, le=30)
     registration_retention_seconds: int = Field(default=900, ge=60, le=900)
-    cors_origins: list[str] = Field(
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:5173"],
         validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CORS_ORIGINS"),
     )
@@ -63,9 +66,17 @@ class Settings(SchedulingSecuritySettings):
     course_gemini_model: str = Field(default="", pattern=r"^[a-z0-9.-]{0,80}$")
     gemini_api_key: SecretStr | None = None
 
-    @field_validator("cors_origins")
+    @field_validator("cors_origins", mode="before")
     @classmethod
     def exact_origins(cls, values):
+        if isinstance(values, str):
+            raw = values.strip()
+            if raw.startswith("["):
+                values = json.loads(raw)
+            else:
+                values = [origin.strip() for origin in raw.split(",") if origin.strip()]
+        if not isinstance(values, list) or not all(isinstance(item, str) for item in values):
+            raise ValueError("CORS origins must be a JSON array or comma-separated origins")
         if len(values) > 20:
             raise ValueError("At most twenty explicit CORS origins are allowed")
         for value in values:
@@ -135,8 +146,30 @@ app.add_middleware(
 @app.middleware("http")
 async def request_context(request: Request, call_next):
     request.state.request_id = request.headers.get("X-Request-ID", str(uuid4()))
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as error:
+        logger.error(
+            "gateway_unhandled_request_error",
+            extra={"request_id": request.state.request_id,
+                   "reason_code": "unhandled_request_error",
+                   "failure_type": type(error).__name__},
+        )
+        response = JSONResponse(
+            status_code=500,
+            content={"error": {"code": "internal_error",
+                                "message": "The request could not be completed. Please try again.",
+                                "requestId": request.state.request_id}},
+        )
     response.headers["X-Request-ID"] = request.state.request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if settings.classsync_env == "production":
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
     if request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/"):
         response.headers["Cache-Control"] = "no-store"
     return response
@@ -201,6 +234,11 @@ def health() -> HealthResponse:
     return HealthResponse(service="gateway")
 
 
+@app.get("/api/v1/health", response_model=HealthResponse)
+def api_health() -> HealthResponse:
+    return HealthResponse(service="gateway")
+
+
 @app.get("/api/v1/auth/me")
 def current_user(request: Request) -> dict:
     return {"data": require_authenticated(request)}
@@ -215,7 +253,7 @@ async def service_health(service_name: str, request: Request) -> dict:
         await run_in_threadpool(require_administrator, request, settings)
     try:
         headers = await run_in_threadpool(service_headers, settings.cloud_run_iam_enabled, target)
-        async with httpx.AsyncClient(timeout=2.0, trust_env=False) as client:
+        async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
             response = await client.get(f"{target}/health", headers=headers)
         response.raise_for_status()
         return {"data": response.json()}
@@ -225,13 +263,15 @@ async def service_health(service_name: str, request: Request) -> dict:
 
 class TurnstileInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    token: str = Field(min_length=1, max_length=2048)
+    token: SecretStr = Field(min_length=1, max_length=2048)
 
 
 @app.post("/api/v1/auth/verify-turnstile")
-async def verify_turnstile(body: TurnstileInput, request: Request) -> dict:
+async def verify_turnstile(body: TurnstileInput, request: Request, response: Response) -> dict:
     """Verify a single-use Cloudflare challenge token; dev bypass is never production."""
-    await verify_turnstile_token(body.token, settings)
+    response.headers["Cache-Control"] = "no-store"
+    limit_student_login(request)
+    await verify_turnstile_token(body.token.get_secret_value(), settings)
     response = JSONResponse(content={"data": {"verified": True}})
     response.headers["Cache-Control"] = "no-store"
     return response

@@ -9,6 +9,7 @@ import {
 
 const actions = vi.hoisted(() => ({
   create: vi.fn(), recover: vi.fn(), signIn: vi.fn(), google: vi.fn(),
+  verifyGoogle: vi.fn(),
   verify: vi.fn().mockResolvedValue(undefined), resetVerify: vi.fn(), resetComplete: vi.fn(),
 }));
 vi.mock('../auth/account-actions', async (original) => ({
@@ -17,6 +18,7 @@ vi.mock('../auth/account-actions', async (original) => ({
   recoverPassword: actions.recover,
   signInToAccount: actions.signIn,
   signInWithGoogle: actions.google,
+  verifyGoogleSignIn: actions.verifyGoogle,
   verifyHumanChallenge: actions.verify,
   verifyPasswordResetCode: actions.resetVerify,
   completePasswordReset: actions.resetComplete,
@@ -55,6 +57,22 @@ it('shows the CdM campus access login and a non-production verification widget',
   expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
   expect(await screen.findByText(/test verification ready/i)).toBeInTheDocument();
   expect(screen.queryByText(/sample agenda/i)).not.toBeInTheDocument();
+  const google = screen.getByRole('button', { name: 'Continue with Google' });
+  expect(google.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+});
+
+it('prewarms the Gateway health endpoint without blocking the login form', async () => {
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    status: 200,
+  } as Response);
+  entrance();
+
+  await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+    expect.stringMatching(/\/api\/v1\/health$/),
+    expect.objectContaining({ method: 'GET', credentials: 'omit', cache: 'no-store' }),
+  ));
+  fetch.mockRestore();
 });
 
 it('offers one login, refreshes the server-authorized session after sign-in, and keeps labels associated', async () => {
@@ -150,10 +168,16 @@ it('requires the registered institutional email pattern for student account crea
 });
 
 it('offers Google sign-in and delegates identity verification to the server session', async () => {
+  actions.google.mockResolvedValue({ user: { getIdToken: vi.fn().mockResolvedValue('id-token') } });
+  actions.verifyGoogle.mockResolvedValue(undefined);
   entrance();
+  await screen.findByText(/test verification ready/i);
   fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
-  await waitFor(() => expect(actions.google).toHaveBeenCalledOnce());
-  expect(actions.verify).toHaveBeenCalledOnce();
+  await waitFor(() => expect(actions.google).toHaveBeenCalledWith('test-token'));
+  expect(actions.verify).not.toHaveBeenCalled();
+  await waitFor(() => expect(actions.verifyGoogle).toHaveBeenCalledWith(
+    expect.objectContaining({ getIdToken: expect.any(Function) }), 'test-token',
+  ));
 });
 
 it('offers recovery without an enumeration-sensitive success message', async () => {
