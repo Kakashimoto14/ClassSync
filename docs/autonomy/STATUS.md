@@ -38,7 +38,7 @@ Fresh local verification (all serial):
   app entry at 334.84 kB (gzip 85.93 kB).
 - `\.venv\Scripts\ruff.exe check` — PASS. Focused Gateway/Notification pytest — **33 passed**,
   one existing Starlette/httpx deprecation warning.
-- `git diff --check` — PASS before this status update; final staged check remains required.
+- `git diff --check` and final `git diff --cached --check` — PASS.
 - Real Chrome via Playwright on temporary local Vite: at 1366×640, the card is 980×600 at y=20,
   document height is 640, Google button ends at y=560, showcase feature card spans y=273–484,
   and first-time callout spans y=500–564. At 390×844, the one-column card is 358px wide, the
@@ -50,8 +50,11 @@ Brevo sender configuration and delivery, native browser zoom, screen-reader test
 PostgreSQL qualification remain UNVERIFIED. Production readiness is not claimed. No live data or
 hosted configuration changed.
 
-Next authorized action: inspect/stage this feature work, commit, merge into `main`, and push both
-branches as authorized by the owner; then verify resulting local/remote refs.
+The implementation was committed on the feature branch as `bbdaa487`, merged into `main` as
+`f9195f70`, and `git push origin feature/auth-onboarding-saas main` reported both branch updates
+successfully. The initial sandboxed `git ls-remote` verification could not connect to GitHub; push
+output is the available remote confirmation. This final evidence correction is being committed on
+the feature branch and will be merged/pushed as a documentation follow-up.
 
 ## 20 November 2026 09:41 SGT — authentication polish, Turnstile stability, and transactional email
 
