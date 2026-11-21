@@ -545,14 +545,15 @@ def registration_router(settings):
             principal,
             review_data,
             allow_self_verification=current.student_verification_mode == "cor_or_roster",
+            password_configured=principal.sign_in_provider == "password",
         )
         try:
             matches, _ = await run_in_threadpool(
                 fetch_matches, request, current, review_data, principal
             )
-        except HTTPException as error:
-            if error.status_code != 503:
-                raise
+        except HTTPException:
+            # Activation has committed. Schedule lookup is a follow-up projection and
+            # must not make a successful account activation look like a failed confirm.
             matches = {
                 "status": "unavailable",
                 "courses": [],

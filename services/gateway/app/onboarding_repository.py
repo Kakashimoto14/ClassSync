@@ -203,7 +203,9 @@ class OnboardingRepository:
                                     headers={"Cache-Control": "no-store"})
         return {"status": "verified"}
 
-    def activate_from_cor(self, principal, review, *, allow_self_verification: bool):
+    def activate_from_cor(
+        self, principal, review, *, allow_self_verification: bool, password_configured: bool,
+    ):
         """Link a verified account from its own server-stored, confirmed COR review."""
         student_id = review.student_identifier
         email = normalize_email(principal.email)
@@ -215,14 +217,24 @@ class OnboardingRepository:
             )
         with self.session(principal) as db:
             membership = db.execute(text("""
-                SELECT student_id,roles,state FROM classsync_identity.memberships
-                WHERE tenant_id=:tenant AND uid=:uid FOR UPDATE
+                SELECT m.student_id,m.roles,m.state,s.registered_email,s.verification_source
+                FROM classsync_identity.memberships m
+                LEFT JOIN classsync_identity.students s
+                  ON s.tenant_id=m.tenant_id AND s.id=m.student_id
+                WHERE m.tenant_id=:tenant AND m.uid=:uid FOR UPDATE OF m
             """), self.params(principal)).mappings().first()
             if membership:
                 if (membership["student_id"] == student_id
                         and "student" in membership["roles"]
                         and membership["state"] == "active"):
-                    return {"status": "active", "verification_source": "existing_membership"}
+                    return {
+                        "status": "active",
+                        "verification_source": (
+                            membership["verification_source"] or "existing_membership"
+                        ),
+                        "student_id": student_id,
+                        "email": email,
+                    }
                 raise HTTPException(
                     409, "This account already has a different university membership"
                 )
@@ -240,7 +252,7 @@ class OnboardingRepository:
                         "Contact your administrator for help.",
                     )
                 person_id = row["person_id"]
-                source = "registrar_roster"
+                source = row["verification_source"]
             else:
                 if not allow_self_verification:
                     raise HTTPException(
@@ -257,9 +269,11 @@ class OnboardingRepository:
                     INSERT INTO classsync_identity.students
                         (tenant_id,id,person_id,registered_email,enrollment_status,
                          password_configured,verification_source)
-                    VALUES(:tenant,:student,:person,:email,'active',false,'cor_self_verified')
+                    VALUES(:tenant,:student,:person,:email,'active',:password_configured,
+                           'cor_self_verified')
                     ON CONFLICT (tenant_id,id) DO NOTHING
-                """), self.params(principal, student=student_id, person=person_id, email=email))
+                """), self.params(principal, student=student_id, person=person_id, email=email,
+                                  password_configured=password_configured))
                 if inserted.rowcount != 1:
                     raise HTTPException(409,
                         "This student number is already linked to another account. "
@@ -297,10 +311,17 @@ class OnboardingRepository:
                 WHERE tenant_id=:tenant AND uid=:uid AND consumed_at IS NULL
                 ORDER BY created_at DESC LIMIT 1 FOR UPDATE
             """), self.params(principal)).mappings().first()
-            if current and db.scalar(text("SELECT :resend_after > transaction_timestamp()"),
-                                     {"resend_after": current["resend_after"]}):
+            retry_after = db.scalar(text("""
+                SELECT CASE WHEN :resend_after > transaction_timestamp()
+                    THEN GREATEST(1, CEIL(EXTRACT(EPOCH FROM
+                        (:resend_after - transaction_timestamp())))::integer)
+                    ELSE 0 END
+            """), {"resend_after": current["resend_after"]}) if current else 0
+            if retry_after:
+                retry_after = max(1, int(retry_after))
                 raise HTTPException(429, "Wait before requesting another verification code",
-                                    headers={"Retry-After": "30", "Cache-Control": "no-store"})
+                                    headers={"Retry-After": str(retry_after),
+                                             "Cache-Control": "no-store"})
             db.execute(text("""
                 UPDATE classsync_identity.email_verification_challenges
                 SET consumed_at=transaction_timestamp()

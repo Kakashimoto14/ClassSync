@@ -349,6 +349,24 @@ def test_roster_mismatch_shares_registrar_message_before_otp_delivery(setup, mon
     repository.issue_student_challenge.assert_called_once()
 
 
+def test_student_challenge_preserves_repository_retry_after(setup, monkeypatch):
+    client, _, repository = setup
+    monkeypatch.setattr(main.settings, "otp_hmac_secret", SecretStr("test-secret"))
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("service-secret"))
+    repository.issue_student_challenge.side_effect = HTTPException(
+        429, "Wait before requesting another verification code", headers={"Retry-After": "17"},
+    )
+
+    result = client.post(
+        "/api/v1/auth/student-verification-challenges", headers=HEADERS,
+        json={"student_id": "24-98096", "turnstile_token": "test-token"},
+    )
+
+    assert result.status_code == 429
+    assert result.headers["Retry-After"] == "17"
+    assert result.json()["error"]["retryAfterSeconds"] == 17
+
+
 def test_student_challenge_fails_closed_when_hmac_or_delivery_secret_is_missing(setup, monkeypatch):
     client, _, repository = setup
     monkeypatch.setattr(main.settings, "otp_hmac_secret", None)

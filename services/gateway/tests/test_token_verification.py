@@ -41,6 +41,14 @@ def test_real_sdk_signature_and_claim_verification_returns_identity_only(offline
     assert principal.auth_time is not None
 
 
+def test_real_sdk_preserves_verified_sign_in_provider_claim(offline_sdk):
+    verifier, encoded, _, _ = offline_sdk
+    password = verifier.verify(encoded(firebase={"sign_in_provider": "password"}))
+    google = verifier.verify(encoded(firebase={"sign_in_provider": "google.com"}))
+    assert password.sign_in_provider == "password"
+    assert google.sign_in_provider == "google.com"
+
+
 @pytest.mark.parametrize(
     "changes,code",
     [

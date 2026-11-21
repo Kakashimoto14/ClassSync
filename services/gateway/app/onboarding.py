@@ -397,7 +397,8 @@ def onboarding_router(settings):
             )
         except HTTPException as error:
             if error.status_code == 429:
-                return cooldown_rejection(30)
+                retry_after = max(1, int((error.headers or {}).get("Retry-After", "1")))
+                return cooldown_rejection(retry_after)
             if error.status_code == 403 and config.student_verification_mode == "cor_or_roster":
                 raise HTTPException(
                     403,

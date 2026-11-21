@@ -2,6 +2,7 @@ from io import BytesIO
 from unittest.mock import Mock
 
 import pytest
+from classync_contracts.identity import VerifiedPrincipal
 from classync_contracts.scheduling import GenerationInput, scheduling_input_hash
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -230,7 +231,126 @@ def test_confirm_registration_activates_from_server_stored_review_and_then_check
     assert result.json()["data"]["schedule"]["status"] == "matched"
     repository.activate_from_cor.assert_called_once_with(
         repository.status.call_args.args[0], review, allow_self_verification=True,
+        password_configured=False,
     )
+
+
+def test_confirm_registration_passes_signed_firebase_password_provider(api, monkeypatch):
+    client, verifier, repository = api
+    monkeypatch.setattr(
+        verifier, "verify", lambda _: VerifiedPrincipal(
+            uid="scanner-route-fixture", email="student@example.invalid",
+            email_verified=True, sign_in_provider="password",
+        ),
+    )
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture", {"method": "local-ocr", "fields": {}}, 900,
+    )
+    review = reviewed(student_identifier="23-01425")
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture", review,
+    )
+    repository.activate_from_cor.return_value = {"status": "active"}
+    monkeypatch.setattr(
+        "services.gateway.app.registration.fetch_matches",
+        lambda *_args: (
+            {"status": "pending-verification", "courses": [], "message": "Checked"}, None
+        ),
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 200
+    repository.activate_from_cor.assert_called_once_with(
+        repository.status.call_args.args[0], review, allow_self_verification=True,
+        password_configured=True,
+    )
+
+
+def test_confirm_registration_rejects_unverified_email_before_activation(api, monkeypatch):
+    client, verifier, repository = api
+    monkeypatch.setattr(
+        verifier, "verify", lambda _: VerifiedPrincipal(
+            uid="scanner-route-fixture", email="student@example.invalid", email_verified=False,
+        ),
+    )
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture", {"method": "local-ocr", "fields": {}}, 900,
+    )
+    review = reviewed(student_identifier="23-01425")
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture", review,
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 403
+    assert "Verify your email" in result.json()["error"]["message"]
+    repository.activate_from_cor.assert_not_called()
+
+
+def test_confirm_registration_keeps_activation_success_when_membership_read_is_stale(
+    api, monkeypatch,
+):
+    client, _, repository = api
+    repository.status.side_effect = [{"membership_state": None}, {"membership_state": "active"}]
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture", {"method": "local-ocr", "fields": {}}, 900,
+    )
+    review = reviewed(student_identifier="23-01425")
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture", review,
+    )
+    repository.activate_from_cor.return_value = {
+        "status": "active", "student_id": "23-01425", "verification_source": "cor_self_verified",
+    }
+    monkeypatch.setattr(
+        "services.gateway.app.registration.fetch_matches",
+        lambda *_args: (_ for _ in ()).throw(HTTPException(403, "Membership snapshot is stale")),
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 200
+    assert result.json()["data"]["status"] == "active"
+    assert result.json()["data"]["schedule"]["status"] == "unavailable"
+
+
+@pytest.mark.parametrize("status_code", [401, 409, 422])
+def test_confirm_registration_keeps_activation_success_when_schedule_lookup_fails(
+    api, monkeypatch, status_code,
+):
+    client, _, repository = api
+    repository.status.side_effect = [{"membership_state": None}, {"membership_state": "active"}]
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture", {"method": "local-ocr", "fields": {}}, 900,
+    )
+    review = reviewed(student_identifier="23-01425")
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture", review,
+    )
+    repository.activate_from_cor.return_value = {
+        "status": "active", "student_id": "23-01425", "verification_source": "cor_self_verified",
+    }
+    monkeypatch.setattr(
+        "services.gateway.app.registration.fetch_matches",
+        lambda *_args: (_ for _ in ()).throw(HTTPException(status_code, "Downstream detail")),
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 200
+    assert result.json()["data"]["status"] == "active"
+    assert result.json()["data"]["schedule"]["status"] == "unavailable"
+    assert "Downstream detail" not in result.text
 
 
 def test_confirm_registration_refuses_manual_entry_as_activation_evidence(api):
