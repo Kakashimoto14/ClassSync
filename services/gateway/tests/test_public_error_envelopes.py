@@ -5,8 +5,8 @@ from services.gateway.app import main
 
 def test_public_error_filter_preserves_safe_identity_message_and_masks_internals():
     safe = (
-        "Unable to sign in wth Google. Use the email registered in your student record. "
-        "If you need assistance, contact the Registrar"
+        "No matching active student record was found. "
+        "Scan your Registration Form or contact the Registrar."
     )
     assert main.safe_public_error_message(safe) == safe
     assert main.safe_public_error_message(

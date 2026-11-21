@@ -28,11 +28,13 @@ vi.mock('../auth/TurnstileWidget', () => ({
 }));
 beforeEach(() => {
   vi.clearAllMocks();
+  sessionStorage.clear();
   source.request.mockResolvedValue({
     email_verified: true,
     claim_state: null,
     membership_state: null,
     status: 'unlinked',
+    verification_mode: 'cor_or_roster',
   });
 });
 
@@ -88,18 +90,18 @@ it('checks student ID against the verified account email and refreshes current m
     return vi.fn();
   });
   source.request.mockImplementation(async (path) => path === 'student-verification-challenges'
-    ? { challenge_id: '00000000-0000-0000-0000-000000000001', masked_email: 'j***@student.pnm.edu.ph', expires_in_seconds: 300, resend_after_seconds: 60 }
+    ? { challenge_id: '00000000-0000-0000-0000-000000000001', masked_email: 's***@gmail.com', expires_in_seconds: 300, resend_after_seconds: 30 }
     : path === 'verify-student'
       ? { status: 'verified' }
       : path === 'complete-student-onboarding'
         ? { status: 'active', password_configured: true }
-      : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' });
+      : { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked', verification_mode: 'cor_or_roster' });
   render(panel(refresh));
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), {
     target: { value: '24-98096' },
   });
-  expect(screen.getByLabelText('Registered student email')).toHaveValue(
+  expect(screen.getByLabelText('Email address')).toHaveValue(
     'juan.delacruz@student.pnm.edu.ph',
   );
   fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
@@ -115,7 +117,7 @@ it('checks student ID against the verified account email and refreshes current m
       'student-a',
     ),
   );
-  expect(await screen.findByText(/A code was sent to j\*\*\*/)).toBeInTheDocument();
+  expect(await screen.findByText(/A code was sent to s\*\*\*@gmail\.com/)).toBeInTheDocument();
   for (let index = 0; index < 6; index += 1)
     fireEvent.change(screen.getByLabelText(`Verification digit ${index + 1}`), {
       target: { value: String(index + 1) },
@@ -141,22 +143,20 @@ it('checks student ID against the verified account email and refreshes current m
   expect(refresh).toHaveBeenCalledOnce();
 });
 
-it('shows the exact anti-enumeration Registrar error for a roster mismatch', async () => {
+it('offers the Registration Form path when the roster has no matching record', async () => {
   source.observe.mockImplementation(async (listener) => {
     listener(profile('student-a'));
     return vi.fn();
   });
-  const registrarError =
-    'Unable to sign in wth Google. Use the email registered in your student record. If you need assistance, contact the Registrar';
   source.request.mockImplementation(async (_path, method) => {
-    if (method === 'POST') throw new Error(registrarError);
-    return { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked' };
+    if (method === 'POST') throw new Error('No matching active student record was found. Scan your Registration Form or contact the Registrar.');
+    return { email_verified: true, claim_state: null, membership_state: null, status: 'unlinked', verification_mode: 'cor_or_roster' };
   });
   render(panel());
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), { target: { value: '24-98096' } });
   fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
-  expect(await screen.findByText(registrarError)).toBeInTheDocument();
+  expect(await screen.findByRole('link', { name: 'Scan Registration Form (COR)' })).toBeInTheDocument();
 });
 
 it('rejects malformed student IDs in the form before sending a roster lookup', async () => {
@@ -167,10 +167,7 @@ it('rejects malformed student IDs in the form before sending a roster lookup', a
   render(panel());
   await screen.findByLabelText('Student number');
   fireEvent.change(screen.getByLabelText('Student number'), { target: { value: 'student-a' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
-  expect(await screen.findByRole('status')).toHaveTextContent(/Use the format 12-12345/);
-  expect(screen.getByText(/Use the format 12-12345/, { selector: '#student-number-error' }))
-    .toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Send verification code' })).toBeDisabled();
   expect(source.request).not.toHaveBeenCalledWith(
     'student-verification-challenges', expect.anything(), expect.anything(), expect.anything(), expect.anything(),
   );

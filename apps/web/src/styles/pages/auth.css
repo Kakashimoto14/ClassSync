@@ -688,3 +688,51 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+.email-action-card {
+  width: min(100%, 500px);
+  margin-inline: auto;
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 54px rgb(31 41 55 / 8%);
+}
+
+.email-action-card h1 {
+  margin: 0 0 10px;
+  color: #17212f;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.email-action-card p {
+  color: #526079;
+  line-height: 1.55;
+}
+
+.email-action-card form {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.email-action-card input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #d8dce5;
+  border-radius: 10px;
+  color: #17212f;
+  font: inherit;
+}
+
+.email-action-card input:focus-visible {
+  outline: 3px solid rgb(135 46 73 / 22%);
+  border-color: #872e49;
+}
+
+.email-action-card a:not(.button) {
+  color: #872e49;
+  font-weight: 650;
+}

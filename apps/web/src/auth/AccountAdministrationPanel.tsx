@@ -2,11 +2,19 @@ import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { Button } from '../components/ui/Button';
 import { accountRequest as requestAccount } from './account-actions';
+import { isValidAccountEmail, normalizeAccountEmail } from './student-number';
 
 interface Claim {
   uid: string;
   student_id: string;
   state: string;
+}
+interface SelfVerifiedStudent {
+  uid: string;
+  student_id: string;
+  registered_email: string;
+  verification_source: 'cor_self_verified';
+  membership_revision: number;
 }
 interface Invitation {
   id: string;
@@ -19,6 +27,7 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
     requestAccount<T>(path, method, body, undefined, uid);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [faculty, setFaculty] = useState<{ id: string }[]>([]);
+  const [selfVerified, setSelfVerified] = useState<SelfVerifiedStudent[]>([]);
   const [selected, setSelected] = useState('');
   const [email, setEmail] = useState('');
   const [reference, setReference] = useState('');
@@ -39,16 +48,20 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
     }
   };
   const load = async () => {
-    const [nextClaims, nextFaculty] = await Promise.all([
+    const [nextClaims, nextFaculty, nextSelfVerified] = await Promise.all([
       accountRequest<Claim[]>('student-claims'),
       accountRequest<{ id: string }[]>('faculty-records'),
+      accountRequest<SelfVerifiedStudent[]>('self-verified-students'),
     ]);
     setClaims(nextClaims);
     setFaculty(nextFaculty);
+    setSelfVerified(nextSelfVerified);
     setMessage(
       nextClaims.length
         ? 'Review each request against your authorized institutional identity source.'
-        : 'No pending student requests.',
+        : nextSelfVerified.length
+          ? `${nextSelfVerified.length} student account${nextSelfVerified.length === 1 ? '' : 's'} activated from a confirmed form; review or revoke below.`
+          : 'No pending student requests.',
     );
   };
   const invite = (event: FormEvent) => {
@@ -57,7 +70,7 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
       setInvitation(null);
       const result = await accountRequest<Invitation>('faculty-invitations', 'POST', {
         faculty_id: selected,
-        email,
+        email: normalizeAccountEmail(email),
         expires_in_hours: 48,
       });
       setInvitation(result);
@@ -67,10 +80,7 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
   return (
     <section aria-label="University account management" aria-busy={busy}>
       <h3>University accounts</h3>
-      <p>
-        Use an authorized identity source to verify student requests. Submitted numbers and
-        registration images alone are insufficient.
-      </p>
+      <p>Review pending records and monitor students activated from confirmed Registration Forms.</p>
       <Button disabled={busy} onClick={() => void run(load)}>
         Load account requests
       </Button>
@@ -129,6 +139,34 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
           </ul>
         </>
       )}
+      {selfVerified.length > 0 && (
+        <section aria-labelledby="self-verified-students-heading">
+          <h4 id="self-verified-students-heading">Students activated from a Registration Form</h4>
+          <p>These accounts are marked for administrator review. Revoke access if the record is invalid.</p>
+          <ul>
+            {selfVerified.map((student) => (
+              <li key={student.uid}>
+                <strong>{student.student_id}</strong> · {student.registered_email}
+                <span> · Form verified · Revision {student.membership_revision}</span>
+                <Button
+                  disabled={busy}
+                  variant="secondary"
+                  onClick={() => void run(async () => {
+                    await accountRequest(
+                      `memberships/${encodeURIComponent(student.uid)}/revoke`,
+                      'PATCH',
+                      { expected_revision: student.membership_revision },
+                    );
+                    await load();
+                  })}
+                >
+                  Revoke access
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <form onSubmit={invite}>
         <h4>Invite a faculty member</h4>
         <label htmlFor="faculty-record">Approved faculty record</label>
@@ -151,10 +189,12 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
           type="email"
           required
           maxLength={320}
+          autoCapitalize="none"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy || !selected || !isValidAccountEmail(email)}>
           Create private invitation
         </Button>
       </form>

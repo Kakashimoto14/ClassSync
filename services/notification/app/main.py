@@ -7,6 +7,7 @@ from typing import Literal
 from urllib.parse import parse_qs, urlsplit
 
 import httpx
+from classync_contracts.email_address import normalize_email
 from classync_contracts.models import HealthResponse
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
@@ -49,6 +50,14 @@ class VerificationEmail(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     code: SecretStr = Field(min_length=6, max_length=6)
 
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        normalized = normalize_email(value)
+        if not normalized:
+            raise ValueError("Email address is invalid")
+        return normalized
+
     @field_validator("code")
     @classmethod
     def six_numeric_digits(cls, value: SecretStr) -> SecretStr:
@@ -65,9 +74,10 @@ class PasswordResetEmail(BaseModel):
     @field_validator("email")
     @classmethod
     def valid_email(cls, value: str) -> str:
-        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
-            raise ValueError("Student email address is invalid")
-        return value
+        normalized = normalize_email(value)
+        if not normalized:
+            raise ValueError("Email address is invalid")
+        return normalized
 
     @field_validator("reset_url")
     @classmethod
@@ -79,13 +89,46 @@ class PasswordResetEmail(BaseModel):
         if (
             parsed.scheme != origin.scheme
             or parsed.netloc != origin.netloc
-            or parsed.path != "/auth/reset-password"
+            or parsed.path != "/auth/action"
             or parsed.fragment
-            or set(query) != {"oobCode"}
+            or set(query) != {"mode", "oobCode"}
             or len(query["oobCode"]) != 1
+            or query["mode"] != ["resetPassword"]
             or not re.fullmatch(r"[A-Za-z0-9_-]{1,2048}={0,2}", query["oobCode"][0])
         ):
             raise ValueError("Password reset action link is invalid")
+        return value
+
+
+class EmailAction(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    email: str = Field(min_length=3, max_length=320)
+    mode: Literal["verifyEmail", "resetPassword"]
+    action_url: SecretStr = Field(min_length=1, max_length=2048)
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        normalized = normalize_email(value)
+        if not normalized:
+            raise ValueError("Email address is invalid")
+        return normalized
+
+    @field_validator("action_url")
+    @classmethod
+    def same_origin_action_url(cls, value: SecretStr, info) -> SecretStr:
+        parsed = urlsplit(value.get_secret_value())
+        origin = urlsplit(settings.classsync_web_url)
+        query = parse_qs(parsed.query)
+        mode = info.data.get("mode")
+        if (
+            parsed.scheme != origin.scheme or parsed.netloc != origin.netloc
+            or parsed.path != "/auth/action" or parsed.fragment
+            or set(query) != {"mode", "oobCode"} or query.get("mode") != [mode]
+            or len(query.get("oobCode", [])) != 1
+            or not re.fullmatch(r"[A-Za-z0-9_-]{1,2048}={0,2}", query["oobCode"][0])
+        ):
+            raise ValueError("Account action link is invalid")
         return value
 
 
@@ -169,14 +212,31 @@ async def verification_email(
         token.get_secret_value(), x_classsync_service_token
     ):
         raise HTTPException(403, "Service authorization required")
-    if not re.fullmatch(r"[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph", body.email):
-        raise HTTPException(422, "Student email address is invalid")
     from .email_templates import render_verification_email
 
     html, text = render_verification_email(
         body.code.get_secret_value(), settings.classsync_web_url
     )
     await deliver_email(body.email, "Your ClassSync verification code", text, html)
+    return {"data": {"accepted": True}}
+
+
+@app.post("/internal/v1/email-action", status_code=202)
+async def email_action(
+    body: EmailAction,
+    x_classsync_service_token: str | None = Header(default=None),
+):
+    token = settings.notification_service_token
+    if token is None or not x_classsync_service_token or not hmac.compare_digest(
+        token.get_secret_value(), x_classsync_service_token
+    ):
+        raise HTTPException(403, "Service authorization required")
+    from .email_templates import render_email_action_email
+
+    html, text = render_email_action_email(body.mode, body.action_url.get_secret_value())
+    subject = "Verify your ClassSync email" if body.mode == "verifyEmail" \
+        else "Reset your ClassSync password"
+    await deliver_email(body.email, subject, text, html)
     return {"data": {"accepted": True}}
 
 

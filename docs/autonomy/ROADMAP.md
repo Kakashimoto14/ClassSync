@@ -234,3 +234,17 @@ small authorized application features and their in-process tests, while keeping 
 dependency scan, Auth Emulator, connected lifecycle E2E, native 200% and keyboard gates explicitly
 open. Do not commit, switch branches or merge until the entire dirty diff and target worktree are
 reviewed and staging paths are grouped safely.
+
+## 21 November 2026 — email-neutral onboarding / COR work
+
+This local implementation adds domain-neutral normalized email validation, a configurable `cor_or_roster` onboarding mode, a strict-roster option, verified-email/COR account activation, duplicate student-number protection, branded Firebase action-email routing, resend cooldowns, student-number formatting, compact COR review and a four-step Admin setup journey. Current evidence and exact files are recorded in [STATUS.md](STATUS.md).
+
+Dependency-ordered remaining work:
+
+1. Diagnose the scheduling draft regression that returns CP-SAT `unknown` under the existing 8-second limit; preserve constraints, timeout, and the repository's rejection of nonvalidated output.
+2. Apply migration `0021_student_email_and_cor_source` to a disposable PostgreSQL database and verify upgrade/downgrade refusal, tenant RLS, COR activation transactionality, duplicate claim conflicts, and rollback behavior.
+3. Replace process-local email/IP cooldown coordination with shared storage before multi-instance deployment.
+4. Verify Firebase Admin action-code generation, Brevo/Resend delivery, Turnstile, and registered-roster/COR matching in isolated provider/emulator fixtures.
+5. Re-run full suites and connected browser/accessibility acceptance. Current local full Python run is 1156/1157 due solver `unknown`; direct web run is 859/859, lint/typecheck/Ruff/build pass. These local checks do not qualify production providers or deployment.
+
+No hosted deployment, original database migration, institutional import, or release is authorized by this entry.

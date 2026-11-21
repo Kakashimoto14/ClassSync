@@ -38,7 +38,7 @@ class ReviewedAcademicFields(PrivateInput):
 
 
 class RegistrationReview(ReviewedAcademicFields):
-    student_identifier: str = Field(min_length=1, max_length=128)
+    student_identifier: str = Field(min_length=8, max_length=8, pattern=r"^[0-9]{2}-[0-9]{5}$")
 
 
 def review_openapi_schema():

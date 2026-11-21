@@ -26,7 +26,7 @@ def reviewed(**changes):
         {
             "academic_year": "2026-2027",
             "semester": "first",
-            "student_identifier": "SYN-001",
+            "student_identifier": "23-00001",
             "program": "SYNTHETIC",
             "year_level": 2,
             "courses": [{"code": "TEST101", "description": "Invented seminar", "section": "2"}],
@@ -198,6 +198,58 @@ def test_upload_route_auth_mime_size_and_no_store(api, monkeypatch):
         content=b"x" * 1025,
     )
     assert result.status_code == 413
+
+
+def test_confirm_registration_activates_from_server_stored_review_and_then_checks_schedule(
+    api, monkeypatch
+):
+    client, _, repository = api
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture",
+        {"method": "local-ocr", "fields": {}}, 900,
+    )
+    review = reviewed(student_identifier="23-01425")
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture", review,
+    )
+    repository.activate_from_cor.return_value = {
+        "status": "active", "verification_source": "cor_self_verified",
+        "student_id": "23-01425",
+    }
+    monkeypatch.setattr(
+        "services.gateway.app.registration.fetch_matches",
+        lambda *_args: ({"status": "matched", "courses": [], "message": "Checked"}, None),
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 200
+    assert result.json()["data"]["verification_source"] == "cor_self_verified"
+    assert result.json()["data"]["schedule"]["status"] == "matched"
+    repository.activate_from_cor.assert_called_once_with(
+        repository.status.call_args.args[0], review, allow_self_verification=True,
+    )
+
+
+def test_confirm_registration_refuses_manual_entry_as_activation_evidence(api):
+    client, _, repository = api
+    scan = main.registration_routes.registration_store.save(
+        "synthetic-tenant", "scanner-route-fixture",
+        {"method": "manual", "fields": {}}, 900,
+    )
+    main.registration_routes.registration_store.record_review(
+        scan["id"], "synthetic-tenant", "scanner-route-fixture",
+        reviewed(student_identifier="23-01425"),
+    )
+
+    result = client.post(
+        f"/api/v1/auth/registration-documents/{scan['id']}/confirm", headers=HEADERS, json={},
+    )
+
+    assert result.status_code == 403
+    repository.activate_from_cor.assert_not_called()
     assert result.headers["Cache-Control"] == "no-store"
 
 
@@ -316,7 +368,7 @@ def test_match_response_requires_the_original_student_binding(
     api, identity_adapters, monkeypatch, change,
 ):
     client, _, onboarding = api
-    _, memberships = identity_adapters(main, role="student", student_id="SYN-001")
+    _, memberships = identity_adapters(main, role="student", student_id="23-00001")
     onboarding.status.return_value = {"membership_state": "active"}
     start = client.post("/api/v1/auth/registration-documents/manual", headers=HEADERS)
     assert start.status_code == 201

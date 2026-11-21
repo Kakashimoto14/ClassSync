@@ -47,9 +47,37 @@
   gap: 16px;
 }
 .registration-course {
-  padding: 16px;
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) minmax(110px, 1fr) minmax(0, 1.5fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
   border: 1px solid var(--border, #d8dce5);
-  border-radius: 16px;
+  border-radius: 12px;
+}
+.registration-course label {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.registration-course > div {
+  min-width: 0;
+}
+.registration-course input {
+  min-height: 40px;
+}
+.registration-course button {
+  min-height: 36px;
+  padding-inline: 10px;
+  white-space: nowrap;
+}
+.registration-raw-details {
+  margin-top: 12px;
+  color: var(--text-secondary, #526079);
+  font-size: 0.875rem;
+}
+.registration-raw-details summary {
+  cursor: pointer;
+  width: fit-content;
 }
 .registration-course details,
 .registration-source {
@@ -74,6 +102,14 @@
   margin-block: 16px;
   overflow-wrap: anywhere;
 }
+.registration-review-note {
+  margin-block: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f4c7d1;
+  border-radius: 10px;
+  background: #fff7f8;
+  color: #7a2840;
+}
 .registration-scanner h2:focus {
   outline: 2px solid var(--accent, #8a2f50);
   outline-offset: 5px;
@@ -82,6 +118,12 @@
   .registration-fields,
   .registration-courses {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .registration-course {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .registration-course label {
+    display: block;
   }
   .registration-scanner {
     padding: 18px;

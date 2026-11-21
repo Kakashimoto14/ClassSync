@@ -4,6 +4,7 @@ import { accountRequest, observeAccount, type OnboardingStatus } from '../auth/a
 import { useUniversitySession } from '../auth/university-session-context';
 import { appMode } from '../config/runtime-config';
 import { Button } from '../components/ui/Button';
+import { formatStudentNumber } from '../auth/student-number';
 import './registration-scanner.css';
 
 interface Evidence {
@@ -49,6 +50,10 @@ interface Match {
   }>;
   periods?: Array<{ id: string; title: string; start: string | null }>;
 }
+const CDM_PROGRAMS = [
+  'BSIT', 'BSCPE', 'BSED-SCI', 'BEED-GEN', 'BEED-ECED',
+  'BTLED-ICT', 'TCP', 'BSBA-HRM', 'BSE',
+];
 const emptyReview = (): Review => ({
   academic_year: '',
   semester: '',
@@ -68,7 +73,7 @@ function reviewFrom(scan: Scan): Review {
   return {
     academic_year: value('academic_year'),
     semester: value('semester'),
-    student_identifier: value('student_identifier'),
+    student_identifier: formatStudentNumber(value('student_identifier')),
     program: value('program'),
     year_level: value('year_level'),
     courses: scan.courses.length
@@ -81,18 +86,6 @@ function reviewFrom(scan: Scan): Review {
       : emptyReview().courses,
   };
 }
-function Source({ field, label }: { field?: Evidence; label: string }) {
-  return field ? (
-    <details className="registration-source">
-      <summary>Source for {label}</summary>
-      <p>
-        Page {field.evidence.page}: {String(field.value)}
-      </p>
-      <p>Check this field against your form.</p>
-    </details>
-  ) : null;
-}
-
 export function RegistrationScannerPage() {
   const [uid, setUid] = useState<string | null | undefined>();
   useEffect(() => {
@@ -296,6 +289,25 @@ function PrivateScanner() {
       setNotice('Your temporary scan was deleted.');
     });
   };
+  const confirmAndActivate = () => {
+    if (!scan || busy || account?.membership_state) return;
+    void execute(async () => {
+      const result = await accountRequest<{ status: string; verification_source: string; schedule: Match }>(
+        `registration-documents/${scan.id}/confirm`, 'POST', {}, 25_000,
+      );
+      setMatch(result.schedule);
+      setNotice('Your account is active. We checked your confirmed courses against published classes.');
+      session.refresh();
+      requestAnimationFrame(() => resultHeading.current?.focus());
+    });
+  };
+  const reviewValid = /^\d{4}-\d{4}$/.test(review.academic_year)
+    && ['first', 'second'].includes(review.semester)
+    && /^[0-9]{2}-[0-9]{5}$/.test(review.student_identifier)
+    && !!review.program.trim()
+    && /^[1-4]$/.test(review.year_level)
+    && review.courses.length > 0
+    && review.courses.every((course) => !!course.code.trim());
   if (session.state.status === 'authorized' && session.state.membership.role !== 'student')
     return (
       <section className="workspace-card">
@@ -365,13 +377,12 @@ function PrivateScanner() {
               <h2 ref={heading} tabIndex={-1}>
                 Review your classes
               </h2>
-              <p>
-                {scan.method === 'reviewed'
-                  ? 'Your reviewed courses are saved. Re-enter your student number to check your matches again.'
-                  : scan.method === 'manual'
-                    ? 'Enter the academic details from your form.'
-                    : 'Check every extracted field against your form. Extraction confidence is unavailable; your review is required.'}
-              </p>
+              <p>Check your scanned details and tap Confirm to load your schedule.</p>
+              {!review.student_identifier && (
+                <p className="registration-review-note" role="note">
+                  Re-enter your student number to continue.
+                </p>
+              )}
               {scan.warnings.map((warning) => (
                 <p key={warning} className="muted">
                   {warning}
@@ -390,7 +401,6 @@ function PrivateScanner() {
                       value={review.academic_year}
                       onChange={(e) => edit({ academic_year: e.target.value })}
                     />
-                    <Source field={scan.fields.academic_year} label="academic year" />
                   </div>
                   <div>
                     <label htmlFor="scan-semester">Semester</label>
@@ -404,52 +414,53 @@ function PrivateScanner() {
                       <option value="first">First semester</option>
                       <option value="second">Second semester</option>
                     </select>
-                    <Source field={scan.fields.semester} label="semester" />
                   </div>
                   <div>
                     <label htmlFor="scan-student">Student number</label>
                     <input
                       id="scan-student"
                       required
-                      maxLength={128}
+                      minLength={8}
+                      maxLength={8}
+                      pattern="[0-9]{2}-[0-9]{5}"
+                      placeholder="12-12345"
                       autoComplete="off"
                       value={review.student_identifier}
-                      onChange={(e) => edit({ student_identifier: e.target.value })}
+                      onChange={(e) => edit({ student_identifier: formatStudentNumber(e.target.value) })}
                     />
-                    <Source field={scan.fields.student_identifier} label="student number" />
                   </div>
                   <div>
                     <label htmlFor="scan-program">Program</label>
-                    <input
+                    <select
                       id="scan-program"
-                      maxLength={160}
                       value={review.program}
                       onChange={(e) => edit({ program: e.target.value })}
-                    />
-                    <Source field={scan.fields.program} label="program" />
+                    >
+                      <option value="">Choose program</option>
+                      {CDM_PROGRAMS.map((program) => <option key={program} value={program}>{program}</option>)}
+                    </select>
                   </div>
                   <div>
                     <label htmlFor="scan-level">Year level</label>
-                    <input
+                    <select
                       id="scan-level"
-                      type="number"
-                      min={1}
-                      max={20}
                       value={review.year_level}
                       onChange={(e) => edit({ year_level: e.target.value })}
-                    />
-                    <Source field={scan.fields.year_level} label="year level" />
+                    >
+                      <option value="">Choose year level</option>
+                      {[1, 2, 3, 4].map((level) => (
+                        <option key={level} value={level}>Year {level}</option>
+                      ))}
+                    </select>
                   </div>
                 </fieldset>
                 <h3>Courses on your form</h3>
-                <p>
-                  Copy enrollment sections exactly as shown. A number alone does not identify an
-                  institutional section.
-                </p>
+                <p>Enter each course exactly as it appears on your form.</p>
                 <div className="registration-courses">
                   {review.courses.map((course, index) => (
                     <fieldset className="registration-course" disabled={busy} key={index}>
-                      <legend>Course {index + 1}</legend>
+                      <legend className="visually-hidden">Course {index + 1}</legend>
+                      <div>
                       <label htmlFor={`course-code-${index}`}>Course code</label>
                       <input
                         id={`course-code-${index}`}
@@ -458,10 +469,8 @@ function PrivateScanner() {
                         value={course.code}
                         onChange={(e) => editCourse(index, { code: e.target.value })}
                       />
-                      <Source
-                        field={scan.courses[course.sourceIndex ?? -1]?.code}
-                        label={`course ${index + 1} code`}
-                      />
+                      </div>
+                      <div>
                       <label htmlFor={`course-section-${index}`}>Enrollment section on form</label>
                       <input
                         id={`course-section-${index}`}
@@ -469,20 +478,18 @@ function PrivateScanner() {
                         value={course.section}
                         onChange={(e) => editCourse(index, { section: e.target.value })}
                       />
-                      <Source
-                        field={scan.courses[course.sourceIndex ?? -1]?.section}
-                        label={`course ${index + 1} section`}
+                      </div>
+                      <div>
+                      <label className="visually-hidden" htmlFor={`course-description-${index}`}>Course description</label>
+                      <input
+                        id={`course-description-${index}`}
+                        aria-label={`Course ${index + 1} description`}
+                        maxLength={240}
+                        placeholder="Course description"
+                        value={course.description}
+                        onChange={(e) => editCourse(index, { description: e.target.value })}
                       />
-                      <details>
-                        <summary>Course description</summary>
-                        <label htmlFor={`course-description-${index}`}>Description</label>
-                        <input
-                          id={`course-description-${index}`}
-                          maxLength={240}
-                          value={course.description}
-                          onChange={(e) => editCourse(index, { description: e.target.value })}
-                        />
-                      </details>
+                      </div>
                       <Button
                         variant="ghost"
                         type="button"
@@ -496,6 +503,17 @@ function PrivateScanner() {
                     </fieldset>
                   ))}
                 </div>
+                <details className="registration-raw-details">
+                  <summary>View raw scan details</summary>
+                  <ul>
+                    {Object.entries(scan.fields).map(([key, field]) => field && (
+                      <li key={key}>{key.replaceAll('_', ' ')} · Page {field.evidence.page}: {String(field.value)}</li>
+                    ))}
+                    {scan.courses.map((course, index) => (
+                      <li key={index}>Course {index + 1} · Page {course.code.evidence.page}: {String(course.code.value)} · Section: {String(course.section.value)}</li>
+                    ))}
+                  </ul>
+                </details>
                 <div className="registration-actions">
                   <Button
                     type="button"
@@ -509,7 +527,7 @@ function PrivateScanner() {
                   >
                     Add a course
                   </Button>
-                  <Button type="submit" disabled={busy}>
+                  <Button type="submit" disabled={busy || !reviewValid}>
                     Find my classes
                   </Button>
                 </div>
@@ -547,13 +565,12 @@ function PrivateScanner() {
                         View verified schedule
                       </Link>
                     ))}
-                  {match.status === 'pending-verification' &&
+                  {match.status === 'pending-verification' && account.verification_mode === 'strict_roster' &&
                     !account.claim_state &&
                     !account.membership_state && (
                       <>
                         <p>
-                          Your university must verify your institutional identity. A student number
-                          or form alone cannot activate access.
+                          Your student number is not on the current Registrar roster. Request an administrator review.
                         </p>
                         <Button
                           disabled={busy}
@@ -578,6 +595,16 @@ function PrivateScanner() {
                   )}
                 </section>
               )}
+              {match?.status === 'pending-verification' && !account.membership_state &&
+                account.verification_mode !== 'strict_roster' && (
+                  <section className="registration-activation" aria-label="Activate student access">
+                    <h3>Ready to activate your access?</h3>
+                    <p>Confirm the reviewed Registration Form to link this account and check for published classes.</p>
+                    <Button disabled={busy} onClick={confirmAndActivate}>
+                      Confirm Registration Form
+                    </Button>
+                  </section>
+                )}
               <Button disabled={busy} variant="ghost" onClick={erase}>
                 Delete temporary scan
               </Button>

@@ -20,6 +20,8 @@ def setup(identity_adapters, monkeypatch):
     verifier, _ = identity_adapters(main)
     with onboarding._LOGIN_LOCK:
         onboarding._LOGIN_ATTEMPTS.clear()
+    with onboarding._EMAIL_SEND_LOCK:
+        onboarding._EMAIL_SENDS.clear()
     repository = Mock()
     repository.status.return_value = {"status": "unlinked"}
     monkeypatch.setattr(main.app.state, "onboarding_repository", repository, raising=False)
@@ -85,20 +87,20 @@ def test_password_reset_request_verifies_turnstile_and_sends_only_clean_app_link
     monkeypatch.setattr(onboarding, "firebase_auth", FirebaseAuth)
     monkeypatch.setattr(onboarding.httpx, "AsyncClient", Client)
     result = client.post("/api/v1/auth/request-password-reset", json={
-        "email": "juan.delacruz@student.pnm.edu.ph",
+        "email": " Student.Demo@Gmail.com ",
         "turnstile_token": "single-use-turnstile-token",
     })
 
     assert result.status_code == 200
     assert result.json() == {"data": {"accepted": True}}
     assert observed["continue_url"] == (
-        "https://class-sync-bhiv.vercel.app/auth/reset-password"
+        "https://class-sync-bhiv.vercel.app/auth/action?mode=resetPassword"
     )
-    assert observed["email"] == "juan.delacruz@student.pnm.edu.ph"
-    assert observed["url"] == "http://127.0.0.1:8003/internal/v1/password-reset-email"
+    assert observed["email"] == "student.demo@gmail.com"
+    assert observed["url"] == "http://127.0.0.1:8003/internal/v1/email-action"
     assert observed["body"] == {
-        "email": "juan.delacruz@student.pnm.edu.ph",
-        "reset_url": "https://class-sync-bhiv.vercel.app/auth/reset-password?oobCode=opaque-code",
+        "email": "student.demo@gmail.com", "mode": "resetPassword",
+        "action_url": "https://class-sync-bhiv.vercel.app/auth/action?mode=resetPassword&oobCode=opaque-code",
     }
     assert "classsync-f444c" not in result.text + str(observed["body"])
     assert "apiKey" not in result.text + str(observed["body"])
@@ -129,6 +131,71 @@ def test_password_reset_request_is_generic_for_unknown_accounts(setup, monkeypat
 
     assert result.status_code == 200
     assert result.json() == {"data": {"accepted": True}}
+
+
+def test_verification_email_accepts_personal_email_and_applies_thirty_second_cooldown(
+    setup, monkeypatch
+):
+    client, verifier, _ = setup
+    monkeypatch.setattr(main.settings, "notification_service_token", SecretStr("service-secret"))
+    monkeypatch.setattr(main.settings, "classsync_web_url", "https://class-sync-bhiv.vercel.app")
+    monkeypatch.setattr(verifier, "verify", lambda _: VerifiedPrincipal(
+        uid="gmail-student", email="Student.Demo@Gmail.com", email_verified=False,
+    ))
+    observed = {}
+
+    class FirebaseAuth:
+        class ActionCodeSettings:
+            def __init__(self, *, url):
+                observed["continue_url"] = url
+
+        @staticmethod
+        def generate_email_verification_link(email, *, action_code_settings, app):
+            observed["email"] = email
+            return "https://firebase.invalid/action?mode=verifyEmail&oobCode=one-use"
+
+    class Result:
+        def raise_for_status(self):
+            return None
+
+    class Client:
+        def __init__(self, **kwargs):
+            observed["client"] = kwargs
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return None
+
+        async def post(self, url, *, json, headers):
+            observed.update({"url": url, "body": json})
+            return Result()
+
+    monkeypatch.setattr(onboarding, "initialize_firebase", lambda *_: "firebase-app")
+    monkeypatch.setattr(onboarding, "firebase_auth", FirebaseAuth)
+    monkeypatch.setattr(onboarding.httpx, "AsyncClient", Client)
+
+    first = client.post("/api/v1/auth/send-verification-email", headers=HEADERS)
+    second = client.post("/api/v1/auth/send-verification-email", headers=HEADERS)
+
+    assert first.status_code == 202
+    assert observed["email"] == "student.demo@gmail.com"
+    assert observed["continue_url"] == (
+        "https://class-sync-bhiv.vercel.app/auth/action?mode=verifyEmail"
+    )
+    assert observed["url"] == "http://127.0.0.1:8003/internal/v1/email-action"
+    assert observed["body"] == {
+        "email": "student.demo@gmail.com", "mode": "verifyEmail",
+        "action_url": "https://class-sync-bhiv.vercel.app/auth/action?mode=verifyEmail&oobCode=one-use",
+    }
+    assert second.status_code == 429
+    assert second.headers["Retry-After"] == "30"
+    assert second.json()["error"] == {
+        "code": "rate_limited",
+        "message": "Please wait before requesting another email.",
+        "retryAfterSeconds": 30,
+    }
 
 
 def test_unverified_identity_can_only_read_pending_status(setup, monkeypatch):
@@ -275,7 +342,10 @@ def test_roster_mismatch_shares_registrar_message_before_otp_delivery(setup, mon
     )
 
     assert result.status_code == 403
-    assert result.json()["error"]["message"] == STUDENT_VERIFICATION_ERROR
+    assert result.json()["error"]["message"] == (
+        "No matching active student record was found. "
+        "Scan your Registration Form or contact the Registrar."
+    )
     repository.issue_student_challenge.assert_called_once()
 
 
@@ -352,7 +422,7 @@ def test_password_completion_requires_firebase_password_provider(setup, monkeypa
 
     assert result.status_code == 403
     assert result.json()["error"]["message"] == (
-        "Verify your registered student email before continuing"
+        "Verify your email before continuing"
     )
     repository.complete_student_onboarding.assert_not_called()
 
@@ -413,7 +483,7 @@ def test_student_number_login_does_not_reveal_missing_roster_records(setup, monk
 
     assert result.status_code == 401
     assert result.json()["error"]["message"] == "Invalid student number or password."
-    assert observed["email"] == "unmatched-student-login@student.pnm.edu.ph"
+    assert observed["email"] == "unmatched-student-login@example.invalid"
     assert "email" not in result.json()
     repository.student_login_email.assert_called_once_with("23-01425")
 
@@ -477,6 +547,8 @@ def test_student_number_login_never_returns_the_roster_email(setup, monkeypatch)
 @pytest.mark.parametrize(
     "row,student_id,email,expected",
     [
+        ({"id": "24-98096", "registered_email": "student.demo@gmail.com",
+          "enrollment_status": "active"}, "24-98096", " Student.Demo@Gmail.com ", True),
         ({"id": "24-98096", "registered_email": "jane.doe@student.pnm.edu.ph",
           "enrollment_status": "active"}, "24-98096", "jane.doe@student.pnm.edu.ph", True),
         ({"id": "24-98096", "registered_email": "jane.doe@student.pnm.edu.ph",
@@ -489,7 +561,7 @@ def test_student_number_login_never_returns_the_roster_email(setup, monkeypatch)
         ({"id": "24-98096", "registered_email": "jane.doe@student.pnm.edu.ph",
           "enrollment_status": "active"}, "24-98096", "JANE_DOE@example.com", False),
         ({"id": "24-98096", "registered_email": "jane.doe@student.pnm.edu.ph",
-          "enrollment_status": "active"}, "24-98096", "Jane.Doe@student.pnm.edu.ph", False),
+          "enrollment_status": "active"}, "24-98096", "Jane.Doe@student.pnm.edu.ph", True),
     ],
 )
 def test_student_verification_requires_exact_active_registrar_record(

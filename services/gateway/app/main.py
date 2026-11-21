@@ -46,6 +46,7 @@ class Settings(SchedulingSecuritySettings):
     classsync_web_url: str = "http://localhost:5173"
     allow_unauthenticated_development: bool = False
     classsync_env: str = "production"
+    student_verification_mode: Literal["cor_or_roster", "strict_roster"] = "cor_or_roster"
     enable_scheduling_sandbox: bool = False
     identity_database_url: SecretStr | None = None
     turnstile_secret_key: SecretStr | None = None

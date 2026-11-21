@@ -79,10 +79,9 @@ it('offers one login, refreshes the server-authorized session after sign-in, and
   const refresh = entrance();
   for (const name of ['Student', 'Teacher', 'Admin'])
     expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Sign in to ClassSync →' }));
-  expect(screen.getByLabelText('Student Number or Institutional Email')).toHaveFocus();
-  expect(screen.getByLabelText('Student Number or Institutional Email')).toBeRequired();
-  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
+  expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeDisabled();
+  expect(screen.getByLabelText('Student Number or Email')).toBeRequired();
+  fireEvent.change(screen.getByLabelText('Student Number or Email'), {
     target: { value: 'student@synthetic.invalid' },
   });
   fireEvent.change(screen.getByLabelText('Password'), {
@@ -105,7 +104,7 @@ it('offers one login, refreshes the server-authorized session after sign-in, and
 
 it('routes student-number sign-in through the Gateway with the one-use Turnstile token', async () => {
   entrance();
-  fireEvent.change(screen.getByLabelText('Student Number or Institutional Email'), {
+  fireEvent.change(screen.getByLabelText('Student Number or Email'), {
     target: { value: '23-01425' },
   });
   fireEvent.change(screen.getByLabelText('Password'), {
@@ -123,11 +122,11 @@ it('validates confirmation before student account creation and submits no role',
   entrance();
   fireEvent.click(screen.getAllByRole('link', { name: 'Create account' })[0]);
   expect(screen.getByRole('heading', { name: 'Create your account' })).toHaveFocus();
-  expect(screen.getByLabelText('Email')).toHaveAttribute(
+  expect(screen.getByLabelText('Email address')).toHaveAttribute(
     'placeholder',
-    'juan.delacruz@student.pnm.edu.ph',
+    'student.demo@gmail.com',
   );
-  fireEvent.change(screen.getByLabelText('Email'), {
+  fireEvent.change(screen.getByLabelText('Email address'), {
     target: { value: 'juan.delacruz@student.pnm.edu.ph' },
   });
   fireEvent.change(screen.getByLabelText('Password', { exact: true }), {
@@ -149,11 +148,11 @@ it('validates confirmation before student account creation and submits no role',
   );
 });
 
-it('requires the registered institutional email pattern for student account creation', async () => {
+it('accepts and normalizes a personal email for student account creation', async () => {
   entrance();
   fireEvent.click(screen.getAllByRole('link', { name: 'Create account' })[0]);
-  fireEvent.change(screen.getByLabelText('Email'), {
-    target: { value: 'Student.Name@student.pnm.edu.ph' },
+  fireEvent.change(screen.getByLabelText('Email address'), {
+    target: { value: ' Student.Demo@Gmail.com ' },
   });
   fireEvent.change(screen.getByLabelText('Password', { exact: true }), {
     target: { value: 'Synthetic-password-42!' },
@@ -163,8 +162,9 @@ it('requires the registered institutional email pattern for student account crea
   });
   fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-  expect(await screen.findByText(/lowercase institutional email/i)).toBeInTheDocument();
-  expect(actions.create).not.toHaveBeenCalled();
+  await waitFor(() => expect(actions.create).toHaveBeenCalledWith(
+    'student.demo@gmail.com', 'Synthetic-password-42!',
+  ));
 });
 
 it('offers Google sign-in and delegates identity verification to the server session', async () => {
@@ -184,7 +184,7 @@ it('offers recovery without an enumeration-sensitive success message', async () 
   entrance();
   fireEvent.click(screen.getAllByRole('link', { name: 'Forgot password?' })[0]);
   expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('Email'), {
+  fireEvent.change(screen.getByLabelText('Email address'), {
     target: { value: 'student@synthetic.invalid' },
   });
   fireEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
@@ -239,6 +239,6 @@ it('shows the unavailable state without accepting credentials', () => {
     'role',
     'status',
   );
-  expect(screen.getByLabelText('Student Number or Institutional Email')).toBeInTheDocument();
+  expect(screen.getByLabelText('Student Number or Email')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeDisabled();
 });

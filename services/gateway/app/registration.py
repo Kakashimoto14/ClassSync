@@ -306,11 +306,11 @@ def fetch_matches(request, settings, review, principal):
                 error.response.status_code, "Current Student access could not be verified"
             ) from error
         raise HTTPException(
-            503, "Published timetable matching is unavailable. Your review was not confirmed."
+            503, "Published timetable matching is unavailable. Try again later."
         ) from error
     except (httpx.HTTPError, ValueError, KeyError) as error:
         raise HTTPException(
-            503, "Published timetable matching is unavailable. Your review was not confirmed."
+            503, "Published timetable matching is unavailable. Try again later."
         ) from error
 
 
@@ -515,5 +515,51 @@ def registration_router(settings):
             return {"data": result}
         finally:
             store.processing.release()
+
+    @router.post("/{scan_id}/confirm")
+    async def confirm(scan_id: UUID, request: Request, response: Response):
+        principal, current = await run_in_threadpool(context, request)
+        response.headers["Cache-Control"] = "no-store"
+        reviews = getattr(request.app.state, "registration_review_repository", None)
+        scan = await run_in_threadpool(
+            read_scan, scan_id, current.institutional_tenant_id, principal.uid, reviews
+        )
+        if scan.get("method") == "manual":
+            raise HTTPException(
+                403, "Upload and review your Registration Form before confirming it"
+            )
+        reviewed = scan.get("reviewed")
+        if not isinstance(reviewed, dict):
+            raise HTTPException(409, "Review your Registration Form before confirming it")
+        try:
+            review_data = RegistrationReview.model_validate(reviewed)
+        except ValidationError as error:
+            raise HTTPException(
+                422, "Complete the required details from your Registration Form"
+            ) from error
+        repository = getattr(request.app.state, "onboarding_repository", None)
+        if repository is None:
+            raise HTTPException(503, "Account verification is unavailable. Try again later.")
+        activation = await run_in_threadpool(
+            repository.activate_from_cor,
+            principal,
+            review_data,
+            allow_self_verification=current.student_verification_mode == "cor_or_roster",
+        )
+        try:
+            matches, _ = await run_in_threadpool(
+                fetch_matches, request, current, review_data, principal
+            )
+        except HTTPException as error:
+            if error.status_code != 503:
+                raise
+            matches = {
+                "status": "unavailable",
+                "courses": [],
+                "message": (
+                    "Your account is active. Published classes could not be checked right now."
+                ),
+            }
+        return {"data": {**activation, "schedule": matches}}
 
     return router

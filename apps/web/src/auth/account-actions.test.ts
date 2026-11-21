@@ -48,19 +48,25 @@ beforeEach(() => {
   fixture.auth.currentUser = null;
 });
 
-it('creates a Firebase account then requests verification without any role API call', async () => {
-  const user = { uid: 'synthetic', getIdToken: vi.fn() };
+it('creates a Firebase account then requests a branded verification email through the Gateway', async () => {
+  const user = { uid: 'synthetic', getIdToken: vi.fn().mockResolvedValue('id-token') };
   fixture.signup.mockResolvedValue({ user });
-  fixture.verify.mockResolvedValue(undefined);
-  const fetch = vi.spyOn(globalThis, 'fetch');
+  fixture.auth.currentUser = user;
+  const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => ({ data: { accepted: true } }),
+  } as unknown as Response);
   await createStudentAccount(' student@synthetic.invalid ', 'Synthetic-password-42!');
   expect(fixture.signup).toHaveBeenCalledWith(
     fixture.auth,
     'student@synthetic.invalid',
     'Synthetic-password-42!',
   );
-  expect(fixture.verify).toHaveBeenCalledWith(user);
-  expect(fetch).not.toHaveBeenCalled();
+  expect(fetch).toHaveBeenCalledWith('/api/v1/auth/send-verification-email', expect.objectContaining({
+    method: 'POST', headers: expect.objectContaining({ Authorization: 'Bearer id-token' }),
+  }));
+  expect(fixture.verify).not.toHaveBeenCalled();
   fetch.mockRestore();
 });
 

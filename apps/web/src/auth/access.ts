@@ -8,8 +8,9 @@ export interface LoginValidationErrors {
 
 export function validateLogin(email: string, password: string): LoginValidationErrors {
   const errors: LoginValidationErrors = {};
-  if (!email.trim()) errors.email = 'Enter your university email address.';
-  else if (!/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+  if (!email.trim()) errors.email = 'Enter your student number or email address.';
+  else if (!/^\S+@\S+\.\S+$/.test(email) && !/^[0-9]{2}-[0-9]{5}$/.test(email))
+    errors.email = 'Enter a valid email address or student number.';
   if (!password) errors.password = 'Enter your password.';
   return errors;
 }

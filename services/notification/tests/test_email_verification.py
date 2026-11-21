@@ -2,6 +2,24 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from services.notification.app import main
+from services.notification.app.email_templates import render_email_action_email
+
+
+def test_personal_email_action_contract_and_branded_email_content():
+    action_url = "https://class-sync-bhiv.vercel.app/auth/action?mode=resetPassword&oobCode=opaque"
+    html, text = render_email_action_email("resetPassword", action_url)
+    assert "Reset Password" in html
+    assert "click here" in html
+    assert "firebaseapp.com" not in html + text
+    assert "classsync-8af14" not in html + text
+    assert action_url not in text
+
+    body = main.EmailAction.model_validate({
+        "email": " Student.Demo@Gmail.com ",
+        "mode": "resetPassword",
+        "action_url": action_url,
+    })
+    assert body.email == "student.demo@gmail.com"
 
 
 def test_verification_delivery_requires_internal_service_token(monkeypatch):
@@ -163,7 +181,7 @@ def test_password_reset_email_uses_configured_transactional_provider(monkeypatch
         headers={"X-ClassSync-Service-Token": "internal"},
         json={
             "email": "juan.delacruz@student.pnm.edu.ph",
-            "reset_url": "https://class-sync-bhiv.vercel.app/auth/reset-password?oobCode=opaque-code",
+            "reset_url": "https://class-sync-bhiv.vercel.app/auth/action?mode=resetPassword&oobCode=opaque-code",
         },
     )
 

@@ -203,6 +203,31 @@ function ConnectedOverview() {
       : appMode === 'sandbox'
         ? 'Development sandbox'
         : 'Read-only presentation';
+  const setupSteps = [
+    {
+      title: 'Academic setup',
+      to: '/admin/academic',
+      done: !!currentReadiness && currentReadiness.programs > 0 && currentReadiness.subjects > 0
+        && currentReadiness.sections > 0 && currentReadiness.offerings > 0,
+    },
+    {
+      title: 'Rooms & faculty',
+      to: '/admin/academic/resources',
+      done: !!currentReadiness && currentReadiness.faculty > 0
+        && (currentReadiness.assigned_faculty ?? 0) > 0 && currentReadiness.eligible_resources > 0,
+    },
+    {
+      title: 'Generate schedule',
+      to: '/admin/ai-scheduling',
+      done: !!currentDraft,
+    },
+    {
+      title: 'Publish & access',
+      to: '/admin/calendar',
+      done: !!publication,
+    },
+  ];
+  const nextSetupStep = setupSteps.findIndex((step) => !step.done);
 
   return (
     <section className="admin-overview admin-command-center" aria-labelledby="admin-dashboard-title">
@@ -243,6 +268,24 @@ function ConnectedOverview() {
           </Button>
         </div>
       </header>
+
+      <nav className="admin-setup-journey" aria-label="Administrator setup journey">
+        {setupSteps.map((step, index) => {
+          const state = step.done ? 'Done' : index === nextSetupStep ? 'Next step' : 'Pending';
+          return (
+            <Link
+              className="admin-setup-step"
+              data-state={state.toLowerCase().replace(' ', '-')}
+              aria-current={index === nextSetupStep ? 'step' : undefined}
+              key={step.title}
+              to={step.to}
+            >
+              <span className="admin-setup-step__number">{step.done ? <CheckCircle2 size={15} aria-hidden="true" /> : index + 1}</span>
+              <span className="admin-setup-step__copy"><strong>{step.title}</strong><small>{state}</small></span>
+            </Link>
+          );
+        })}
+      </nav>
 
       {loading && (
         <div className="admin-command-skeleton" role="status" aria-label="Loading scheduling data">

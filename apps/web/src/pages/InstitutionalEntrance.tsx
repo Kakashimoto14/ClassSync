@@ -22,6 +22,8 @@ import { TurnstileWidget } from '../auth/TurnstileWidget';
 import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
 import { PasswordStrengthChecklist } from '../auth/PasswordStrengthChecklist';
 import { passwordStrengthComplete } from '../auth/password-strength';
+import { formatLoginIdentifier, isValidAccountEmail, normalizeAccountEmail } from '../auth/student-number';
+import { cooldownRemaining, retryAfterFrom, startCooldown } from '../auth/cooldown';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
@@ -34,7 +36,6 @@ const invitePath = '/auth/teacher-invite';
 const verifyPath = '/auth/verify';
 const onboardingPath = '/auth/student-onboarding';
 const accountPath = '/auth/account';
-const STUDENT_EMAIL_PATTERN = /^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$/;
 const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
 function ProductPreview({ showLoginHint }: { showLoginHint: boolean }) {
@@ -59,7 +60,7 @@ function ProductPreview({ showLoginHint }: { showLoginHint: boolean }) {
       {showLoginHint && (
         <aside className="connected-entrance__callout connected-entrance__story-callout">
           <strong>Signing in for the first time?</strong>
-          <p>Use your registered Google email, verify the code, and set a password.</p>
+          <p>Use a Google account you can access, verify your email, then set a password.</p>
         </aside>
       )}
     </motion.aside>
@@ -291,11 +292,22 @@ function CredentialsForm({
   const resetting = mode === 'reset';
   const [resetCodeValid, setResetCodeValid] = useState(false);
   const [resetCodeChecking, setResetCodeChecking] = useState(resetting);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const session = useUniversitySession();
 
   useEffect(() => {
     heading.current?.focus();
   }, []);
+
+  useEffect(() => {
+    setCooldownSeconds(recovery ? cooldownRemaining('password-reset', email) : 0);
+  }, [email, recovery]);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timer = window.setTimeout(() => setCooldownSeconds((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldownSeconds]);
 
   useEffect(() => {
     if (!busy) {
@@ -334,13 +346,14 @@ function CredentialsForm({
     event.preventDefault();
     if (busy) return;
     const studentNumberLogin = mode === 'login' && STUDENT_ID_PATTERN.test(email.trim());
+    const normalizedEmail = normalizeAccountEmail(email);
     const validation: typeof errors = (studentNumberLogin || resetting)
       ? {}
-      : validateLogin(email.trim(), password);
+      : validateLogin(recovery || signup ? normalizedEmail : email.trim(), password);
     if (studentNumberLogin && !password) validation.password = 'Enter your password.';
     if (recovery) delete validation.password;
-    if (signup && !STUDENT_EMAIL_PATTERN.test(email.trim()))
-      validation.email = 'Use a lowercase institutional email such as juan.delacruz@student.pnm.edu.ph.';
+    if ((signup || recovery) && !isValidAccountEmail(email))
+      validation.email = 'Enter a valid email address.';
     if ((signup || resetting) && !passwordStrengthComplete(password, confirmation))
       validation.password = 'Meet all six password requirements before continuing.';
     if ((signup || resetting) && confirmation !== password)
@@ -359,21 +372,32 @@ function CredentialsForm({
         setConfirmation('');
         setNotice('Your password has been changed. You can now sign in.');
       } else if (recovery) {
-        await recoverPassword(email, turnstileToken);
+        await recoverPassword(normalizedEmail, turnstileToken);
+        setCooldownSeconds(startCooldown('password-reset', normalizedEmail, 30));
         setNotice('If your account can receive a reset link, check your email for the next steps.');
-      } else if (signup) await createStudentAccount(email, password);
+      } else if (signup) {
+        await createStudentAccount(normalizedEmail, password);
+        setCooldownSeconds(startCooldown('verification-email', normalizedEmail, 30));
+      }
       else {
         if (studentNumberLogin) {
           await signInToAccount(email, password, turnstileToken);
         } else {
           await verifyHumanChallenge(turnstileToken);
-          await signInToAccount(email, password);
+          await signInToAccount(normalizedEmail, password);
         }
         session.refresh();
       }
     } catch (failure) {
+      const retryAfter = retryAfterFrom(failure);
+      if (retryAfter) {
+        const action = recovery ? 'password-reset' : 'verification-email';
+        setCooldownSeconds(startCooldown(action, normalizeAccountEmail(email), retryAfter));
+      }
       setError(
-        mode === 'login' && studentNumberLogin
+        failure instanceof Error && failure.name === 'RateLimitError'
+          ? failure.message
+          : mode === 'login' && studentNumberLogin
           ? 'Invalid student number or password.'
           : mode === 'login'
             ? 'We could not sign you in. Check your email and password, or try resetting your password.'
@@ -438,23 +462,23 @@ function CredentialsForm({
         {recovery
           ? 'Enter your email to request a reset link.'
           : signup
-            ? 'Create your account with the email on your student record, then verify it.'
+            ? 'Create your account with an email you can access, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
-              : 'Use your student number, campus email, or Google account.'}
+              : 'Use your student number, email, or Google account.'}
       </p>
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
         {!resetting && <div className="auth-field">
           <label htmlFor="entrance-email">
-            {mode === 'login' ? 'Student Number or Institutional Email' : 'Email'}
+            {mode === 'login' ? 'Student Number or Email' : 'Email address'}
           </label>
           <input
             id="entrance-email"
             ref={emailField}
             type={mode === 'login' ? 'text' : 'email'}
             placeholder={mode === 'login'
-              ? '23-01425 or juan.delacruz@student.pnm.edu.ph'
-              : signup ? 'juan.delacruz@student.pnm.edu.ph' : undefined}
+              ? '23-01425 or student.demo@gmail.com'
+              : 'student.demo@gmail.com'}
             autoComplete="username"
             inputMode={mode === 'login' ? 'text' : 'email'}
             autoCapitalize="none"
@@ -465,7 +489,7 @@ function CredentialsForm({
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'entrance-email-error' : undefined}
             onChange={(event) => {
-              setEmail(event.target.value);
+              setEmail(mode === 'login' ? formatLoginIdentifier(event.target.value) : event.target.value);
               setErrors({ ...errors, email: undefined });
             }}
           />
@@ -585,6 +609,9 @@ function CredentialsForm({
           </p>
         )}
         <Button type="submit" disabled={busy || !serviceAvailable ||
+          (mode === 'login' && ((!isValidAccountEmail(email) && !STUDENT_ID_PATTERN.test(email.trim())) || !password || !turnstileToken)) ||
+          (signup && (!isValidAccountEmail(email) || !passwordStrengthComplete(password, confirmation))) ||
+          (recovery && (!isValidAccountEmail(email) || !turnstileToken || cooldownSeconds > 0)) ||
           ((signup || resetting) && !passwordStrengthComplete(password, confirmation)) ||
           (resetting && (resetCodeChecking || !resetCodeValid))}>
           {busy
@@ -592,7 +619,7 @@ function CredentialsForm({
             : signup
               ? 'Create account'
               : recovery
-                ? 'Send reset link'
+                ? cooldownSeconds > 0 ? `Resend in ${cooldownSeconds}s` : 'Send reset link'
                 : resetting
                   ? 'Save new password'
                 : 'Sign in to ClassSync →'}
@@ -607,7 +634,7 @@ function CredentialsForm({
           </Button>
           <aside className="connected-entrance__callout connected-entrance__callout--mobile">
             <strong>Signing in for the first time?</strong>
-            <p>Use your registered Google email, verify the code, and set a password.</p>
+            <p>Use a Google account you can access, verify your email, then set a password.</p>
           </aside>
           <p
             className="connected-entrance__help"

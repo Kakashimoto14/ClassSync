@@ -30,8 +30,8 @@ const scan = () => ({
   fields: {
     academic_year: field('2026-2027'),
     semester: field('first'),
-    student_identifier: field('SYN-OOI'),
-    program: field('SYNTHETIC'),
+    student_identifier: field('23-00001'),
+    program: field('BSIT'),
     year_level: field(2),
   },
   courses: [
@@ -52,7 +52,7 @@ function page(state?: UniversitySession, path = '/student/registration-scanner')
               tenant_id: 'synthetic',
               role: 'student',
               membership_revision: 1,
-              student_id: 'SYN-001',
+              student_id: '23-00001',
             },
           },
           refresh: vi.fn(),
@@ -131,8 +131,8 @@ it('uploads privately, accepts corrections and links only a confirmed published 
     },
   });
   await screen.findByLabelText('Student number');
-  expect(screen.getByLabelText('Student number')).toHaveValue('SYN-OOI');
-  fireEvent.change(screen.getByLabelText('Student number'), { target: { value: 'SYN-001' } });
+  expect(screen.getByLabelText('Student number')).toHaveValue('23-00001');
+  fireEvent.change(screen.getByLabelText('Student number'), { target: { value: '23-00002' } });
   fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'TEST101' } });
   fireEvent.click(screen.getByRole('button', { name: 'Find my classes' }));
   await screen.findByText('Matched using verified enrollment.');
@@ -140,7 +140,7 @@ it('uploads privately, accepts corrections and links only a confirmed published 
     expect.stringMatching(/\/review$/),
     'POST',
     expect.objectContaining({
-      student_identifier: 'SYN-001',
+      student_identifier: '23-00002',
       courses: [{ code: 'TEST101', description: 'Invented seminar', section: '2' }],
     }),
     25_000,

@@ -465,6 +465,45 @@ details[open] > summary::after {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
+.admin-setup-journey {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-setup-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 8px 10px;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.admin-setup-step:hover,
+.admin-setup-step:focus-visible { border-color: var(--primary); }
+.admin-setup-step:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.admin-setup-step[data-state="done"] { border-color: color-mix(in srgb, #16825d 28%, var(--line)); }
+.admin-setup-step[data-state="next-step"] { background: var(--primary-soft); border-color: var(--primary); }
+.admin-setup-step__number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  background: var(--primary-soft);
+}
+.admin-setup-step[data-state="done"] .admin-setup-step__number { color: #16825d; background: #e7f5ef; }
+.admin-setup-step__copy { display: grid; min-width: 0; gap: 2px; }
+.admin-setup-step__copy strong { font-size: 12px; line-height: 1.25; }
+.admin-setup-step__copy small { color: var(--ink-soft); font-size: 11px; }
 .admin-kpi-card {
   display: flex;
   align-items: center;
@@ -755,6 +794,7 @@ details[open] > summary::after {
   .admin-kpi-ribbon { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {
+  .admin-setup-journey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-command-header,
   .admin-command-title { align-items: flex-start; }
   .admin-command-header { flex-direction: column; }
@@ -764,6 +804,9 @@ details[open] > summary::after {
   .admin-command-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; }
 }
 @media (max-width: 600px) {
+  .admin-setup-journey { gap: 6px; }
+  .admin-setup-step { align-items: flex-start; gap: 7px; padding: 8px; }
+  .admin-setup-step__copy strong { font-size: 11px; }
   .admin-command-center { gap: 12px; }
   .admin-command-controls { align-items: stretch; flex-direction: column; }
   .admin-command-center .admin-period-selector { flex-basis: auto; }

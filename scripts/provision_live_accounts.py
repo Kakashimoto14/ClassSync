@@ -17,6 +17,7 @@ import sys
 from getpass import getpass
 from typing import Any
 
+from classync_contracts.email_address import normalize_email
 from classync_contracts.firebase import FirebaseSettings, initialize_firebase
 from classync_persistence.database import postgres_engine
 from classync_persistence.schema import migrate
@@ -25,8 +26,6 @@ from sqlalchemy import text
 from sqlalchemy.engine import URL, make_url
 
 STUDENT_ID_PATTERN = re.compile(r"^[0-9]{2}-[0-9]{5}$")
-STUDENT_EMAIL_PATTERN = re.compile(r"^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$")
-GENERAL_EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 CONFIRMATION_TEXT = "PROVISION LIVE CLASSSYNC ACCOUNTS"
 BOOTSTRAP_ACTOR = "bootstrap:provision_live_accounts"
 
@@ -68,11 +67,11 @@ def validate_database_target(value: str) -> tuple[URL, str]:
 
 def validate_student_identity(student_id: str, email: str) -> tuple[str, str]:
     student_id = student_id.strip()
-    email = email.strip()
+    email = normalize_email(email)
     if not STUDENT_ID_PATTERN.fullmatch(student_id):
         raise ValueError("Student Number must use YY-NNNNN format.")
-    if not STUDENT_EMAIL_PATTERN.fullmatch(email):
-        raise ValueError("Student email must use the lowercase student.pnm.edu.ph format.")
+    if not email:
+        raise ValueError("Enter a valid email address.")
     return student_id, email
 
 
@@ -80,7 +79,7 @@ def validate_student_roster_record(student_id: str, email: str, row: dict[str, A
     if (
         not row
         or row.get("id") != student_id
-        or row.get("registered_email") != email
+        or normalize_email(row.get("registered_email")) != email
         or row.get("enrollment_status") != "active"
         or not row.get("person_id")
     ):
@@ -123,11 +122,10 @@ def validate_password(value: str) -> str:
 
 
 def _email(value: str, *, student: bool = False) -> str:
-    value = value.strip().lower()
-    pattern = STUDENT_EMAIL_PATTERN if student else GENERAL_EMAIL_PATTERN
-    if not pattern.fullmatch(value):
-        raise ValueError("Enter a valid institutional account email.")
-    return value
+    normalized = normalize_email(value)
+    if not normalized:
+        raise ValueError("Enter a valid account email.")
+    return normalized
 
 
 def _arguments() -> argparse.Namespace:
@@ -477,7 +475,7 @@ def main() -> int:
                 accounts.append((role, identifier or "", email, passwords[email]))
             _print_summary(accounts)
             print(f"Tenant: {args.tenant_id} · Firebase project: {app.project_id} · TLS: {sslmode}")
-            print("Database migration: head (0001–0020).")
+            print("Database migration: head (0001–0021).")
             print("Existing student roster or faculty identity evidence was required.")
             return 0
         finally:

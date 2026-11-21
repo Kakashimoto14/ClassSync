@@ -62,3 +62,9 @@ Resend credentials; no plaintext code fallback is enabled. Migration/RLS executi
 delivery, real roster handling, and Auth Emulator/browser end-to-end behavior are unverified. The
 bootstrap seed remains local synthetic academic data only and does not create identity or official
 publication data.
+
+## Domain-neutral student email and COR self-verification (21 November 2026)
+
+Student email addresses are normalized to trimmed lowercase and validated without a required institutional domain. Email possession is necessary but does not by itself grant student membership. Default `cor_or_roster` requires a verified Firebase email and either a matching active Registrar record or a server-stored, reviewed Registration Form confirmed by the signed-in student. New self-verified rows are marked `cor_self_verified`; student-number claims are unique per tenant and an existing claim cannot be rebound to a different UID. `strict_roster` keeps roster-only activation available when required by approved policy. These changes are represented in migration `0021_student_email_and_cor_source` and the Gateway repository transaction. The database migration and RLS behavior have not yet been executed against a disposable PostgreSQL instance in this work phase.
+
+Firebase verification/reset action codes are rewritten to the branded frontend `/auth/action` route and sent through the existing notification service. The client keeps per-action/per-email cooldown expiry in `sessionStorage`, and Gateway returns retry metadata. Current server email/IP limiting is process-local; it is suitable only as local defense-in-depth and must be backed by shared coordination before horizontal/multi-instance deployment. Live Firebase, Turnstile, Brevo/Resend, and hosted checks remain unverified. See the 21 November implementation evidence in `docs/autonomy/STATUS.md`.

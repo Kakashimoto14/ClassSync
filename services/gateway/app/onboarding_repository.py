@@ -11,6 +11,7 @@ import secrets
 from contextlib import contextmanager
 from uuid import uuid4
 
+from classync_contracts.email_address import normalize_email
 from classync_contracts.identity import VerifiedPrincipal
 from classync_persistence.database import transaction
 from classync_persistence.membership_changes import audit_actor
@@ -22,16 +23,16 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from .onboarding import STUDENT_VERIFICATION_ERROR
 
 STUDENT_ID_PATTERN = re.compile(r"^[0-9]{2}-[0-9]{5}$")
-STUDENT_EMAIL_PATTERN = re.compile(r"^[a-z]+(?:\.[a-z]+)*@student\.pnm\.edu\.ph$")
 
 
 def student_record_matches(row, student_id, email):
-    candidate = email if isinstance(email, str) else ""
-    valid_email = bool(STUDENT_EMAIL_PATTERN.fullmatch(candidate))
+    candidate = normalize_email(email)
+    valid_email = candidate is not None
+    candidate = candidate or ""
     valid_student_id = isinstance(student_id, str) and bool(
         STUDENT_ID_PATTERN.fullmatch(student_id)
     )
-    registered = row["registered_email"] if row is not None else ""
+    registered = normalize_email(row["registered_email"] if row is not None else None) or ""
     email_matches = hmac.compare_digest(candidate.encode("utf-8"), registered.encode("utf-8"))
     return bool(
         valid_student_id
@@ -202,6 +203,82 @@ class OnboardingRepository:
                                     headers={"Cache-Control": "no-store"})
         return {"status": "verified"}
 
+    def activate_from_cor(self, principal, review, *, allow_self_verification: bool):
+        """Link a verified account from its own server-stored, confirmed COR review."""
+        student_id = review.student_identifier
+        email = normalize_email(principal.email)
+        if (not email or not STUDENT_ID_PATTERN.fullmatch(student_id)
+                or not review.program.strip() or review.year_level is None
+                or not review.courses):
+            raise HTTPException(
+                422, "Complete the student number and course details from your form"
+            )
+        with self.session(principal) as db:
+            membership = db.execute(text("""
+                SELECT student_id,roles,state FROM classsync_identity.memberships
+                WHERE tenant_id=:tenant AND uid=:uid FOR UPDATE
+            """), self.params(principal)).mappings().first()
+            if membership:
+                if (membership["student_id"] == student_id
+                        and "student" in membership["roles"]
+                        and membership["state"] == "active"):
+                    return {"status": "active", "verification_source": "existing_membership"}
+                raise HTTPException(
+                    409, "This account already has a different university membership"
+                )
+
+            row = db.execute(text("""
+                SELECT id,person_id,registered_email,enrollment_status,verification_source
+                FROM classsync_identity.students
+                WHERE tenant_id=:tenant AND id=:student FOR UPDATE
+            """), self.params(principal, student=student_id)).mappings().first()
+            if row is not None:
+                if not student_record_matches(row, student_id, email):
+                    raise HTTPException(
+                        409,
+                        "This student number is already linked to another account. "
+                        "Contact your administrator for help.",
+                    )
+                person_id = row["person_id"]
+                source = "registrar_roster"
+            else:
+                if not allow_self_verification:
+                    raise HTTPException(
+                        403,
+                        "Your student record is not on the Registrar roster. "
+                        "Contact the Registrar.",
+                    )
+                person_id = str(uuid4())
+                db.execute(text("""
+                    INSERT INTO classsync_identity.people(tenant_id,id)
+                    VALUES(:tenant,:person) ON CONFLICT DO NOTHING
+                """), self.params(principal, person=person_id))
+                inserted = db.execute(text("""
+                    INSERT INTO classsync_identity.students
+                        (tenant_id,id,person_id,registered_email,enrollment_status,
+                         password_configured,verification_source)
+                    VALUES(:tenant,:student,:person,:email,'active',false,'cor_self_verified')
+                    ON CONFLICT (tenant_id,id) DO NOTHING
+                """), self.params(principal, student=student_id, person=person_id, email=email))
+                if inserted.rowcount != 1:
+                    raise HTTPException(409,
+                        "This student number is already linked to another account. "
+                        "Contact your administrator for help.")
+                source = "cor_self_verified"
+
+            inserted = db.execute(text("""
+                INSERT INTO classsync_identity.memberships
+                    (tenant_id,uid,person_id,student_id,roles,state,revision)
+                VALUES(:tenant,:uid,:person,:student,ARRAY['student']::text[],'active',1)
+                ON CONFLICT DO NOTHING
+            """), self.params(principal, person=person_id, student=student_id))
+            if inserted.rowcount != 1:
+                raise HTTPException(409,
+                    "This student number is already linked to another account. "
+                    "Contact your administrator for help.")
+        return {"status": "active", "verification_source": source,
+                "student_id": student_id, "email": email}
+
     def issue_student_challenge(self, principal, student_id, challenge_id, digest):
         lookup_id = student_id if isinstance(student_id, str) and STUDENT_ID_PATTERN.fullmatch(
             student_id
@@ -223,7 +300,7 @@ class OnboardingRepository:
             if current and db.scalar(text("SELECT :resend_after > transaction_timestamp()"),
                                      {"resend_after": current["resend_after"]}):
                 raise HTTPException(429, "Wait before requesting another verification code",
-                                    headers={"Retry-After": "60", "Cache-Control": "no-store"})
+                                    headers={"Retry-After": "30", "Cache-Control": "no-store"})
             db.execute(text("""
                 UPDATE classsync_identity.email_verification_challenges
                 SET consumed_at=transaction_timestamp()
@@ -234,7 +311,7 @@ class OnboardingRepository:
                     (tenant_id,uid,challenge_id,student_id,otp_hmac,expires_at,resend_after)
                 VALUES (:tenant,:uid,:challenge,:student,:digest,
                     transaction_timestamp()+interval '5 minutes',
-                    transaction_timestamp()+interval '60 seconds')
+                    transaction_timestamp()+interval '30 seconds')
             """), self.params(principal, challenge=challenge_id, student=student_id,
                               digest=digest))
         local, domain = principal.email.split("@", 1)
@@ -307,6 +384,7 @@ class OnboardingRepository:
         return result
 
     def complete_student_onboarding(self, principal, student_id, challenge_id):
+        normalized_email = normalize_email(principal.email)
         with self.session(principal) as db:
             row = db.execute(text("""
                 SELECT c.verified_at,s.id,s.person_id,s.registered_email,s.enrollment_status
@@ -337,7 +415,7 @@ class OnboardingRepository:
                 UPDATE classsync_identity.students SET password_configured=true
                 WHERE tenant_id=:tenant AND id=:student AND enrollment_status='active'
                     AND registered_email=:email
-            """), self.params(principal, student=student_id, email=principal.email))
+            """), self.params(principal, student=student_id, email=normalized_email))
             if existing is None:
                 inserted = db.execute(text("""
                     INSERT INTO classsync_identity.memberships
@@ -393,6 +471,19 @@ class OnboardingRepository:
                     self.params(principal),
                 ).mappings()
             ]
+
+    def self_verified_students(self, principal):
+        with self.session(principal, admin=True) as db:
+            return [dict(row) for row in db.execute(text("""
+                SELECT m.uid,s.id AS student_id,s.registered_email,s.verification_source,
+                       m.revision AS membership_revision
+                FROM classsync_identity.students s
+                JOIN classsync_identity.memberships m
+                  ON m.tenant_id=s.tenant_id AND m.student_id=s.id
+                WHERE s.tenant_id=:tenant AND s.verification_source='cor_self_verified'
+                  AND m.state='active' AND 'student'=ANY(m.roles)
+                ORDER BY s.id LIMIT 1000
+            """), self.params(principal)).mappings()]
 
     def faculty_records(self, principal):
         with self.session(principal, admin=True) as db:

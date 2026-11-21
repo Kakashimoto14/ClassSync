@@ -12,9 +12,11 @@ from uuid import UUID, uuid4
 
 import httpx
 from classync_contracts.cloud_run import service_headers
+from classync_contracts.email_address import normalize_email
 from classync_contracts.firebase import initialize_firebase
 from classync_contracts.request_authorization import request_principal
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from firebase_admin import auth as firebase_auth
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from starlette.concurrency import run_in_threadpool
@@ -22,8 +24,8 @@ from starlette.concurrency import run_in_threadpool
 from .turnstile import verify_turnstile_token
 
 STUDENT_VERIFICATION_ERROR = (
-    "Unable to sign in wth Google. Use the email registered in your student record. "
-    "If you need assistance, contact the Registrar"
+    "Unable to verify this student record. Use the email associated with your active "
+    "Registrar record, or scan your Registration Form. Contact the Registrar for help."
 )
 STUDENT_LOGIN_ERROR = "Invalid student number or password."
 STUDENT_ID_PATTERN = r"^[0-9]{2}-[0-9]{5}$"
@@ -32,6 +34,9 @@ LOGIN_MAX_ATTEMPTS = 5
 logger = logging.getLogger(__name__)
 _LOGIN_ATTEMPTS: OrderedDict[tuple[str, str], deque[float]] = OrderedDict()
 _LOGIN_LOCK = Lock()
+_EMAIL_SENDS: OrderedDict[tuple[str, str], float] = OrderedDict()
+_EMAIL_SEND_LOCK = Lock()
+EMAIL_SEND_COOLDOWN_SECONDS = 30
 
 
 class Input(BaseModel):
@@ -87,9 +92,10 @@ class PasswordResetRequest(Input):
     @field_validator("email")
     @classmethod
     def valid_email(cls, value):
-        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+        normalized = normalize_email(value)
+        if not normalized:
             raise ValueError("Enter a valid email address")
-        return value
+        return normalized
 
 
 class PasswordResetCompletion(Input):
@@ -113,23 +119,26 @@ class ClaimDecision(Input):
     verification_reference: str = Field(min_length=1, max_length=500)
 
 
-async def _send_password_reset(config, email: str) -> None:
+async def _send_firebase_action_email(config, email: str, mode: str) -> None:
     try:
         firebase_app = await run_in_threadpool(initialize_firebase, config)
         action_settings = firebase_auth.ActionCodeSettings(
-            url=f"{config.classsync_web_url}/auth/reset-password"
+            url=(f"{config.classsync_web_url}/auth/action?"
+                 f"{urlencode({'mode': mode})}")
         )
-        firebase_link = await run_in_threadpool(
-            firebase_auth.generate_password_reset_link,
-            email,
-            action_code_settings=action_settings,
-            app=firebase_app,
+        generator = (
+            firebase_auth.generate_password_reset_link
+            if mode == "resetPassword"
+            else firebase_auth.generate_email_verification_link
         )
+        firebase_link = await run_in_threadpool(generator, email,
+                                                 action_code_settings=action_settings,
+                                                 app=firebase_app)
     except firebase_auth.UserNotFoundError:
         return
     except Exception as error:
         logger.warning(
-            "password_reset_link_generation_failed",
+            "firebase_action_link_generation_failed",
             extra={"failure_type": type(error).__name__},
         )
         return
@@ -145,12 +154,11 @@ async def _send_password_reset(config, email: str) -> None:
         logger.warning("password_reset_link_missing_action_code")
         return
 
-    reset_url = (
-        f"{config.classsync_web_url}/auth/reset-password?"
-        f"{urlencode({'oobCode': code})}"
-    )
+    action_query = urlencode({'mode': mode, 'oobCode': code})
+    action_url = f"{config.classsync_web_url}/auth/action?{action_query}"
     if not config.notification_service_token:
-        logger.warning("password_reset_notification_unavailable")
+        logger.warning("email_action_notification_unavailable",
+                       extra={"action": mode})
         return
     try:
         notification_url = config.notification_service_url
@@ -163,16 +171,43 @@ async def _send_password_reset(config, email: str) -> None:
         )
         async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
             sent = await client.post(
-                notification_url + "/internal/v1/password-reset-email",
-                json={"email": email, "reset_url": reset_url},
+                notification_url + "/internal/v1/email-action",
+                json={"email": email, "mode": mode, "action_url": action_url},
                 headers=headers,
             )
             sent.raise_for_status()
     except (httpx.HTTPError, ValueError) as error:
         logger.warning(
-            "password_reset_notification_failed",
+            "email_action_notification_failed",
             extra={"failure_type": type(error).__name__},
         )
+
+
+def email_cooldown_remaining(scope: str, identity: str, email: str) -> int:
+    email_key = hmac.new(b"classsync-email-cooldown", email.encode("utf-8"), "sha256").hexdigest()
+    key = (scope, identity + ":" + email_key)
+    now = time.monotonic()
+    with _EMAIL_SEND_LOCK:
+        expires = _EMAIL_SENDS.get(key, 0.0)
+        remaining = max(0, int(expires - now + 0.999))
+        if remaining:
+            _EMAIL_SENDS.move_to_end(key)
+            return remaining
+        _EMAIL_SENDS[key] = now + EMAIL_SEND_COOLDOWN_SECONDS
+        _EMAIL_SENDS.move_to_end(key)
+        while len(_EMAIL_SENDS) > 8192:
+            _EMAIL_SENDS.popitem(last=False)
+    return 0
+
+
+def cooldown_rejection(seconds: int) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        headers={"Retry-After": str(seconds), "Cache-Control": "no-store"},
+        content={"error": {"code": "rate_limited",
+                            "message": "Please wait before requesting another email.",
+                            "retryAfterSeconds": seconds}},
+    )
 
 
 class FacultyInvitation(Input):
@@ -183,9 +218,10 @@ class FacultyInvitation(Input):
     @field_validator("email")
     @classmethod
     def valid_email(cls, value):
-        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+        normalized = normalize_email(value)
+        if not normalized:
             raise ValueError("Enter a valid email address")
-        return value
+        return normalized
 
 
 class InvitationAccept(Input):
@@ -261,7 +297,27 @@ def onboarding_router(settings):
         config = settings()
         limit_student_login(request)
         await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
-        background_tasks.add_task(_send_password_reset, config, body.email)
+        remaining = email_cooldown_remaining("password-reset", "anonymous", body.email)
+        if remaining:
+            return cooldown_rejection(remaining)
+        background_tasks.add_task(_send_firebase_action_email, config, body.email, "resetPassword")
+        return {"data": {"accepted": True}}
+
+    @router.post("/send-verification-email", status_code=202)
+    async def send_verification_email(request: Request, response: Response,
+                                     background_tasks: BackgroundTasks):
+        response.headers["Cache-Control"] = "no-store"
+        limit_student_login(request)
+        principal = request_principal(request, settings())
+        email = normalize_email(principal.email)
+        if not email:
+            raise HTTPException(403, "A valid account email is required")
+        if principal.email_verified:
+            return {"data": {"accepted": True, "alreadyVerified": True}}
+        remaining = email_cooldown_remaining("verify-email", principal.uid, email)
+        if remaining:
+            return cooldown_rejection(remaining)
+        background_tasks.add_task(_send_firebase_action_email, settings(), email, "verifyEmail")
         return {"data": {"accepted": True}}
 
     @router.post("/google-sign-in")
@@ -309,7 +365,8 @@ def onboarding_router(settings):
     def status(request: Request, response: Response):
         principal, repository = context(request, verified=False)
         response.headers["Cache-Control"] = "no-store"
-        return {"data": repository.status(principal)}
+        return {"data": {**repository.status(principal),
+                          "verification_mode": settings().student_verification_mode}}
 
     @router.post("/student-claims", status_code=201)
     def submit_claim(body: StudentClaim, request: Request):
@@ -334,9 +391,21 @@ def onboarding_router(settings):
             f"{principal.uid}\0{challenge_id}\0{code}".encode(),
             "sha256",
         ).digest()
-        masked = repository.issue_student_challenge(
-            principal, body.student_id, challenge_id, digest
-        )
+        try:
+            masked = repository.issue_student_challenge(
+                principal, body.student_id, challenge_id, digest
+            )
+        except HTTPException as error:
+            if error.status_code == 429:
+                return cooldown_rejection(30)
+            if error.status_code == 403 and config.student_verification_mode == "cor_or_roster":
+                raise HTTPException(
+                    403,
+                    "No matching active student record was found. Scan your Registration Form "
+                    "or contact the Registrar.",
+                    headers={"Cache-Control": "no-store"},
+                ) from error
+            raise
         try:
             notification_url = config.notification_service_url
             headers = await run_in_threadpool(
@@ -355,7 +424,7 @@ def onboarding_router(settings):
             repository.cancel_student_challenge(principal, challenge_id)
             raise HTTPException(503, "Email verification is unavailable") from error
         return {"data": {"challenge_id": str(challenge_id), "masked_email": masked,
-                         "expires_in_seconds": 300, "resend_after_seconds": 60}}
+                         "expires_in_seconds": 300, "resend_after_seconds": 30}}
 
     @router.post("/verify-student")
     async def verify_student(body: StudentVerification, request: Request, response: Response):
@@ -383,8 +452,9 @@ def onboarding_router(settings):
             app = await run_in_threadpool(initialize_firebase, config)
             firebase_user = await run_in_threadpool(firebase_auth.get_user, principal.uid, app=app)
             providers = {item.provider_id for item in firebase_user.provider_data}
-            if "google.com" not in providers or firebase_user.email != principal.email:
-                raise HTTPException(403, "Verify your registered student email before continuing")
+            if ("google.com" not in providers
+                    or normalize_email(firebase_user.email) != normalize_email(principal.email)):
+                raise HTTPException(403, "Verify your email before continuing")
             await run_in_threadpool(
                 firebase_auth.update_user,
                 principal.uid,
@@ -427,7 +497,7 @@ def onboarding_router(settings):
                     # Always make the Firebase credential request for a shaped
                     # student number. A synthetic unmatched address avoids a
                     # fast-path timing signal for missing roster IDs.
-                    json={"email": email or "unmatched-student-login@student.pnm.edu.ph",
+                    json={"email": email or "unmatched-student-login@example.invalid",
                           "password": body.password.get_secret_value(),
                           "returnSecureToken": True},
                     follow_redirects=False,
@@ -455,6 +525,12 @@ def onboarding_router(settings):
         principal, repository = context(request, privileged=True)
         response.headers["Cache-Control"] = "no-store"
         return {"data": repository.claims(principal)}
+
+    @router.get("/self-verified-students")
+    def self_verified_students(request: Request, response: Response):
+        principal, repository = context(request, privileged=True)
+        response.headers["Cache-Control"] = "no-store"
+        return {"data": repository.self_verified_students(principal)}
 
     @router.get("/faculty-records")
     def faculty_records(request: Request, response: Response):

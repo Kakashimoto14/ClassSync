@@ -39,16 +39,17 @@ def test_live_database_target_rejects_unencrypted_or_ambiguous_targets(value):
         validate_database_target(value)
 
 
-def test_student_identity_requires_exact_student_format_and_institutional_email():
+def test_student_identity_requires_exact_student_format_and_accepts_any_valid_email():
     assert validate_student_identity("23-01425", "juan.delacruz@student.pnm.edu.ph") == (
         "23-01425",
         "juan.delacruz@student.pnm.edu.ph",
     )
+    assert validate_student_identity("23-01425", " Student.Demo@Gmail.com ") == (
+        "23-01425", "student.demo@gmail.com",
+    )
     for student_id, email in [
         ("2301425", "juan.delacruz@student.pnm.edu.ph"),
-        ("23-01425", "Juan.delacruz@student.pnm.edu.ph"),
-        ("23-01425", "juan-delacruz@student.pnm.edu.ph"),
-        ("23-01425", "juan.delacruz@example.org"),
+        ("23-01425", "not-an-email"),
     ]:
         with pytest.raises(ValueError):
             validate_student_identity(student_id, email)

@@ -29,7 +29,7 @@ describe('honest sign-in entry', () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole('heading', { name: 'Welcome to ClassSync' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Student Number or Institutional Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Student Number or Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByLabelText('Human verification')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in to ClassSync →' })).toBeInTheDocument();

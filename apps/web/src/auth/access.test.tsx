@@ -9,11 +9,11 @@ describe('authentication entry and demo access', () => {
   beforeEach(() => sessionStorage.clear());
   it('validates required login credentials before any authentication attempt', () => {
     expect(validateLogin('', '')).toEqual({
-      email: 'Enter your university email address.',
+      email: 'Enter your student number or email address.',
       password: 'Enter your password.',
     });
     expect(validateLogin('not-an-email', 'password')).toEqual({
-      email: 'Enter a valid email address.',
+      email: 'Enter a valid email address or student number.',
     });
     expect(validateLogin('student@university.edu', 'password')).toEqual({});
   });

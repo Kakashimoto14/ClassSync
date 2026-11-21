@@ -1,6 +1,8 @@
 import { appMode } from '../config/runtime-config';
 import { firebaseApp } from '../lib/firebase';
 import { identityEndpoint } from './university-session-driver';
+import { RateLimitError } from './cooldown';
+import { normalizeAccountEmail } from './student-number';
 import * as firebaseAuthSdk from 'firebase/auth';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, type User } from 'firebase/auth';
 
@@ -52,7 +54,7 @@ export async function signInToAccount(
     await sdk.signInWithCustomToken(auth, payload.data.custom_token);
     return;
   }
-  await sdk.signInWithEmailAndPassword(auth, identifier.trim(), password);
+  await sdk.signInWithEmailAndPassword(auth, normalizeAccountEmail(identifier), password);
 }
 
 export function signInWithGoogle(turnstileToken: string) {
@@ -106,8 +108,8 @@ export async function completeGoogleRedirectSignIn() {
 
 export async function createStudentAccount(email: string, password: string) {
   const { auth, sdk } = await provider();
-  const result = await sdk.createUserWithEmailAndPassword(auth, email.trim(), password);
-  await sdk.sendEmailVerification(result.user);
+  const result = await sdk.createUserWithEmailAndPassword(auth, normalizeAccountEmail(email), password);
+  await accountRequest('send-verification-email', 'POST', {}, AUTH_TIMEOUT_MS, result.user.uid);
 }
 
 export async function recoverPassword(email: string, turnstileToken: string) {
@@ -120,13 +122,33 @@ export async function recoverPassword(email: string, turnstileToken: string) {
     redirect: 'error',
     referrerPolicy: 'no-referrer',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim(), turnstile_token: turnstileToken }),
+    body: JSON.stringify({ email: normalizeAccountEmail(email), turnstile_token: turnstileToken }),
   });
   if (!response.headers.get('content-type')?.includes('application/json'))
     throw new Error('Password reset is temporarily unavailable. Try again later.');
   const payload = await response.json();
-  if (!response.ok || payload?.data?.accepted !== true)
+  if (!response.ok) throw emailRequestError(response, payload);
+  if (payload?.data?.accepted !== true)
     throw new Error('Password reset is temporarily unavailable. Try again later.');
+}
+
+function emailRequestError(
+  response: Response,
+  payload: { error?: { code?: unknown; message?: unknown; retryAfterSeconds?: unknown }; detail?: unknown },
+): Error {
+  if (payload?.error?.code === 'rate_limited') {
+    const retry = Number(payload.error.retryAfterSeconds ?? response.headers.get('Retry-After') ?? 30);
+    return new RateLimitError(
+      typeof payload.error.message === 'string'
+        ? safeAccountServiceMessage(payload.error.message)
+        : 'Please wait before requesting another email.',
+      retry,
+    );
+  }
+  const message = typeof payload.error?.message === 'string'
+    ? payload.error.message
+    : typeof payload.detail === 'string' ? payload.detail : undefined;
+  return new Error(message ? safeAccountServiceMessage(message) : 'Account service unavailable. Please try again later.');
 }
 
 export async function verifyPasswordResetCode(code: string) {
@@ -136,6 +158,20 @@ export async function verifyPasswordResetCode(code: string) {
     await sdk.verifyPasswordResetCode(auth, code);
   } catch {
     throw new Error('This password reset link is invalid or expired.');
+  }
+}
+
+export async function applyEmailVerificationCode(code: string) {
+  if (!code || code.length > 2048) throw new Error('This verification link is invalid or expired.');
+  const { auth, sdk } = await provider();
+  try {
+    await sdk.applyActionCode(auth, code);
+    if (auth.currentUser) {
+      await sdk.reload(auth.currentUser);
+      await auth.currentUser.getIdToken(true);
+    }
+  } catch {
+    throw new Error('This verification link is invalid or expired.');
   }
 }
 
@@ -168,8 +204,7 @@ export async function verifyHumanChallenge(token: string) {
 }
 
 export async function resendVerification(expectedUid?: string) {
-  const { auth, sdk } = await provider();
-  await sdk.sendEmailVerification(currentAccount(auth, expectedUid));
+  await accountRequest('send-verification-email', 'POST', {}, AUTH_TIMEOUT_MS, expectedUid);
 }
 
 export async function refreshVerifiedAccount(expectedUid?: string) {
@@ -216,6 +251,7 @@ export interface OnboardingStatus {
   claim_state: 'pending' | 'approved' | 'rejected' | null;
   membership_state: 'active' | 'inactive' | 'revoked' | null;
   status: string;
+  verification_mode?: 'cor_or_roster' | 'strict_roster';
 }
 
 export async function observeAccount(next: (uid: string | null) => void) {
@@ -310,12 +346,6 @@ export async function accountRequest<T>(
   const payload = await response.json();
   if (auth.currentUser !== user) throw new Error('Sign in to continue.');
   if (!response.ok)
-    throw new Error(
-      typeof payload?.error?.message === 'string'
-        ? safeAccountServiceMessage(payload.error.message)
-        : typeof payload?.detail === 'string'
-          ? safeAccountServiceMessage(payload.detail)
-        : 'Account request could not be confirmed.',
-    );
+    throw emailRequestError(response, payload);
   return payload.data as T;
 }

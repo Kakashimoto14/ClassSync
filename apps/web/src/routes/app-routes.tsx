@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { appMode } from '../config/runtime-config';
 import { AuthPage } from '../pages/AuthPage';
+import { EmailActionPage } from '../pages/EmailActionPage';
 import { DesignSystemPage } from '../pages/DesignSystemPage';
 import { DevelopmentRolePreviewPage } from '../pages/DevelopmentRolePreviewPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -25,13 +26,14 @@ export const appRoutes: RouteObject[] = [
                 'auth/signup',
                 'auth/forgot-password',
                 'auth/reset-password',
+                'auth/action',
                 'auth/verify',
                 'auth/student-onboarding',
                 'auth/teacher-invite',
                 'auth/account',
               ].map((path) => ({
                 path,
-                element: <AuthPage />,
+                element: path === 'auth/action' ? <EmailActionPage /> : <AuthPage />,
               }))
             : []),
           ...routeDefinitions.map((definition) => ({
