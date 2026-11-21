@@ -4,10 +4,12 @@
 **/.env*
 .venv
 .venv-main-junction
-**/__pycache__
+**/__pycache__/
 **/node_modules
-**/dist
-**/.pytest_cache
+**/dist/
+**/build/
+**/*.egg-info/
+**/.pytest_cache/
 var
 docs/production/p4d-local
 docs

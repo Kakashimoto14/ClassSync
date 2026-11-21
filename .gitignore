@@ -1,18 +1,19 @@
 # Node
 node_modules/
-dist/
+**/dist/
 coverage/
 *.tsbuildinfo
 
 # Python
-__pycache__/
+**/__pycache__/
 *.py[cod]
-.pytest_cache/
+**/.pytest_cache/
 .ruff_cache/
+**/build/
 .venv/
 .venv-main-junction/
 venv/
-*.egg-info/
+**/*.egg-info/
 var/
 var/p4d-evidence/
 *.sqlite3

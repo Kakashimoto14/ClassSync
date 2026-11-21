@@ -48,8 +48,10 @@ extracted without guessing colors/edges. The earlier reference archive contained
 screenshots, while `ITADBMS_Final_Official_Logo_Package.zip` contained database
 coursework and a CdM institutional logo. Neither supplied an isolated ribbon export.
 
-The earlier cap/calendar attachment and old `public/classsync-logo.png` are different
-artwork and remain unused. This follow-up changes the integration authority to the
+The earlier cap/calendar attachment and old `public/classsync-logo.png` were different
+artwork and unused; the old public PNG was removed during repository hygiene cleanup.
+The provisional asset ZIP is retained only as provenance in source history and is not
+served in the public directory. This follow-up changes the integration authority to the
 new user-supplied provisional ribbon derivatives, without claiming that the missing
 original vector master has been recovered. The full B1 verification report records
 the historical state; this document supersedes its logo-integration blocker for the
