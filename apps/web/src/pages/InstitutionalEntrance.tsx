@@ -290,6 +290,7 @@ function CredentialsForm({
   const signup = mode === 'signup';
   const recovery = mode === 'recovery';
   const resetting = mode === 'reset';
+  const normalizedEmail = normalizeAccountEmail(email);
   const [resetCodeValid, setResetCodeValid] = useState(false);
   const [resetCodeChecking, setResetCodeChecking] = useState(resetting);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
@@ -300,14 +301,17 @@ function CredentialsForm({
   }, []);
 
   useEffect(() => {
-    setCooldownSeconds(recovery ? cooldownRemaining('password-reset', email) : 0);
-  }, [email, recovery]);
+    setCooldownSeconds(recovery ? cooldownRemaining('password-reset', normalizedEmail) : 0);
+  }, [normalizedEmail, recovery]);
 
+  const hasRecoveryCooldown = recovery && cooldownSeconds > 0;
   useEffect(() => {
-    if (cooldownSeconds <= 0) return;
-    const timer = window.setTimeout(() => setCooldownSeconds((value) => Math.max(0, value - 1)), 1000);
-    return () => window.clearTimeout(timer);
-  }, [cooldownSeconds]);
+    if (!hasRecoveryCooldown) return;
+    const timer = window.setInterval(() => {
+      setCooldownSeconds(cooldownRemaining('password-reset', normalizedEmail));
+    }, 500);
+    return () => window.clearInterval(timer);
+  }, [hasRecoveryCooldown, normalizedEmail]);
 
   useEffect(() => {
     if (!busy) {
@@ -346,10 +350,9 @@ function CredentialsForm({
     event.preventDefault();
     if (busy) return;
     const studentNumberLogin = mode === 'login' && STUDENT_ID_PATTERN.test(email.trim());
-    const normalizedEmail = normalizeAccountEmail(email);
     const validation: typeof errors = (studentNumberLogin || resetting)
       ? {}
-      : validateLogin(recovery || signup ? normalizedEmail : email.trim(), password);
+      : validateLogin(normalizedEmail, password);
     if (studentNumberLogin && !password) validation.password = 'Enter your password.';
     if (recovery) delete validation.password;
     if ((signup || recovery) && !isValidAccountEmail(email))
@@ -364,6 +367,10 @@ function CredentialsForm({
     if (validation.email) return emailField.current?.focus();
     if (validation.password) return passwordField.current?.focus();
     if (validation.confirmation) return confirmationField.current?.focus();
+    if ((mode === 'login' || recovery) && !turnstileToken) {
+      setError('Complete the human verification check before continuing.');
+      return;
+    }
     setBusy(true);
     try {
       if (resetting) {
@@ -377,11 +384,11 @@ function CredentialsForm({
         setNotice('If your account can receive a reset link, check your email for the next steps.');
       } else if (signup) {
         await createStudentAccount(normalizedEmail, password);
-        setCooldownSeconds(startCooldown('verification-email', normalizedEmail, 30));
+        startCooldown('verification-email', normalizedEmail, 30);
       }
       else {
         if (studentNumberLogin) {
-          await signInToAccount(email, password, turnstileToken);
+          await signInToAccount(email.trim(), password, turnstileToken);
         } else {
           await verifyHumanChallenge(turnstileToken);
           await signInToAccount(normalizedEmail, password);
@@ -390,9 +397,10 @@ function CredentialsForm({
       }
     } catch (failure) {
       const retryAfter = retryAfterFrom(failure);
-      if (retryAfter) {
-        const action = recovery ? 'password-reset' : 'verification-email';
-        setCooldownSeconds(startCooldown(action, normalizeAccountEmail(email), retryAfter));
+      if (retryAfter && recovery) {
+        setCooldownSeconds(startCooldown('password-reset', normalizedEmail, retryAfter));
+      } else if (retryAfter && signup) {
+        startCooldown('verification-email', normalizedEmail, retryAfter);
       }
       setError(
         failure instanceof Error && failure.name === 'RateLimitError'
@@ -477,8 +485,8 @@ function CredentialsForm({
             ref={emailField}
             type={mode === 'login' ? 'text' : 'email'}
             placeholder={mode === 'login'
-              ? '23-01425 or student.demo@gmail.com'
-              : 'student.demo@gmail.com'}
+              ? '23-01425 or student@example.com'
+              : 'student@example.com'}
             autoComplete="username"
             inputMode={mode === 'login' ? 'text' : 'email'}
             autoCapitalize="none"
@@ -489,7 +497,9 @@ function CredentialsForm({
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'entrance-email-error' : undefined}
             onChange={(event) => {
-              setEmail(mode === 'login' ? formatLoginIdentifier(event.target.value) : event.target.value);
+              setEmail(mode === 'login'
+                ? formatLoginIdentifier(event.target.value, email)
+                : event.target.value);
               setErrors({ ...errors, email: undefined });
             }}
           />
@@ -609,10 +619,7 @@ function CredentialsForm({
           </p>
         )}
         <Button type="submit" disabled={busy || !serviceAvailable ||
-          (mode === 'login' && ((!isValidAccountEmail(email) && !STUDENT_ID_PATTERN.test(email.trim())) || !password || !turnstileToken)) ||
-          (signup && (!isValidAccountEmail(email) || !passwordStrengthComplete(password, confirmation))) ||
-          (recovery && (!isValidAccountEmail(email) || !turnstileToken || cooldownSeconds > 0)) ||
-          ((signup || resetting) && !passwordStrengthComplete(password, confirmation)) ||
+          (recovery && cooldownSeconds > 0) ||
           (resetting && (resetCodeChecking || !resetCodeValid))}>
           {busy
             ? 'Please wait…'

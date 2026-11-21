@@ -1,3 +1,5 @@
+import { normalizeAccountEmail } from './student-number';
+
 export class RateLimitError extends Error {
   readonly retryAfterSeconds: number;
 
@@ -9,7 +11,7 @@ export class RateLimitError extends Error {
 }
 
 function key(action: string, identity: string) {
-  return `classsync.cooldown.${action}.${identity.trim().toLowerCase()}`;
+  return `classsync.cooldown.${action}.${normalizeAccountEmail(identity)}`;
 }
 
 export function startCooldown(action: string, identity: string, seconds = 30): number {

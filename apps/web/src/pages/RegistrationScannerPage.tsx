@@ -150,6 +150,7 @@ function PrivateScanner() {
   }, [authorizedStudent]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [reviewError, setReviewError] = useState('');
   const [notice, setNotice] = useState('');
   const [load, setLoad] = useState(0);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -235,6 +236,7 @@ function PrivateScanner() {
       setScan(next);
       setReview(reviewFrom(next));
       setMatch(null);
+      setReviewError('');
       setParams({ scan: next.id }, { replace: true });
       requestAnimationFrame(() => heading.current?.focus());
     });
@@ -243,6 +245,7 @@ function PrivateScanner() {
   const edit = (patch: Partial<Review>) => {
     setReview((current) => ({ ...current, ...patch }));
     setMatch(null);
+    setReviewError('');
     setNotice('');
   };
   const editCourse = (index: number, patch: Partial<Course>) =>
@@ -253,6 +256,13 @@ function PrivateScanner() {
     event.preventDefault();
     if (!scan) return;
     setMatch(null);
+    if (!reviewValid) {
+      setReviewError(
+        'Complete the academic year, semester, student number, program, year level, and at least one course code.',
+      );
+      return;
+    }
+    setReviewError('');
     const authorityGeneration = currentStudentAuthority.current.generation;
     void execute(async () => {
       const result = await accountRequest<Match>(
@@ -285,6 +295,7 @@ function PrivateScanner() {
       setScan(null);
       setReview(emptyReview());
       setMatch(null);
+      setReviewError('');
       setParams({}, { replace: true });
       setNotice('Your temporary scan was deleted.');
     });
@@ -388,7 +399,7 @@ function PrivateScanner() {
                   {warning}
                 </p>
               ))}
-              <form onSubmit={submit}>
+              <form noValidate onSubmit={submit}>
                 <fieldset disabled={busy} className="registration-fields">
                   <legend>Academic details</legend>
                   <div>
@@ -437,6 +448,9 @@ function PrivateScanner() {
                       onChange={(e) => edit({ program: e.target.value })}
                     >
                       <option value="">Choose program</option>
+                      {review.program.trim() && !CDM_PROGRAMS.includes(review.program.trim()) && (
+                        <option value={review.program}> {review.program} (from scan)</option>
+                      )}
                       {CDM_PROGRAMS.map((program) => <option key={program} value={program}>{program}</option>)}
                     </select>
                   </div>
@@ -527,10 +541,11 @@ function PrivateScanner() {
                   >
                     Add a course
                   </Button>
-                  <Button type="submit" disabled={busy || !reviewValid}>
+                  <Button type="submit" disabled={busy}>
                     Find my classes
                   </Button>
                 </div>
+                {reviewError && <p role="alert" className="registration-error">{reviewError}</p>}
               </form>
               {match && (
                 <section aria-labelledby="scan-match-title">
@@ -597,6 +612,13 @@ function PrivateScanner() {
               )}
               {match?.status === 'pending-verification' && !account.membership_state &&
                 account.verification_mode !== 'strict_roster' && (
+                  scan.method === 'manual' ? (
+                    <section className="registration-activation" aria-label="Scan form to activate access">
+                      <h3>Upload your Registration Form to activate</h3>
+                      <p>Manual course entry can help find classes, but only a scanned Registration Form can activate student access.</p>
+                      <Button disabled={busy} onClick={erase}>Replace with a scanned form</Button>
+                    </section>
+                  ) : (
                   <section className="registration-activation" aria-label="Activate student access">
                     <h3>Ready to activate your access?</h3>
                     <p>Confirm the reviewed Registration Form to link this account and check for published classes.</p>
@@ -604,6 +626,7 @@ function PrivateScanner() {
                       Confirm Registration Form
                     </Button>
                   </section>
+                  )
                 )}
               <Button disabled={busy} variant="ghost" onClick={erase}>
                 Delete temporary scan

@@ -22,16 +22,16 @@ function field(value: string | number) {
     evidence: { page: 1, line: 1, excerpt: 'Invented academic field' },
   };
 }
-const scan = () => ({
+const scan = (program = 'BSIT', method = 'digital-pdf') => ({
   id: '11111111-1111-4111-8111-111111111111',
-  method: 'digital-pdf',
+  method,
   expires_at: new Date(Date.now() + 900_000).toISOString(),
   original_retained: false,
   fields: {
     academic_year: field('2026-2027'),
     semester: field('first'),
     student_identifier: field('23-00001'),
-    program: field('BSIT'),
+    program: field(program),
     year_level: field(2),
   },
   courses: [
@@ -191,6 +191,62 @@ it('displays a failed upload honestly and keeps manual entry available', async (
   expect(screen.getByRole('alert')).toHaveTextContent('could not be safely read');
   expect(screen.getByRole('button', { name: 'Enter courses manually' })).toBeEnabled();
   expect(screen.queryByRole('link', { name: 'View verified schedule' })).not.toBeInTheDocument();
+});
+
+it('retains an OCR-extracted program that is not in the selection catalog', async () => {
+  source.request.mockImplementation(async (path, method) => {
+    if (path === 'onboarding') return { email_verified: true, membership_state: null };
+    if (method === 'POST' && path === 'registration-documents') return scan('SYNTHETIC-PROGRAM');
+    return undefined;
+  });
+  render(page());
+  fireEvent.change(await screen.findByLabelText('Choose a PDF or clear photo'), {
+    target: { files: [new File(['invented'], 'invented.pdf', { type: 'application/pdf' })] },
+  });
+  const program = await screen.findByLabelText('Program');
+  expect(program).toHaveValue('SYNTHETIC-PROGRAM');
+  expect(screen.getByRole('option', { name: 'SYNTHETIC-PROGRAM (from scan)' })).toBeInTheDocument();
+});
+
+it('shows review validation feedback instead of silently disabling Find my classes', async () => {
+  render(page());
+  fireEvent.change(await screen.findByLabelText('Choose a PDF or clear photo'), {
+    target: { files: [new File(['invented'], 'invented.pdf', { type: 'application/pdf' })] },
+  });
+  await screen.findByLabelText('Student number');
+  fireEvent.change(screen.getByLabelText('Academic year'), { target: { value: '' } });
+  const submit = screen.getByRole('button', { name: 'Find my classes' });
+  expect(submit).toBeEnabled();
+  fireEvent.click(submit);
+  expect(await screen.findByRole('alert')).toHaveTextContent(/complete.*academic year.*course code/i);
+  expect(source.request).not.toHaveBeenCalledWith(expect.stringMatching(/\/review$/), 'POST', expect.anything(), expect.anything());
+});
+
+it('does not offer self-activation for manual course entry and directs students to upload a form', async () => {
+  source.request.mockImplementation(async (path, method) => {
+    if (path === 'onboarding') return {
+      email_verified: true, membership_state: null, claim_state: null,
+      verification_mode: 'cor_or_roster',
+    };
+    if (method === 'POST' && path === 'registration-documents/manual') return scan('', 'manual');
+    if (path.endsWith('/review')) return {
+      status: 'pending-verification', message: 'No active membership yet.', courses: [],
+    };
+    return undefined;
+  });
+  render(page());
+  fireEvent.click(await screen.findByRole('button', { name: 'Enter courses manually' }));
+  await screen.findByLabelText('Student number');
+  fireEvent.change(screen.getByLabelText('Academic year'), { target: { value: '2026-2027' } });
+  fireEvent.change(screen.getByLabelText('Semester'), { target: { value: 'first' } });
+  fireEvent.change(screen.getByLabelText('Student number'), { target: { value: '23-00001' } });
+  fireEvent.change(screen.getByLabelText('Program'), { target: { value: 'BSIT' } });
+  fireEvent.change(screen.getByLabelText('Year level'), { target: { value: '2' } });
+  fireEvent.change(screen.getByLabelText('Course code'), { target: { value: 'TESTIOI' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Find my classes' }));
+  expect(await screen.findByText(/only a scanned Registration Form can activate student access/i)).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Confirm Registration Form' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Replace with a scanned form' })).toBeInTheDocument();
 });
 
 it('deletes the server-side temporary review before clearing the form', async () => {

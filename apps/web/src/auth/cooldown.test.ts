@@ -10,8 +10,9 @@ describe('session cooldown persistence', () => {
   it('restores the remaining time after refresh and normalizes identity', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-21T00:00:00Z'));
-    expect(startCooldown('reset', 'Student.Demo@gmail.com', 30)).toBe(30);
+    expect(startCooldown('reset', ' Student.Demo@Gmail.com ', 30)).toBe(30);
     vi.advanceTimersByTime(11_000);
     expect(cooldownRemaining('reset', 'student.demo@gmail.com')).toBe(19);
+    expect(cooldownRemaining('reset', ' STUDENT.DEMO@gmail.com ')).toBe(19);
   });
 });

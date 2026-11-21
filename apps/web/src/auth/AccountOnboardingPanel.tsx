@@ -78,13 +78,18 @@ function PendingAccount({
   const [busy, setBusy] = useState(false);
   const signedIn = ['denied', 'verification-required'].includes(session.state.status);
   useEffect(() => {
-    if (verificationResendSeconds <= 0 && codeResendSeconds <= 0) return;
-    const timer = window.setTimeout(() => {
-      setVerificationResendSeconds((value) => Math.max(0, value - 1));
-      setCodeResendSeconds((value) => Math.max(0, value - 1));
-    }, 1000);
-    return () => window.clearTimeout(timer);
-  }, [verificationResendSeconds, codeResendSeconds]);
+    setVerificationResendSeconds(cooldownRemaining('verification-email', profile.email));
+    setCodeResendSeconds(cooldownRemaining('student-code', profile.email));
+  }, [profile.email]);
+  const hasOnboardingCooldown = verificationResendSeconds > 0 || codeResendSeconds > 0;
+  useEffect(() => {
+    if (!hasOnboardingCooldown) return;
+    const timer = window.setInterval(() => {
+      setVerificationResendSeconds(cooldownRemaining('verification-email', profile.email));
+      setCodeResendSeconds(cooldownRemaining('student-code', profile.email));
+    }, 500);
+    return () => window.clearInterval(timer);
+  }, [hasOnboardingCooldown, profile.email]);
   useEffect(() => {
     if (!signedIn) return;
     let closed = false;
@@ -119,13 +124,24 @@ function PendingAccount({
       setMessage(success);
       session.refresh();
     } catch (error) {
-      const retryAfter = retryAfterFrom(error);
-      if (retryAfter) setVerificationResendSeconds(startCooldown('verification-email', profile.email, retryAfter));
       setMessage(
         error instanceof Error && !('code' in error) ? error.message : accountError(error),
       );
     } finally {
       setBusy(false);
+    }
+  };
+  const requestVerificationEmail = async () => {
+    try {
+      await resendVerification(profile.uid);
+      setVerificationResendSeconds(startCooldown('verification-email', profile.email, 30));
+    } catch (error) {
+      const retryAfter = retryAfterFrom(error);
+      if (retryAfter)
+        setVerificationResendSeconds(
+          startCooldown('verification-email', profile.email, retryAfter),
+        );
+      throw error;
     }
   };
   const sendCode = async () => {
@@ -134,6 +150,10 @@ function PendingAccount({
       const error = 'Use the format 12-12345 for your student number.';
       setStudentIdError(error);
       setMessage(error);
+      return;
+    }
+    if (!turnstileToken) {
+      setMessage('Complete the human verification check before continuing.');
       return;
     }
     setStudentIdError('');
@@ -168,7 +188,15 @@ function PendingAccount({
   };
   const verifyCode = async (event: FormEvent) => {
     event.preventDefault();
-    if (busy || !challenge || code.length !== 6) return;
+    if (busy || !challenge) return;
+    if (code.length !== 6) {
+      setMessage('Enter all 6 digits of the verification code.');
+      return;
+    }
+    if (!turnstileToken) {
+      setMessage('Complete the human verification check before continuing.');
+      return;
+    }
     setBusy(true);
     setMessage('');
     try {
@@ -197,6 +225,10 @@ function PendingAccount({
     if (busy || !challenge) return;
     if (newPassword.length > 128 || !passwordStrengthComplete(newPassword, confirmPassword)) {
       setMessage('Meet all six password requirements before continuing.');
+      return;
+    }
+    if (!turnstileToken) {
+      setMessage('Complete the human verification check before continuing.');
       return;
     }
     setBusy(true);
@@ -249,10 +281,7 @@ function PendingAccount({
             disabled={busy || verificationResendSeconds > 0}
             onClick={() =>
               void action(
-                async () => {
-                  await resendVerification(profile.uid);
-                  setVerificationResendSeconds(startCooldown('verification-email', profile.email, 30));
-                },
+                requestVerificationEmail,
                 'Verification email requested. Check your inbox.',
               )
             }
@@ -277,8 +306,8 @@ function PendingAccount({
             step === 'student' ? <>
               {status.verification_mode === 'cor_or_roster' && <>
                 <div className="account-onboarding__steps" aria-label="Account setup steps">
-                  <strong>Step 1 of 2 · Verify email</strong>
-                  <span>Step 2 · Confirm Registration Form</span>
+                  <strong>Step 1 · Email verified</strong>
+                  <span aria-current="step">Step 2 of 2 · Confirm Registration Form</span>
                 </div>
                 <Link className="button" to="/student/registration-scanner">Scan Registration Form (COR)</Link>
               </>}
@@ -292,7 +321,7 @@ function PendingAccount({
                 type="email"
                 readOnly
                 value={profile.email}
-                placeholder="student.demo@gmail.com"
+                placeholder="student@example.com"
                 autoComplete="email"
               />
               <p className="entrance-hint">
@@ -324,8 +353,10 @@ function PendingAccount({
                 </p>
               )}
               <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
-              <Button type="submit" disabled={busy || !turnstileToken || codeResendSeconds > 0 || !/^[0-9]{2}-[0-9]{5}$/.test(studentId)}>
-                {busy ? 'Sending code…' : 'Send verification code'}
+              <Button type="submit" disabled={busy || codeResendSeconds > 0}>
+                {busy ? 'Sending code…' : codeResendSeconds > 0
+                  ? `Send verification code in ${codeResendSeconds}s`
+                  : 'Send verification code'}
               </Button>
               </form>
               </details>
@@ -371,7 +402,7 @@ function PendingAccount({
                 ))}
               </div>
               <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
-              <Button type="submit" disabled={busy || code.length !== 6 || !turnstileToken}>{busy ? 'Verifying…' : 'Verify and sign in'}</Button>
+              <Button type="submit" disabled={busy}>{busy ? 'Verifying…' : 'Verify and sign in'}</Button>
               <div className="account-onboarding__otp-actions">
                 <Button type="button" variant="secondary" disabled={busy || codeResendSeconds > 0} onClick={resendCode}>
                   {codeResendSeconds ? `Resend code in ${codeResendSeconds}s` : 'Resend code'}
@@ -395,7 +426,7 @@ function PendingAccount({
               <PasswordStrengthChecklist password={newPassword} confirmPassword={confirmPassword} />
               <p className="entrance-hint">Your password stays with your ClassSync account.</p>
               <TurnstileWidget key={turnstileRevision} onToken={onTurnstileToken} />
-              <Button type="submit" disabled={busy || !turnstileToken || !passwordStrengthComplete(newPassword, confirmPassword)}>{busy ? 'Securing your account…' : 'Create portal password'}</Button>
+              <Button type="submit" disabled={busy}>{busy ? 'Securing your account…' : 'Create portal password'}</Button>
             </form> : null
           )}
           {status.claim_state === 'rejected' && (

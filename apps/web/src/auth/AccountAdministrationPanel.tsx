@@ -32,6 +32,7 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
   const [email, setEmail] = useState('');
   const [reference, setReference] = useState('');
   const [invitation, setInvitation] = useState<Invitation | null>(null);
+  const [confirmRevokeUid, setConfirmRevokeUid] = useState('');
   const [revokeUid, setRevokeUid] = useState('');
   const [revision, setRevision] = useState('');
   const [message, setMessage] = useState('');
@@ -148,20 +149,41 @@ export function AccountAdministrationPanel({ uid }: { uid: string }) {
               <li key={student.uid}>
                 <strong>{student.student_id}</strong> · {student.registered_email}
                 <span> · Form verified · Revision {student.membership_revision}</span>
-                <Button
-                  disabled={busy}
-                  variant="secondary"
-                  onClick={() => void run(async () => {
-                    await accountRequest(
-                      `memberships/${encodeURIComponent(student.uid)}/revoke`,
-                      'PATCH',
-                      { expected_revision: student.membership_revision },
-                    );
-                    await load();
-                  })}
-                >
-                  Revoke access
-                </Button>
+                {confirmRevokeUid === student.uid ? (
+                  <div role="group" aria-label={`Confirm access revocation for ${student.student_id}`}>
+                    <p>Revoke access for student {student.student_id}?</p>
+                    <Button
+                      disabled={busy}
+                      onClick={() => void run(async () => {
+                        await accountRequest(
+                          `memberships/${encodeURIComponent(student.uid)}/revoke`,
+                          'PATCH',
+                          { expected_revision: student.membership_revision },
+                        );
+                        setConfirmRevokeUid('');
+                        await load();
+                        setMessage(`Access revoked for student ${student.student_id}.`);
+                      })}
+                    >
+                      Confirm revoke
+                    </Button>
+                    <Button
+                      disabled={busy}
+                      variant="ghost"
+                      onClick={() => setConfirmRevokeUid('')}
+                    >
+                      Cancel revoke
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    disabled={busy}
+                    variant="secondary"
+                    onClick={() => setConfirmRevokeUid(student.uid)}
+                  >
+                    Revoke access
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
