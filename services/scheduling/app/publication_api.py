@@ -140,7 +140,14 @@ def publish(body: PublicationCommand, request: Request):
 
 
 @router.get("/history/{period}")
-def history(period: str, request: Request, dataset: str = "institutional"):
+def history(
+    period: str,
+    request: Request,
+    dataset: str = "institutional",
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0, le=10000),
+    include_details: bool = False,
+):
     settings = settings_only()
     claims = require_administrator(request, settings)
     if dataset not in {"institutional", "synthetic"}:
@@ -156,12 +163,20 @@ def history(period: str, request: Request, dataset: str = "institutional"):
     _, repo = scoped_repo(request, claims)
     if settings.scheduling_database_url is not None:
         try:
-            return {"versions": repo.history(dataset, period)}
+            versions = repo.history(
+                dataset, period, limit=limit + 1, offset=offset,
+                include_details=include_details,
+            )
         except DraftError as error:
             raise HTTPException(error.status, detail={"error": {
                 "code": error.code, "message": str(error),
             }}) from error
-    return {"versions": repo.history(tenant, dataset, period)}
+    else:
+        versions = repo.history(
+            tenant, dataset, period, limit=limit + 1, offset=offset,
+            include_details=include_details,
+        )
+    return {"versions": versions[:limit], "has_more": len(versions) > limit}
 
 
 @router.get("/audit/{period}")

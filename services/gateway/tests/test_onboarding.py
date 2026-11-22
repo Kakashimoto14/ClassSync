@@ -1,4 +1,6 @@
 import time
+from collections import deque
+from types import SimpleNamespace
 from unittest.mock import Mock
 from uuid import UUID
 
@@ -41,6 +43,72 @@ def test_onboarding_requires_token_and_never_takes_subject_or_role_from_payload(
     )
     assert result.status_code == 422
     repository.submit_claim.assert_not_called()
+
+
+def test_email_cooldown_capacity_does_not_evict_active_entries(monkeypatch):
+    monkeypatch.setattr(onboarding, "EMAIL_SENDS_LIMIT", 2, raising=False)
+    with onboarding._EMAIL_SEND_LOCK:
+        onboarding._EMAIL_SENDS.clear()
+
+    assert onboarding.email_cooldown_remaining("reset", "anonymous", "one@example.com") == 0
+    assert onboarding.email_cooldown_remaining("reset", "anonymous", "two@example.com") == 0
+    assert onboarding.email_cooldown_remaining("reset", "anonymous", "three@example.com") > 0
+
+    assert len(onboarding._EMAIL_SENDS) == 2
+    assert onboarding.email_cooldown_remaining("reset", "anonymous", "one@example.com") > 0
+
+
+def test_expired_email_cooldowns_are_purged_before_capacity_is_checked(monkeypatch):
+    monkeypatch.setattr(onboarding, "EMAIL_SENDS_LIMIT", 1, raising=False)
+    with onboarding._EMAIL_SEND_LOCK:
+        onboarding._EMAIL_SENDS.clear()
+        onboarding._EMAIL_SENDS[("expired", "entry")] = time.monotonic() - 1
+
+    assert onboarding.email_cooldown_remaining("reset", "anonymous", "new@example.com") == 0
+    assert len(onboarding._EMAIL_SENDS) == 1
+    assert next(iter(onboarding._EMAIL_SENDS))[0] == "reset"
+
+
+def test_login_bucket_capacity_does_not_evict_active_lockouts(monkeypatch):
+    monkeypatch.setattr(onboarding, "LOGIN_ATTEMPT_BUCKET_LIMIT", 2, raising=False)
+
+    def request(address):
+        return SimpleNamespace(
+            client=SimpleNamespace(host=address),
+            url=SimpleNamespace(path="/api/v1/auth/student-password-login"),
+        )
+
+    for _ in range(onboarding.LOGIN_MAX_ATTEMPTS):
+        onboarding.limit_student_login(request("192.0.2.1"))
+    onboarding.limit_student_login(request("192.0.2.2"))
+
+    with pytest.raises(HTTPException) as full:
+        onboarding.limit_student_login(request("192.0.2.3"))
+    assert full.value.status_code == 429
+
+    with pytest.raises(HTTPException) as locked:
+        onboarding.limit_student_login(request("192.0.2.1"))
+    assert locked.value.status_code == 429
+    assert len(onboarding._LOGIN_ATTEMPTS) == 2
+
+
+def test_expired_login_buckets_are_purged_before_capacity_is_checked(monkeypatch):
+    monkeypatch.setattr(onboarding, "LOGIN_ATTEMPT_BUCKET_LIMIT", 1, raising=False)
+    with onboarding._LOGIN_LOCK:
+        onboarding._LOGIN_ATTEMPTS.clear()
+        onboarding._LOGIN_ATTEMPTS[("192.0.2.1", "/old")] = deque(
+            [time.monotonic() - onboarding.LOGIN_WINDOW_SECONDS - 1]
+        )
+    request = SimpleNamespace(
+        client=SimpleNamespace(host="192.0.2.2"),
+        url=SimpleNamespace(path="/api/v1/auth/student-password-login"),
+    )
+
+    onboarding.limit_student_login(request)
+
+    assert list(onboarding._LOGIN_ATTEMPTS) == [
+        ("192.0.2.2", "/api/v1/auth/student-password-login")
+    ]
 
 
 def test_password_reset_request_verifies_turnstile_and_sends_only_clean_app_link(

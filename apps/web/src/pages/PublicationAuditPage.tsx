@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { timetableRequest } from '../lib/publication-api';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 
+const HISTORY_PAGE_SIZE = 50;
+
 type ActivityEvent = {
   event_id: string;
   event_type: string;
@@ -26,6 +28,9 @@ export function PublicationAuditPage() {
   const [period, setPeriod] = useState('');
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [error, setError] = useState('');
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const [historyHasMore, setHistoryHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     timetableRequest<{ periods: Array<{ id: string; title: string }> }>(
       (schedulingSandboxEnabled ? 'sandbox/' : '') + 'periods',
@@ -37,8 +42,11 @@ export function PublicationAuditPage() {
     if (!period) return;
     let ignore = false;
     setError('');
+    setHistoryHasMore(false);
+    setLoading(true);
     const historyRequest = schedulingSandboxEnabled
       ? timetableRequest<{
+          has_more?: boolean;
           versions: Array<{
             id: string;
             revision: number;
@@ -46,8 +54,16 @@ export function PublicationAuditPage() {
             created_at: string;
             status: string;
           }>;
-        }>(`history/${encodeURIComponent(period)}?dataset=synthetic`).then(({ versions }) =>
-          versions.map((version) => ({
+        }>(
+          'history/' +
+            encodeURIComponent(period) +
+            '?dataset=synthetic&limit=' +
+            HISTORY_PAGE_SIZE +
+            '&offset=' +
+            historyOffset,
+        ).then(({ versions, has_more }) => {
+          if (!ignore) setHistoryHasMore(Boolean(has_more));
+          return versions.map((version) => ({
             event_id: version.id,
             event_type: 'scheduling.publication.published',
             entity_type: 'publication',
@@ -55,28 +71,40 @@ export function PublicationAuditPage() {
             revision: version.revision,
             actor_uid: version.actor,
             created_at: version.created_at,
-          })),
-        )
+          }));
+        })
       : timetableRequest<{ events: ActivityEvent[] }>(
           `audit/${encodeURIComponent(period)}`,
         ).then(({ events: rows }) => rows);
     historyRequest
       .then((v) => {
-        if (!ignore) setEvents(v);
+        if (!ignore) {
+          setEvents(v);
+          setLoading(false);
+        }
       })
       .catch((e) => {
-        if (!ignore) setError(e.message);
+        if (!ignore) {
+          setError(e.message);
+          setLoading(false);
+        }
       });
     return () => {
       ignore = true;
     };
-  }, [period]);
+  }, [period, historyOffset]);
   return (
     <section className="workspace-card">
       <h2>{schedulingSandboxEnabled ? 'Preview publication history' : 'Administrator activity'}</h2>
       <label>
         Academic period
-        <select value={period} onChange={(e) => setPeriod(e.target.value)}>
+        <select
+          value={period}
+          onChange={(e) => {
+            setHistoryOffset(0);
+            setPeriod(e.target.value);
+          }}
+        >
           <option value="">Choose a period</option>
           {periods.map((p) => (
             <option key={p.id} value={p.id}>
@@ -86,7 +114,8 @@ export function PublicationAuditPage() {
         </select>
       </label>
       {error && <p role="alert">{error}</p>}
-      {period && !error && events.length === 0 && (
+      {loading && <p role="status">Loading activity…</p>}
+      {period && !error && !loading && events.length === 0 && (
         <p role="status">No activity is recorded for this period.</p>
       )}
       <ul>
@@ -100,6 +129,25 @@ export function PublicationAuditPage() {
           </li>
         ))}
       </ul>
+      {schedulingSandboxEnabled && period && !error && (
+        <nav aria-label="Publication history pages">
+          <button
+            type="button"
+            disabled={loading || historyOffset === 0}
+            onClick={() => setHistoryOffset((current) => Math.max(0, current - HISTORY_PAGE_SIZE))}
+          >
+            Newer history
+          </button>
+          <span>Page {Math.floor(historyOffset / HISTORY_PAGE_SIZE) + 1}</span>
+          <button
+            type="button"
+            disabled={loading || !historyHasMore}
+            onClick={() => setHistoryOffset((current) => current + HISTORY_PAGE_SIZE)}
+          >
+            Older history
+          </button>
+        </nav>
+      )}
       <p className="muted">
         {schedulingSandboxEnabled
           ? 'Preview mode shows publication history only; it is not an authoritative activity audit.'

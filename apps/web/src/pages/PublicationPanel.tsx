@@ -68,7 +68,9 @@ function PublicationContent({
         : liveFetch(`${env.apiBaseUrl}/academic/sandbox/periods/${draft.period_id}`).then((r) =>
             r.json(),
           ),
-      timetableRequest<{ versions: Version[] }>(`history/${draft.period_id}?dataset=${dataset}`),
+      timetableRequest<{ versions: Version[] }>(
+        'history/' + draft.period_id + '?dataset=' + dataset + '&limit=1&include_details=true',
+      ),
       requestId
         ? institutionalRequest<ClassroomRequest>(
             `timetables/requests/${encodeURIComponent(requestId)}`,

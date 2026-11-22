@@ -159,6 +159,34 @@ class PublicationRepository(PublicationRules):
         with self.drafts.connection() as db:
             return self.project(db, tenant, dataset, period, start, end, viewer)
 
-    def history(self, tenant, dataset, period):
+    def history(self, tenant, dataset, period, *, limit=50, offset=0, include_details=False):
+        if not 1 <= limit <= 101 or not 0 <= offset <= 10000:
+            raise DraftError(422, "publication_page", "Choose a valid publication history page.")
         with self.drafts.connection() as db:
-            return [self.summary(r, db) for r in reversed(self.rows(db, tenant, dataset, period))]
+            columns = (
+                "*"
+                if include_details
+                else "id,sequence,revision,period_id,draft_id,actor,created_at,dataset,tenant"
+            )
+            rows = db.execute(
+                "SELECT " + columns + " FROM published_versions "
+                "WHERE tenant=? AND dataset=? AND period_id=? "
+                "ORDER BY sequence DESC LIMIT ? OFFSET ?",
+                (tenant, dataset, period, limit, offset),
+            ).fetchall()
+            current = self.head(db, tenant, dataset, period)
+            result = []
+            for row in rows:
+                if include_details:
+                    result.append(self.summary(row, db))
+                else:
+                    result.append({
+                        key: row[key]
+                        for key in (
+                            "id", "sequence", "revision", "period_id", "draft_id",
+                            "actor", "created_at", "dataset",
+                        )
+                    } | {
+                        "status": "published" if row["revision"] == current else "superseded"
+                    })
+            return result

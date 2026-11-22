@@ -68,22 +68,37 @@ def test_postgres_publication_history_route_uses_only_postgres_repository(monkey
     )
 
     settings = pg_settings()
+    observed = {}
     monkeypatch.setattr(main, "settings", settings)
     monkeypatch.setattr(api, "require_administrator", lambda *_: {
         "uid": "verified-admin", "tenant_id": "tenant-a", "role": "administrator",
     })
-    monkeypatch.setattr(
-        PostgresPublicationRepository,
-        "history",
-        lambda self, dataset, period: [{"dataset": dataset, "period_id": period}],
-    )
+    def history_page(self, dataset, period, *, limit, offset, include_details):
+        observed.update(
+            dataset=dataset, period=period, limit=limit, offset=offset,
+            include_details=include_details,
+        )
+        return [
+            {"dataset": dataset, "period_id": period, "revision": revision}
+            for revision in range(offset + 1, offset + limit + 1)
+        ]
+
+    monkeypatch.setattr(PostgresPublicationRepository, "history", history_page)
     monkeypatch.setattr(
         api, "settings_and_repo", lambda: pytest.fail("SQLite publication fallback was used")
     )
     result = api.history(
-        "term-a", request(object()), dataset="institutional"
+        "term-a", request(object()), dataset="institutional", limit=50, offset=100
     )
-    assert result == {"versions": [{"dataset": "institutional", "period_id": "term-a"}]}
+    assert result["has_more"] is True
+    assert len(result["versions"]) == 50
+    assert result["versions"][0] == {
+        "dataset": "institutional", "period_id": "term-a", "revision": 101,
+    }
+    assert observed == {
+        "dataset": "institutional", "period": "term-a", "limit": 51,
+        "offset": 100, "include_details": False,
+    }
 
 
 def test_administrator_activity_route_uses_scoped_postgres_repository(monkeypatch):

@@ -34,6 +34,7 @@ class VerifiedPrincipal(_SubjectContract):
     email: str | None = Field(default=None, strict=True, max_length=320)
     email_verified: bool = Field(default=False, strict=True)
     auth_time: int | None = Field(default=None, strict=True, ge=0)
+    sign_in_provider: str | None = Field(default=None, strict=True, max_length=128)
 
 
 class MembershipState(StrEnum):

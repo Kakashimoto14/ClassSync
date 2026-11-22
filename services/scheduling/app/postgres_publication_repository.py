@@ -177,15 +177,46 @@ class PostgresPublicationRepository(PublicationRules):
             or 0
         )
 
-    def history(self, dataset, period):
+    def history(self, dataset, period, *, limit=50, offset=0, include_details=False):
         if period is None:
             raise DraftError(422, "publication_scope", "Choose an academic period.")
         self.scope(dataset, period)
+        if not 1 <= limit <= 101 or not 0 <= offset <= 10000:
+            raise DraftError(422, "publication_page", "Choose a valid publication history page.")
         with self.session() as db:
-            return [
-                self.summary(row, db)
-                for row in reversed(self.rows(db, self.keys["tenant"], dataset, period))
-            ]
+            columns = (
+                "*"
+                if include_details
+                else (
+                    "tenant_id,dataset,period_id,id,sequence,revision,draft_id,actor_uid,"
+                    "created_at,command,request_hash"
+                )
+            )
+            rows = db.execute(
+                text(
+                    "SELECT " + columns + " FROM classsync_scheduling.published_versions "
+                    "WHERE tenant_id=:tenant AND dataset=:dataset AND period_id=:period "
+                    "ORDER BY sequence DESC LIMIT :limit OFFSET :offset"
+                ),
+                self.params(dataset, period=period, limit=limit, offset=offset),
+            ).mappings()
+            current = self.head(db, self.keys["tenant"], dataset, period)
+            result = []
+            for row in rows:
+                record = self.record(row)
+                if include_details:
+                    result.append(self.summary(record, db))
+                else:
+                    result.append({
+                        key: record[key]
+                        for key in (
+                            "id", "sequence", "revision", "period_id", "draft_id",
+                            "actor", "created_at", "dataset",
+                        )
+                    } | {
+                        "status": "published" if record["revision"] == current else "superseded"
+                    })
+            return result
 
     def administrator_activity(self, period, *, limit=100):
         """Return redacted activity events visible to a verified tenant Administrator."""

@@ -87,6 +87,7 @@ class FirebaseTokenVerifier:
                 uid=claims["uid"], email=claims.get("email"),
                 email_verified=claims.get("email_verified") is True,
                 auth_time=claims.get("auth_time"),
+                sign_in_provider=claims.get("firebase", {}).get("sign_in_provider"),
             )
         except (ValueError, KeyError, AttributeError, TypeError) as error:
             raise TokenVerificationError(TokenErrorCode.INVALID) from error

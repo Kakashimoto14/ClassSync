@@ -31,6 +31,8 @@ STUDENT_LOGIN_ERROR = "Invalid student number or password."
 STUDENT_ID_PATTERN = r"^[0-9]{2}-[0-9]{5}$"
 LOGIN_WINDOW_SECONDS = 60
 LOGIN_MAX_ATTEMPTS = 5
+LOGIN_ATTEMPT_BUCKET_LIMIT = 4096
+EMAIL_SENDS_LIMIT = 8192
 logger = logging.getLogger(__name__)
 _LOGIN_ATTEMPTS: OrderedDict[tuple[str, str], deque[float]] = OrderedDict()
 _LOGIN_LOCK = Lock()
@@ -188,15 +190,19 @@ def email_cooldown_remaining(scope: str, identity: str, email: str) -> int:
     key = (scope, identity + ":" + email_key)
     now = time.monotonic()
     with _EMAIL_SEND_LOCK:
+        for cached_key, expires in list(_EMAIL_SENDS.items()):
+            if expires <= now:
+                del _EMAIL_SENDS[cached_key]
         expires = _EMAIL_SENDS.get(key, 0.0)
         remaining = max(0, int(expires - now + 0.999))
         if remaining:
             _EMAIL_SENDS.move_to_end(key)
             return remaining
+        if len(_EMAIL_SENDS) >= EMAIL_SENDS_LIMIT:
+            # Fail closed rather than evict an unexpired recipient cooldown.
+            return EMAIL_SEND_COOLDOWN_SECONDS
         _EMAIL_SENDS[key] = now + EMAIL_SEND_COOLDOWN_SECONDS
         _EMAIL_SENDS.move_to_end(key)
-        while len(_EMAIL_SENDS) > 8192:
-            _EMAIL_SENDS.popitem(last=False)
     return 0
 
 
@@ -583,13 +589,23 @@ def limit_student_login(request):
     address = request.client.host if request.client else "unknown"
     bucket_key = (address, request.url.path)
     with _LOGIN_LOCK:
-        bucket = _LOGIN_ATTEMPTS.setdefault(bucket_key, deque())
+        for cached_key, attempts in list(_LOGIN_ATTEMPTS.items()):
+            while attempts and attempts[0] <= now - LOGIN_WINDOW_SECONDS:
+                attempts.popleft()
+            if not attempts:
+                del _LOGIN_ATTEMPTS[cached_key]
+        bucket = _LOGIN_ATTEMPTS.get(bucket_key)
+        if bucket is None:
+            if len(_LOGIN_ATTEMPTS) >= LOGIN_ATTEMPT_BUCKET_LIMIT:
+                raise HTTPException(
+                    429,
+                    "Too many sign-in attempts. Try again shortly.",
+                    headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)},
+                )
+            bucket = deque()
+            _LOGIN_ATTEMPTS[bucket_key] = bucket
         _LOGIN_ATTEMPTS.move_to_end(bucket_key)
-        while bucket and bucket[0] <= now - LOGIN_WINDOW_SECONDS:
-            bucket.popleft()
         if len(bucket) >= LOGIN_MAX_ATTEMPTS:
             raise HTTPException(429, "Too many sign-in attempts. Try again shortly.",
                                 headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)})
         bucket.append(now)
-        while len(_LOGIN_ATTEMPTS) > 4096:
-            _LOGIN_ATTEMPTS.popitem(last=False)

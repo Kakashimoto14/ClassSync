@@ -78,6 +78,18 @@ def test_atomic_publication_idempotency_immutable_history_and_effective_revision
     )
     v2 = repo.publish(second, draft, "tenant", "admin", commit=True)
     assert v2["revision"] == 2 and len(repo.history("tenant", "synthetic", draft.period_id)) == 2
+    assert [item["revision"] for item in repo.history(
+        "tenant", "synthetic", draft.period_id, limit=1, offset=0
+    )] == [2]
+    assert [item["revision"] for item in repo.history(
+        "tenant", "synthetic", draft.period_id, limit=1, offset=1
+    )] == [1]
+    metadata = repo.history("tenant", "synthetic", draft.period_id, limit=1)
+    assert "calendar" not in metadata[0]
+    detailed = repo.history(
+        "tenant", "synthetic", draft.period_id, limit=1, include_details=True
+    )
+    assert "calendar" in detailed[0]
     assert repo.calendar(
         "tenant",
         "synthetic",

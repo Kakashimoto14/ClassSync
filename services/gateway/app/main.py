@@ -333,17 +333,13 @@ async def service_proxy(service_name, path, request):
             )
         payload = response.json()
         if response.is_error:
-            detail = payload.get("error", {}).get(
-                "message", payload.get("detail", "Scheduling request rejected")
-            )
-            if isinstance(detail, list):
-                detail = [{"loc": d.get("loc"), "msg": d.get("msg")} for d in detail]
+            code, message = downstream_error(payload)
             return JSONResponse(
                 status_code=response.status_code,
                 content={
                     "error": {
-                        "code": payload.get("error", {}).get("code", "scheduling_rejected"),
-                        "message": detail,
+                        "code": code,
+                        "message": message,
                         "requestId": request.state.request_id,
                     }
                 },
@@ -353,6 +349,24 @@ async def service_proxy(service_name, path, request):
         raise HTTPException(
             503, f"{service_name.capitalize()} service unavailable; no server confirmation received"
         ) from error
+
+
+def downstream_error(payload: object) -> tuple[str, str]:
+    """Return only a validated code and public-safe message from a service response."""
+    code = "scheduling_rejected"
+    detail = None
+    if isinstance(payload, dict):
+        error = payload.get("error")
+        if isinstance(error, dict):
+            candidate_code = error.get("code")
+            if isinstance(candidate_code, str) and re.fullmatch(
+                r"[a-z][a-z0-9_]{0,63}", candidate_code
+            ):
+                code = candidate_code
+            detail = error.get("message")
+        elif "error" not in payload and isinstance(payload.get("detail"), str):
+            detail = payload["detail"]
+    return code, safe_public_error_message(detail)
 
 
 def forwarded_headers(request):

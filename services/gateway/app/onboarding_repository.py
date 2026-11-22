@@ -271,7 +271,7 @@ class OnboardingRepository:
                          password_configured,verification_source)
                     VALUES(:tenant,:student,:person,:email,'active',:password_configured,
                            'cor_self_verified')
-                    ON CONFLICT (tenant_id,id) DO NOTHING
+                    ON CONFLICT DO NOTHING
                 """), self.params(principal, student=student_id, person=person_id, email=email,
                                   password_configured=password_configured))
                 if inserted.rowcount != 1:

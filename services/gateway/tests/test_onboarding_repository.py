@@ -45,6 +45,8 @@ class Database:
         if "INSERT INTO classsync_identity.students" in query:
             self.student_params = params
             if self.email_conflict:
+                if "ON CONFLICT DO NOTHING" in query:
+                    return Result(rowcount=0)
                 raise IntegrityError(query, params, RuntimeError("unique registered email"))
             return Result(rowcount=1)
         if "SELECT resend_after" in query:
@@ -145,6 +147,12 @@ def test_registered_email_unique_conflict_is_a_sanitized_409(monkeypatch):
 
     assert caught.value.status_code == 409
     assert "student@example.invalid" not in str(caught.value.detail)
+    insert = next(
+        statement for statement in db.statements
+        if "INSERT INTO classsync_identity.students" in statement
+    )
+    assert "ON CONFLICT DO NOTHING" in insert
+    assert "ON CONFLICT (tenant_id, id)" not in insert
 
 
 def test_student_challenge_rate_limit_uses_database_remaining_seconds(monkeypatch):

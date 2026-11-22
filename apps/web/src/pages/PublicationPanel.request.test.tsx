@@ -64,6 +64,9 @@ it('discards a ready calendar when the request scope changes to an invalid reque
   await waitFor(() =>
     expect(screen.getByRole('button', { name: 'Revalidate for publication' })).toBeEnabled(),
   );
+  expect(source.timetable).toHaveBeenCalledWith(
+    'history/owned-period?dataset=institutional&limit=1&include_details=true',
+  );
   fireEvent.click(screen.getByRole('button', { name: 'Revalidate for publication' }));
   await waitFor(() =>
     expect(screen.getByRole('button', { name: 'Publish reviewed timetable' })).toBeEnabled(),

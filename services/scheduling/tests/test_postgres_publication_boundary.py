@@ -49,6 +49,58 @@ def test_server_binding_is_validated_without_database(field, value):
         repository_type()(object(), principal=VerifiedPrincipal(uid="uid-admin"), **values)
 
 
+def test_history_metadata_query_is_bounded_and_keeps_integrity_fields(repository):
+    from contextlib import contextmanager
+    from datetime import UTC, datetime
+
+    command_text = encode({"source": "administrator"})
+    row = {
+        "tenant_id": "tenant-a",
+        "dataset": "institutional",
+        "period_id": "period-a",
+        "id": "publication-1",
+        "sequence": 1,
+        "revision": 1,
+        "draft_id": "draft-1",
+        "actor_uid": "uid-admin",
+        "created_at": datetime(2026, 11, 1, tzinfo=UTC),
+        "command": command_text,
+        "request_hash": digest(command_text),
+    }
+    observed = {}
+
+    class Result:
+        def mappings(self):
+            return self
+
+        def __iter__(self):
+            return iter([row])
+
+    class Database:
+        def execute(self, statement, params):
+            observed["query"] = str(statement)
+            observed["params"] = params
+            return Result()
+
+        def scalar(self, *_args, **_kwargs):
+            return 1
+
+    @contextmanager
+    def session():
+        yield Database()
+
+    repository.session = lambda **_kwargs: session()
+
+    result = repository.history("institutional", "period-a", limit=2, offset=4)
+
+    assert result[0]["id"] == "publication-1"
+    assert "ORDER BY sequence DESC LIMIT :limit OFFSET :offset" in observed["query"]
+    assert "command,request_hash" in observed["query"]
+    assert "payload" not in observed["query"]
+    assert observed["params"]["limit"] == 2
+    assert observed["params"]["offset"] == 4
+
+
 @pytest.fixture
 def repository():
     return repository_type()(object(), tenant_id="tenant-a",
