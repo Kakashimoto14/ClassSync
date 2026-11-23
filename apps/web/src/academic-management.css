@@ -64,7 +64,7 @@
 .academic-setup__progress { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--primary); border-radius: var(--radius); background: var(--surface); }
 .academic-setup__progress span { color: var(--ink-soft); font-size: .875rem; }
 .academic-setup__calendar .workspace-card { margin: 0; }
-.academic-setup__jump { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; scroll-snap-type: x proximity; }
+.academic-setup__jump { display: flex; gap: 8px; padding: 2px 0 6px; scroll-snap-type: x proximity; }
 .academic-setup__jump a { flex: 0 0 auto; min-height: 40px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: var(--surface); font-size: .875rem; scroll-snap-align: start; }
 .academic-setup__jump a:hover, .academic-setup__jump a:focus-visible { border-color: var(--primary); color: var(--primary); }
 .academic-setup__grid { display: grid; gap: 14px; min-width: 0; }
@@ -74,11 +74,11 @@
 .academic-setup-card__header h3 { margin: 0 0 6px; font-size: 1.05rem; }
 .academic-setup-card__header p:last-child { max-width: 48ch; margin: 0; color: var(--ink-soft); font-size: .875rem; }
 .academic-setup-card__records { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
-.academic-setup-card__records li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; padding: 10px 0; border-top: 1px solid var(--line); }
+.academic-setup-card__records li { display: flex; justify-content: space-between; gap: 12px; min-width: 0; padding: 10px 0; border-top: 1px solid var(--line); }
 .academic-setup-card__records li > div { display: grid; gap: 3px; min-width: 0; }
 .academic-setup-card__records strong, .academic-setup-card__records span { overflow-wrap: anywhere; }
 .academic-setup-card__records span, .academic-setup-card__empty { color: var(--ink-soft); font-size: .875rem; }
-.academic-setup-card__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 4px; }
+.academic-setup-card__actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
 .academic-setup-card .academic-record-form { padding-top: 12px; border-top: 1px solid var(--line); }
 .academic-program-preview { display: grid; gap: 10px; margin: 0; }
 .academic-program-preview div { display: grid; gap: 3px; }

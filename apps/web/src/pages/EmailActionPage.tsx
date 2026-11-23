@@ -6,7 +6,7 @@ import { passwordStrengthComplete } from '../auth/password-strength';
 import { applyEmailVerificationCode, completePasswordReset, verifyPasswordResetCode } from '../auth/account-actions';
 import { useUniversitySession } from '../auth/university-session-context';
 import { EntranceLayout } from './InstitutionalEntrance';
-import '../styles/pages/auth.css';
+import './institutional-entrance.css';
 
 type ActionState = 'checking' | 'verified' | 'reset-ready' | 'complete' | 'invalid';
 

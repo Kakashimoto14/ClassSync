@@ -2470,3 +2470,40 @@ Therefore the outside-shell commands in the handoff have not yet produced eviden
 - **Security documentation:** `docs/security.md` now states in-process rate limits protect one Gateway instance and need edge/shared limiting when scaling replicas.
 - **Verification:** focused Gateway tests **48 passed**; migration revision/provider/publication tests **16 passed**; focused web publication tests **3 passed**. Final full `.venv/Scripts/python.exe -m pytest -q`: **1,180 passed**, one existing Starlette/httpx deprecation warning. `.venv/Scripts/ruff.exe check`: passed. Web `npm run lint`, `npm run typecheck`, `npm test` (**880 tests, 68 files**) and `npm run build` passed; build transformed 2,186 modules, largest JS chunk 347.81 kB, no chunk-size warning. Final `git diff --check` passed.
 - **Limitations:** no disposable PostgreSQL migration execution or live Gateway/replica rate-limit exercise was performed. Existing in-process limiters remain per-process by design. No existing work was staged or committed.
+
+## 23 November 2026 03:14 SGT — Phase 3 CSS and design-system cleanup
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`a9ef3c2d330cb73a2005093c83be382eec06747c`. Existing unrelated worktree edits were preserved;
+none were present at start of this slice. No application behavior, backend, data, dependencies,
+Tailwind directives, PostCSS, or Preflight configuration was changed. No commit or push occurred.
+
+Deleted 21 verified orphan stylesheets under `apps/web/src/styles/` and removed the old
+`styles/pages/auth.css` after moving its rules after `pages/institutional-entrance.css` rules in
+the latter canonical sheet. The email-action and institutional entrance imports now load that
+single sheet. Removed exact duplicate declarations only: four entrance-sheet declarations
+(`.connected-entrance__frame { display:grid }`, duplicate `.connected-entrance__access`
+`grid-row`/`grid-column` placement), three academic/operational declarations (jump overflow,
+records-row alignment, actions alignment), three `.topbar` declarations already supplied by
+later `operational-ui.css`, and exact auth declarations shadowed by the canonical later auth
+rules. Retained differing layout values, all `!important` operational declarations, reduced-motion
+rules, and the 1024px responsive token overrides. `theme.css` remains the active token authority;
+`styles/tokens.css` was orphaned and deleted.
+
+Removed 22 CSS files total (the 21 orphans plus the replaced auth sheet). CSS source inventory
+went from 288,785 B to 206,605 B, net reduction 82,180 B. Existing CSS build artifact before:
+172,857 B. Final `apps/web/dist/assets/index-CFCch1U6.css`: 172,033 B, reduction 824 B (gzip
+30.74 kB). Build transformed 2,185 modules and passed.
+
+Verification on the final tree: `npm run lint` PASS; `npm run typecheck` PASS; focused
+`npx vitest run src/pages/PublicationPanel.request.test.tsx` PASS (1 test); `npm run build` PASS;
+`git diff --check` PASS. The final full `npm test` attempt was not green: 65 files passed, one
+publication-panel test failed, and two Vitest fork workers timed out starting. The failing test
+passed in isolation. An initial whole-suite attempt before the later cascade corrections passed
+880 tests across 68 files; it is not represented as final-tree evidence.
+
+No runtime imports or tests reference deleted orphan files. The HCI plan now points to active
+stylesheets; remaining `STATUS.md` references to former auth/shell stylesheets are historical
+change receipts and were preserved. No screenshot/pixel-diff comparison was run; visual
+preservation was checked by retaining rule order/media scopes and removing only exact cascade
+duplicates. Current full test suite should be rerun in a less-contended environment.

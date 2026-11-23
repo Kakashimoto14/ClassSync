@@ -407,10 +407,7 @@ textarea {
     max(16px, env(safe-area-inset-left));
   background: var(--surface);
   border-bottom: 1px solid var(--line);
-  position: sticky;
-  top: 0;
   z-index: 5;
-  overflow: visible;
 }
 .topbar-start {
   display: flex;
@@ -1851,37 +1848,13 @@ tr:hover td {
 }
 
 /* Existing public and planned screens use the same surfaces and controls. */
-.auth-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--canvas);
-}
 .auth-brand {
   background: var(--primary-soft);
   color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px;
 }
 .auth-brand .eyebrow,
 .auth-brand-copy > p:last-child {
   color: var(--ink-on-tint);
-}
-
-.auth-brand-copy {
-  display: none;
-  gap: 16px;
-}
-.auth-brand h2 {
-  font-size: clamp(1.75rem, 3vw, 2.75rem);
-  max-width: 20ch;
-}
-.auth-brand .classsync-logo__tagline {
-  display: none;
-}
-.auth-brand .classsync-logo__name {
-  font-size: 1.5rem;
 }
 /* Presentation entrance: working preview first, unavailable sign-in disclosed. */
 .auth-entrance .auth-brand { background: var(--surface); }
@@ -1934,63 +1907,15 @@ tr:hover td {
     box-shadow: 0 4px 24px rgb(32 36 44 / 8%);
   }
 }
-.auth-field {
-  display: grid;
-  gap: 8px;
-}
-.auth-main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-}
 .auth-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: 24px;
-  max-width: 480px;
-  width: 100%;
-}
-.auth-card__title {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.auth-card__title > p:last-child {
-  color: var(--ink-soft);
-}
-.auth-card form {
-  display: grid;
-  gap: 16px;
-}
-.password-field button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 0;
-  color: var(--ink-soft);
-  min-height: 44px;
-  min-width: 44px;
-  border-radius: var(--radius);
 }
 .field-error {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--danger);
-  font-size: 0.875rem;
-}
-.auth-demo-access {
-  display: grid;
-  gap: 8px;
-  border-top: 1px solid var(--line);
-  margin-top: 24px;
-  padding-top: 24px;
-}
-.auth-demo-access p {
-  color: var(--ink-soft);
   font-size: 0.875rem;
 }
 .system-state-page {
@@ -2361,27 +2286,6 @@ tr:hover td {
   }
   .main-content {
     padding: 24px 24px 48px;
-  }
-  .auth-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-  .auth-brand {
-    padding: 48px;
-    justify-content: center;
-    gap: 64px;
-  }
-  .auth-brand-copy {
-    display: grid;
-  }
-  .auth-brand .classsync-logo__tagline {
-    display: block;
-  }
-  .auth-brand .classsync-logo__name {
-    font-size: 2rem;
-  }
-  .auth-main {
-    padding: 32px;
   }
 }
 @media (min-width: 1280px) {

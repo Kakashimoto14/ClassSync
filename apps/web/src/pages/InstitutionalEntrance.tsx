@@ -30,7 +30,6 @@ import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
 import { AccountAdministrationPanel } from '../auth/AccountAdministrationPanel';
 import { devServer } from '../config/runtime-config';
 import './institutional-entrance.css';
-import '../styles/pages/auth.css';
 
 const invitePath = '/auth/teacher-invite';
 const verifyPath = '/auth/verify';

@@ -290,3 +290,7 @@ publishing live data, or certify production readiness. Do not force-rewrite feat
 the requested cleanup is limited to removing the named stale refs and pruning unreachable local
 objects. Branch publication and cleanup remain subject to repository quality gates and safe
 worktree/remote verification.
+
+## 23 November 2026 — Phase 3 CSS and design-system cleanup
+
+Owner authorizes this local cleanup on `main`: remove only the 21 verified orphan CSS files under `apps/web/src/styles/`; consolidate the two auth stylesheets into `apps/web/src/pages/institutional-entrance.css`; remove only exact, later-shadowed auth, academic, and topbar declarations; update clearly stale HCI plan references. Preserve Tailwind directives, PostCSS, Preflight, Soft Rouge `theme.css`, all unrelated work, and do not commit or push. Verify web lint, typecheck, tests, build, and diff/status.
