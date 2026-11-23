@@ -35,7 +35,7 @@ it.each(['student', 'teacher', 'administrator'] as const)(
     fetcher.mockRestore();
   },
 );
-it('opens only the verified Student workspace and ignores a conflicting preview persona', () => {
+it('opens only the verified Student workspace and ignores a conflicting preview persona', async () => {
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,
     value: vi.fn(() => ({
@@ -75,7 +75,7 @@ it('opens only the verified Student workspace and ignores a conflicting preview 
       </DevelopmentRoleContext.Provider>
     </MemoryRouter>,
   );
-  expect(screen.getByRole('heading', { name: 'Connected Student Home' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Connected Student Home' })).toBeInTheDocument();
   expect(screen.getByText('Student · University')).toBeInTheDocument();
   expect(screen.queryByText('Maria Santos')).not.toBeInTheDocument();
   expect(screen.queryByRole('link', { name: 'Switch preview role' })).not.toBeInTheDocument();

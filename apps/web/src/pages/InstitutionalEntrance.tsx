@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { AlertCircle, CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { MotionConfig, motion } from 'motion/react';
@@ -26,10 +26,15 @@ import { formatLoginIdentifier, isValidAccountEmail, normalizeAccountEmail } fro
 import { cooldownRemaining, retryAfterFrom, startCooldown } from '../auth/cooldown';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
-import { AccountOnboardingPanel } from '../auth/AccountOnboardingPanel';
-import { AccountAdministrationPanel } from '../auth/AccountAdministrationPanel';
 import { devServer } from '../config/runtime-config';
 import './institutional-entrance.css';
+
+const AccountOnboardingPanel = lazy(() =>
+  import('../auth/AccountOnboardingPanel').then((module) => ({ default: module.AccountOnboardingPanel })),
+);
+const AccountAdministrationPanel = lazy(() =>
+  import('../auth/AccountAdministrationPanel').then((module) => ({ default: module.AccountAdministrationPanel })),
+);
 
 const invitePath = '/auth/teacher-invite';
 const verifyPath = '/auth/verify';
@@ -235,18 +240,20 @@ export function InstitutionalEntrance() {
           ) : (
             <>
               <UniversitySessionPanel />
-              {[verifyPath, onboardingPath, invitePath].includes(path) &&
-                state.status !== 'authorized' && (
-                  <AccountOnboardingPanel entryRole={invited ? 'teacher' : 'student'} />
-                )}
-              {path === accountPath &&
-                state.status === 'authorized' &&
-                state.membership.role === 'administrator' && (
-                  <AccountAdministrationPanel
-                    key={state.membership.uid}
-                    uid={state.membership.uid}
-                  />
-                )}
+              <Suspense fallback={<p role="status">Opening account setup…</p>}>
+                {[verifyPath, onboardingPath, invitePath].includes(path) &&
+                  state.status !== 'authorized' && (
+                    <AccountOnboardingPanel entryRole={invited ? 'teacher' : 'student'} />
+                  )}
+                {path === accountPath &&
+                  state.status === 'authorized' &&
+                  state.membership.role === 'administrator' && (
+                    <AccountAdministrationPanel
+                      key={state.membership.uid}
+                      uid={state.membership.uid}
+                    />
+                  )}
+              </Suspense>
             </>
           )}
         </>

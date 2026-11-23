@@ -2507,3 +2507,40 @@ stylesheets; remaining `STATUS.md` references to former auth/shell stylesheets a
 change receipts and were preserved. No screenshot/pixel-diff comparison was run; visual
 preservation was checked by retaining rule order/media scopes and removing only exact cascade
 duplicates. Current full test suite should be rerun in a less-contended environment.
+
+### Phase 4A — Route-level code splitting and development-route gating — PASS locally, 23 November 2026
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`02ce81e064a0eb5e4d23f85c9e620db5c3d8bcca`. The worktree was clean before this slice; no prior
+uncommitted work was present. No commit or push occurred.
+
+Captured a fresh baseline build before editing. The entry JS was **347,813 B (89.83 kB gzip)**;
+the React, Firebase, motion and UI vendor chunks were respectively 318,505 B, 243,924 B, 125,017 B
+and 48,161 B. `RouteGuard` now lazy-loads connected and preview leaves behind status-announcing
+Suspense surfaces, while session/role checks, `AppShell`, route guard, and login remain eager.
+The student schedule and preview-only operations/building panels now load on demand. Onboarding
+and account-administration panels load only when their authenticated screens render. Institutional
+route construction omits `/dev/design-system` and `/dev/role-preview`; sandbox and presentation
+route construction keeps them. The Vite vendor chunk rules were unchanged and did not pull lazy
+page modules back into the entry.
+
+Final build: entry **96,488 B (25.83 kB gzip)**, a reduction of **251,325 B / 72.2%** versus the
+baseline entry. Route chunks include AcademicManagementPage 60,312 B, ProductScreenPage 29,909 B,
+SchedulingDraftPages 16,402 B, RegistrationScannerPage 13,943 B, OperationsPreviewPage 13,075 B,
+AcademicGenerationPage 11,167 B, StudentHome 9,530 B, ClassroomRequestsPage 8,300 B,
+StudentSchedule 7,970 B, and AccountOnboardingPanel 10,360 B. The four vendor chunks remain
+preloaded by Vite; their sizes are unchanged. No oversized-chunk warning was emitted.
+
+Timing-only test updates wait for lazy route content before checking the same route, role,
+navigation, and data assertions. A first full run exposed 43 synchronous-query failures after the
+lazy boundaries; the affected route suites were updated, then passed focused verification. The
+final full web suite passed **883 tests across 69 files**. `npm run lint`, `npm run typecheck`,
+`npm run build`, and `git diff --check` also passed. No authorization assertions were weakened.
+
+Changed application files: `apps/web/src/routes/RouteGuard.tsx`, `app-routes.tsx`,
+`pages/StructuredCalendarPage.tsx`, `pages/ProductScreenPage.tsx`,
+`pages/InstitutionalEntrance.tsx`, `config/app-mode.ts`. Added
+`apps/web/src/config/development-routes.test.ts`; updated connected, institutional, preview,
+room-navigation and route-reliability tests. `dist/` contains the ignored local build output.
+No browser screenshot or production-mode deployed navigation test was run. Next: visually verify
+lazy loading fallbacks on direct deep links and confirm production CDN caching/waterfall behavior.

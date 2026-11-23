@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { appRoutes } from './app-routes';
@@ -25,7 +25,7 @@ function open(path = '/dev/role-preview') {
 }
 async function choose(role: UserRole) {
   const result = open();
-  fireEvent.click(screen.getByRole('button', { name: `Open ${role} demo` }));
+  fireEvent.click(await screen.findByRole('button', { name: `Open ${role} demo` }));
   await act(async () => {});
   expect(result.router.state.location.pathname).toBe(dashboardPath(role));
   return result;
@@ -57,12 +57,16 @@ describe('real route tree preview continuity', () => {
       expectRole(role);
       for (const path of paths) {
         await act(() => restored.router.navigate(path));
-        expect(
-          restored.router.state.location.pathname + restored.router.state.location.search,
-        ).toBe(
+        if (path === '/student/schedule')
+          await screen.findByText('Schedule options', {}, { timeout: 10_000 });
+        const expectedPath =
           path === '/student/schedule'
             ? `${path}?date=${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())}`
-            : path,
+            : path;
+        await waitFor(() =>
+          expect(
+            restored.router.state.location.pathname + restored.router.state.location.search,
+          ).toBe(expectedPath),
         );
         expectRole(role);
       }
@@ -79,7 +83,7 @@ describe('real route tree preview continuity', () => {
         nested,
       );
       expectRole(role);
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent(
         role === 'student' ? 'PRRC 302' : /Details/,
       );
     },
@@ -99,7 +103,7 @@ describe('real route tree preview continuity', () => {
   it('switches roles only through explicit selection and exit prevents history revival', async () => {
     const { router, view } = await choose('student');
     await act(() => router.navigate('/dev/role-preview'));
-    fireEvent.click(screen.getByRole('button', { name: 'Open teacher demo' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Open teacher demo' }));
     await act(async () => {});
     expect(router.state.location.pathname).toBe('/teacher/dashboard');
     expectRole('teacher');
@@ -121,7 +125,7 @@ describe('real route tree preview continuity', () => {
     expect(router.state.location.pathname).toBe('/auth/login');
     await act(() => router.navigate(`/dev/role-preview?returnTo=${encodeURIComponent(path)}`));
     await act(async () => {});
-    fireEvent.click(screen.getByRole('button', { name: 'Open teacher demo' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Open teacher demo' }));
     await act(async () => {});
     expect(
       router.state.location.pathname + router.state.location.search + router.state.location.hash,

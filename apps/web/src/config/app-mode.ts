@@ -62,3 +62,7 @@ export function capabilitiesFor(mode: AppMode) {
           : 'University identity and current permissions are required. Your classes and approved university workflows connect through the authorized Gateway.',
   });
 }
+
+export function developmentRoutesAvailable(mode: AppMode): boolean {
+  return mode !== 'institutional';
+}

@@ -3,19 +3,13 @@ import { StudentRooms } from './StudentRooms';
 import { presentationOnlyBuild } from '../lib/presentation-sample';
 import { capabilitiesFor } from '../config/app-mode';
 import { PresentationConflictSummary } from '../components/scheduling/PresentationConflictSummary';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { previewViewer, schedulePreview } from '../data/schedule-preview';
 import { selectAssignments } from '../lib/schedule-preview';
-import {
-  PreviewRequestsView,
-  PreviewRequestCreateView,
-  PreviewUpdatesView,
-} from './PreviewOperationsViews';
 import { CalendarDays, FileBarChart, Search } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { RoomDiscoveryPage, RoomDetailPage } from './RoomDiscoveryPages';
-import { PreviewBuildingDirectory, PreviewBuildingDetail } from './PreviewBuildingViews';
 import { SchedulingSourcePage } from './AcademicGenerationPage';
 import { AcademicManagementPage } from './AcademicManagementPage';
 import { SavedDraftsPage, SavedDraftDetailPage } from './SchedulingDraftPages';
@@ -27,6 +21,22 @@ import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { rolePath, type RouteDefinition } from '../routes/route-config';
+
+const PreviewRequestsView = lazy(() =>
+  import('./PreviewOperationsViews').then((module) => ({ default: module.PreviewRequestsView })),
+);
+const PreviewRequestCreateView = lazy(() =>
+  import('./PreviewOperationsViews').then((module) => ({ default: module.PreviewRequestCreateView })),
+);
+const PreviewUpdatesView = lazy(() =>
+  import('./PreviewOperationsViews').then((module) => ({ default: module.PreviewUpdatesView })),
+);
+const PreviewBuildingDirectory = lazy(() =>
+  import('./PreviewBuildingViews').then((module) => ({ default: module.PreviewBuildingDirectory })),
+);
+const PreviewBuildingDetail = lazy(() =>
+  import('./PreviewBuildingViews').then((module) => ({ default: module.PreviewBuildingDetail })),
+);
 
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
   const [params] = useSearchParams();
@@ -112,6 +122,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
     'building-detail',
   ].includes(definition.kind);
   return (
+    <Suspense fallback={<p className="workspace-card" role="status">Opening this page…</p>}>
     <AppShell>
       <div className="page-heading">
         <div>
@@ -181,6 +192,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       {definition.kind === 'settings' && <SettingsScreen />}
       {definition.kind === 'audit' && <AuditScreen />}
     </AppShell>
+    </Suspense>
   );
 }
 

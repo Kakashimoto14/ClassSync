@@ -17,13 +17,14 @@ function LoginLocation() {
   const location = useLocation();
   return <p>{location.search}</p>;
 }
-function open(role: UserRole | null, path: string, inventory = 'demo') {
-  if (routeDefinitions.find((route) => route.path === path.split('?')[0])?.kind === 'rooms') {
+async function open(role: UserRole | null, path: string, inventory = 'demo') {
+  const route = routeDefinitions.find((item) => item.path === path.split('?')[0]);
+  if (route?.kind === 'rooms') {
     const url = new URL(path, 'http://localhost');
     url.searchParams.set('inventory', inventory);
     path = url.pathname + url.search;
   }
-  return render(
+  const result = render(
     <MemoryRouter initialEntries={[path]}>
       <DevelopmentRoleContext.Provider value={{ role, startDemo: vi.fn(), signOut: vi.fn() }}>
         <Routes>
@@ -42,14 +43,17 @@ function open(role: UserRole | null, path: string, inventory = 'demo') {
       </DevelopmentRoleContext.Provider>
     </MemoryRouter>,
   );
+  if (role && role === route?.role)
+    await screen.findByRole('heading', { level: 1 }, { timeout: 5000 });
+  return result;
 }
 const main = () => within(screen.getByRole('main'));
 
 describe('room discovery routes and interactions', () => {
   it.each(['student', 'teacher', 'administrator'] as const)(
     'offers provisional CDM inventory to %s without implying verified resources',
-    (role) => {
-      open(role, roomDirectoryPath(role), 'cdm');
+    async (role) => {
+      await open(role, roomDirectoryPath(role), 'cdm');
       expect(main().getByText('53 of 53 spaces')).toBeInTheDocument();
       expect(main().getAllByRole('article')).toHaveLength(12);
       fireEvent.click(main().getByRole('button', { name: 'Next' }));
@@ -76,8 +80,8 @@ describe('room discovery routes and interactions', () => {
         ['room-nb-405', 'Room 405'],
       ].map(([id, name]) => ({ role, id, name })),
     ),
-  )('opens $name through its $role detail route', ({ role, id, name }) => {
-    open(role, roomDirectoryPath(role));
+  )('opens $name through its $role detail route', async ({ role, id, name }) => {
+    await open(role, roomDirectoryPath(role));
     expect(main().getAllByRole('article')).toHaveLength(4);
     const link = main().getByRole('link', { name: `View ${name} details` });
     expect(link).toHaveAttribute('href', roomDetailPath(role, id));
@@ -86,8 +90,8 @@ describe('room discovery routes and interactions', () => {
     expect(main().queryByRole('button', { name: /edit|book|reserve/i })).not.toBeInTheDocument();
     fireEvent.click(main().getByRole('link', { name: 'Back to Room Directory' }));
   });
-  it('filters combined attributes, preserves filtered return, and resets', () => {
-    open('student', '/student/rooms');
+  it('filters combined attributes, preserves filtered return, and resets', async () => {
+    await open('student', '/student/rooms');
     fireEvent.click(main().getByText('Filters', { selector: 'summary' }));
     fireEvent.change(main().getByLabelText('Minimum capacity'), { target: { value: '42' } });
     fireEvent.change(main().getByLabelText('Facility'), { target: { value: 'Projector' } });
@@ -110,9 +114,9 @@ describe('room discovery routes and interactions', () => {
   });
   it.each(['/student/find-room', '/teacher/room-availability', '/admin/room-availability'])(
     'offers published occupancy without asserting resource suitability at %s',
-    (path) => {
+    async (path) => {
       const definition = routeDefinitions.find((item) => item.path === path)!;
-      open(definition.role, path);
+      await open(definition.role, path);
       expect(main().getByText('Check published room occupancy')).toBeInTheDocument();
       expect(main().getByLabelText('Date')).not.toBeDisabled();
       expect(
@@ -129,14 +133,14 @@ describe('room discovery routes and interactions', () => {
   );
   it.each(['', '?id=unknown', '?id=', '?id=room-sci-218&id=room-eng-204'])(
     'does not substitute SCI-218 for invalid detail parameters %s',
-    (query) => {
-      open('student', '/student/rooms/detail' + query);
+    async (query) => {
+      await open('student', '/student/rooms/detail' + query);
       expect(main().getByText(query ? 'Room not found' : 'Choose a room')).toBeInTheDocument();
       expect(main().queryByText('42 seats')).not.toBeInTheDocument();
     },
   );
-  it('shows unknown resource metadata without inventing it', () => {
-    open('teacher', roomDetailPath('teacher', 'room-nb-405'));
+  it('shows unknown resource metadata without inventing it', async () => {
+    await open('teacher', roomDetailPath('teacher', 'room-nb-405'));
     expect(main().getByText('Condition unrecorded')).toBeInTheDocument();
     expect(main().getAllByText('Not recorded')).toHaveLength(3);
     expect(main().getByText('Human Computer Interaction')).toBeInTheDocument();
@@ -145,18 +149,18 @@ describe('room discovery routes and interactions', () => {
       '/teacher/find-room?inventory=demo',
     );
   });
-  it('shows the actual administrator draft alongside published assignments', () => {
-    open('administrator', roomDetailPath('administrator', 'room-sci-218'));
+  it('shows the actual administrator draft alongside published assignments', async () => {
+    await open('administrator', roomDetailPath('administrator', 'room-sci-218'));
     expect(main().getByText('Network Fundamentals')).toBeInTheDocument();
     expect(main().getByText('Draft')).toBeInTheDocument();
   });
-  it('rejects cross-role detail access', () => {
-    open('student', roomDetailPath('administrator', 'room-sci-218'));
+  it('rejects cross-role detail access', async () => {
+    await open('student', roomDetailPath('administrator', 'room-sci-218'));
     expect(screen.getByText('Forbidden')).toBeInTheDocument();
   });
-  it('retains the room ID when a refresh requires demo access again', () => {
+  it('retains the room ID when a refresh requires demo access again', async () => {
     const target = roomDetailPath('student', 'room-eng-204');
-    open(null, target);
+    await open(null, target);
     expect(screen.getByText('?returnTo=' + encodeURIComponent(target))).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DevelopmentRoleContext } from '../auth/development-role-context';
@@ -47,9 +47,9 @@ function open(path: string, role: 'student' | 'administrator' = 'administrator')
 }
 
 describe('presentation journey integrity', () => {
-  it('filters Administrator classroom requests with selection-only status pills', () => {
+  it('filters Administrator classroom requests with selection-only status pills', async () => {
     open('/admin/requests');
-    expect(screen.getByRole('button', { name: /All 2/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(await screen.findByRole('button', { name: /All 2/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('Pending review', { selector: '.status' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Declined 1/ }));
     expect(screen.getByText('Declined', { selector: '.status' })).toBeInTheDocument();
@@ -78,28 +78,28 @@ describe('presentation journey integrity', () => {
     ['Montalban Sports Complex', 1],
   ])(
     'opens only %s rooms and returns through the same building',
-    (building, count) => {
+    async (building, count) => {
       open('/admin/buildings');
       expect(screen.queryByText(/rooms available today/)).not.toBeInTheDocument();
-      fireEvent.click(screen.getByRole('link', { name: `View ${building} rooms` }));
+      fireEvent.click(await screen.findByRole('link', { name: `View ${building} rooms` }));
       const main = within(screen.getByRole('main'));
-      expect(main.getByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
+      expect(await main.findByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
       expect(main.getByText(new RegExp(`Showing ${Math.min(Number(count), 6)} of ${count} provisional spaces`))).toBeInTheDocument();
       const card = main.getAllByRole('article')[0];
       fireEvent.click(within(card).getByRole('link'));
-      fireEvent.click(screen.getByRole('link', { name: 'Back to building' }));
-      expect(screen.getByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('link', { name: 'Back to buildings' }));
-      expect(screen.getByRole('main').querySelectorAll('article')).toHaveLength(4);
+      fireEvent.click(await screen.findByRole('link', { name: 'Back to building' }));
+      expect(await screen.findByRole('heading', { name: `${building} spaces` })).toBeInTheDocument();
+      fireEvent.click(await screen.findByRole('link', { name: 'Back to buildings' }));
+      await waitFor(() => expect(screen.getByRole('main').querySelectorAll('article')).toHaveLength(4));
       expect(provisionalCdmRooms).toHaveLength(53);
     },
   );
   it.each(['', '?building=missing', '?building=Science+Building&building=Computing+Building'])(
     'does not substitute a building for absent or invalid parameters %s',
-    (query) => {
+    async (query) => {
       open('/admin/buildings/detail' + query);
       expect(
-        screen.getByText(
+        await screen.findByText(
           query && !query.includes('&') ? 'Building not found' : 'Choose a building',
         ),
       ).toBeInTheDocument();

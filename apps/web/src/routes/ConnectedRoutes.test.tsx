@@ -44,9 +44,9 @@ const teacher: UniversitySession = {
     membership_revision: 1,
   },
 };
-it('admits the verified Teacher and hides the timetable when current access is denied', () => {
+it('admits the verified Teacher and hides the timetable when current access is denied', async () => {
   const result = render(view(teacher));
-  expect(screen.getByText('Connected teacher timetable')).toBeInTheDocument();
+  expect(await screen.findByText('Connected teacher timetable')).toBeInTheDocument();
   result.rerender(view({ status: 'denied' }));
   expect(screen.queryByText('Connected teacher timetable')).not.toBeInTheDocument();
 });
@@ -57,7 +57,7 @@ it('rejects a Teacher at Administrator inputs even when the browser preview role
     screen.getByText('This page requires your university to grant the matching workspace role.'),
   ).toBeInTheDocument();
 });
-it('admits current Administrator inputs through the connected branch', () => {
+it('admits current Administrator inputs through the connected branch', async () => {
   render(
     view(
       {
@@ -72,5 +72,5 @@ it('admits current Administrator inputs through the connected branch', () => {
       '/admin/academic',
     ),
   );
-  expect(screen.getByText('Connected academic inputs')).toBeInTheDocument();
+  expect(await screen.findByText('Connected academic inputs')).toBeInTheDocument();
 });
