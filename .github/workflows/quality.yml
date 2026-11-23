@@ -51,6 +51,7 @@ jobs:
           docker exec "${prefix}-gateway" python -m scripts.linux_runtime_probe --health
   web:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false }
@@ -69,11 +70,23 @@ jobs:
         run: node -e "const r=require('./apps/web/dist/release.json'); if(r.mode!=='read-only-presentation'||r.appMode!=='presentation'||r.capabilityVersion!==1||r.sampleVersion!=='classsync-presentation-v1'||r.commit!==process.env.GITHUB_SHA||r.uncommittedChanges!==false) throw new Error('Unexpected presentation release metadata');"
   python:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false }
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            services/gateway/requirements.txt
+            services/academic/requirements.txt
+            services/scheduling/requirements.txt
+            services/notification/requirements.txt
+            services/persistence/requirements.txt
+            services/security-constraints.txt
+            packages/api-contracts/pyproject.toml
+            packages/persistence/pyproject.toml
       - run: python -m pip install pip==26.2.2
       - run: pip install ruff pytest==9.0.3
       - run: pip install -r requirements.txt
@@ -86,6 +99,8 @@ jobs:
         working-directory: services/notification
       - run: pip install -r requirements.txt
         working-directory: services/persistence
+      - name: Check generated scheduling contract parity
+        run: python scripts/export_scheduling_contracts.py --check
       - run: ruff check scripts/security scripts/postgres_disposable.py scripts/postgres_driver_qualification.py scripts/postgres_identity_qualification.py scripts/postgres_restore_qualification.py scripts/postgres_revision_qualification.py scripts/postgres_audit_qualification.py scripts/postgres_identity_http_qualification.py scripts/postgres_emulator_qualification.py scripts/postgres_provider_qualification.py scripts/postgres_web_session_qualification.py scripts/postgres_academic_period_qualification.py scripts/postgres_academic_repository_qualification.py scripts/postgres_academic_migration_qualification.py scripts/postgres_academic_provider_qualification.py scripts/postgres_academic_restore_qualification.py scripts/postgres_draft_qualification.py scripts/postgres_scheduling_provider_qualification.py scripts/postgres_scheduling_migration_qualification.py scripts/postgres_scheduling_restore_qualification.py scripts/postgres_publication_state_qualification.py scripts/postgres_publication_repository_qualification.py scripts/postgres_publication_resource_qualification.py scripts/postgres_publication_scale_qualification.py services packages
       - run: ruff check scripts/container_entrypoint.py scripts/build_mvp_postman.py scripts/hosting_plan.py
       - run: python -m pytest

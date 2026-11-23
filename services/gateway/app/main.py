@@ -1,3 +1,4 @@
+import ipaddress
 import json
 import logging
 import re
@@ -20,7 +21,14 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, SecretStr, field_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    field_validator,
+)
 from pydantic_settings import NoDecode, SettingsConfigDict
 from starlette.concurrency import run_in_threadpool
 
@@ -111,7 +119,6 @@ class Settings(SchedulingSecuritySettings):
         _ = parsed.port
         return f"{parsed.scheme}://{parsed.netloc}"
 
-
 settings = Settings()
 SERVICES = {
     "academic": settings.academic_service_url,
@@ -122,9 +129,24 @@ SERVICES = {
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
+    validate_production_frontend_origin(settings)
     with configured_authorization(application, settings):
         with registration_routes.registration_store.lifecycle():
             yield
+
+
+def validate_production_frontend_origin(config):
+    if config.classsync_env != "production":
+        return
+    parsed = urlsplit(config.classsync_web_url)
+    hostname = (parsed.hostname or "").lower()
+    loopback = hostname == "localhost" or hostname.endswith(".localhost")
+    try:
+        loopback = loopback or ipaddress.ip_address(hostname).is_loopback
+    except ValueError:
+        pass
+    if parsed.scheme != "https" or loopback:
+        raise ValueError("Production requires an HTTPS frontend origin")
 
 
 app = FastAPI(title="ClassSync API Gateway", version="1.0.0", lifespan=lifespan)

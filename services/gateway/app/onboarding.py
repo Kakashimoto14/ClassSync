@@ -301,7 +301,7 @@ def onboarding_router(settings):
     ):
         response.headers["Cache-Control"] = "no-store"
         config = settings()
-        limit_student_login(request)
+        limit_email_trigger(request)
         await verify_turnstile_token(body.turnstile_token.get_secret_value(), config)
         remaining = email_cooldown_remaining("password-reset", "anonymous", body.email)
         if remaining:
@@ -313,7 +313,7 @@ def onboarding_router(settings):
     async def send_verification_email(request: Request, response: Response,
                                      background_tasks: BackgroundTasks):
         response.headers["Cache-Control"] = "no-store"
-        limit_student_login(request)
+        limit_email_trigger(request)
         principal = request_principal(request, settings())
         email = normalize_email(principal.email)
         if not email:
@@ -382,7 +382,7 @@ def onboarding_router(settings):
     @router.post("/student-verification-challenges", status_code=202)
     async def request_student_verification(body: StudentVerificationChallenge, request: Request,
                                            response: Response):
-        limit_student_login(request)
+        limit_email_trigger(request)
         principal, repository = context(request, write=True)
         response.headers["Cache-Control"] = "no-store"
         config = settings()
@@ -584,10 +584,10 @@ def onboarding_router(settings):
     return router
 
 
-def limit_student_login(request):
+def _limit_ip_bucket(request, scope: str):
     now = time.monotonic()
     address = request.client.host if request.client else "unknown"
-    bucket_key = (address, request.url.path)
+    bucket_key = (address, scope)
     with _LOGIN_LOCK:
         for cached_key, attempts in list(_LOGIN_ATTEMPTS.items()):
             while attempts and attempts[0] <= now - LOGIN_WINDOW_SECONDS:
@@ -597,11 +597,21 @@ def limit_student_login(request):
         bucket = _LOGIN_ATTEMPTS.get(bucket_key)
         if bucket is None:
             if len(_LOGIN_ATTEMPTS) >= LOGIN_ATTEMPT_BUCKET_LIMIT:
-                raise HTTPException(
-                    429,
-                    "Too many sign-in attempts. Try again shortly.",
-                    headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)},
+                evictable_key = next(
+                    (
+                        cached_key
+                        for cached_key, attempts in _LOGIN_ATTEMPTS.items()
+                        if len(attempts) < LOGIN_MAX_ATTEMPTS
+                    ),
+                    None,
                 )
+                if evictable_key is None:
+                    raise HTTPException(
+                        429,
+                        "Too many sign-in attempts. Try again shortly.",
+                        headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)},
+                    )
+                del _LOGIN_ATTEMPTS[evictable_key]
             bucket = deque()
             _LOGIN_ATTEMPTS[bucket_key] = bucket
         _LOGIN_ATTEMPTS.move_to_end(bucket_key)
@@ -609,3 +619,13 @@ def limit_student_login(request):
             raise HTTPException(429, "Too many sign-in attempts. Try again shortly.",
                                 headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)})
         bucket.append(now)
+
+
+def limit_student_login(request):
+    _limit_ip_bucket(request, request.url.path)
+
+
+def limit_email_trigger(request):
+    # Reset, verification, and student-code sends share one IP bucket so switching
+    # endpoint paths cannot multiply a single client's email-send allowance.
+    _limit_ip_bucket(request, "/api/v1/auth/email-trigger")

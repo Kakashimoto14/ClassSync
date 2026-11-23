@@ -5,6 +5,16 @@
 .venv
 .venv-main-junction
 **/__pycache__/
+# Runtime qualification probes need only these two test helpers; exclude the remaining suites.
+services/*/tests/
+!services/gateway/tests/
+services/gateway/tests/*
+!services/gateway/tests/registration_fixtures.py
+!services/scheduling/tests/
+services/scheduling/tests/*
+!services/scheduling/tests/test_engine.py
+packages/*/tests/
+scripts/tests/
 **/node_modules
 **/dist/
 **/build/

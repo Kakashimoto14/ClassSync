@@ -4,6 +4,7 @@ This entrypoint is a constrained preview/qualification option. Services bind onl
 loopback except the Gateway, and it performs no migrations, seeding, or database writes.
 """
 
+import ipaddress
 import os
 import signal
 import subprocess
@@ -33,8 +34,26 @@ def deployment_port(environ):
     return port
 
 
-def service_command(module, port, host):
-    return [
+def forwarded_allowlist(value):
+    entries = [entry.strip() for entry in value.split(",") if entry.strip()]
+    if not entries:
+        return None
+    canonical = []
+    for entry in entries:
+        try:
+            network = ipaddress.ip_network(entry, strict=False)
+        except ValueError as error:
+            raise ValueError(
+                "Trusted proxy entries must be IP addresses or CIDR networks"
+            ) from error
+        if network.prefixlen == 0:
+            raise ValueError("A default-route CIDR cannot be trusted as a proxy range")
+        canonical.append(str(network))
+    return ",".join(canonical)
+
+
+def service_command(module, port, host, forwarded_allow_ips=None):
+    command = [
         sys.executable,
         "-m",
         "uvicorn",
@@ -46,11 +65,17 @@ def service_command(module, port, host):
         "--workers",
         "1",
         "--no-access-log",
-        "--no-proxy-headers",
     ]
+    if host == "0.0.0.0" and forwarded_allow_ips:
+        command.extend(
+            ["--proxy-headers", "--forwarded-allow-ips", forwarded_allow_ips]
+        )
+    else:
+        command.append("--no-proxy-headers")
+    return command
 
 
-def deployment_plan(port):
+def deployment_plan(port, forwarded_allow_ips=None):
     plan = [
         (name, service_command(module, service_port, "127.0.0.1"), service_port)
         for name, service_port, module in INTERNAL_SERVICES
@@ -58,7 +83,9 @@ def deployment_plan(port):
     plan.append(
         (
             "gateway",
-            service_command("services.gateway.app.main:app", port, "0.0.0.0"),
+            service_command(
+                "services.gateway.app.main:app", port, "0.0.0.0", forwarded_allow_ips
+            ),
             port,
         )
     )
@@ -123,6 +150,7 @@ def start_internal_services(plan, environ, *, popen=subprocess.Popen, opener=url
 
 def main(environ=os.environ, *, popen=subprocess.Popen, opener=urlopen, sleep=time.sleep):
     port = deployment_port(environ)
+    trusted_proxies = forwarded_allowlist(environ.get("TRUSTED_PROXY_IPS", ""))
     shutdown = Event()
     children = []
     prior_handlers = {}
@@ -134,7 +162,7 @@ def main(environ=os.environ, *, popen=subprocess.Popen, opener=urlopen, sleep=ti
         for signum in (signal.SIGTERM, signal.SIGINT):
             prior_handlers[signum] = signal.signal(signum, request_shutdown)
 
-        plan = deployment_plan(port)
+        plan = deployment_plan(port, trusted_proxies)
         children.extend(
             start_internal_services(plan, environ, popen=popen, opener=opener, sleep=sleep)
         )

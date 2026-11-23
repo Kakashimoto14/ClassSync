@@ -1,5 +1,48 @@
 # ClassSync — autonomy status ledger
 
+## 23 November 2026 14:26 SGT — Phase 5 deployment and CI polish
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`f8b85d0084669bc6bc3886be42093d187c9817b4`. Worktree was clean before this phase; no
+database, provider, hosted setting, or running dev server was changed.
+
+Gateway now rejects an HTTP or loopback `CLASSSYNC_WEB_URL` during production app startup;
+Render exposes the frontend origin and email-provider settings for operator configuration.
+Reset, verification, and student-code email sends share an IP bucket. At login-bucket
+capacity, oldest non-locked buckets may be evicted while active lockouts remain protected.
+Render forwarded-header trust stays disabled by default and accepts only explicit IP/CIDR
+allowlists (not hostnames, `*`, or default-route networks). Scheduling contract export now
+supports a read-only `--check` mode and CI runs it. Docker build context excludes unrelated
+test trees while retaining the two synthetic helpers imported by the in-image qualification
+probe. Dockerfile dependency-layer changes were left untouched because Docker is unavailable
+for the required image validation.
+
+Files changed: `.dockerignore`, `.env.example`, `.env.gateway.example`,
+`.env.notification.example`, `.github/workflows/quality.yml`, `apps/web/.env.example`,
+`docs/security.md`, `render.yaml`, `scripts/export_scheduling_contracts.py`,
+`scripts/render_entrypoint.py`, `services/gateway/app/main.py`,
+`services/gateway/app/onboarding.py`, and focused Gateway tests for contracts, production
+origin, proxy trust, and rate limits.
+
+Fresh checks:
+
+- `python scripts/export_scheduling_contracts.py --check` — PASS, generated TS and JSON
+  schema match current Pydantic models without writing files.
+- Focused Gateway tests — **60 passed**, one existing Starlette/httpx deprecation warning.
+- `\.venv\Scripts\python.exe -m pytest` — **1,194 passed**, one existing deprecation warning.
+- `\.venv\Scripts\ruff.exe check scripts services packages` — PASS.
+- In `apps/web`: `npm run lint`, `npm run typecheck`, `npm test` (**883 passed across 69
+  files**), and `npm run build` — PASS. Build largest chunks: React vendor 318.51 kB,
+  Firebase vendor 243.92 kB; no build error.
+- `git diff --check` — PASS. Render/CI YAML parser check was not available because PyYAML is
+  not installed; Docker image build was not run because Docker is not installed.
+
+Remaining manual deployment steps: enter the approved HTTPS `CLASSSYNC_WEB_URL` in Render;
+choose the configured email provider and enter its API key and approved sender; leave
+`TRUSTED_PROXY_IPS` empty unless the platform's proxy IP/CIDR ranges are verified. No commit
+or push was performed. Next: independent YAML/image deployment qualification in an enabled
+CI/container environment, then manual Render configuration review.
+
 ## 20 November 2026 10:48 SGT — branded password reset and login polish
 
 Worktree: `C:\Projects\ClassSync\var\feature-auth-onboarding-saas`, branch

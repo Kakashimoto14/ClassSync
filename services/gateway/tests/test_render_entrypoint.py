@@ -1,6 +1,11 @@
 import pytest
 
-from scripts.render_entrypoint import deployment_plan, deployment_port, start_internal_services
+from scripts.render_entrypoint import (
+    deployment_plan,
+    deployment_port,
+    forwarded_allowlist,
+    start_internal_services,
+)
 
 
 @pytest.mark.parametrize("value", ["", "zero", "0", "65536", "8001", "8002", "8003"])
@@ -20,6 +25,29 @@ def test_render_entrypoint_uses_platform_port_and_loopback_for_internal_services
     assert all(command[command.index("--host") + 1] == "127.0.0.1" for _, command, _ in plan[:3])
     assert plan[3][1][plan[3][1].index("--host") + 1] == "0.0.0.0"
     assert all("--no-access-log" in command for _, command, _ in plan)
+
+
+def test_proxy_headers_are_disabled_unless_trusted_ips_are_explicit():
+    default_plan = deployment_plan(10000)
+    gateway_command = default_plan[-1][1]
+    assert "--no-proxy-headers" in gateway_command
+
+    trusted = forwarded_allowlist("10.0.0.0/8,2001:db8::/32")
+    trusted_plan = deployment_plan(10000, trusted)
+    gateway_command = trusted_plan[-1][1]
+    assert "--no-proxy-headers" not in gateway_command
+    assert "--forwarded-allow-ips" in gateway_command
+    assert gateway_command[gateway_command.index("--forwarded-allow-ips") + 1] == (
+        "10.0.0.0/8,2001:db8::/32"
+    )
+
+
+@pytest.mark.parametrize(
+    "value", ["*", "0.0.0.0/0", "::/0", "proxy.example.com", "10.0.0.1,not-an-ip"]
+)
+def test_proxy_header_opt_in_rejects_unbounded_or_unparseable_trust(value):
+    with pytest.raises(ValueError):
+        forwarded_allowlist(value)
 
 
 def test_starts_all_internal_services_before_waiting_for_health_in_parallel():

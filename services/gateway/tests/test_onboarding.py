@@ -71,6 +71,8 @@ def test_expired_email_cooldowns_are_purged_before_capacity_is_checked(monkeypat
 
 def test_login_bucket_capacity_does_not_evict_active_lockouts(monkeypatch):
     monkeypatch.setattr(onboarding, "LOGIN_ATTEMPT_BUCKET_LIMIT", 2, raising=False)
+    with onboarding._LOGIN_LOCK:
+        onboarding._LOGIN_ATTEMPTS.clear()
 
     def request(address):
         return SimpleNamespace(
@@ -80,7 +82,8 @@ def test_login_bucket_capacity_does_not_evict_active_lockouts(monkeypatch):
 
     for _ in range(onboarding.LOGIN_MAX_ATTEMPTS):
         onboarding.limit_student_login(request("192.0.2.1"))
-    onboarding.limit_student_login(request("192.0.2.2"))
+    for _ in range(onboarding.LOGIN_MAX_ATTEMPTS):
+        onboarding.limit_student_login(request("192.0.2.2"))
 
     with pytest.raises(HTTPException) as full:
         onboarding.limit_student_login(request("192.0.2.3"))
@@ -90,6 +93,48 @@ def test_login_bucket_capacity_does_not_evict_active_lockouts(monkeypatch):
         onboarding.limit_student_login(request("192.0.2.1"))
     assert locked.value.status_code == 429
     assert len(onboarding._LOGIN_ATTEMPTS) == 2
+
+
+def test_login_bucket_capacity_evicts_oldest_non_locked_bucket(monkeypatch):
+    monkeypatch.setattr(onboarding, "LOGIN_ATTEMPT_BUCKET_LIMIT", 2, raising=False)
+    with onboarding._LOGIN_LOCK:
+        onboarding._LOGIN_ATTEMPTS.clear()
+
+    def request(address):
+        return SimpleNamespace(
+            client=SimpleNamespace(host=address),
+            url=SimpleNamespace(path="/api/v1/auth/student-password-login"),
+        )
+
+    for _ in range(onboarding.LOGIN_MAX_ATTEMPTS):
+        onboarding.limit_student_login(request("192.0.2.10"))
+    onboarding.limit_student_login(request("192.0.2.20"))
+
+    onboarding.limit_student_login(request("192.0.2.30"))
+
+    assert ("192.0.2.10", "/api/v1/auth/student-password-login") in onboarding._LOGIN_ATTEMPTS
+    assert ("192.0.2.20", "/api/v1/auth/student-password-login") not in onboarding._LOGIN_ATTEMPTS
+    assert ("192.0.2.30", "/api/v1/auth/student-password-login") in onboarding._LOGIN_ATTEMPTS
+
+
+def test_email_trigger_rate_limit_is_shared_across_email_routes(monkeypatch):
+    monkeypatch.setattr(onboarding, "LOGIN_MAX_ATTEMPTS", 2, raising=False)
+    with onboarding._LOGIN_LOCK:
+        onboarding._LOGIN_ATTEMPTS.clear()
+
+    def request(path):
+        return SimpleNamespace(
+            client=SimpleNamespace(host="192.0.2.50"),
+            url=SimpleNamespace(path=path),
+        )
+
+    onboarding.limit_email_trigger(request("/api/v1/auth/request-password-reset"))
+    onboarding.limit_email_trigger(request("/api/v1/auth/send-verification-email"))
+
+    with pytest.raises(HTTPException) as limited:
+        onboarding.limit_email_trigger(request("/api/v1/auth/request-password-reset"))
+
+    assert limited.value.status_code == 429
 
 
 def test_expired_login_buckets_are_purged_before_capacity_is_checked(monkeypatch):

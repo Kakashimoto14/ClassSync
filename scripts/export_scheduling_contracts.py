@@ -1,5 +1,6 @@
 """Regenerate browser DTOs and the JSON schema from the Pydantic source of truth."""
 
+import argparse
 import json
 from pathlib import Path
 
@@ -60,29 +61,32 @@ def ts(schema):
     }.get(kind, "unknown")
 
 
-if __name__ == "__main__":
+MODELS = (
+    GenerationInput,
+    GenerationResult,
+    ReadinessResult,
+    ValidationInput,
+    ValidationResult,
+    SaveDraftRequest,
+    DraftDetail,
+    DraftList,
+    AcademicSnapshot,
+    CalendarWrite,
+    AcademicReadiness,
+    AcademicGenerationRequest,
+    AcademicPeriodList,
+    PeriodCreate,
+    RecordWrite,
+    CalendarWrite,
+    PublicationCommand,
+    RoomRestriction,
+)
+
+
+def render_contracts():
     definitions = {}
     schema_bundle = {}
-    for model in (
-        GenerationInput,
-        GenerationResult,
-        ReadinessResult,
-        ValidationInput,
-        ValidationResult,
-        SaveDraftRequest,
-        DraftDetail,
-        DraftList,
-        AcademicSnapshot,
-    CalendarWrite,
-        AcademicReadiness,
-        AcademicGenerationRequest,
-        AcademicPeriodList,
-        PeriodCreate,
-        RecordWrite,
-        CalendarWrite,
-        PublicationCommand,
-        RoomRestriction,
-    ):
+    for model in MODELS:
         schema = model.model_json_schema()
         definitions.update(schema.pop("$defs", {}))
         definitions[model.__name__] = schema
@@ -94,9 +98,50 @@ if __name__ == "__main__":
         )
         + "\n"
     )
-    (ROOT / "packages/shared-types/src/scheduling.ts").write_text(output, encoding="utf-8")
-    path = ROOT / "packages/api-contracts/schemas"
-    path.mkdir(exist_ok=True)
-    (path / "scheduling-v1.json").write_text(
-        json.dumps(schema_bundle, indent=2) + "\n", encoding="utf-8"
+    return {
+        Path("packages/shared-types/src/scheduling.ts"): output,
+        Path("packages/api-contracts/schemas/scheduling-v1.json"):
+            json.dumps(schema_bundle, indent=2) + "\n",
+    }
+
+
+def check_contracts(root=ROOT):
+    drift = []
+    for relative_path, expected in render_contracts().items():
+        target = root / relative_path
+        try:
+            actual = target.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            actual = None
+        if actual != expected:
+            drift.append(relative_path.as_posix())
+    return drift
+
+
+def write_contracts(root=ROOT):
+    for relative_path, content in render_contracts().items():
+        target = root / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check", action="store_true", help="check generated files without modifying them"
     )
+    args = parser.parse_args(argv)
+    if not args.check:
+        write_contracts()
+        return 0
+    drift = check_contracts()
+    if drift:
+        for path in drift:
+            print(f"Contract drift: {path}")
+        return 1
+    print("Scheduling TypeScript and JSON schema contracts are in sync.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
