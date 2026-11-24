@@ -2587,3 +2587,94 @@ Changed application files: `apps/web/src/routes/RouteGuard.tsx`, `app-routes.tsx
 room-navigation and route-reliability tests. `dist/` contains the ignored local build output.
 No browser screenshot or production-mode deployed navigation test was run. Next: visually verify
 lazy loading fallbacks on direct deep links and confirm production CDN caching/waterfall behavior.
+
+## 24 November 2026 15:10 SGT — Phase 0 production routing and CI repair
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`2313efd3c11aa03c614bdf966ca3c5cf688ad784`. The pre-existing uncommitted dependency-security
+changes in `apps/web/package.json`, `package-lock.json`, and this status file were preserved; no
+commit, push, deployment, hosted setting, database, or live service was changed.
+
+Acceptance cases for this bounded Phase 0 work:
+
+- The Linux container qualification retains read-only root filesystems, dropped capabilities,
+  no-new-privileges, and health/denial/outage-recovery assertions; failures print container state
+  and bounded logs before cleanup.
+- Institutional browser API requests stay at same-origin `/api/v1`, are reverse-proxied to the
+  configured Render Gateway, and the client same-origin guard remains enabled.
+- Render's Firebase project ID matches the production frontend project supplied by the owner;
+  the Render blueprint declares Resend credentials instead of unused Brevo credentials.
+
+Implemented: raised the three long-running Linux qualification containers' hard memory limit from
+1 GiB to 2 GiB; added an EXIT failure diagnostic that prints `docker ps -a`, each named container's
+status/OOMKilled/exit code, and at most 40 log lines before cleanup. The 1 GiB cap is the leading
+explanation for exit 137: the Gateway's qualification exec starts a second Python process within
+the running container's memory cgroup. The raw failed-run log/cgroup event is unavailable and
+Docker is not installed here, so the specific killed process remains **unverified**. The current
+checked-in workflow starts three long-running service containers; the supplied Run #52 excerpt
+mentions four container IDs, which may reflect a different workflow revision.
+
+Added a fixed external rewrite for `/api/v1/:path*` to
+`https://classsync-o3u3.onrender.com/api/v1/:path*` ahead of SPA rewrites. Vercel's external
+rewrite keeps the browser URL unchanged and proxies requests to the external origin ([Vercel
+rewrite documentation](https://vercel.com/docs/routing/rewrites)). Existing API clients continue
+to send Firebase bearer tokens, omit cookies, and enforce same-origin URLs; no auth/CORS/CSRF
+guard was removed. Updated `render.yaml`'s `FIREBASE_PROJECT_ID` to `classsync-8af14` per the
+owner's current-production observation and changed the blueprint email provider to Resend with
+`RESEND_API_KEY` and `RESEND_FROM_EMAIL` as unsynced secrets. Historical docs and explicit
+non-disclosure test assertions for `classsync-f444c` remain as historical evidence/tests.
+
+Fresh verification:
+
+- System `python -m pytest` could not start (`pytest` is not installed in system Python); the
+  repository runtime `.venv\Scripts\python.exe -m pytest` passed **1,194 tests** with one
+  existing Starlette/httpx deprecation warning.
+- `.venv\Scripts\ruff.exe check scripts services packages` — PASS.
+- `.venv\Scripts\python.exe scripts/export_scheduling_contracts.py --check` — PASS.
+- In `apps/web`, `npm run lint` and `npm run typecheck` — PASS; `npm run build` — PASS.
+- In `apps/web`, `npm test` — **882 passed, 1 failed** across 69 files. The failure is the
+  existing `RoomNavigation.test.tsx` focus assertion after pagination: expected the “Rooms &
+  spaces” heading, received `main#main-content`. It is outside this Phase 0 scope and was not
+  changed.
+- In `apps/web`, `npm audit --audit-level=low` — BLOCKED because the npm registry audit endpoint
+  returned a network error. Existing dependency-security changes were not modified.
+- `vercel.json` parsed as JSON; `render.yaml` parsed successfully with `js-yaml`.
+- `git diff --check` — PASS on the final worktree; Docker qualification was not runnable because the
+  Docker CLI is unavailable. No deployed same-origin request, live login, or hosted variable was
+  verified or changed.
+
+Changed for this Phase 0 slice: `.github/workflows/quality.yml`, `vercel.json`, `render.yaml`, and
+this appended evidence. Pre-existing dependency-security files remain dirty and preserved.
+Next: verify/update the exact Vercel/Render environment values listed in the task before an
+authorized deployment, then inspect the next Linux qualification run's failure diagnostics.
+
+## 23 November 2026 19:46 UTC — Dependency security job follow-up
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base HEAD
+`2313efd3c11aa03c614bdf966ca3c5cf688ad784`. Worktree was clean before this task. No commit,
+push, database, provider, cloud setting, or running service was changed.
+
+Updated the Web workspace `typescript-eslint` dependency from `^8.24.0` to `^8.74.0` and
+refreshed the root lockfile. The previous locked `8.71.1` tree resolved
+`@typescript-eslint/typescript-estree` to vulnerable `minimatch@10.2.6`; the new compatible
+8.x tree resolves patched `minimatch@11.0.9`. No forced major update was used.
+
+Evidence: `npm ci --ignore-scripts` — PASS, 416 packages added, 419 audited, zero vulnerabilities;
+`npm audit --audit-level=low` — PASS, zero vulnerabilities;
+`npm ls --all` — PASS;
+`apps/web`: `npm run lint` — PASS; `npm run typecheck` — PASS; `npm test` — PASS, 883 tests in
+69 files; `npm run build` — PASS. The build emitted no fatal errors. `git diff --check` passed.
+
+Linux container job remains unresolved. Public GitHub run 52 (`45128001383`, HEAD above) confirms
+the `linux-containers` job's combined qualification step ended with exit code 137. GitHub's public
+check annotation contains only that generic code; downloading the job log returned HTTP 403
+(`Must have admin rights to Repository`). Docker is not installed in this environment, so the
+container sequence could not be reproduced. In the checked-in workflow, after the three service
+containers start, the first command is `docker exec ...gateway python -m
+scripts.linux_runtime_probe --health`; this ordering makes it the first candidate if the failure
+occurred immediately after startup, but the exact SIGKILLed command and root cause are unverified.
+No speculative memory-limit change was made. Next: obtain the failed step's raw log from a repository
+administrator, then reproduce/fix the exact command without weakening the health, denial, or recovery
+assertions.
+
+Files changed in this follow-up: `apps/web/package.json`, `package-lock.json`, and this status entry.

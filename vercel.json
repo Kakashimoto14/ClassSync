@@ -5,6 +5,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://classsync-o3u3.onrender.com/api/v1/:path*"
+    },
     { "source": "/", "destination": "/index.html" },
     { "source": "/auth/:path*", "destination": "/index.html" },
     { "source": "/dev/role-preview", "destination": "/index.html" },
