@@ -1,5 +1,5 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { RoomDirectoryCard, ResourceStatusBadge } from '../components/scheduling/RoomDirectoryCard';
 import { RoomFilters } from '../components/scheduling/RoomFilters';
@@ -32,6 +32,7 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const resultsHeading = useRef<HTMLHeadingElement>(null);
+  const focusAfterPageChange = useRef(false);
   const inventory = params.get('inventory');
   const inventorySource = inventory === 'demo' ? 'demo' : 'cdm';
   const inventoryRooms = rooms.filter((room) =>
@@ -51,6 +52,12 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
     Number.isSafeInteger(requestedPage) && requestedPage > 0
       ? Math.min(requestedPage, pageCount)
       : 1;
+  useEffect(() => {
+    if (!focusAfterPageChange.current) return;
+    focusAfterPageChange.current = false;
+    resultsHeading.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [page]);
   const shown = results.slice((page - 1) * 12, page * 12);
   function update(key: keyof RoomCriteria | 'inventory' | 'page', value: string) {
     const next = new URLSearchParams(params);
@@ -140,9 +147,8 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
             variant="secondary"
             disabled={page === 1}
             onClick={() => {
+              focusAfterPageChange.current = true;
               update('page', String(page - 1));
-              resultsHeading.current?.focus({ preventScroll: true });
-              window.scrollTo({ top: 0, behavior: 'instant' });
             }}
           >
             Previous
@@ -154,9 +160,8 @@ export function RoomDiscoveryPage({ definition }: { definition: RouteDefinition 
             variant="secondary"
             disabled={page === pageCount}
             onClick={() => {
+              focusAfterPageChange.current = true;
               update('page', String(page + 1));
-              resultsHeading.current?.focus({ preventScroll: true });
-              window.scrollTo({ top: 0, behavior: 'instant' });
             }}
           >
             Next

@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import certifi
 import pytest
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from fastapi.testclient import TestClient
@@ -97,6 +98,24 @@ def test_normal_owned_cleanup_and_bounded_pool_without_migrations(monkeypatch, p
     assert options[0]["pool_timeout"] == 3
     assert "statement_timeout=5000" in options[0]["connect_args"]["options"]
     assert options[0]["connect_args"]["application_name"] == "classsync-academic"
+
+
+def test_verify_full_membership_engine_uses_certifi_ca_bundle(monkeypatch):
+    from services.academic.app import authorization as providers
+
+    options = []
+    engine = SimpleNamespace(dispose=lambda: None)
+    monkeypatch.setattr(
+        providers, "postgres_engine", lambda *args, **kwargs: options.append(kwargs) or engine
+    )
+    app = SimpleNamespace(state=SimpleNamespace())
+    settings = configured_settings(
+        classsync_env="production", academic_database_transport="verify-full"
+    )
+    with providers.configured_academic(app, settings):
+        assert app.state.authorization_adapters.memberships.engine is engine
+    assert options[0]["connect_args"]["sslmode"] == "verify-full"
+    assert options[0]["connect_args"]["sslrootcert"] == certifi.where()
 
 
 @pytest.mark.parametrize("existing", ["authorization_adapters", "academic_engine"])

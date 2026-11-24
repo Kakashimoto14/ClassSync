@@ -94,6 +94,33 @@ def test_repository_failure_is_unavailable_without_claims_or_sample_fallback():
     assert str(caught.value) == "membership_unavailable"
 
 
+def test_repository_failure_is_logged_with_sanitized_diagnostic(caplog):
+    import logging
+
+    class BrokenLookup:
+        def lookup_current(self, **key):
+            raise RuntimeError(
+                "connection failed postgresql+psycopg://svc:private@db.example/private "
+                "password=private access_token=private"
+            )
+
+    with caplog.at_level(logging.WARNING, logger="classync_contracts.identity"):
+        with pytest.raises(MembershipAuthorizationError):
+            authorize(BrokenLookup())
+
+    record = next(
+        r for r in caplog.records if r.message.startswith("membership_lookup_unavailable")
+    )
+    assert record.failure_type == "RuntimeError"
+    assert "connection failed" in record.failure_message
+    assert "type=RuntimeError" in record.message
+    assert "detail=connection failed" in record.message
+    assert "private" not in record.message
+    assert "postgresql" not in record.failure_message
+    assert "db.example" not in record.failure_message
+    assert "private" not in record.failure_message
+
+
 def test_invalid_adapter_response_is_unavailable():
     with pytest.raises(MembershipAuthorizationError) as caught:
         authorize(Lookup({"role": "administrator"}))

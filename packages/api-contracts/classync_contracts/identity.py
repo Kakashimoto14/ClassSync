@@ -5,12 +5,49 @@ request into this model does not verify identity. Institutional repositories and
 identity provisioning remain separately gated.
 """
 
+import logging
+import re
 from enum import StrEnum
 from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .models import UserRole
+
+logger = logging.getLogger(__name__)
+_DATABASE_URL = re.compile(
+    r"(?i)\b(?:postgres(?:ql)?(?:\+\w+)?|https?)://[^\s\"'<>]+"
+)
+_SENSITIVE_VALUE = re.compile(
+    r"(?i)\b([\w-]*(?:password|passwd|pwd|token|secret|api[_-]?key|authorization))"
+    r"\s*([=:])\s*"
+    r"(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"
+)
+_CONNECTION_VALUE = re.compile(
+    r"(?i)\b(host|hostaddr|user|username|dbname|database|sslrootcert)\s*([=:])\s*"
+    r"(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"
+)
+_BEARER = re.compile(r"(?i)\bBearer\s+[^\s,;]+")
+_JWT = re.compile(r"\b[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b")
+_EMAIL = re.compile(r"\b[^\s@]+@[^\s@]+\.[A-Za-z]{2,}\b")
+
+
+def _safe_lookup_failure(error: Exception) -> tuple[str, str]:
+    try:
+        message = str(error)
+    except Exception:
+        message = "Diagnostic unavailable"
+    message = _DATABASE_URL.sub("[database URL redacted]", message)
+    message = _BEARER.sub("Bearer [redacted]", message)
+    message = _JWT.sub("[token redacted]", message)
+    message = _EMAIL.sub("[email redacted]", message)
+    message = _SENSITIVE_VALUE.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}[redacted]", message
+    )
+    message = _CONNECTION_VALUE.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}[redacted]", message
+    )
+    return type(error).__name__, message[:240] or "No diagnostic message"
 
 
 class _ImmutableContract(BaseModel):
@@ -119,8 +156,24 @@ def current_membership(
     try:
         membership = repository.lookup_current(tenant_id=tenant_id, uid=principal.uid)
     except Exception as error:
+        failure_type, failure_message = _safe_lookup_failure(error)
+        logger.error(
+            "membership_lookup_unavailable type=%s detail=%s",
+            failure_type,
+            failure_message,
+            extra={"failure_type": failure_type, "failure_message": failure_message},
+        )
         raise MembershipAuthorizationError(MembershipErrorCode.UNAVAILABLE) from error
     if membership is not None and not isinstance(membership, MembershipSnapshot):
+        logger.error(
+            "membership_lookup_unavailable type=%s detail=%s",
+            "InvalidMembershipSnapshot",
+            "Membership repository returned an invalid snapshot",
+            extra={
+                "failure_type": "InvalidMembershipSnapshot",
+                "failure_message": "Membership repository returned an invalid snapshot",
+            },
+        )
         raise MembershipAuthorizationError(MembershipErrorCode.UNAVAILABLE)
     if (
         membership is None

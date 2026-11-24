@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 
+import certifi
 from classync_contracts.request_authorization import AuthorizationAdapters
 from classync_contracts.token_verification import FirebaseTokenVerifier
 from classync_persistence.configuration import postgres_configuration
@@ -25,7 +26,11 @@ def configured_scheduling(application, settings):
         firebase_project_id=settings.firebase_project_id,
         tenant_id=settings.institutional_tenant_id,
         application_name="classsync-scheduling",
-        tls_root_cert=settings.postgres_tls_root_cert,
+        tls_root_cert=(
+            settings.postgres_tls_root_cert or certifi.where()
+            if settings.scheduling_database_transport == "verify-full"
+            else None
+        ),
     )
     engine = postgres_engine(
         url,

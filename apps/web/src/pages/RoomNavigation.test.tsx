@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DevelopmentRoleContext } from '../auth/development-role-context';
@@ -43,8 +43,10 @@ async function open(role: UserRole | null, path: string, inventory = 'demo') {
       </DevelopmentRoleContext.Provider>
     </MemoryRouter>,
   );
-  if (role && role === route?.role)
+  if (role && role === route?.role) {
     await screen.findByRole('heading', { level: 1 }, { timeout: 5000 });
+    await waitFor(() => expect(screen.getByRole('main')).toHaveFocus());
+  }
   return result;
 }
 const main = () => within(screen.getByRole('main'));
@@ -57,8 +59,10 @@ describe('room discovery routes and interactions', () => {
       expect(main().getByText('53 of 53 spaces')).toBeInTheDocument();
       expect(main().getAllByRole('article')).toHaveLength(12);
       fireEvent.click(main().getByRole('button', { name: 'Next' }));
-      expect(main().getByText('Page 2 of 5')).toBeInTheDocument();
-      expect(main().getByRole('heading', { name: 'Rooms & spaces' })).toHaveFocus();
+      await waitFor(() => {
+        expect(main().getByText('Page 2 of 5')).toBeInTheDocument();
+        expect(main().getByRole('heading', { name: 'Rooms & spaces' })).toHaveFocus();
+      });
       fireEvent.change(main().getByRole('searchbox', { name: 'Search rooms' }), {
         target: { value: 'COMLAB1' },
       });

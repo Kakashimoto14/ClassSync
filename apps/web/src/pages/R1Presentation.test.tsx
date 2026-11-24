@@ -66,7 +66,7 @@ it('recovers an invalid presentation identity deliberately without substituting 
     </MemoryRouter>,
   );
   expect(await screen.findByRole('alert')).toHaveTextContent('Choose an identity included');
-  fireEvent.click(screen.getByRole('button', { name: 'Reset sample identity' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Reset sample identity' }));
   await waitFor(() =>
     expect(document.querySelectorAll('.ux-agenda-row').length).toBeGreaterThan(0),
   );

@@ -2712,3 +2712,27 @@ failure diagnostics and all hardening remain. `js-yaml` syntax/settings check an
 passed. Read-only source trace confirms Academic independently uses
 `ACADEMIC_DATABASE_URL` for the current membership lookup. No database, hosted configuration,
 identity, or live provisioning was accessed or changed; no commit or push.
+
+## 24 November 2026 17:03 SGT — Phase 0 membership TLS and web CI stability
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`0391e2fb4ae064069816e7a6e13c025ad5f83516` (changes remain uncommitted). Academic and Scheduling
+membership engines now use the Gateway-proven Certifi CA bundle for `verify-full`, with the
+dependency declared in both isolated service requirements. Shared membership lookup failures
+log exception type and bounded, sanitized detail in the rendered log message; focused coverage
+checks URL, credential, token redaction. Added Academic/Scheduling TLS configuration tests.
+
+The presentation reset test now waits for its conditional reset control; calendar fetches ignore
+all stale aborted requests. Room pagination focus runs after the page state commits, and the
+navigation test waits for route and pagination focus changes. Both affected frontend test files
+passed 3 consecutive runs (33 tests per run).
+
+Verification: `.venv\Scripts\python.exe -m pytest` — 1197 passed, 1 existing Starlette/httpx
+deprecation warning; `.venv\Scripts\ruff.exe check scripts services packages` — passed;
+`.venv\Scripts\python.exe scripts/export_scheduling_contracts.py --check` — passed;
+`npm run test:web` — 69 files / 883 tests passed; in `apps/web`, `npm run lint`,
+`npm run typecheck`, `npm test` (69 files / 883 tests), and `npm run build` — passed;
+`git diff --check` — passed (Git emitted line-ending normalization notices only). No live Render
+database, hosted configuration, or membership record was accessed or changed. No commit or push.
+Next: deploy through the separately authorized release process and verify production membership
+lookups; do not advance into Phase 1/2 here.

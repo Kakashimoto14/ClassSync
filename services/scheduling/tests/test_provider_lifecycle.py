@@ -2,6 +2,7 @@
 
 from types import SimpleNamespace
 
+import certifi
 import pytest
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.publication import PublicationCommand, RoomRestriction
@@ -92,6 +93,24 @@ def test_owned_pool_and_adapters_removed_and_disposed_on_exit(monkeypatch, body_
     assert "lock_timeout=1500" in parameters["options"]
     assert parameters["application_name"] == "classsync-scheduling"
     assert parameters["sslmode"] == "disable" and parameters["require_auth"] == "sspi"
+
+
+def test_verify_full_membership_engine_uses_certifi_ca_bundle(monkeypatch):
+    from services.scheduling.app import authorization as providers
+
+    options = []
+    engine = SimpleNamespace(dispose=lambda: None)
+    monkeypatch.setattr(
+        providers, "postgres_engine", lambda *args, **kwargs: options.append(kwargs) or engine
+    )
+    app = SimpleNamespace(state=SimpleNamespace())
+    settings = configured_settings(
+        classsync_env="production", scheduling_database_transport="verify-full"
+    )
+    with providers.configured_scheduling(app, settings):
+        assert app.state.authorization_adapters.memberships.engine is engine
+    assert options[0]["connect_args"]["sslmode"] == "verify-full"
+    assert options[0]["connect_args"]["sslrootcert"] == certifi.where()
 
 
 @pytest.mark.parametrize("existing", ["authorization_adapters", "scheduling_engine"])

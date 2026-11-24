@@ -298,7 +298,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         setData(value);
       })
       .catch((e) => {
-        if (e.name !== 'AbortError') {
+        if (!controller.signal.aborted && e.name !== 'AbortError') {
           setError(e.message);
           setErrorStatus(e.status ?? 0);
           setData(null);
