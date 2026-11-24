@@ -2678,3 +2678,37 @@ administrator, then reproduce/fix the exact command without weakening the health
 assertions.
 
 Files changed in this follow-up: `apps/web/package.json`, `package-lock.json`, and this status entry.
+
+## 24 November 2026 16:04 SGT — Phase 0 Gateway container startup correction
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, HEAD
+`2313efd3c11aa03c614bdf966ca3c5cf688ad784`. Preserved all prior uncommitted edits; no
+database connection, provisioning, hosted setting, commit, or push occurred.
+
+Restored the three qualification containers to `--memory 1g` after the supplied diagnostics
+ruled out OOM, and passed `CLASSSYNC_WEB_URL=https://class-sync-bhiv.vercel.app` into them so
+Gateway production-origin validation uses HTTPS. Kept the failure-only Docker diagnostic trap.
+
+Traced `membership_unavailable`: the shared membership contract emits it when a membership
+repository raises or returns a non-`MembershipSnapshot`; the unconfigured repository also raises
+it. Gateway, Academic, and Scheduling map that condition to 503. A missing/inactive/wrong-tenant
+membership maps to 403 `membership_denied` instead. Academic independently checks current
+membership when `/api/v1/academic/periods` is proxied, using `ACADEMIC_DATABASE_URL`; Gateway
+`/api/v1/auth/me` uses `IDENTITY_DATABASE_URL`. Exact `/api/v1/me` is not a registered Gateway
+route in this checkout. No production identity/database state was inspected.
+
+Verification: `js-yaml` parsed `.github/workflows/quality.yml` and assertions confirmed the HTTPS
+origin, restored 1 GiB limit, and retained trap; `.venv\Scripts\python.exe scripts/provision_live_accounts.py --help`
+printed the existing provisioning CLI options without
+connecting to providers; `git diff --check` passed. No Docker execution or live API request was
+performed.
+
+## 24 November 2026 16:06 SGT — Phase 0 qualification environment follow-up
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, HEAD
+`2313efd3c11aa03c614bdf966ca3c5cf688ad784`. Restored the `linux-containers` service memory cap
+to 1 GiB and set `CLASSSYNC_WEB_URL=https://class-sync-bhiv.vercel.app` in its container loop;
+failure diagnostics and all hardening remain. `js-yaml` syntax/settings check and `git diff --check`
+passed. Read-only source trace confirms Academic independently uses
+`ACADEMIC_DATABASE_URL` for the current membership lookup. No database, hosted configuration,
+identity, or live provisioning was accessed or changed; no commit or push.
