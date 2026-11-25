@@ -318,7 +318,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
           <label>Solver time limit (seconds)<input type="number" min={1} max={30} step={1} value={record.options?.time_limit_seconds ?? 5} onChange={e => update('options', { ...record.options, time_limit_seconds: Number(e.target.value) })}/></label>
           <label>Deterministic seed<input type="number" min={0} max={2147483647} value={record.options?.seed ?? 42} onChange={e => update('options', { ...record.options, seed: Number(e.target.value) })}/></label>
           <LockedAssignmentsEditor snapshot={snapshot} value={locks} onChange={changeLocks}/>
-          {appMode === 'institutional' ? <p className="muted">Individual student roster entry is not available in this workflow. Enter only a verified aggregate section population; no student records are imported.</p> : <label>Explicit synthetic cross-section enrollment conflicts JSON<textarea rows={5} value={enrollments} onChange={e => setEnrollments(e.target.value)}/><p className="muted">Synthetic test identities only. No institutional roster is inferred or imported.</p></label>}
+          {appMode === 'institutional' ? <p className="muted">Manage individual names, IDs, contact emails and section assignments in the Admin Student roster. Use this form only for period-wide constraints.</p> : <label>Explicit synthetic cross-section enrollment conflicts JSON<textarea rows={5} value={enrollments} onChange={e => setEnrollments(e.target.value)}/><p className="muted">Synthetic test identities only. No institutional roster is inferred or imported.</p></label>}
         </details>
       </>}
       {'active' in record && check('Active in this academic period', 'active', record.active)}

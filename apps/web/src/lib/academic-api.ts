@@ -91,7 +91,17 @@ export interface AcademicRosterPage {
   total: number;
   limit: number;
   offset: number;
-  sections: Array<{ id: string; year_level: string; label: string }>;
+  period_revision: number;
+  sections: Array<{ id: string; year_level: number; label: string; active: boolean }>;
+}
+export interface RosterStudentWrite {
+  expected_period_revision: number;
+  student_id: string;
+  full_name: string;
+  email: string;
+  year_level: number;
+  section_id: string;
+  enrollment_status: 'active' | 'inactive' | 'unverified';
 }
 export const loadAcademicRoster = (period: string, filters: {
   limit?: number; offset?: number; search?: string; year_level?: number; section_id?: string;
@@ -104,6 +114,25 @@ export const loadAcademicRoster = (period: string, filters: {
     `academic/periods/${encodeURIComponent(period)}/roster?${query.toString()}`,
   );
 };
+export const createAcademicRosterStudent = (period: string, body: RosterStudentWrite) =>
+  academicRequest<{ created: true }>(
+    `academic/periods/${encodeURIComponent(period)}/roster`, body, 'POST',
+  );
+export const updateAcademicRosterStudent = (
+  period: string, studentId: string, body: RosterStudentWrite,
+) => academicRequest<{ updated: true }>(
+  `academic/periods/${encodeURIComponent(period)}/roster/${encodeURIComponent(studentId)}`,
+  body,
+  'PUT',
+);
+export const deleteAcademicRosterStudent = (
+  period: string, studentId: string, expectedPeriodRevision: number,
+) => academicRequest<{ deleted: true }>(
+  `academic/periods/${encodeURIComponent(period)}/roster/${encodeURIComponent(studentId)}` +
+    `?expected_period_revision=${expectedPeriodRevision}`,
+  undefined,
+  'DELETE',
+);
 export const checkAcademicReadiness = (period: string) =>
   academicRequest<AcademicReadiness>(
     `scheduling/${prefix}academic/${encodeURIComponent(period)}/readiness`,

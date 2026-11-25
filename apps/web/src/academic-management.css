@@ -8,6 +8,14 @@
 .academic-form-fields, .academic-record-form, .academic-create-period { display: grid; gap: 20px; min-width: 0; }
 .academic-period-controls, .academic-list-toolbar, .academic-review-actions { display: grid; gap: 12px; align-items: end; }
 .academic-records, .academic-record-list { display: grid; gap: 12px; min-width: 0; }
+.student-roster-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 12px; }
+.student-roster-heading h2, .student-roster-heading p { margin: 0; }
+.student-roster-form { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.student-roster-form h3 { margin: 0; }
+.student-roster-form label { display: grid; gap: 6px; min-width: 0; font-weight: 600; }
+.student-roster-form input, .student-roster-form select { width: 100%; min-width: 0; }
+.student-roster-form small { color: var(--ink-soft); font-size: .8125rem; font-weight: 400; }
+.student-roster-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .academic-record-list { list-style: none; padding: 0; margin: 0; }
 .academic-record-row { display: grid; gap: 12px; min-width: 0; }
 .academic-record-row h2 { font-size: 1rem; overflow-wrap: anywhere; }

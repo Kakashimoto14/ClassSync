@@ -2829,4 +2829,32 @@ Final `npm run build` passed; main entry `index-H1SfvGhn.js` is 97.62 kB raw / 2
 `git diff --check` passed with line-ending normalization notices only. The initial frontend run
 under concurrent heavy load had 4 route/navigation timeouts; the isolated full rerun and final
 full rerun both passed. Independent review findings on unknown room IDs, post-action count
-consistency, and seed overwrite preservation were addressed; review did not access a database.
+ consistency, and seed overwrite preservation were addressed; review did not access a database.
+
+### 25 November 2026 18:25 SGT — Admin student roster CRUD
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`8f795da068ef7699d2eb6b5fce9de52fb52f8f55`. Implemented Admin-only create, full-profile update,
+and period roster removal using period revision checks, active same-period section/offerings,
+tenant-scoped identity writes, cohort binding safeguards, and transactional Administrator audit.
+The roster UI now provides add/edit/delete with confirmation, validation feedback and inline
+loading states. Migration `0025_student_roster_crud.py` adds the narrowly scoped database
+functions/policies and audit event types. No live database or deployment was accessed.
+
+Changed files: `apps/web/src/academic-management.css`, `apps/web/src/lib/academic-api.ts`,
+`apps/web/src/pages/AcademicRecordEditor.tsx`, `apps/web/src/pages/AcademicStudentRosterPage.tsx`,
+`apps/web/src/pages/AcademicStudentRosterPage.test.tsx`, `docs/autonomy/STATUS.md`,
+`docs/autonomy/TRACEABILITY.md`, `packages/api-contracts/classync_contracts/academic.py`,
+`packages/persistence/classync_persistence/migrations/versions/0025_student_roster_crud.py`,
+`scripts/tests/test_postgres_qualification_regressions.py`, `services/academic/app/main.py`,
+`services/academic/app/postgres_repository.py`, `services/academic/app/record_rules.py`,
+`services/academic/app/student_roster.py`, and `services/academic/tests/test_roster_crud.py`.
+
+Verification: focused Academic CRUD tests — 11 passed; focused roster UI — 4 passed. Full Python
+suite — final rerun **1,212 passed** (the first invocation under concurrent web checks had one
+unrelated solver timeout; that test passed both alone and on the full rerun). Ruff, scheduling
+contract check, frontend lint/typecheck, and `git diff --check` passed. Full web
+suite — 894 tests across 71 files passed. Production build passed; main entry is 97.62 kB raw /
+26.19 kB gzip. PostgreSQL migration/RLS runtime behavior remains IMPLEMENTED-UNVERIFIED. A fresh
+disposable qualification attempt could not start PostgreSQL (`pg_ctl` restricted-token error 87);
+the server did not start and no Neon/live database connection was made. No commit or push.

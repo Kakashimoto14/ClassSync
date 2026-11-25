@@ -128,7 +128,7 @@ def unique_label(record):
     return record.id
 
 
-def validate_record(record, period_id, lookup):
+def validate_record(record, period_id, lookup, *, allow_cohort_change=False):
     """Validate against transaction-local scoped records before any mutation."""
     cache = {}
 
@@ -290,6 +290,7 @@ def validate_record(record, period_id, lookup):
                     old.curriculum_version_id != enrollment.curriculum_version_id
                     or old.entry_cohort_year != enrollment.entry_cohort_year
                 )
+                and not allow_cohort_change
             ):
                 raise AcademicError(
                     409, "cohort_immutable", "Student curriculum binding is stable."

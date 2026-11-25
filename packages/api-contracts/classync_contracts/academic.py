@@ -6,6 +6,7 @@ from uuid import uuid4
 from pydantic import Field, field_validator, model_validator
 
 from .calendar import AcademicCalendar
+from .email_address import normalize_email
 from .scheduling import (
     ActivityType,
     Assignment,
@@ -200,6 +201,32 @@ AcademicRecord = Annotated[
 class RecordWrite(Contract):
     expected_revision: int = Field(ge=0)
     record: AcademicRecord
+
+
+class RosterStudentWrite(Contract):
+    expected_period_revision: int = Field(ge=1)
+    student_id: str = Field(pattern=r"^[0-9]{2}-[0-9]{5}$")
+    full_name: str = Field(min_length=1, max_length=160)
+    email: str = Field(min_length=3, max_length=320)
+    year_level: int = Field(ge=1, le=4)
+    section_id: str = Field(min_length=1, max_length=80)
+    enrollment_status: Literal["active", "inactive", "unverified"] = "unverified"
+
+    @field_validator("full_name", "section_id")
+    @classmethod
+    def trim_required_text(cls, value: str) -> str:
+        result = value.strip()
+        if not result:
+            raise ValueError("Enter a value")
+        return result
+
+    @field_validator("email")
+    @classmethod
+    def normalize_roster_email(cls, value: str) -> str:
+        normalized = normalize_email(value)
+        if normalized is None:
+            raise ValueError("Enter a valid email address")
+        return normalized
 
 
 class CalendarWrite(Contract):

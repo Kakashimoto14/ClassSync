@@ -9,7 +9,14 @@ import json
 from contextlib import contextmanager
 from uuid import uuid4
 
-from classync_contracts.academic import AcademicPeriod, AcademicSnapshot, RecordWrite
+from classync_contracts.academic import (
+    AcademicConstraints,
+    AcademicPeriod,
+    AcademicSection,
+    AcademicSnapshot,
+    RecordWrite,
+    RosterStudentWrite,
+)
 from classync_contracts.calendar import AcademicCalendar
 from classync_contracts.identity import (
     MembershipAuthorizationError,
@@ -34,6 +41,7 @@ from .record_rules import (
     validate_record,
 )
 from .repository import AcademicRepository
+from .student_roster import enrollment_for_section
 
 
 class PostgresAcademicRepository:
@@ -68,6 +76,23 @@ class PostgresAcademicRepository:
                 yield db
         except IntegrityError as error:
             constraint = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
+            if constraint == "students_pkey":
+                raise AcademicError(
+                    409, "student_id_conflict", "That student ID already exists in this tenant."
+                ) from error
+            if constraint == "student_email_verification_pending":
+                raise AcademicError(
+                    409,
+                    "student_email_verification_pending",
+                    "Wait for the active verification request to expire before changing email.",
+                ) from error
+            if constraint and ("student_id_fkey" in constraint or "person_id_fkey" in constraint):
+                raise AcademicError(
+                    409,
+                    "student_identity_linked",
+                    "This student has a linked account or verification record and cannot be "
+                    "deleted or re-keyed.",
+                ) from error
             if constraint == "academic_faculty_identity":
                 raise AcademicError(
                     409,
@@ -332,7 +357,7 @@ class PostgresAcademicRepository:
         if not 1 <= limit <= 25 or not 0 <= offset <= 100000 or len(search) > 100:
             raise AcademicError(422, "invalid_roster_page", "Roster page filters are invalid.")
         with self.session() as db:
-            self.period_in(db, period_id)
+            period = self.period_in(db, period_id)
             rows = (
                 db.execute(
                     text("""
@@ -397,7 +422,8 @@ class PostgresAcademicRepository:
             section_rows = (
                 db.execute(
                     text("""
-                    SELECT r.id,r.payload::jsonb->>'year_level' AS year_level,
+                    SELECT r.id,(r.payload::jsonb->>'year_level')::integer AS year_level,
+                           COALESCE((r.payload::jsonb->>'active')::boolean,true) AS active,
                            COALESCE(r.payload::jsonb->>'custom_label',
                                p.payload::jsonb->>'acronym' || '-' ||
                                (r.payload::jsonb->>'year_level') ||
@@ -419,8 +445,280 @@ class PostgresAcademicRepository:
                 "total": int(rows[0]["total"]) if rows else 0,
                 "limit": limit,
                 "offset": offset,
+                "period_revision": period.revision,
                 "sections": [dict(row) for row in section_rows],
             }
+
+    def _roster_period_in(self, db, period_id, expected_period_revision):
+        period = self.period_in(db, period_id, lock=True)
+        if period.revision != expected_period_revision:
+            raise AcademicError(
+                409, "roster_version_conflict", "Academic data changed; reload the roster."
+            )
+        constraints = self.record_in(db, period_id, "constraints", "rules")
+        if constraints is None:
+            raise AcademicError(409, "roster_unavailable", "Period enrollment rules are missing.")
+        record = self.envelope(constraints).record
+        if not isinstance(record, AcademicConstraints):
+            raise AcademicError(409, "roster_unavailable", "Period enrollment rules are invalid.")
+        return period, constraints, record
+
+    def _roster_used_in_other_period(self, db, period_id, student_id):
+        return (
+            db.scalar(
+                text("""
+            SELECT 1 FROM classsync_academic.records r
+            WHERE r.tenant_id=:tenant AND r.owner_uid=:owner AND r.kind='constraints'
+              AND r.period_id<>:period
+              AND EXISTS (
+                  SELECT 1 FROM jsonb_array_elements(r.payload::jsonb->'enrollments') e
+                  WHERE e->>'student_id'=:student
+              )
+            LIMIT 1
+        """),
+                self.params(period_id, student=student_id),
+            )
+            is not None
+        )
+
+    def _roster_enrollment(self, db, period_id, student_id, body):
+        section_row = self.record_in(db, period_id, "sections", body.section_id)
+        section_record = self.envelope(section_row).record if section_row else None
+        section = section_record if isinstance(section_record, AcademicSection) else None
+        rows = (
+            db.execute(
+                text("""
+                SELECT * FROM classsync_academic.records
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND period_id=:period
+                  AND kind='offerings' AND payload::jsonb->>'section_id'=:section
+                ORDER BY id
+            """),
+                self.params(period_id, section=body.section_id),
+            )
+            .mappings()
+            .all()
+        )
+        offerings = [self.envelope(row).record for row in rows]
+        return enrollment_for_section(student_id, body, section, offerings)
+
+    def _set_cohort_binding(self, db, student_id, enrollment):
+        exists = db.scalar(
+            text("SELECT to_regclass('classsync_academic.cohort_bindings') IS NOT NULL")
+        )
+        if not exists:
+            return
+        db.execute(
+            text("""
+            SELECT classsync_academic.set_student_cohort_binding(
+                :student,:cohort,:version)
+        """),
+            {
+                **self.keys,
+                "student": student_id,
+                "cohort": enrollment.entry_cohort_year if enrollment else None,
+                "version": enrollment.curriculum_version_id if enrollment else None,
+            },
+        )
+
+    def _audit_roster_write(self, db, period_id, event_type, student_id, revision):
+        db.execute(
+            text("""
+            SELECT classsync_scheduling.audit_student_roster_write(
+                :period,:event,:student,:revision)
+        """),
+            self.params(
+                period_id,
+                event=event_type,
+                student=student_id,
+                revision=revision,
+            ),
+        )
+
+    def create_roster_student(self, period_id, body: RosterStudentWrite):
+        with self.session(write=True) as db:
+            _, constraints_row, constraints = self._roster_period_in(
+                db, period_id, body.expected_period_revision
+            )
+            if db.scalar(
+                text(
+                    "SELECT 1 FROM classsync_identity.students "
+                    "WHERE tenant_id=:tenant AND id=:student"
+                ),
+                {**self.keys, "student": body.student_id},
+            ):
+                raise AcademicError(
+                    409, "student_id_conflict", "That student ID already exists in this tenant."
+                )
+            if any(item.student_id == body.student_id for item in constraints.enrollments):
+                raise AcademicError(
+                    409,
+                    "student_roster_duplicate",
+                    "That student is already in this period roster.",
+                )
+            enrollment = self._roster_enrollment(db, period_id, body.student_id, body)
+            db.execute(
+                text("""
+                SELECT classsync_identity.manage_student_roster(
+                    'create',:student,NULL,:name,:email,:status)
+            """),
+                {
+                    **self.keys,
+                    "student": body.student_id,
+                    "name": body.full_name,
+                    "email": body.email,
+                    "status": body.enrollment_status,
+                },
+            )
+            next_record = constraints.model_copy(
+                update={"enrollments": [*constraints.enrollments, enrollment]}
+            )
+            self.write_in(
+                db,
+                period_id,
+                RecordWrite(expected_revision=constraints_row["revision"], record=next_record),
+            )
+            self.bump(db, period_id)
+            self._audit_roster_write(
+                db,
+                period_id,
+                "academic.student.created",
+                body.student_id,
+                constraints_row["revision"] + 1,
+            )
+
+    def update_roster_student(self, period_id, student_id, body: RosterStudentWrite):
+        with self.session(write=True) as db:
+            _, constraints_row, constraints = self._roster_period_in(
+                db, period_id, body.expected_period_revision
+            )
+            identity = (
+                db.execute(
+                    text("""
+                SELECT id,person_id FROM classsync_identity.students
+                WHERE tenant_id=:tenant AND id=:student FOR UPDATE
+            """),
+                    {**self.keys, "student": student_id},
+                )
+                .mappings()
+                .one_or_none()
+            )
+            if identity is None:
+                raise AcademicError(404, "student_not_found", "Roster student was not found.")
+            current_enrollment = next(
+                (item for item in constraints.enrollments if item.student_id == student_id), None
+            )
+            if current_enrollment is None:
+                raise AcademicError(
+                    404, "student_not_in_period", "Student is not enrolled in this period."
+                )
+            used_elsewhere = self._roster_used_in_other_period(db, period_id, student_id)
+            if body.student_id != student_id and used_elsewhere:
+                raise AcademicError(
+                    409,
+                    "student_id_period_linked",
+                    "This student ID is used in another period; resolve that roster record first.",
+                )
+            if body.student_id != student_id and db.scalar(
+                text(
+                    "SELECT 1 FROM classsync_identity.students "
+                    "WHERE tenant_id=:tenant AND id=:student"
+                ),
+                {**self.keys, "student": body.student_id},
+            ):
+                raise AcademicError(
+                    409, "student_id_conflict", "That student ID already exists in this tenant."
+                )
+            next_enrollment = self._roster_enrollment(db, period_id, body.student_id, body)
+            if body.student_id != student_id:
+                self._set_cohort_binding(db, student_id, None)
+            other_enrollments = [
+                item for item in constraints.enrollments if item.student_id != student_id
+            ]
+            next_record = constraints.model_copy(
+                update={"enrollments": [*other_enrollments, next_enrollment]}
+            )
+            self.write_in(
+                db,
+                period_id,
+                RecordWrite(expected_revision=constraints_row["revision"], record=next_record),
+                # Cohort bindings are student-wide, so only change one when this
+                # period is the student's sole enrollment.
+                allow_cohort_change=not used_elsewhere,
+            )
+            db.execute(
+                text("""
+                SELECT classsync_identity.manage_student_roster(
+                    'update',:student,:new_student,:name,:email,:status)
+            """),
+                {
+                    **self.keys,
+                    "student": student_id,
+                    "new_student": body.student_id,
+                    "name": body.full_name,
+                    "email": body.email,
+                    "status": body.enrollment_status,
+                },
+            )
+            self.bump(db, period_id)
+            self._audit_roster_write(
+                db,
+                period_id,
+                "academic.student.updated",
+                body.student_id,
+                constraints_row["revision"] + 1,
+            )
+
+    def delete_roster_student(self, period_id, student_id, expected_period_revision):
+        with self.session(write=True) as db:
+            _, constraints_row, constraints = self._roster_period_in(
+                db, period_id, expected_period_revision
+            )
+            if (
+                db.scalar(
+                    text(
+                        "SELECT 1 FROM classsync_identity.students "
+                        "WHERE tenant_id=:tenant AND id=:student FOR UPDATE"
+                    ),
+                    {**self.keys, "student": student_id},
+                )
+                is None
+            ):
+                raise AcademicError(404, "student_not_found", "Roster student was not found.")
+            if not any(item.student_id == student_id for item in constraints.enrollments):
+                raise AcademicError(
+                    404, "student_not_in_period", "Student is not enrolled in this period."
+                )
+            used_elsewhere = self._roster_used_in_other_period(db, period_id, student_id)
+            if not used_elsewhere:
+                self._set_cohort_binding(db, student_id, None)
+            next_record = constraints.model_copy(
+                update={
+                    "enrollments": [
+                        item for item in constraints.enrollments if item.student_id != student_id
+                    ]
+                }
+            )
+            self.write_in(
+                db,
+                period_id,
+                RecordWrite(expected_revision=constraints_row["revision"], record=next_record),
+            )
+            if not used_elsewhere:
+                db.execute(
+                    text("""
+                    SELECT classsync_identity.manage_student_roster(
+                        'delete',:student,NULL,NULL,NULL,NULL)
+                """),
+                    {**self.keys, "student": student_id},
+                )
+            self.bump(db, period_id)
+            self._audit_roster_write(
+                db,
+                period_id,
+                "academic.student.deleted",
+                student_id,
+                constraints_row["revision"] + 1,
+            )
 
     def record_in(self, db, period_id, kind, record_id):
         return (
@@ -436,7 +734,7 @@ class PostgresAcademicRepository:
             .one_or_none()
         )
 
-    def write_in(self, db, period_id, body):
+    def write_in(self, db, period_id, body, *, allow_cohort_change=False):
         record = body.record
         data_mode = db.scalar(
             text("""
@@ -461,7 +759,7 @@ class PostgresAcademicRepository:
             row = self.record_in(db, period_id, kind, identity)
             return self.envelope(row).record if row else None
 
-        validate_record(record, period_id, lookup)
+        validate_record(record, period_id, lookup, allow_cohort_change=allow_cohort_change)
         if record.kind == "constraints":
             has_registry = (
                 db.scalar(
@@ -472,13 +770,16 @@ class PostgresAcademicRepository:
             )
             for enrollment in record.enrollments:
                 if not enrollment.curriculum_version_id:
-                    if has_registry and db.scalar(
+                    existing_binding = has_registry and db.scalar(
                         text("""
                         SELECT 1 FROM classsync_academic.cohort_bindings
                         WHERE tenant_id=:tenant AND owner_uid=:owner AND student_id=:student
                     """),
                         {**self.keys, "student": enrollment.student_id},
-                    ):
+                    )
+                    if existing_binding and allow_cohort_change:
+                        self._set_cohort_binding(db, enrollment.student_id, enrollment)
+                    elif existing_binding:
                         raise AcademicError(
                             409,
                             "cohort_immutable",
@@ -512,11 +813,14 @@ class PostgresAcademicRepository:
                     enrollment.entry_cohort_year,
                     enrollment.curriculum_version_id,
                 ):
-                    raise AcademicError(
-                        409,
-                        "cohort_immutable",
-                        "Student curriculum binding survives term/enrollment changes.",
-                    )
+                    if allow_cohort_change:
+                        self._set_cohort_binding(db, enrollment.student_id, enrollment)
+                    else:
+                        raise AcademicError(
+                            409,
+                            "cohort_immutable",
+                            "Student curriculum binding survives term/enrollment changes.",
+                        )
         payload = encode(record.model_dump(mode="json"))
         params = self.params(
             period_id,

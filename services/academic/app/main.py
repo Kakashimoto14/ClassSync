@@ -8,6 +8,7 @@ from classync_contracts.academic import (
     CalendarWrite,
     PeriodCreate,
     RecordWrite,
+    RosterStudentWrite,
 )
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
 from classync_contracts.models import HealthResponse
@@ -177,6 +178,39 @@ def roster(
         year_level=year_level,
         section_id=section_id,
     )
+
+
+@app.post(
+    "/api/v1/academic/periods/{period_id}/roster",
+    status_code=201,
+)
+def create_roster_student(period_id: str, body: RosterStudentWrite, request: Request):
+    _, owner = authorize(request, False)
+    connected_repository(request, owner).create_roster_student(period_id, body)
+    return {"created": True}
+
+
+@app.put("/api/v1/academic/periods/{period_id}/roster/{student_id}")
+def update_roster_student(
+    period_id: str, student_id: str, body: RosterStudentWrite, request: Request
+):
+    _, owner = authorize(request, False)
+    connected_repository(request, owner).update_roster_student(period_id, student_id, body)
+    return {"updated": True}
+
+
+@app.delete("/api/v1/academic/periods/{period_id}/roster/{student_id}")
+def delete_roster_student(
+    period_id: str,
+    student_id: str,
+    request: Request,
+    expected_period_revision: int = Query(ge=1),
+):
+    _, owner = authorize(request, False)
+    connected_repository(request, owner).delete_roster_student(
+        period_id, student_id, expected_period_revision
+    )
+    return {"deleted": True}
 
 
 @app.put(

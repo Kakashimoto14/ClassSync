@@ -25,9 +25,7 @@ def test_academic_period_migration_runs_only_after_non_bypass_migrator_role(monk
         calls.append(("migrate", kwargs))
 
     monkeypatch.setattr("scripts.postgres_academic_period_qualification.migrate", migrate)
-    migrate_as_migrator(
-        Session(), "classync_migrator_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    )
+    migrate_as_migrator(Session(), "classync_migrator_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
     assert calls[0] == "SET LOCAL ROLE classync_migrator_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     assert "rolsuper" in calls[1] and "rolbypassrls" in calls[1]
@@ -79,10 +77,8 @@ def test_synthetic_provider_fixture_requires_unique_student_records():
     )
 
     with pytest.raises(RuntimeError, match="distinct synthetic student IDs"):
-        require_unique_student_bindings(
-            [("uid-one", "student-a"), ("uid-two", "student-a")]
-        )
+        require_unique_student_bindings([("uid-one", "student-a"), ("uid-two", "student-a")])
 
 
 def test_provider_qualification_uses_current_alembic_head():
-    assert current_migration_head() == "0024_academic_record_deletion_audit"
+    assert current_migration_head() == "0025_student_roster_crud"
