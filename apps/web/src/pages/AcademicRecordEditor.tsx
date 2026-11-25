@@ -31,6 +31,10 @@ const clock = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2,
 const comma = (text: string) => text.split(',').map(v => v.trim()).filter(Boolean);
 const timeSlots = Array.from({ length: 48 }, (_, index) => index * 30);
 const endTimeSlots = [...timeSlots.slice(1), 1440];
+const referencePlaceholders: Record<string, string> = {
+  verification_reference: 'e.g., CDM Academic Calendar AY 2026-2027 · Registrar Memo',
+  shared_scope_reference: 'e.g., ICS/IBE/ITE Joint Room & Faculty Review – 1st Sem',
+};
 
 function CommaField({ label, initial, onChange }: { label: string; initial: string; onChange: (text: string) => void }) {
   const [text, setText] = useState(initial);
@@ -62,12 +66,13 @@ export function WeeklyWindows({ label, value, onChange }: { label: string; value
     const remaining = value.filter(window => window.start !== current.start || window.end !== current.end);
     onChange([...remaining, ...next.days.map(day => ({ day, start: next.start!, end: next.end! }))]);
   };
-  return <fieldset className="academic-windows"><legend>{label}</legend>
+  return <fieldset className="academic-windows"><legend>{label} <span className="academic-field-indicator" aria-hidden="true">Required for scheduling readiness</span></legend>
+    <p className="muted">Enter the verified days and times that apply. Start and end become required when a day is selected.</p>
     {!value.length && !drafts.length && <p className="muted">No windows supplied.</p>}
     {rows.map((w, i) => <div className="academic-window" key={w.saved ? `${w.start}:${w.end}` : `new:${i}`}>
       <fieldset className="academic-day-options"><legend>Days · window {i + 1}</legend>{dayNames.map((day, dayIndex) => <label className={`academic-checkbox${w.days.includes(dayIndex) ? ' is-selected' : ''}`} key={day}><input type="checkbox" aria-label={`${label} ${day} ${i + 1}`} checked={w.days.includes(dayIndex)} onChange={e => updateGroup(i, current => ({ ...current, days: e.target.checked ? [...current.days, dayIndex] : current.days.filter(selected => selected !== dayIndex) }))}/>{day.slice(0, 3)}</label>)}</fieldset>
-      <label>Start<select aria-label={`${label} start ${i + 1}`} required={w.days.length > 0} value={w.start ?? ''} onChange={e => updateGroup(i, current => ({ ...current, start: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose start time</option>{timeSlots.map(slot => <option key={slot} value={slot}>{clock(slot)}</option>)}</select></label>
-      <label>End<select aria-label={`${label} end ${i + 1}`} required={w.days.length > 0} disabled={w.end === 1440} value={w.end ?? ''} onChange={e => updateGroup(i, current => ({ ...current, end: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose end time</option>{endTimeSlots.map(slot => <option key={slot} value={slot}>{slot === 1440 ? '24:00 · midnight' : clock(slot)}</option>)}</select></label>
+      <label>Start <span className="academic-field-indicator" aria-hidden="true">{w.days.length ? 'Required' : 'Optional'}</span><select aria-label={`${label} start ${i + 1}`} required={w.days.length > 0} value={w.start ?? ''} onChange={e => updateGroup(i, current => ({ ...current, start: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose start time</option>{timeSlots.map(slot => <option key={slot} value={slot}>{clock(slot)}</option>)}</select></label>
+      <label>End <span className="academic-field-indicator" aria-hidden="true">{w.days.length ? 'Required' : 'Optional'}</span><select aria-label={`${label} end ${i + 1}`} required={w.days.length > 0} disabled={w.end === 1440} value={w.end ?? ''} onChange={e => updateGroup(i, current => ({ ...current, end: e.target.value ? Number(e.target.value) : null }))}><option value="">Choose end time</option>{endTimeSlots.map(slot => <option key={slot} value={slot}>{slot === 1440 ? '24:00 · midnight' : clock(slot)}</option>)}</select></label>
       <Button type="button" variant="ghost" aria-label={`Remove ${label.toLowerCase()} window ${i + 1}`} onClick={() => w.saved ? onChange(value.filter(window => window.start !== w.start || window.end !== w.end)) : setDrafts(drafts.filter((_, draftIndex) => draftIndex !== i - grouped.length))}>Remove</Button>
       <label className="academic-checkbox"><input type="checkbox" aria-label={`${label} ends at midnight ${i + 1}`} checked={w.end === 1440} onChange={e => updateGroup(i, current => ({ ...current, end: e.target.checked ? 1440 : 720 }))}/>Ends at midnight</label>
       {w.start !== null && w.end !== null && w.end <= w.start && <p className="academic-field-error">End must be later than start.</p>}
@@ -153,6 +158,10 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
       if (['weekly_minutes_override', 'patterns_override'].includes(name)) next.override_requirements_verified = false;
     } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'operating_windows') {
       next.operating_windows_verified = false;
+    } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'verification_reference') {
+      next.operating_windows_verified = false;
+    } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'shared_scope_reference') {
+      next.shared_scope_verified = false;
     }
     return next;
   });
@@ -181,9 +190,9 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
     }
     return rows.map(r => ({ id: r.id, label: academicLabel(r, snapshot) }));
   };
-  const text = (label: string, name: string, value: string | null | undefined, required = false, disabled = false) => <label>{label}<input name={name} required={required} disabled={disabled} value={value ?? ''} onChange={e => update(name, e.target.value || (required ? '' : null))}/></label>;
-  const number = (label: string, name: string, value: number | null | undefined, step = 1, min = 0) => <label>{label}<input name={name} type="number" min={min} step={step} value={value ?? ''} onChange={e => update(name, e.target.value === '' ? null : Number(e.target.value))}/></label>;
-  const check = (label: string, name: string, value: boolean | undefined) => <label className="academic-checkbox"><input type="checkbox" checked={value ?? false} onChange={e => update(name, e.target.checked)}/>{label}</label>;
+  const text = (label: string, name: string, value: string | null | undefined, required = false, disabled = false) => <label>{label} <span className="academic-field-indicator" aria-hidden="true">{required ? 'Required' : 'Optional'}</span><input name={name} required={required} disabled={disabled} value={value ?? ''} placeholder={referencePlaceholders[name] ?? (required ? `Enter ${label.toLowerCase()}` : 'Optional')} onChange={e => update(name, e.target.value || (required ? '' : null))}/></label>;
+  const number = (label: string, name: string, value: number | null | undefined, step = 1, min = 0) => <label>{label} <span className="academic-field-indicator" aria-hidden="true">Optional</span><input name={name} type="number" min={min} step={step} value={value ?? ''} placeholder="Optional" onChange={e => update(name, e.target.value === '' ? null : Number(e.target.value))}/></label>;
+  const check = (label: string, name: string, value: boolean | undefined) => <label className="academic-checkbox"><input type="checkbox" checked={value ?? false} onChange={e => update(name, e.target.checked)}/>{label} <span className="academic-field-indicator" aria-hidden="true">Optional</span></label>;
   async function submit(event: FormEvent) {
     event.preventDefault(); if (active.current) return;
     active.current = true; setBusy(true); setError('');
@@ -208,10 +217,20 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
           <p className="muted">This saved program is not in the current supplied catalog. Its existing identity is preserved; review the source before changing it.</p>
           <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
           <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label</option></select></label>
+        </> : existing ? <>
+          <p className="muted">This program started from the supplied catalog. Edit its details for this academic period; the stable record ID remains unchanged.</p>
+          <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
+          <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label</option></select></label>
         </> : <>
-          <label>Program from supplied catalog<select required={!existing} disabled={Boolean(existing)} value={catalogProgram?.id ?? ''} onChange={e => { const selected = suppliedAcademicProgramCatalog.find(item => item.id === e.target.value); if (selected) setRecord({ ...selected, kind: 'programs', active: true }); }}><option value="">Choose a configured program</option>{suppliedAcademicProgramCatalog.filter(item => existing ? item.id === record.id : !savedPrograms.some(saved => saved.id === item.id)).map(item => <option key={item.id} value={item.id}>{item.acronym} · {item.name}</option>)}</select></label>
-          <p className="muted">Only programs not already saved in this period are offered. This repository catalog is supplied data, not yet Registrar-verified; selecting a program does not confirm it is active for this term.</p>
-          {catalogProgram && <dl className="academic-program-preview"><div><dt>Institute</dt><dd>{record.institute}</dd></div><div><dt>Section format</dt><dd>{record.section_policy === 'custom' ? 'Program-specific label' : 'Year level and section letter'}</dd></div></dl>}
+          <label>Program suggestion <span className="academic-field-indicator" aria-hidden="true">Optional</span><select value={catalogProgram?.id ?? ''} onChange={e => { if (e.target.value === '__custom__') { setRecord({ id: crypto.randomUUID(), kind: 'programs', acronym: '', name: '', institute: '', section_policy: 'degree', active: true }); return; } const selected = suppliedAcademicProgramCatalog.find(item => item.id === e.target.value); if (selected) setRecord({ ...selected, kind: 'programs', active: true }); }}><option value="">Choose a supplied suggestion</option>{suppliedAcademicProgramCatalog.filter(item => !savedPrograms.some(saved => saved.id === item.id)).map(item => <option key={item.id} value={item.id}>{item.acronym} · {item.name}</option>)}<option value="__custom__">Create another program</option></select></label>
+          {catalogProgram ? <>
+            <p className="muted">The supplied catalog is editable starting data and is not Registrar-verified.</p>
+            <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
+            <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label</option></select></label>
+          </> : <>
+            <div className="academic-field-grid">{text('Program acronym', 'acronym', record.acronym, true)}{text('Program name', 'name', record.name, true)}{text('Institute', 'institute', record.institute, true)}</div>
+            <label>Section naming policy<select value={record.section_policy ?? 'degree'} onChange={e => update('section_policy', e.target.value)}><option value="degree">Structured year and section letter</option><option value="custom">Program-specific label</option></select></label>
+          </>}
         </>}
       </>}
       {record.kind === 'subjects' && <>
@@ -250,7 +269,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         {record.alias && <p>{record.alias}{record.alias_unconfirmed ? ' · unconfirmed label' : ''}</p>}
         <label>Known operational condition<select value={record.condition ?? 'unknown'} onChange={e => update('condition', e.target.value)}><option value="unknown">Unknown / unverified</option><option value="operational">Confirmed operational</option><option value="maintenance">Maintenance / unavailable</option></select></label>
         {check('Explicitly eligible for scheduling', 'schedulable', record.schedulable)}
-        <div className="academic-field-grid"><label>Room type<select disabled={cdm} value={record.room_type ?? ''} onChange={e => update('room_type', e.target.value || null)}><option value="">Unspecified</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{number('Capacity (if supplied)', 'capacity', record.capacity, 1, 1)}</div>
+        <div className="academic-field-grid"><label>Room type<select value={record.room_type ?? ''} onChange={e => update('room_type', e.target.value || null)}><option value="">Unspecified</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{number('Capacity (if supplied)', 'capacity', record.capacity, 1, 1)}</div>
         {cdm && <p className="muted">The inventory designation is a classification only. Facilities must verify the room type, operation, equipment, capacity and availability separately.</p>}
         {check('Room type is verified', 'type_verified', record.type_verified)}{check('Capacity is verified', 'capacity_verified', record.capacity_verified)}
         <CommaField label="Equipment (comma-separated)" initial={record.equipment?.join(', ') ?? ''} onChange={value => update('equipment', comma(value))}/>{check('Equipment list is verified', 'equipment_verified', record.equipment_verified)}
@@ -278,9 +297,19 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         </details>
       </>}
       {record.kind === 'constraints' && <>
+        <Button type="button" variant="secondary" onClick={() => setRecord(current => current.kind === 'constraints' ? {
+          ...current,
+          operating_windows: [0, 1, 2, 3, 4, 5].map(day => ({ day, start: 420, end: 1260 })),
+          transition_buffer_minutes: 10,
+          verification_reference: 'CDM Academic Calendar AY 2026-2027 · Registrar Memo',
+          shared_scope_reference: 'ICS/IBE/ITE Joint Room & Faculty Review – 1st Sem',
+          operating_windows_verified: false,
+          shared_scope_verified: false,
+        } : current)}>Apply Standard Campus Defaults</Button>
+        <p className="muted">Fills editable suggestions only. Confirm the calendar, teaching hours, transition time, and review references before checking verification and saving.</p>
         <WeeklyWindows label="Operating hours" value={record.operating_windows ?? []} onChange={v => update('operating_windows', v)}/>
         {check('Operating windows are approved for this academic period', 'operating_windows_verified', record.operating_windows_verified)}{text('Calendar/rules source/reference', 'verification_reference', record.verification_reference, record.operating_windows_verified)}
-        <label>Transition buffer<select value={record.transition_buffer_minutes ?? 0} onChange={e => update('transition_buffer_minutes', Number(e.target.value))}>{[0, 30, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}</select></label>
+        <label>Transition buffer <span className="academic-field-indicator" aria-hidden="true">Required</span><select aria-label="Transition buffer" value={record.transition_buffer_minutes ?? 0} onChange={e => update('transition_buffer_minutes', Number(e.target.value))}>{[0, 10, 30, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}</select><small className="muted">Time reserved between consecutive room or faculty assignments.</small></label>
         {check('I have supplied all intended offerings for this period', 'all_intended_offerings_supplied', record.all_intended_offerings_supplied)}
         <p className="muted">This is an administrator scope declaration, not independent verification of school-wide coverage.</p>
         <p className="muted">Include shared ICS, IBE and ITE rooms/faculty/locked sessions in this same period. Separate periods are not checked against each other.</p>
@@ -296,7 +325,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
     </fieldset>
     {error && <p role="alert" className="academic-field-error">{error}</p>}
     {error && onReload && <><Button type="button" variant="secondary" onClick={onReload}>Reload saved records</Button><p className="muted">Reload discards this unsaved form and retrieves the server-confirmed records.</p></>}
-    <div className="draft-actions"><Button type="submit" disabled={busy}>{busy ? 'Saving academic record…' : 'Save Record'}</Button><Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>Cancel</Button></div>
+    <div className="draft-actions"><Button type="submit" disabled={busy} loading={busy}>{busy ? 'Saving academic record…' : 'Save Record'}</Button><Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>Cancel</Button></div>
     <p className="muted">Existing generated drafts keep their original snapshots. Current-record edits do not rewrite them.</p>
   </form>;
 }

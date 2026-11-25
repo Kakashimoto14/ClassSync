@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import type { AcademicKind, AcademicSnapshot } from '../lib/academic-api';
+import type { AcademicKind, AcademicReadiness, AcademicRecord, AcademicSnapshot } from '../lib/academic-api';
 import { academicLabel, academicPath, academicTabs } from '../lib/academic-labels';
 import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
@@ -56,6 +56,7 @@ function recordSummary(record: AcademicSnapshot['records'][number]['record']): s
 
 export function AcademicPeriodSetup({
   snapshot,
+  readiness,
   editing,
   editingKind,
   onEdit,
@@ -64,6 +65,7 @@ export function AcademicPeriodSetup({
   onReload,
 }: {
   snapshot: AcademicSnapshot;
+  readiness?: AcademicReadiness | null;
   editing: string | null;
   editingKind: AcademicKind;
   onEdit: (kind: AcademicKind, id: string) => void;
@@ -76,6 +78,67 @@ export function AcademicPeriodSetup({
     snapshot.records.some((entry) => entry.record.kind === tab.kind),
   ).length;
   const startedAreas = populatedAreas + Number(Boolean(snapshot.period.calendar));
+  const records = <Kind extends AcademicKind>(kind: Kind): Extract<AcademicRecord, { kind: Kind }>[] =>
+    snapshot.records
+      .filter((entry) => entry.record.kind === kind)
+      .map((entry) => entry.record as Extract<AcademicRecord, { kind: Kind }>);
+  const constraints = records('constraints').find((record) => record.kind === 'constraints');
+  const programs = records('programs');
+  const subjects = records('subjects').filter((record) => record.kind === 'subjects');
+  const sections = records('sections').filter((record) => record.kind === 'sections');
+  const faculty = records('faculty').filter((record) => record.kind === 'faculty');
+  const resources = records('resources').filter((record) => record.kind === 'resources');
+  const offerings = records('offerings').filter((record) => record.kind === 'offerings');
+  const steps = [
+    {
+      title: 'Academic Period & Scheduling Constraints',
+      kind: 'constraints' as const,
+      count: `${snapshot.period.calendar ? 'Calendar saved' : 'Calendar missing'} · ${records('constraints').length} rule set`,
+      started: Boolean(snapshot.period.calendar || records('constraints').length),
+      ready: Boolean(snapshot.period.calendar && constraints?.kind === 'constraints' && constraints.operating_windows_verified && constraints.shared_scope_verified),
+      detail: 'Set the approved calendar, operating windows, transition time, and shared-scope references.',
+    },
+    {
+      title: 'Programs & Curriculum Subjects',
+      kind: 'subjects' as const,
+      count: `${programs.length} programs · ${subjects.length} subjects`,
+      started: programs.length + subjects.length > 0,
+      ready: programs.length > 0 && subjects.length > 0 && subjects.every((subject) => subject.curriculum_review_verified && subject.contact_minutes_verified),
+      detail: 'Review the editable program catalog and enter subjects from approved curriculum sources.',
+    },
+    {
+      title: 'Sections & Student Roster',
+      kind: 'sections' as const,
+      count: `${sections.length} sections`,
+      started: sections.length > 0,
+      ready: sections.length > 0 && sections.every((section) => section.identity_verified && section.cohort_assignment_verified && section.population_verified && (section.population ?? 0) > 0),
+      detail: 'Set up sections by year; student enrollment uses the verified roster onboarding process.',
+    },
+    {
+      title: 'Faculty & Availability',
+      kind: 'faculty' as const,
+      count: `${faculty.length} faculty records`,
+      started: faculty.length > 0,
+      ready: faculty.length > 0 && faculty.every((member) => member.eligibility_verified && member.availability_verified && member.workload_verified),
+      detail: 'Record verified subject eligibility, workload limits, and weekly availability.',
+    },
+    {
+      title: 'Campus Rooms & Resource Metadata',
+      kind: 'resources' as const,
+      count: `${resources.length} room records`,
+      started: resources.length > 0,
+      ready: resources.length > 0 && resources.every((room) => room.condition === 'operational' && room.schedulable && room.type_verified && room.capacity_verified && room.availability_verified),
+      detail: 'Review each room’s verified type, capacity, operational condition, and availability.',
+    },
+    {
+      title: 'Subject Offerings & Schedule Generation',
+      kind: 'offerings' as const,
+      count: `${offerings.length} offerings`,
+      started: offerings.length > 0,
+      ready: offerings.length > 0 && offerings.every((offering) => offering.term_offering_verified) && readiness?.ready === true,
+      detail: 'Confirm term offerings, then validate readiness before generating a schedule draft.',
+    },
+  ];
 
   return (
     <section className="academic-setup" aria-labelledby="academic-setup-title">
@@ -103,6 +166,32 @@ export function AcademicPeriodSetup({
         <summary>Calendar setup</summary>
         <AcademicCalendarEditor snapshot={snapshot} onSaved={onSaved} open={!snapshot.period.calendar} />
       </details>
+
+      <ol className="academic-setup__steps" aria-label="Six setup steps">
+        {steps.map((step, index) => {
+          const count = records(step.kind).length;
+          const status = step.ready ? 'Ready' : step.started ? 'In progress' : 'Not started';
+          return (
+            <li className="academic-setup__step" key={step.title}>
+              <div className="academic-setup__step-heading">
+                <span className="academic-setup__step-number">{index + 1}</span>
+                <StatusBadge tone={step.ready ? 'success' : count ? 'info' : 'warning'}>{status}</StatusBadge>
+              </div>
+              <h3>{step.title}</h3>
+              <p>{step.detail}</p>
+              <p className="academic-setup__step-count">{step.count}</p>
+              <Link className="button button--secondary" to={academicPath(step.kind, snapshot.period.id)}>
+                {count ? 'Manage' : 'Set up'} <span aria-hidden="true">→</span>
+              </Link>
+              {step.kind === 'offerings' && (
+                <Link to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(snapshot.period.id)}`}>
+                  Generate from this period
+                </Link>
+              )}
+            </li>
+          );
+        })}
+      </ol>
 
       <nav className="academic-setup__jump" aria-label="Academic setup areas">
         {academicTabs.map((tab) => (

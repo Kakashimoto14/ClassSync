@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { TeacherRequestOverview } from '../components/scheduling/TeacherRequestOverview';
 import { Button } from '../components/ui/Button';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import {
   addDays,
   calendarDateLabel,
@@ -240,7 +241,10 @@ export function RoleScheduleWorkspace({
             Retry
           </Button>
           {isPresentation && (
-            <Button variant="secondary" onClick={() => change({ identity: '' })}>
+            <Button
+              variant="secondary"
+              onClick={() => change({ identity: role === 'student' ? 'syn-bsit-3-A' : '' })}
+            >
               Reset sample identity
             </Button>
           )}
@@ -271,7 +275,7 @@ export function RoleScheduleWorkspace({
           </details>
         </div>
       )}
-      {loading && !data && <p role="status">Loading your timetable…</p>}
+      {loading && !data && <ClassSyncSkeleton layout="timetable" label="Loading your timetable" />}
       {!loading && !error && (unpublished || !data) && (
         <div className="workspace-card ux-empty">
           {presentationEnabled && !isPresentation && (
@@ -549,7 +553,7 @@ export function RoleScheduleWorkspace({
             {dashboard && <Link to={base + '/schedule'}>Full schedule</Link>}
           </div>
           {loading ? (
-            <p role="status">Loading selected day…</p>
+            <ClassSyncSkeleton rows={2} label="Loading selected day" />
           ) : agenda.length ? (
             agenda.map((o) => (
               <button className="ux-agenda-row" key={o.id} onClick={() => setSelected(o)}>

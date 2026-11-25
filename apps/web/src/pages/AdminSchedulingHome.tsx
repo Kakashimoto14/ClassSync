@@ -32,6 +32,7 @@ import { appMode } from '../config/runtime-config';
 import { readinessActionForIssue } from '../lib/readiness-navigation';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { ClassSyncInlineSpinner, ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
 export function AdminSchedulingHome() {
   return presentationOnlyBuild ? <PresentationOverview /> : <ConnectedOverview />;
@@ -287,15 +288,7 @@ function ConnectedOverview() {
         })}
       </nav>
 
-      {loading && (
-        <div className="admin-command-skeleton" role="status" aria-label="Loading scheduling data">
-          <span className="visually-hidden">Loading scheduling data…</span>
-          <div className="admin-kpi-ribbon" aria-hidden="true">
-            {[0, 1, 2, 3].map((item) => <div className="admin-kpi-skeleton" key={item} />)}
-          </div>
-          <div className="admin-workflow-skeleton" aria-hidden="true" />
-        </div>
-      )}
+      {loading && <ClassSyncSkeleton layout="kpis" label="Loading scheduling data" />}
 
       {error && (
         <div role="alert" className="workspace-card admin-command-error">
@@ -476,7 +469,7 @@ function ConnectedOverview() {
       {!loading && !error && period && !currentReadiness && (
         <div className="admin-checking-state" role="status" aria-live="polite">
           <span className="admin-inline-skeleton" aria-hidden="true" />
-          <span>Checking academic readiness…</span>
+          <span><ClassSyncInlineSpinner />Checking academic readiness…</span>
         </div>
       )}
     </section>

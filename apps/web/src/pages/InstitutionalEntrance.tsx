@@ -3,6 +3,7 @@ import { AlertCircle, CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCh
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { MotionConfig, motion } from 'motion/react';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
+import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 import { Button } from '../components/ui/Button';
 import { validateLogin, workspaceDestination, type LoginValidationErrors } from '../auth/access';
 import {
@@ -218,7 +219,7 @@ export function InstitutionalEntrance() {
             {title}
           </h1>
           {!available && state.status === 'checking' ? (
-            <p role="status">Checking sign-in availability…</p>
+            <ClassSyncPageLoader label="Checking sign-in availability…" />
           ) : !available ? (
             <>
               <div className="entrance-availability" role="status">
@@ -240,7 +241,7 @@ export function InstitutionalEntrance() {
           ) : (
             <>
               <UniversitySessionPanel />
-              <Suspense fallback={<p role="status">Opening account setup…</p>}>
+              <Suspense fallback={<ClassSyncPageLoader label="Opening account setup…" />}>
                 {[verifyPath, onboardingPath, invitePath].includes(path) &&
                   state.status !== 'authorized' && (
                     <AccountOnboardingPanel entryRole={invited ? 'teacher' : 'student'} />
@@ -624,7 +625,7 @@ function CredentialsForm({
             {notice}
           </p>
         )}
-        <Button type="submit" disabled={busy || !serviceAvailable ||
+        <Button type="submit" loading={busy} disabled={busy || !serviceAvailable ||
           (recovery && cooldownSeconds > 0) ||
           (resetting && (resetCodeChecking || !resetCodeValid))}>
           {busy

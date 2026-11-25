@@ -15,6 +15,7 @@ import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
 import { Button } from '../components/ui/Button';
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import './student-schedule.css';
 
 export function StudentSchedule() {
@@ -278,9 +279,9 @@ export function StudentSchedule() {
           <Button onClick={w.retry}>Try again</Button>
         </section>
       ) : w.loading ? (
-        <p role="status" aria-busy="true">
-          Loading your schedule…
-        </p>
+        <div aria-busy="true">
+          <ClassSyncSkeleton layout="timetable" label="Loading your schedule" />
+        </div>
       ) : !w.data || w.data.status === 'not-published' ? (
         <section className="student-panel">
           <h2>No schedule available yet</h2>

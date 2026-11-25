@@ -7,6 +7,7 @@ import {
   type AccountProfile,
 } from '../auth/account-actions';
 import { useUniversitySession } from '../auth/university-session-context';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { Button } from '../components/ui/Button';
 import { TurnstileWidget } from '../auth/TurnstileWidget';
 import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
@@ -101,7 +102,7 @@ export function AccountProfilePage({
         error ? (
           <Link to="/auth/login">Restore account access</Link>
         ) : (
-          <p role="status">Loading your account…</p>
+          <ClassSyncSkeleton label="Loading your account" />
         )
       ) : (
         <>
@@ -138,7 +139,7 @@ export function AccountProfilePage({
               onChange={(e) => setName(e.target.value)}
             />
             <p>Your account name does not change your university record or permissions.</p>
-            <Button disabled={busy}>{busy ? 'Saving…' : 'Save account name'}</Button>
+            <Button loading={busy} disabled={busy}>{busy ? 'Saving…' : 'Save account name'}</Button>
           </form>
           <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} />
           <div className="draft-actions">

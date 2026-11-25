@@ -10,6 +10,7 @@ import { UniversitySessionProvider } from '../auth/UniversitySessionProvider';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import type { ReactNode } from 'react';
+import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 
 const OperationsPreviewPage = lazy(() =>
   import('../pages/OperationsPreviewPage').then((module) => ({ default: module.OperationsPreviewPage })),
@@ -67,7 +68,7 @@ const ConnectedUpdatesPage = lazy(() =>
 );
 
 function RouteLoading() {
-  return <p className="workspace-card" role="status">Opening your workspace…</p>;
+  return <ClassSyncPageLoader label="Loading your workspace…" />;
 }
 
 function LazyPage({ children }: { children: ReactNode }) {
@@ -77,6 +78,7 @@ function LazyPage({ children }: { children: ReactNode }) {
 function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition }) {
   const { state } = useUniversitySession();
   const location = useLocation();
+  if (state.status === 'checking') return <ClassSyncPageLoader label="Checking university access…" />;
   if (state.status === 'signed-out')
     return (
       <Navigate

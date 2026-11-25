@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { timetableRequest } from '../lib/publication-api';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
 const HISTORY_PAGE_SIZE = 50;
 
@@ -114,7 +115,7 @@ export function PublicationAuditPage() {
         </select>
       </label>
       {error && <p role="alert">{error}</p>}
-      {loading && <p role="status">Loading activity…</p>}
+      {loading && <ClassSyncSkeleton layout="table" label="Loading activity" />}
       {period && !error && !loading && events.length === 0 && (
         <p role="status">No activity is recorded for this period.</p>
       )}

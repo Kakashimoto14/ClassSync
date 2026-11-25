@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import {
   loadCurriculumCatalog,
   type AcademicRecord,
@@ -58,7 +59,7 @@ export function CurriculumSelection({
           </Button>
         </>
       )}
-      {!catalog && !error && <p role="status">Loading curriculum sources…</p>}
+      {!catalog && !error && <ClassSyncSkeleton rows={2} label="Loading curriculum sources" />}
       {catalog && (
         <>
           <label>

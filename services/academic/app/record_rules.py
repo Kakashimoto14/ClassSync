@@ -330,7 +330,6 @@ def validate_record(record, period_id, lookup):
                     "location",
                     "alias",
                     "schedulable",
-                    "room_type",
                     "allowed_program_ids",
                     "allowed_activity_types",
                 )

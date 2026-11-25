@@ -88,6 +88,15 @@
 .academic-day-options legend { width: 100%; }
 .academic-day-options .academic-checkbox { min-height: 40px; padding: 5px 9px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .academic-day-options .academic-checkbox.is-selected { border-color: var(--primary); background: var(--primary-soft); }
+.academic-setup__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.academic-setup__step { display: grid; align-content: start; gap: 9px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.academic-setup__step-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.academic-setup__step-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--primary); background: var(--primary-soft); font-weight: 700; }
+.academic-setup__step h3 { margin: 0; font-size: 1rem; }
+.academic-setup__step p { margin: 0; color: var(--ink-soft); font-size: .875rem; }
+.academic-setup__step .academic-setup__step-count { color: var(--ink); font-weight: 650; }
+.academic-setup__step .button { justify-self: start; }
+.academic-field-indicator { color: var(--ink-soft); font-size: .75rem; font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) {
   .academic-setup-card--editing .academic-record-form { animation: academic-form-enter 160ms ease-out both; }
   .academic-day-options .academic-checkbox { transition: border-color 140ms ease, background-color 140ms ease; }
@@ -104,3 +113,5 @@
   .academic-setup__header, .academic-setup-card__header { flex-direction: column; }
   .academic-setup-card { padding: 14px; }
 }
+@media (max-width: 900px) { .academic-setup__steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .academic-setup__steps { grid-template-columns: 1fr; } }

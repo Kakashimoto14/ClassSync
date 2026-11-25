@@ -14,6 +14,7 @@ import { calendarDateLabel } from '../lib/calendar-model';
 import { studentOccurrence, timeRange } from '../lib/student-presentation';
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { Button } from '../components/ui/Button';
 import { usePublishedRoomDirectory } from '../lib/use-published-room-directory';
 import './student-rooms.css';
@@ -87,8 +88,8 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
       <Button onClick={w.retry}>Try again</Button>
     </div>
   ) : w.loading ? (
-    <div className="student-rooms-state" role="status" aria-busy="true">
-      Loading your rooms…
+    <div className="student-rooms-state" aria-busy="true">
+      <ClassSyncSkeleton label="Loading your rooms" />
     </div>
   ) : null;
   function card(item: StudentRoom) {
@@ -293,7 +294,7 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
               <Building2 aria-hidden="true" />
               <h2>
                 {publishedDirectory.loading
-                  ? 'Loading room directory…'
+                  ? <ClassSyncSkeleton label="Loading room directory" />
                   : 'Room directory unavailable'}
               </h2>
               <p>

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { institutionalRequest } from '../lib/institutional-api';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { periodLabel } from '../lib/workspace-context';
@@ -112,7 +113,7 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
       )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      {!requests && !error && <p role="status">Loading classroom requests…</p>}
+      {!requests && !error && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
       {requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
       {requests?.length && !requests.filter((request) => statusFilter === 'all' || request.status === statusFilter).length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
       {requests?.filter((request) => statusFilter === 'all' || request.status === statusFilter).map((request) => (
@@ -263,7 +264,7 @@ function CreateClassroomRequest() {
       </p>
       <Link to="/teacher/change-requests">Your requests</Link>
       {(error || workspace.error) && <p role="alert">{error || workspace.error}</p>}
-      {workspace.loading && <p role="status">Loading your published classes…</p>}
+      {workspace.loading && <ClassSyncSkeleton layout="table" label="Loading your published classes" />}
       <form className="academic-create-period" onSubmit={(event) => void submit(event)}>
         <div>
           <label htmlFor="request-period">Academic period</label>
@@ -308,7 +309,7 @@ function CreateClassroomRequest() {
         {!workspace.loading && !workspace.error && workspace.records.length === 0 && (
           <p>No assigned published classes in this date range.</p>
         )}
-        {event && !options && !error && <p role="status">Checking eligible rooms…</p>}
+        {event && !options && !error && <ClassSyncSkeleton rows={2} label="Checking eligible rooms" />}
         {options && (
           <div>
             <label htmlFor="request-room">Proposed classroom</label>
@@ -346,6 +347,7 @@ function CreateClassroomRequest() {
         </div>
         <Button
           type="submit"
+          loading={busy}
           disabled={busy || !event || !room || !options || reason.trim().length < 3}
         >
           {busy ? 'Submitting request…' : 'Submit classroom request'}

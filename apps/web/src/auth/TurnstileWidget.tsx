@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { ClassSyncInlineSpinner } from '../components/loading/ClassSyncLoading';
 
 declare global {
   interface Window {
@@ -91,7 +92,7 @@ export const TurnstileWidget = forwardRef<
       aria-label="Human verification"
     >
       <div ref={target} className="turnstile-field__widget" />
-      {configured && status && <span className="entrance-hint" role="status">{status}</span>}
+      {configured && status && <span className="entrance-hint" role="status">{status.startsWith('Loading') && <ClassSyncInlineSpinner />}{status}</span>}
     </div>
   );
 });

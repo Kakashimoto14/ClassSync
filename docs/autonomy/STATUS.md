@@ -2736,3 +2736,54 @@ deprecation warning; `.venv\Scripts\ruff.exe check scripts services packages` �
 database, hosted configuration, or membership record was accessed or changed. No commit or push.
 Next: deploy through the separately authorized release process and verify production membership
 lookups; do not advance into Phase 1/2 here.
+
+## 25 November 2026 07:23 SGT — Phase 1 admin UX and loading states; Phase 2 source gate
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`01d01229430b2284739454468f0fd734182d15f1` (no commit or push). Implemented admin setup overview
+with six linked, ordered steps and saved-record readiness/counts; clarified period and record forms,
+including reviewable campus scheduling defaults; added search/year/section/status filtering and
+20-row pagination where supported. Resource counts reflect actual verification flags. Added
+lightweight ClassSync page, skeleton and inline-button loading states, reduced-motion CSS, and
+wired them across route, academic, admin, teacher, student and account workflows. A focused
+academic validator change lets an admin edit provisional room type while keeping it explicitly
+unverified; regression coverage ensures the edit does not claim verification.
+
+Phase 2 institutional data seeding and bulk verification are BLOCKED on authoritative input:
+repository review found no approved complete BSIT curriculum, numeric room capacities/equipment,
+faculty qualifications/availability, or student roster source. Existing campus inventory includes
+53 spaces, of which source metadata marks 41 schedulable and 12 excluded; no room was falsely
+verified or assigned inferred capacity/type. No seed script or seed tests were added, and no Neon
+or other live data was read or written. Truthful synthetic/presentation labels remain in local
+presentation paths so the product does not imply generated data are official. No student PII was
+created. Responsive/browser/screen-reader manual review remains open.
+
+Files: `docs/autonomy/STATUS.md`; `apps/web/src/academic-management.css`; `apps/web/src/auth/TurnstileWidget.tsx`;
+`apps/web/src/components/loading/ClassSyncLoading.tsx`; `apps/web/src/components/loading/loading.css`;
+`apps/web/src/components/loading/ClassSyncLoading.test.tsx`; `apps/web/src/components/scheduling/PresentationConflictSummary.tsx`;
+`apps/web/src/components/ui/Button.tsx`; `apps/web/src/pages/AcademicCalendarEditor.tsx`;
+`apps/web/src/pages/AcademicGenerationPage.tsx`; `apps/web/src/pages/AcademicManagementPage.test.tsx`;
+`apps/web/src/pages/AcademicManagementPage.tsx`; `apps/web/src/pages/AcademicPeriodSetup.tsx`;
+`apps/web/src/pages/AcademicRecordEditor.tsx`; `apps/web/src/pages/AccountProfilePage.tsx`;
+`apps/web/src/pages/AdminSchedulingHome.tsx`; `apps/web/src/pages/AnnouncementsPage.tsx`;
+`apps/web/src/pages/ClassroomRequestsPage.tsx`; `apps/web/src/pages/ConflictCenterPage.tsx`;
+`apps/web/src/pages/ConnectedRoomsPage.tsx`; `apps/web/src/pages/ConnectedUpdatesPage.tsx`;
+`apps/web/src/pages/CurriculumSelection.tsx`; `apps/web/src/pages/EmailActionPage.tsx`;
+`apps/web/src/pages/InstitutionalEntrance.tsx`; `apps/web/src/pages/ProductScreenPage.tsx`;
+`apps/web/src/pages/PublicationAuditPage.tsx`; `apps/web/src/pages/PublicationPanel.tsx`;
+`apps/web/src/pages/R1Presentation.test.tsx`; `apps/web/src/pages/RoleScheduleWorkspace.tsx`;
+`apps/web/src/pages/ScheduledRooms.tsx`; `apps/web/src/pages/SchedulingDraftPages.tsx`;
+`apps/web/src/pages/StructuredCalendarPage.tsx`; `apps/web/src/pages/StudentHome.tsx`;
+`apps/web/src/pages/StudentRooms.tsx`; `apps/web/src/pages/StudentSchedule.tsx`;
+`apps/web/src/pages/TimetableValidation.tsx`; `apps/web/src/routes/RouteGuard.tsx`;
+`apps/web/src/routes/app-routes.tsx`; `services/academic/app/record_rules.py`;
+`services/academic/tests/test_record_rules.py`.
+
+Verification: `.venv\\Scripts\\python.exe -m pytest` — 1,198 passed (one existing Starlette/httpx
+deprecation warning); `.venv\\Scripts\\ruff.exe check scripts services packages` — passed;
+`.venv\\Scripts\\python.exe scripts/export_scheduling_contracts.py --check` — passed;
+`npm run lint` — passed; `npm run typecheck` — passed; `npm test` — 70 files / 889 tests passed;
+`npm run build` — passed, main JS entry 97.61 kB raw / 26.18 kB gzip; `git diff --check` — passed
+(Git reported only LF-to-CRLF normalization notices). No hosted settings, live database or external
+service was changed. Seed acceptance and end-to-end institutional verification remain pending
+official source data and a separately authorized live-data operation.

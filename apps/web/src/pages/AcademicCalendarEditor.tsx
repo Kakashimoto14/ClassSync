@@ -16,12 +16,12 @@ export function AcademicCalendarEditor({
   open?: boolean;
 }) {
   const c = snapshot.period.calendar;
-  const [year, setYear] = useState(c?.academic_year ?? '');
-  const [semester, setSemester] = useState<'' | 'first' | 'second'>(c?.semester ?? '');
+  const [year, setYear] = useState(c?.academic_year ?? '2026-2027');
+  const [semester, setSemester] = useState<'' | 'first' | 'second'>(c?.semester ?? 'first');
   const [start, setStart] = useState(c?.effective_start ?? '');
   const [end, setEnd] = useState(c?.effective_end ?? '');
   const [midterm, setMidterm] = useState(c?.phases?.find((p) => p.name === 'midterm')?.end ?? '');
-  const [days, setDays] = useState(c?.instructional_days ?? []);
+  const [days, setDays] = useState(c?.instructional_days ?? [0, 1, 2, 3, 4, 5]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   async function submit(e: FormEvent) {
@@ -84,23 +84,25 @@ export function AcademicCalendarEditor({
       <summary>Academic year, semester and instructional calendar</summary>
       <form className="academic-create-period" onSubmit={submit}>
         <p>
-          The existing calendar contract uses Asia/Manila. Enter dates and instructional days from
-          the approved institutional calendar; blank dates and days are never prefilled. Midterm and
+          Timezone is Asia/Manila. Year, semester, and Monday–Saturday are editable starting values;
+          verify them against the approved institutional calendar. Effective dates must come from
+          that source. Midterm and
           Final Term are phases inside the semester. Changing these dates versions the academic
           inputs; existing drafts stay intact and require revalidation.
         </p>
         {!c && <p role="note">No academic calendar is saved for this period yet.</p>}
         <label>
-          Academic year
+          Academic year <span className="academic-field-indicator" aria-hidden="true">Required</span>
           <input
             pattern="[0-9]{4}-[0-9]{4}"
             required
+            placeholder="e.g., 2026-2027"
             value={year}
             onChange={(e) => setYear(e.target.value)}
           />
         </label>
         <label>
-          Semester
+          Semester <span className="academic-field-indicator" aria-hidden="true">Required</span>
           <select
             required
             value={semester}
@@ -112,15 +114,15 @@ export function AcademicCalendarEditor({
           </select>
         </label>
         <label>
-          Effective start
+          Effective start <span className="academic-field-indicator" aria-hidden="true">Required</span>
           <input required type="date" value={start} onChange={(e) => setStart(e.target.value)} />
         </label>
         <label>
-          Effective end
+          Effective end <span className="academic-field-indicator" aria-hidden="true">Required</span>
           <input required type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
         </label>
         <label>
-          Midterm phase ends (optional)
+          Midterm phase ends <span className="academic-field-indicator" aria-hidden="true">Optional</span>
           <input type="date" value={midterm} onChange={(e) => setMidterm(e.target.value)} />
         </label>
         <fieldset aria-describedby="academic-calendar-days-help">
@@ -145,7 +147,7 @@ export function AcademicCalendarEditor({
         <p id="academic-calendar-days-help" className="muted">
           Select the actual teaching days, including Saturday/Sunday only if they are approved.
         </p>
-        <Button disabled={busy || days.length === 0}>
+        <Button disabled={busy || days.length === 0} loading={busy}>
           {busy ? 'Saving calendar…' : 'Save academic calendar'}
         </Button>
         {error && <p role="alert">{error}</p>}

@@ -291,7 +291,7 @@ function PublicationContent({
         >
           Revalidate for publication
         </Button>
-        <Button disabled={state !== 'ready-for-review' || busy} onClick={() => void act(true)}>
+        <Button loading={busy} disabled={state !== 'ready-for-review' || busy} onClick={() => void act(true)}>
           {busy ? 'Publishing…' : 'Publish reviewed timetable'}
         </Button>
       </div>

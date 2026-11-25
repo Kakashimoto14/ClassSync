@@ -3,6 +3,7 @@ import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { calendarDateLabel } from '../lib/calendar-model';
 import { timeRange } from '../lib/student-presentation';
 import { Button } from '../components/ui/Button';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import type { UserRole } from '../types/ui';
 
 export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
@@ -19,7 +20,7 @@ export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
           <Button onClick={w.retry}>Try again</Button>
         </div>
       ) : w.loading ? (
-        <p role="status">Loading schedule updates…</p>
+        <ClassSyncSkeleton layout="rows" label="Loading schedule updates" />
       ) : (
         <>
           <label>

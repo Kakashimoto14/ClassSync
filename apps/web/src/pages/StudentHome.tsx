@@ -15,6 +15,7 @@ import {
   timeRange,
 } from '../lib/student-presentation';
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import './student-home.css';
 
 export function StudentHome({
@@ -139,8 +140,8 @@ export function StudentHome({
           </details>
         </div>
       ) : w.loading && !w.data ? (
-        <div className="student-panel student-loading" role="status" aria-busy="true">
-          Loading your timetable…
+      <div className="student-panel student-loading" aria-busy="true">
+          <ClassSyncSkeleton layout="kpis" label="Loading your timetable" />
           <div />
           <div />
           <div />

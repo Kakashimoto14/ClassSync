@@ -36,7 +36,7 @@ export function IndependentValidation({
     <section className="workspace-card ux-validation">
       <div className="ux-section-heading">
         <h3>Independent conflict check</h3>
-        <Button variant="secondary" disabled={busy} onClick={validate}>
+        <Button variant="secondary" loading={busy} disabled={busy} onClick={validate}>
           {busy ? 'Checking constraints…' : 'Validate timetable'}
         </Button>
       </div>

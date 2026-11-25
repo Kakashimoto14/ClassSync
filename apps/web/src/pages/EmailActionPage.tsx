@@ -81,7 +81,7 @@ export function EmailActionPage() {
               value={confirmPassword} disabled={busy} onChange={(event) => setConfirmPassword(event.target.value)} />
             <PasswordStrengthChecklist password={password} confirmPassword={confirmPassword} />
             {error && <p role="alert">{error}</p>}
-            <Button type="submit" disabled={busy || !passwordStrengthComplete(password, confirmPassword)}>
+            <Button type="submit" loading={busy} disabled={busy || !passwordStrengthComplete(password, confirmPassword)}>
               {busy ? 'Saving…' : 'Save new password'}
             </Button>
           </form>

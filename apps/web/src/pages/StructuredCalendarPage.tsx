@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import type { UserRole } from '../types/ui';
+import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 const StudentSchedule = lazy(() =>
   import('./StudentSchedule').then((module) => ({ default: module.StudentSchedule })),
 );
@@ -9,12 +10,12 @@ const Workspace = lazy(() =>
 export function StructuredCalendarPage(props: { role: UserRole; dashboard?: boolean }) {
   if (props.role === 'student' && !props.dashboard)
     return (
-      <Suspense fallback={<p role="status">Opening your schedule…</p>}>
+      <Suspense fallback={<ClassSyncPageLoader label="Loading class schedule…" />}>
         <StudentSchedule />
       </Suspense>
     );
   return (
-    <Suspense fallback={<p role="status">Opening your schedule…</p>}>
+    <Suspense fallback={<ClassSyncPageLoader label="Loading class schedule…" />}>
       <Workspace {...props} />
     </Suspense>
   );

@@ -23,6 +23,7 @@ import { SaveDraftPanel } from './SchedulingDraftPages';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { WeeklySchedulingPage } from './WeeklySchedulingPage';
 import { IndependentValidation } from './TimetableValidation';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
 export function SchedulingSourcePage() {
   const [search] = useSearchParams();
@@ -327,7 +328,7 @@ function AcademicGenerationPage() {
             ))}
           </select>
         </label>
-        {loading && <p role="status">Loading academic periods…</p>}
+        {loading && <ClassSyncSkeleton layout="kpis" label="Loading academic periods" />}
         {!loading && !periods.length && !error && (
           <section className="generation-empty-state">
             <h3>Start with academic setup</h3>
@@ -343,6 +344,7 @@ function AcademicGenerationPage() {
         {checked && <ReadinessSummary checked={checked} />}
         <Button
           variant={result ? 'secondary' : 'primary'}
+          loading={busy}
           disabled={!checked?.ready || busy}
           onClick={generate}
         >

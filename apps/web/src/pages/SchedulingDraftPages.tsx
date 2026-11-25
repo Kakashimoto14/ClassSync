@@ -16,6 +16,7 @@ const schedulingWorkspaceEnabled = appMode === 'institutional' || schedulingSand
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { draftPath } from '../lib/scheduling-labels';
 import { PublicationPanel } from './PublicationPanel';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
 const created = (value: string) =>
   new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -97,7 +98,7 @@ export function SaveDraftPanel({
               onChange={(e) => setTitle(e.target.value)}
             />
           </label>
-          <Button onClick={save} disabled={busy || !title.trim()}>
+          <Button onClick={save} loading={busy} disabled={busy || !title.trim()}>
             {busy ? 'Saving draft…' : 'Save Draft'}
           </Button>
           <p role="status">
@@ -207,7 +208,7 @@ function DraftListContent({
           Back to Schedule Manager
         </Link>
       </div>
-      {!data && !error && <p role="status">Loading saved drafts…</p>}
+      {!data && !error && <ClassSyncSkeleton layout="table" label="Loading saved drafts" />}
       {error && (
         <div className="scheduler-error" role="alert">
           <p>{error}</p>
@@ -326,7 +327,7 @@ function DraftDetailContent({
       >
         Back to Saved Drafts
       </Link>
-      {!draft && !error && <p role="status">Loading saved timetable…</p>}
+      {!draft && !error && <ClassSyncSkeleton layout="timetable" label="Loading saved timetable" />}
       {error && (
         <div className="scheduler-error" role="alert">
           <p>{error}</p>

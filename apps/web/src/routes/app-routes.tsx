@@ -6,6 +6,7 @@ import { developmentRoutesAvailable, type AppMode } from '../config/app-mode';
 import { AuthPage } from '../pages/AuthPage';
 import { ForbiddenPage, RoleProviderLayout, RoleRoute } from './RouteGuard';
 import { routeDefinitions } from './route-config';
+import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 
 const EmailActionPage = lazy(() =>
   import('../pages/EmailActionPage').then((module) => ({ default: module.EmailActionPage })),
@@ -21,7 +22,7 @@ const NotFoundPage = lazy(() =>
 );
 
 function loadRoute(element: ReactNode) {
-  return <Suspense fallback={<p className="workspace-card" role="status">Opening this page…</p>}>{element}</Suspense>;
+  return <Suspense fallback={<ClassSyncPageLoader label="Loading this page…" />}>{element}</Suspense>;
 }
 
 export function createAppRoutes(mode: AppMode): RouteObject[] {

@@ -10,6 +10,7 @@ import {
   type AcademicKind,
   type AcademicPeriod,
   type AcademicReadiness,
+  type AcademicRecord,
   type AcademicSnapshot,
 } from '../lib/academic-api';
 import { academicLabel, academicPath, academicTabs } from '../lib/academic-labels';
@@ -20,6 +21,7 @@ import { AcademicFixtureImport } from './AcademicFixtureImport';
 import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicPeriodSetup } from './AcademicPeriodSetup';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 const schedulingSandboxEnabled = appMode !== 'presentation';
 
 export function AcademicManagementPage({
@@ -60,9 +62,12 @@ function ManagementContent({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState('AY 2026-2027 · 1st Semester');
   const [includeCatalog, setIncludeCatalog] = useState(true);
   const [recordFilter, setRecordFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [recordSearch, setRecordSearch] = useState('');
+  const [yearFilter, setYearFilter] = useState<'all' | '1' | '2' | '3' | '4'>('all');
+  const [sectionFilter, setSectionFilter] = useState('all');
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<string | null>(null);
   const [editingKind, setEditingKind] = useState<AcademicKind>(kind);
@@ -104,7 +109,7 @@ function ManagementContent({
       </p>
     );
   const current = academicTabs.find((t) => t.kind === kind)!;
-  const setupLanding = location.pathname === '/admin/academic';
+  const setupLanding = location.pathname === '/admin/academic' || location.pathname === '/admin/dashboard';
   async function create(event: FormEvent) {
     event.preventDefault();
     if (active.current || !title.trim()) return;
@@ -139,13 +144,27 @@ function ManagementContent({
     }
   }
   const all = snapshot?.records.filter((e) => e.record.kind === kind) ?? [];
+  const sections = (snapshot?.records ?? []).flatMap((entry) =>
+    entry.record.kind === 'sections' ? [entry.record as AcademicRecord] : [],
+  );
   const matching = snapshot
     ? all.filter((e) => {
-        const inactive = 'active' in e.record && e.record.active === false;
-        return recordFilter === 'all' || (recordFilter === 'inactive' ? inactive : !inactive);
+        const record = e.record;
+        const inactive = 'active' in record && record.active === false;
+        if (recordFilter !== 'all' && (recordFilter === 'inactive' ? !inactive : inactive)) return false;
+        const searchText = `${academicLabel(record as Parameters<typeof academicLabel>[0], snapshot)} ${JSON.stringify(record)}`.toLowerCase();
+        if (recordSearch.trim() && !searchText.includes(recordSearch.trim().toLowerCase())) return false;
+        const relatedSection = record.kind === 'offerings'
+          ? sections.find((section) => section.kind === 'sections' && section.id === record.section_id)
+          : record.kind === 'sections' ? record : undefined;
+        const year = record.kind === 'subjects' ? record.year_level : relatedSection?.kind === 'sections' ? relatedSection.year_level : undefined;
+        if (yearFilter !== 'all' && year !== Number(yearFilter)) return false;
+        if (sectionFilter !== 'all' && (record.kind !== 'offerings' || record.section_id !== sectionFilter)) return false;
+        return true;
       })
     : [];
-  const visible = matching.slice(page * 10, page * 10 + 10);
+  const verifiedRooms = all.filter((entry) => entry.record.kind === 'resources' && entry.record.condition === 'operational' && entry.record.schedulable && entry.record.type_verified && entry.record.capacity_verified && entry.record.availability_verified).length;
+  const visible = matching.slice(page * 20, page * 20 + 20);
   const editRecord = snapshot?.records.find(
     (e) => e.record.kind === editingKind && e.record.id === editing,
   );
@@ -211,6 +230,11 @@ function ManagementContent({
                   New academic period
                 </Button>
               )}
+              {!createOpen && !periods.length && !loading && !error && (
+                <Button disabled={busy} onClick={() => setCreateOpen(true)}>
+                  Create Academic Period
+                </Button>
+              )}
             </div>
             <section
               className="academic-start__checklist"
@@ -264,15 +288,16 @@ function ManagementContent({
             </Button>
           </div>
         )}
-        {loading && <p role="status">Loading academic records…</p>}
-        {(createOpen || (!loading && !error && !periods.length)) && (
+        {loading && <ClassSyncSkeleton label="Loading academic records" />}
+        {createOpen && (
           <form className="academic-create-period" onSubmit={create}>
             <h2>Create academic period</h2>
             <label>
-              Academic period title
+              Academic period title <span className="academic-field-indicator" aria-hidden="true">Required</span>
               <input
                 required
                 maxLength={160}
+                placeholder="AY 2026-2027 · 1st Semester"
                 value={title}
                 disabled={busy}
                 onChange={(e) => setTitle(e.target.value)}
@@ -285,14 +310,14 @@ function ManagementContent({
                 disabled={busy}
                 onChange={(e) => setIncludeCatalog(e.target.checked)}
               />
-              Include the supplied nine-program catalog and 53 row-classified CdM spaces
+              Include the supplied program and room catalog <span className="academic-field-indicator" aria-hidden="true">Optional</span>
             </label>
             <p className="muted">
               No subjects, faculty, sections, operating hours or room capacities are invented. A
               catalog entry does not establish availability or curriculum.
             </p>
             <div className="draft-actions">
-              <Button type="submit" disabled={busy || !title.trim()}>
+              <Button type="submit" disabled={busy || !title.trim()} loading={busy}>
                 {busy ? 'Creating period…' : 'Create Period'}
               </Button>
               {periods.length > 0 && (
@@ -345,7 +370,7 @@ function ManagementContent({
               {periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}
             </p>
             <div className="draft-actions">
-              <Button variant="secondary" disabled={busy} onClick={readiness}>
+              <Button variant="secondary" disabled={busy} loading={busy} onClick={readiness}>
                 {busy ? 'Checking inputs…' : 'Validate Readiness'}
               </Button>
               <Link
@@ -360,6 +385,7 @@ function ManagementContent({
           {setupLanding ? (
             <AcademicPeriodSetup
               snapshot={snapshot}
+              readiness={checked}
               editing={editing}
               editingKind={editingKind}
               onEdit={(nextKind, id) => {
@@ -407,6 +433,28 @@ function ManagementContent({
             <section className="academic-records" aria-label={`${current.label} records`}>
               <div className="academic-list-toolbar">
                 <label>
+                  Search records
+                  <input type="search" value={recordSearch} placeholder={`Search ${current.label.toLowerCase()}`} onChange={(e) => { setRecordSearch(e.target.value); setPage(0); }} />
+                </label>
+                {['subjects', 'sections', 'offerings'].includes(kind) && (
+                  <label>
+                    Year level
+                    <select value={yearFilter} onChange={(e) => { setYearFilter(e.target.value as typeof yearFilter); setPage(0); }}>
+                      <option value="all">All years</option>
+                      {[1, 2, 3, 4].map((year) => <option key={year} value={year}>{year}{year === 1 ? 'st' : year === 2 ? 'nd' : year === 3 ? 'rd' : 'th'} Year</option>)}
+                    </select>
+                  </label>
+                )}
+                {kind === 'offerings' && (
+                  <label>
+                    Section
+                    <select value={sectionFilter} onChange={(e) => { setSectionFilter(e.target.value); setPage(0); }}>
+                      <option value="all">All sections</option>
+                      {sections.map((section) => section.kind === 'sections' && <option key={section.id} value={section.id}>{academicLabel(section, snapshot!)}</option>)}
+                    </select>
+                  </label>
+                )}
+                <label>
                   Record status
                   <select value={recordFilter} onChange={(e) => { setRecordFilter(e.target.value as typeof recordFilter); setPage(0); }}>
                     <option value="all">All records</option>
@@ -425,6 +473,7 @@ function ManagementContent({
                     ? 'Edit Scheduling Constraints'
                     : `Add ${kind === 'faculty' ? 'Faculty' : kind === 'offerings' ? 'Subject Offering' : kind === 'resources' ? 'Resource' : current.label.replace(/s$/, '')}`}
                 </Button>
+                {kind === 'resources' && <p role="status" className="academic-record-summary">{verifiedRooms}/{all.length} rooms verified for scheduling</p>}
               </div>
               {!matching.length && (
                 <p>
@@ -497,7 +546,7 @@ function ManagementContent({
                   </li>
                 ))}
               </ul>
-              {matching.length > 10 && (
+              {matching.length > 20 && (
                 <nav className="draft-actions" aria-label="Academic record pagination">
                   <Button
                     variant="secondary"
@@ -506,12 +555,12 @@ function ManagementContent({
                   >
                     Previous
                   </Button>
-                  <span>
-                    {page * 10 + 1}–{Math.min(page * 10 + 10, matching.length)} of {matching.length}
+                    <span>
+                    {page * 20 + 1}–{Math.min(page * 20 + 20, matching.length)} of {matching.length}
                   </span>
                   <Button
                     variant="secondary"
-                    disabled={(page + 1) * 10 >= matching.length}
+                    disabled={(page + 1) * 20 >= matching.length}
                     onClick={() => setPage((n) => n + 1)}
                   >
                     Next

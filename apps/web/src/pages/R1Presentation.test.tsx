@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { RoleScheduleWorkspace } from './RoleScheduleWorkspace';
@@ -8,6 +8,7 @@ import { readWorkspace, rememberWorkspace } from '../lib/workspace-context';
 import { subscribeTimetable, timetableRequest } from '../lib/publication-api';
 vi.mock('../lib/presentation-sample', async (original) => ({
   ...(await original<typeof import('../lib/presentation-sample')>()),
+  presentationEnabled: true,
   presentationOnlyBuild: true,
 }));
 vi.mock('../lib/publication-api', () => ({
@@ -65,8 +66,12 @@ it('recovers an invalid presentation identity deliberately without substituting 
       <RoleScheduleWorkspace role="student" />
     </MemoryRouter>,
   );
-  expect(await screen.findByRole('alert')).toHaveTextContent('Choose an identity included');
-  fireEvent.click(await screen.findByRole('button', { name: 'Reset sample identity' }));
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent('Choose an identity included');
+  await act(async () => {
+    fireEvent.click(within(alert).getByRole('button', { name: 'Reset sample identity' }));
+  });
+  await waitFor(() => expect(readWorkspace('student').identity).toBe('syn-bsit-3-A'));
   await waitFor(() =>
     expect(document.querySelectorAll('.ux-agenda-row').length).toBeGreaterThan(0),
   );

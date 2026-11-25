@@ -5,6 +5,7 @@ import { usePublishedRoomDirectory } from '../lib/use-published-room-directory';
 import { calendarDateLabel } from '../lib/calendar-model';
 import { timeRange } from '../lib/student-presentation';
 import { Button } from '../components/ui/Button';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
 import type { UserRole } from '../types/ui';
 import './student-rooms.css';
@@ -62,7 +63,7 @@ export function ConnectedRoomsPage({ role, detail = false }: { role: UserRole; d
           </Button>
         </div>
       ) : w.loading || directory.loading ? (
-        <p role="status">Loading rooms…</p>
+        <ClassSyncSkeleton layout="rows" label="Loading rooms" />
       ) : !w.data || w.data.status === 'not-published' ? (
         <p>No authorized published rooms yet.</p>
       ) : detail ? (

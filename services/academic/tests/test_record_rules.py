@@ -1,7 +1,7 @@
 import pytest
 from classync_contracts.academic import PeriodCreate
 
-from services.academic.app.record_rules import AcademicError, adapter, validate_record
+from services.academic.app.record_rules import AcademicError, adapter, catalog_data, validate_record
 from services.academic.app.repository import AcademicRepository
 from services.scheduling.tests.test_calendar import configuration
 
@@ -40,3 +40,21 @@ def test_shared_rules_reject_out_of_scope_references_without_mutating_lookup():
         validate_record(subject, "period", lookup)
     assert denied.value.code == "missing_reference"
     assert seen == [("programs", "private-program")]
+
+
+def test_admin_can_override_provisional_room_type_without_claiming_verification():
+    room_data = catalog_data()[1][0]
+    room = adapter.validate_python({
+        **{
+            key: value
+            for key, value in room_data.items()
+            if key not in {"aliasUnconfirmed", "alias"}
+        },
+        "kind": "resources",
+        "source": "cdm-provisional",
+        "alias": room_data.get("alias"),
+        "alias_unconfirmed": room_data.get("aliasUnconfirmed", False),
+    })
+    changed = room.model_copy(update={"room_type": "computer_lab", "type_verified": False})
+    validate_record(changed, "period", lambda *_: None)
+    assert changed.type_verified is False

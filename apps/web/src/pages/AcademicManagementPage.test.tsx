@@ -123,6 +123,33 @@ describe('persisted academic data management', () => {
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 
+  it('shows six ordered guided steps with saved counts and direct setup links', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    const steps = await screen.findByRole('list', { name: 'Six setup steps' });
+    expect(within(steps).getAllByRole('listitem')).toHaveLength(6);
+    expect(within(steps).getByRole('heading', { name: 'Programs & Curriculum Subjects' })).toBeInTheDocument();
+    expect(within(steps).getByText('1 programs · 1 subjects')).toBeInTheDocument();
+    expect(within(steps).getAllByText('In progress').length).toBeGreaterThan(0);
+    expect(within(steps).getAllByRole('link', { name: 'Set up' })[0]).toHaveAttribute('href', expect.stringContaining('/admin/scheduling-constraints'));
+    expect(within(steps).getByRole('link', { name: 'Manage' })).toHaveAttribute('href', expect.stringContaining('/admin/subjects'));
+  });
+
+  it('offers a prefilled first-period action without pre-filling unverified calendar dates', async () => {
+    vi.mocked(api.listAcademicPeriods).mockResolvedValueOnce({ periods: [] });
+    vi.mocked(api.loadAcademicPeriod).mockResolvedValueOnce(null as never);
+    render(
+      <MemoryRouter initialEntries={['/admin/dashboard']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Create Academic Period' }));
+    expect(screen.getByRole('textbox', { name: 'Academic period title' })).toHaveValue('AY 2026-2027 · 1st Semester');
+  });
+
   it('uses fixed year and letter menus for degree sections', () => {
     render(
       <AcademicRecordEditor
@@ -142,6 +169,23 @@ describe('persisted academic data management', () => {
     ).toHaveLength(27);
   });
 
+  it('applies editable scheduling defaults without marking source checks verified', async () => {
+    render(
+      <AcademicRecordEditor
+        kind="constraints"
+        snapshot={{ ...snapshot, records: [] }}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Apply Standard Campus Defaults' }));
+    expect(screen.getByRole('combobox', { name: 'Transition buffer' })).toHaveValue('10');
+    expect(screen.getByRole('checkbox', { name: 'Operating hours Monday 1' })).toBeChecked();
+    expect(screen.getByRole('textbox', { name: 'Calendar/rules source/reference' })).toHaveValue('CDM Academic Calendar AY 2026-2027 · Registrar Memo');
+    expect(screen.getByRole('checkbox', { name: 'Operating windows are approved for this academic period' })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /Shared ICS\/IBE\/ITE offerings/ })).not.toBeChecked();
+  });
+
   it('creates a period program from the supplied catalog instead of typed labels', async () => {
     render(
       <AcademicRecordEditor
@@ -151,9 +195,9 @@ describe('persisted academic data management', () => {
         onCancel={vi.fn()}
       />,
     );
-    const program = screen.getByRole('combobox', { name: 'Program from supplied catalog' });
+    const program = screen.getByRole('combobox', { name: 'Program suggestion' });
     expect(within(program).queryByRole('option', { name: /BSIT/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('textbox', { name: 'Program acronym' })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Program acronym' })).toBeEnabled();
     fireEvent.change(program, { target: { value: 'bscpe' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save Record' }));
     await waitFor(() => expect(api.saveAcademicRecord).toHaveBeenCalled());
@@ -168,6 +212,21 @@ describe('persisted academic data management', () => {
         }),
       }),
     );
+  });
+
+  it('keeps supplied program details editable after the program is saved', () => {
+    render(
+      <AcademicRecordEditor
+        kind="programs"
+        snapshot={snapshot}
+        existing={snapshot.records[0]}
+        onSaved={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('textbox', { name: 'Program acronym' })).toBeEnabled();
+    expect(screen.getByRole('textbox', { name: 'Program name' })).toBeEnabled();
+    expect(screen.getByRole('textbox', { name: 'Institute' })).toBeEnabled();
   });
 
   it('disables catalog program creation when every supplied entry is already saved', async () => {
@@ -289,23 +348,17 @@ describe('persisted academic data management', () => {
     expect(screen.queryByRole('checkbox', { name: /PRRC 108/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: /PRRC 204/ })).not.toBeInTheDocument();
   });
-  it('starts a missing academic calendar blank and does not invent dates or teaching days', () => {
+  it('prefills editable year, semester and Mon–Sat days without inventing effective dates', () => {
     render(<AcademicCalendarEditor snapshot={snapshot} onSaved={vi.fn()} />);
-    expect(screen.getByRole('textbox', { name: 'Academic year' })).toHaveValue('');
-    expect(screen.getByLabelText('Effective start')).toHaveValue('');
-    expect(screen.getByLabelText('Effective end')).toHaveValue('');
-    for (const day of [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ]) {
-      expect(screen.getByRole('checkbox', { name: day })).not.toBeChecked();
-    }
-    expect(screen.getByRole('button', { name: 'Save academic calendar' })).toBeDisabled();
+    expect(screen.getByRole('textbox', { name: 'Academic year' })).toHaveValue('2026-2027');
+    expect(screen.getByRole('combobox', { name: 'Semester' })).toHaveValue('first');
+    expect(screen.getByLabelText(/Effective start/)).toHaveValue('');
+    expect(screen.getByLabelText(/Effective end/)).toHaveValue('');
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].forEach((day, index) => {
+      if (index < 6) expect(screen.getByRole('checkbox', { name: day })).toBeChecked();
+      else expect(screen.getByRole('checkbox', { name: day })).not.toBeChecked();
+    });
+    expect(screen.getByRole('button', { name: 'Save academic calendar' })).toBeEnabled();
   });
   it('routes calendar and shared-scope blockers to the Administrator input screens', () => {
     const checked = {
@@ -340,6 +393,7 @@ describe('persisted academic data management', () => {
         <AcademicManagementPage />
       </MemoryRouter>,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Create Academic Period' }));
     await screen.findByRole('heading', { name: 'Create academic period' });
     fireEvent.change(screen.getByRole('textbox', { name: 'Academic period title' }), {
       target: { value: 'Entered term' },

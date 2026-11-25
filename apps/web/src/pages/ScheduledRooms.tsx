@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import type { UserRole } from '../types/ui';
 import { Button } from '../components/ui/Button';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 export function ScheduledRooms({ role, roomId }: { role: UserRole; roomId?: string }) {
   const w = useScheduleWorkspace(role);
   const rooms = [...new Map(w.records.map((o) => [o.room.id, o.room])).values()];
@@ -15,7 +16,7 @@ export function ScheduledRooms({ role, roomId }: { role: UserRole; roomId?: stri
         </Link>
         <h1>{room?.name ?? 'Scheduled room'}</h1>
         {w.loading ? (
-          <p role="status">Loading room from your timetable…</p>
+          <ClassSyncSkeleton rows={2} label="Loading room from your timetable" />
         ) : w.error ? (
           <p role="alert">{w.error}</p>
         ) : room ? (
@@ -67,12 +68,10 @@ export function ScheduledRooms({ role, roomId }: { role: UserRole; roomId?: stri
             </Link>
           ))}
         </div>
+      ) : w.loading ? (
+        <ClassSyncSkeleton rows={2} label="Loading scheduled rooms" />
       ) : (
-        <p>
-          {w.loading
-            ? 'Loading scheduled rooms…'
-            : 'No published rooms in this selected context. Room inventory remains available below.'}
-        </p>
+        <p>No published rooms in this selected context. Room inventory remains available below.</p>
       )}
     </details>
   );

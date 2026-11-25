@@ -18,6 +18,7 @@ import { PublicationAuditPage } from './PublicationAuditPage';
 import { StructuredCalendarPage } from './StructuredCalendarPage';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
+import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 import { EmptyState } from '../components/ui/EmptyState';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { rolePath, type RouteDefinition } from '../routes/route-config';
@@ -122,7 +123,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
     'building-detail',
   ].includes(definition.kind);
   return (
-    <Suspense fallback={<p className="workspace-card" role="status">Opening this page…</p>}>
+    <Suspense fallback={<ClassSyncPageLoader label="Loading this page…" />}>
     <AppShell>
       <div className="page-heading">
         <div>

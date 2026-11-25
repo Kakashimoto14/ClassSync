@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { presentationData } from '../../lib/presentation-sample';
 import { Button } from '../ui/Button';
+import { ClassSyncSkeleton } from '../loading/ClassSyncLoading';
 
 export function PresentationConflictSummary() {
   const [sample, setSample] = useState<Awaited<ReturnType<typeof presentationData>>>();
@@ -31,7 +32,7 @@ export function PresentationConflictSummary() {
           </Button>
         </div>
       ) : !sample ? (
-        <p role="status">Loading sample summary…</p>
+        <ClassSyncSkeleton rows={2} label="Loading read-only conflict summary" />
       ) : (
         <>
           <p className="source-label">{sample.metadata.version} · Synthetic · Frozen export</p>

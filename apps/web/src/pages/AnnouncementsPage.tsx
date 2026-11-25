@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { institutionalRequest } from '../lib/institutional-api';
 import { Button } from '../components/ui/Button';
+import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import type { UserRole } from '../types/ui';
 
 interface Announcement {
@@ -150,7 +151,7 @@ export function AnnouncementsPage({ role }: { role: UserRole }) {
                 </label>
               ))}
             </fieldset>
-            <Button disabled={busy || !audience.length}>
+            <Button loading={busy} disabled={busy || !audience.length}>
               {busy ? 'Saving…' : editing ? 'Save announcement' : 'Publish announcement'}
             </Button>
             {editing && (
@@ -161,7 +162,7 @@ export function AnnouncementsPage({ role }: { role: UserRole }) {
           </form>
         </details>
       )}
-      {!rows && !error && <p role="status">Loading announcements…</p>}
+      {!rows && !error && <ClassSyncSkeleton layout="table" label="Loading announcements" />}
       {rows?.length === 0 && <p>No announcements yet.</p>}
       {rows?.map((row) => (
         <article className="workspace-card" key={row.id}>
