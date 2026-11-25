@@ -103,6 +103,24 @@ beforeEach(() => {
 });
 
 describe('persisted academic data management', () => {
+  it('keeps the period picker available when a stale deep-linked period fails to load', async () => {
+    vi.mocked(api.loadAcademicPeriod).mockImplementation((id) =>
+      id === 'defense-ay-2026-2027-first'
+        ? Promise.reject(new Error('Period ID is invalid.'))
+        : Promise.resolve(snapshot),
+    );
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=defense-ay-2026-2027-first']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Set up Entered term' });
+    const picker = screen.getByLabelText('Academic period');
+    expect(picker).toBeEnabled();
+    expect(within(picker).getByRole('option', { name: 'Entered term' })).toBeInTheDocument();
+    expect(api.loadAcademicPeriod).toHaveBeenCalledWith('period-a');
+  });
+
   it('keeps period setup compact with a counted category selector and opens editors inline', async () => {
     render(
       <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
@@ -136,6 +154,47 @@ describe('persisted academic data management', () => {
     expect(within(steps).getAllByText('In progress').length).toBeGreaterThan(0);
     expect(within(steps).getAllByRole('link', { name: 'Set up' })[0]).toHaveAttribute('href', expect.stringContaining('/admin/scheduling-constraints'));
     expect(within(steps).getByRole('link', { name: 'Manage' })).toHaveAttribute('href', expect.stringContaining('/admin/subjects'));
+  });
+
+  it('reports the roster total within the six-step progress checklist', async () => {
+    const rosterSnapshot = structuredClone(snapshot);
+    rosterSnapshot.records.push(
+      {
+        revision: 1,
+        updated_at: period.created_at,
+        updated_by: 'development-academic-sandbox',
+        record: {
+          kind: 'sections',
+          id: 'section-a',
+          period_id: period.id,
+          program_id: 'bsit',
+          year_level: 3,
+          section_letter: 'A',
+        },
+      },
+      {
+        revision: 1,
+        updated_at: period.created_at,
+        updated_by: 'development-academic-sandbox',
+        record: {
+          kind: 'constraints',
+          id: 'rules',
+          enrollments: [
+            { student_id: '24-00101', offering_ids: [] },
+            { student_id: '24-00102', offering_ids: [] },
+          ],
+        },
+      },
+    );
+    vi.mocked(api.loadAcademicPeriod).mockResolvedValueOnce(rosterSnapshot);
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('4 of 6 setup steps have saved information')).toBeInTheDocument();
+    const steps = screen.getByRole('list', { name: 'Six setup steps' });
+    expect(within(steps).getByText('1 sections · 2 students')).toBeInTheDocument();
   });
 
   it('bulk verification updates only unverified schedulable rooms and preserves excluded spaces', async () => {

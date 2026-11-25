@@ -1,6 +1,7 @@
 import { env } from './env';
 import { requireLiveCapability } from '../config/runtime-config';
 import { appMode } from '../config/runtime-config';
+import { firebaseApp } from './firebase';
 import { institutionalRequest } from './institutional-api';
 import type {
   AcademicPeriodList,
@@ -61,11 +62,30 @@ async function academicRequest<T>(path: string, body?: unknown, method = 'GET'):
 export const academicWorkspaceEnabled = appMode !== 'presentation';
 const prefix = appMode === 'sandbox' ? 'sandbox/' : '';
 const base = `academic/${prefix}periods`;
-export const listAcademicPeriods = () => academicRequest<AcademicPeriodList>(base);
+const pendingAcademicReads = new Map<string, Promise<unknown>>();
+
+async function dedupeAcademicRead<T>(path: string): Promise<T> {
+  let key = path;
+  if (appMode === 'institutional' && firebaseApp) {
+    const { getAuth } = await import('firebase/auth');
+    key = `${getAuth(firebaseApp).currentUser?.uid ?? 'signed-out'}:${path}`;
+  }
+  const existing = pendingAcademicReads.get(key);
+  if (existing) return existing as Promise<T>;
+  const pending = academicRequest<T>(path);
+  pendingAcademicReads.set(key, pending);
+  const clear = () => {
+    if (pendingAcademicReads.get(key) === pending) pendingAcademicReads.delete(key);
+  };
+  void pending.then(clear, clear);
+  return pending;
+}
+
+export const listAcademicPeriods = () => dedupeAcademicRead<AcademicPeriodList>(base);
 export const createAcademicPeriod = (body: PeriodCreate) =>
   academicRequest<AcademicSnapshot>(base, body, 'POST');
 export const loadAcademicPeriod = (id: string) =>
-  academicRequest<AcademicSnapshot>(`${base}/${encodeURIComponent(id)}`);
+  dedupeAcademicRead<AcademicSnapshot>(`${base}/${encodeURIComponent(id)}`);
 export const saveAcademicRecord = (period: string, body: RecordWrite) =>
   academicRequest<AcademicSnapshot>(
     `${base}/${encodeURIComponent(period)}/records/${body.record.kind}/${encodeURIComponent(body.record.id!)}`,

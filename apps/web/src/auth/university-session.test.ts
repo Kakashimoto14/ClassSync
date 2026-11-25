@@ -88,6 +88,19 @@ describe('current university session authority', () => {
     expect(value.last()).toEqual({ status: 'authorized', membership });
     value.session.dispose();
   });
+  it('coalesces concurrent same-role membership revalidation requests', async () => {
+    const value = setup();
+    const pending = deferred<UniversityMembership>();
+    vi.mocked(value.driver.lookup).mockReturnValueOnce(pending.promise);
+    value.next(identity());
+    value.session.online();
+    value.session.refresh();
+    expect(value.driver.lookup).toHaveBeenCalledTimes(1);
+    pending.resolve(membership);
+    await settle();
+    expect(value.last()).toEqual({ status: 'authorized', membership });
+    value.session.dispose();
+  });
   it('cannot revive the previous UID after a later identity callback', async () => {
     const value = setup();
     const old = deferred<UniversityMembership>();

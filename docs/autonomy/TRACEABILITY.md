@@ -1,5 +1,17 @@
 # Requirements -> implementation -> evidence
 
+### 26 November 2026 — Phase 3 local implementation slice
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| UUID-valid seeded IDs and stale legacy period recovery | `scripts/seed_campus_data.py` UUIDv5 helper; migration `0026_archived_period_audit.py`; archived row/audit event committed transactionally; `PostgresAcademicPeriods.list_for` hides the explicit archive marker | IMPLEMENTED-UNVERIFIED against Neon; immutable audit references preserved; no `--apply` |
+| Seeded generation and independent hard-conflict detection | `test_seeded_defense_dataset.py`: owner-authorized local fixture, 54/54 generated assignments, 41 room metadata records, zero conflicts; override overlap regression | VERIFIED in-memory only; no PostgreSQL-backed period readiness or live generation |
+| Admin draft edit and publication | Scheduling revision route saves a separate complete immutable draft after independent validator success while preserving the exact academic input/pin snapshot; current publish/review flow tests remain green | IMPLEMENTED-UNVERIFIED on institutional PostgreSQL; pins are managed in Academic Setup; no connected Admin publication performed |
+| Gemini conflict and health advice | Scheduling backend `advisor.py`, Render env declarations, bounded REST call and 16 KiB response, 10s timeout, 120-assignment/24-candidate cap, opaque options and aggregate metrics; mock fallback/schema tests | IMPLEMENTED locally; provider/key/rate-limit behavior only mocked; UI candidates apply through deterministic revision validator |
+| Admin → Teacher → Student workflow | Existing request, publish, teacher/student projection tests and room directory checks pass locally | PARTIAL; connected live role journey unverified; request decision only records approval/rejection (it does not publish a schedule change), request room options are not checked against occupied slots, and no Resend/in-app notification is triggered |
+| Admin period recovery and checklist | Period/detail fallback, request coalescing, six-step label/student count, responsive tab layout; focused and full Web tests | VERIFIED locally; production browser/session remains unverified |
+| Full local gates | Python 1,220 passed including migration `0026`; web 898 passed; Ruff, lint, typecheck, build, contract check and diff check pass; focused seed/advisor/migration tests pass | Local checks VERIFIED; no live data or provider operation |
+
 **Current authority decision (15 November 2026):** PostgreSQL is the authoritative
 relational identity-membership, academic, scheduling and publication store; Firebase Auth
 proves identity. Firestore is optional absent a verified rubric or later owner decision.

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 from classync_contracts.identity import VerifiedPrincipal
@@ -47,3 +47,43 @@ def test_period_timestamp_is_canonical_utc_independent_of_database_timezone():
         "created_at": datetime(2026, 10, 26, 8, tzinfo=timezone(timedelta(hours=8))),
     }
     assert PostgresAcademicPeriods.decode(row).created_at == "2026-10-26T00:00:00+00:00"
+
+
+def test_active_period_picker_excludes_only_explicitly_archived_seed_periods(monkeypatch):
+    from contextlib import contextmanager
+
+    import classync_persistence.academic_periods as periods
+
+    class Result:
+        def mappings(self):
+            return self
+
+        def all(self):
+            return [
+                {
+                    "id": "valid-period",
+                    "title": "Current",
+                    "revision": 1,
+                    "created_at": datetime.now(UTC),
+                }
+            ]
+
+    class Connection:
+        statement = ""
+
+        def execute(self, statement, _params=None):
+            self.statement = str(statement)
+            return Result()
+
+    connection = Connection()
+
+    @contextmanager
+    def transaction(_engine):
+        yield connection
+
+    monkeypatch.setattr(periods, "transaction", transaction)
+    monkeypatch.setattr(periods, "identity_context", lambda *_args, **_kwargs: None)
+    store = PostgresAcademicPeriods(object(), tenant_id="tenant", firebase_project_id="project")
+    listed = store.list_for(VerifiedPrincipal(uid="admin"))
+    assert [period.id for period in listed] == ["valid-period"]
+    assert "Archived invalid period" in connection.statement

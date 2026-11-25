@@ -7,11 +7,13 @@ an existing Administrator membership. It never creates users or memberships.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
 from collections import defaultdict
 from pathlib import Path
+from uuid import NAMESPACE_URL, uuid4, uuid5
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "packages/api-contracts"), str(ROOT / "packages/persistence")]
@@ -37,7 +39,15 @@ from sqlalchemy import text  # noqa: E402
 from sqlalchemy.engine import make_url  # noqa: E402
 
 PERIOD_TITLE = "AY 2026-2027 · 1st Semester"
-PERIOD_ID = "defense-ay-2026-2027-first"
+LEGACY_PERIOD_ID = "defense-ay-2026-2027-first"
+SEED_NAMESPACE = uuid5(NAMESPACE_URL, "classsync:authorized-defense-dataset:v1")
+
+
+def stable_uuid(kind: str, identity: str) -> str:
+    return str(uuid5(SEED_NAMESPACE, f"{kind}:{identity}"))
+
+
+PERIOD_ID = stable_uuid("period", "ay-2026-2027-first")
 REFERENCE = "Owner-authorized ClassSync defense dataset · administrator editable"
 adapter = TypeAdapter(AcademicResource)
 
@@ -175,7 +185,7 @@ def curriculum_subjects() -> list[AcademicSubject]:
                 pattern = [weekly // 2, weekly // 2]
             result.append(
                 AcademicSubject(
-                    id=c["id"],
+                    id=stable_uuid("subject", f"{c['curriculum_version_id']}:{c['id']}"),
                     kind="subjects",
                     code=c["subject_code"],
                     name=c["subject_title"],
@@ -188,11 +198,11 @@ def curriculum_subjects() -> list[AcademicSubject]:
                     year_level=int(year),
                     semester="first" if c["semester"] == "1" else "second",
                     provenance="administrator-entered",
-                    program_ids=["bsit"],
+                    program_ids=[stable_uuid("program", "BSIT")],
                     required_weekly_minutes=weekly,
                     patterns=[
                         {
-                            "id": "catalog-contact-pattern",
+                            "id": stable_uuid("pattern", f"{c['curriculum_version_id']}:{c['id']}"),
                             "durations": pattern,
                             "distinct_days": True,
                         }
@@ -228,10 +238,10 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
             version_id = next(s.curriculum_version_id for s in subject_by_year[year])
             sections.append(
                 AcademicSection(
-                    id=f"defense-bsit-{year}{letter.lower()}",
+                    id=stable_uuid("section", f"BSIT-{year}{letter}"),
                     kind="sections",
                     period_id=period_id,
-                    program_id="bsit",
+                    program_id=stable_uuid("program", "BSIT"),
                     year_level=year,
                     section_letter=letter,
                     entry_cohort_year=2027 - year,
@@ -270,7 +280,7 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
             covered = subjects[index::12]
         faculty.append(
             AcademicFaculty(
-                id=f"defense-faculty-{index + 1:02}",
+                id=stable_uuid("faculty", f"{index + 1:02}"),
                 name=f"{name} · {specialties[index % 5]}",
                 subject_ids=[s.id for s in covered],
                 availability=[Window(day=d, start=420, end=1260) for d in range(6)],
@@ -298,7 +308,7 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
             compatible = [r.id for r in rooms if r.room_type == subject.required_room_type]
             offerings.append(
                 AcademicOffering(
-                    id=f"defense-offer-{subject.id}-{section.section_letter}",
+                    id=stable_uuid("offering", f"{subject.id}:{section.id}"),
                     subject_id=subject.id,
                     section_id=section.id,
                     activity_type="pahfit"
@@ -365,27 +375,28 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
         cohort = 2027 - year
         prefix = str(cohort)[-2:]
         for n in range(12):
-            student_id = f"{prefix}-{101 + n:05}"
+            roster_number = 101 + n + (12 if section.section_letter == "B" else 0)
+            student_id = f"{prefix}-{roster_number:05}"
             students.append(
                 {
                     "id": student_id,
-                    "person_id": f"defense-person-{student_id}",
+                    "person_id": stable_uuid("student-person", student_id),
                     "display_name": (
                         f"{student_first_names[n]} {surnames[(n + year) % len(surnames)]}"
                     ),
-                    "registered_email": f"student.{prefix}.{101 + n:05}@student.pnm.edu.ph",
+                    "registered_email": (f"student.{prefix}.{roster_number:05}@student.pnm.edu.ph"),
                     "section_id": section.id,
-                "enrollment": Enrollment(
-                    student_id=student_id,
-                    offering_ids=offering_by_section[section.id],
-                    entry_cohort_year=section.entry_cohort_year,
-                    curriculum_version_id=section.curriculum_version_id,
-                ),
+                    "enrollment": Enrollment(
+                        student_id=student_id,
+                        offering_ids=offering_by_section[section.id],
+                        entry_cohort_year=section.entry_cohort_year,
+                        curriculum_version_id=section.curriculum_version_id,
+                    ),
                 }
             )
     constraints.enrollments = [s["enrollment"] for s in students]
     program = AcademicProgram(
-        id="bsit",
+        id=stable_uuid("program", "BSIT"),
         kind="programs",
         acronym="BSIT",
         name="Information Technology",
@@ -406,15 +417,22 @@ def apply_seed(repo) -> tuple[int, int]:
     """Apply all new/seed-default rows atomically; preserve existing admin edits."""
     calendar = defense_calendar()
     with repo.session(write=True) as db:
-        row = db.execute(
-            text(
-                "SELECT id FROM classsync_academic.period_metadata "
-                "WHERE tenant_id=:tenant AND owner_uid=:owner AND title=:title"
-            ),
-            {**repo.keys, "title": PERIOD_TITLE},
-        ).scalar_one_or_none()
-        if row:
-            period_id = row
+        _archive_legacy_period(db, repo)
+        rows = (
+            db.execute(
+                text(
+                    "SELECT id FROM classsync_academic.period_metadata "
+                    "WHERE tenant_id=:tenant AND owner_uid=:owner AND title=:title"
+                ),
+                {**repo.keys, "title": PERIOD_TITLE},
+            )
+            .scalars()
+            .all()
+        )
+        if len(rows) > 1:
+            raise ValueError("Multiple periods use the defense title; review them before seeding")
+        if rows:
+            period_id = rows[0]
             snapshot = repo.snapshot_in(db, period_id)
         else:
             period_id = PERIOD_ID
@@ -521,6 +539,63 @@ def apply_seed(repo) -> tuple[int, int]:
             )
             inserted_students += 1
     return written, inserted_students
+
+
+def _archive_legacy_period(db, repo) -> bool:
+    """Retire the known broken ID without violating append-only audit references."""
+    legacy = (
+        db.execute(
+            text("""
+                SELECT id,title,data_mode FROM classsync_academic.period_metadata
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:legacy
+                FOR UPDATE
+            """),
+            {**repo.keys, "legacy": LEGACY_PERIOD_ID},
+        )
+        .mappings()
+        .one_or_none()
+    )
+    if legacy is None:
+        return False
+    if legacy["title"] != PERIOD_TITLE or legacy["data_mode"] != "institutional":
+        raise ValueError(
+            "The legacy period does not match the approved defense period; preserving it"
+        )
+
+    params = {**repo.keys, "period": LEGACY_PERIOD_ID}
+
+    # Immutable administrative activity references the old period ID, so retain
+    # its rows and move the existing record set out of the active-title target.
+    archived = (
+        db.execute(
+            text("""
+            UPDATE classsync_academic.period_metadata
+            SET title=:title, revision=revision+1
+            WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:period
+            RETURNING revision
+        """),
+            {**params, "title": f"Archived invalid period · {LEGACY_PERIOD_ID}"},
+        )
+        .mappings()
+        .one_or_none()
+    )
+    if archived is None:
+        raise RuntimeError("The locked legacy period changed before replacement")
+    db.execute(
+        text("""
+            INSERT INTO classsync_scheduling.administrator_activity
+                (tenant_id,owner_uid,event_id,period_id,event_type,entity_type,entity_ref,revision)
+            VALUES (:tenant,:owner,:event,:period,'academic.period.archived','period',:ref,
+                    :revision)
+        """),
+        {
+            **params,
+            "event": str(uuid4()),
+            "ref": hashlib.sha256(LEGACY_PERIOD_ID.encode("utf-8")).hexdigest(),
+            "revision": archived["revision"],
+        },
+    )
+    return True
 
 
 def _arguments(argv=None):

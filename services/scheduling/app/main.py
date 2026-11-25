@@ -3,6 +3,7 @@ from datetime import date
 from pathlib import Path
 from threading import BoundedSemaphore
 from typing import Literal
+from uuid import uuid4
 
 import httpx
 from classync_contracts.academic import (
@@ -15,6 +16,7 @@ from classync_contracts.identity import MembershipAuthorizationError, Membership
 from classync_contracts.models import HealthResponse
 from classync_contracts.request_authorization import install_identity_errors
 from classync_contracts.scheduling import (
+    Assignment,
     DraftDetail,
     DraftList,
     GenerationInput,
@@ -23,6 +25,7 @@ from classync_contracts.scheduling import (
     SaveDraftRequest,
     ValidationInput,
     ValidationResult,
+    scheduling_input_hash,
 )
 from classync_contracts.scheduling_security import (
     SchedulingSecuritySettings,
@@ -31,10 +34,11 @@ from classync_contracts.scheduling_security import (
 )
 from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
-from pydantic import SecretStr
+from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from .academic_input import academic_readiness
+from .advisor import Advice, ConflictAdvice, ConflictPrompt, HealthPrompt, _advise
 from .authorization import configured_scheduling
 from .catalog import catalogs, synthetic_scenario
 from .classroom_requests import router as classroom_requests_router
@@ -55,10 +59,18 @@ class Settings(SchedulingSecuritySettings):
     scheduling_database_url: SecretStr | None = None
     scheduling_database_transport: Literal["verify-full", "loopback-sspi-test"] = "verify-full"
     academic_service_url: str = "http://127.0.0.1:8001"
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-3.5-flash-lite"
 
 
 settings = Settings()
 generation_slot = BoundedSemaphore(1)
+
+
+class ReviseDraftRequest(BaseModel):
+    assignments: list[Assignment] = Field(max_length=7000)
+    title: str = Field(min_length=1, max_length=160)
+    idempotency_key: str = Field(min_length=8, max_length=100)
 
 
 @asynccontextmanager
@@ -279,6 +291,180 @@ def get_draft(draft_id: str, request: Request):
     return connected_repository(request, owner).get(draft_id)
 
 
+@app.post("/api/v1/scheduling/drafts/{draft_id}/advisor/conflict", response_model=ConflictAdvice)
+async def conflict_advice(draft_id: str, body: ConflictPrompt, request: Request):
+    _, owner = authorize(request, False)
+    draft = connected_repository(request, owner).get(draft_id)
+    if draft.source != "institutional":
+        raise HTTPException(403, "Institutional schedule draft required")
+    inputs = draft.input_snapshot
+    assignments = draft.generation_result.assignments
+    if len(assignments) > 120:
+        return ConflictAdvice(
+            available=False,
+            message=(
+                "AI conflict advice is limited to drafts with at most 120 assignments. "
+                "The complete deterministic validation and editing workflow remains available."
+            ),
+        )
+    target = next((item for item in assignments if item.id == body.assignment_id), None)
+    if target is None:
+        raise HTTPException(404, "Assignment is not part of this draft")
+    offering = next((item for item in inputs.offerings if item.id == target.offering_id), None)
+    if offering is None:
+        raise HTTPException(409, "Assignment offering is unavailable")
+    room_by_id = {room.id: room for room in inputs.rooms}
+    teacher_ids = offering.eligible_teacher_ids or [target.teacher_id]
+    alternatives = []
+    option_assignments = {}
+    checked_count = 0
+    for window in inputs.operating_windows:
+        if checked_count >= 24 or len(alternatives) >= 8:
+            break
+        if window.day < 6:
+            for start in range(window.start, window.end - (target.end - target.start) + 1, 30):
+                if checked_count >= 24 or len(alternatives) >= 8:
+                    break
+                for teacher_id in teacher_ids:
+                    if checked_count >= 24 or len(alternatives) >= 8:
+                        break
+                    for room_id in offering.eligible_room_ids:
+                        if checked_count >= 24 or len(alternatives) >= 8:
+                            break
+                        checked_count += 1
+                        proposal = target.model_copy(
+                            update={
+                                "day": window.day,
+                                "start": start,
+                                "end": start + target.end - target.start,
+                                "teacher_id": teacher_id,
+                                "room_id": room_id,
+                            }
+                        )
+                        candidate = [
+                            proposal if item.id == target.id else item for item in assignments
+                        ]
+                        if validate_timetable(inputs, candidate).valid:
+                            option_id = f"option-{len(alternatives) + 1}"
+                            option_assignments[option_id] = proposal
+                            room = room_by_id[room_id]
+                            alternatives.append(
+                                {
+                                    "option_id": option_id,
+                                    "day": window.day,
+                                    "start": start,
+                                    "duration": target.end - target.start,
+                                    "room_type": room.room_type,
+                                    "faculty_load_hours": round(
+                                        sum(
+                                            item.end - item.start
+                                            for item in assignments
+                                            if item.teacher_id == teacher_id
+                                        )
+                                        / 60
+                                    ),
+                                }
+                            )
+    prompt = {
+        "issue": ("Rank these validated options for fewer conflicts and lower gaps."),
+        "alternatives": alternatives,
+    }
+    if not alternatives:
+        return ConflictAdvice(
+            available=False,
+            message=(
+                "No conflict-free alternatives were found by the deterministic validator. "
+                "Adjust the academic constraints and validate again."
+            ),
+        )
+    result = await _advise(
+        settings, prompt, shape="conflict", option_assignments=option_assignments
+    )
+    if not result.available:
+        return result
+    return result
+
+
+@app.post("/api/v1/scheduling/drafts/{draft_id}/advisor/health", response_model=Advice)
+async def health_advice(draft_id: str, request: Request):
+    scope, owner = authorize(request, False)
+    draft = connected_repository(request, owner).get(draft_id)
+    if draft.source != "institutional":
+        raise HTTPException(403, "Institutional schedule draft required")
+    inputs, assignments = draft.input_snapshot, draft.generation_result.assignments
+    used_rooms = {item.room_id for item in assignments}
+    loads = {teacher.id: 0 for teacher in inputs.teachers}
+    for item in assignments:
+        loads[item.teacher_id] = loads.get(item.teacher_id, 0) + item.end - item.start
+    section_days: dict[tuple[str, int], list] = {}
+    for item in assignments:
+        section_days.setdefault((item.section_id, item.day), []).append(item)
+    gaps = 0
+    for items in section_days.values():
+        ordered = sorted(items, key=lambda item: item.start)
+        gaps += sum(
+            right.start > left.end for left, right in zip(ordered, ordered[1:], strict=False)
+        )
+    prompt = HealthPrompt(
+        room_utilization_percent=round(100 * len(used_rooms) / max(1, len(inputs.rooms))),
+        faculty_load_min_hours=min(loads.values(), default=0) // 60,
+        faculty_load_max_hours=max(loads.values(), default=0) // 60,
+        faculty_load_average_hours=round(sum(loads.values()) / max(1, len(loads)) / 60),
+        idle_gap_count=gaps,
+        publish_ready=draft.validation.valid and len(assignments) > 0,
+        blocking_conflicts=draft.validation.hard_conflict_count,
+    )
+    return await _advise(settings, prompt.model_dump(), shape="health")
+
+
+@app.post("/api/v1/scheduling/drafts/{draft_id}/revisions", response_model=DraftDetail)
+def revise_draft(draft_id: str, body: ReviseDraftRequest, request: Request):
+    _, owner = authorize(request, False)
+    storage = connected_repository(request, owner)
+    current = storage.get(draft_id)
+    assignments = body.assignments
+    available_ids = {assignment.id for assignment in assignments}
+    if len(available_ids) != len(assignments):
+        raise HTTPException(422, "Assignment IDs must be unique")
+    # Academic Setup owns pins. Revisions preserve the exact current constraint
+    # snapshot so publication's fresh-input hash remains bound to saved records.
+    inputs = current.input_snapshot
+    validation = validate_timetable(inputs, assignments)
+    if not validation.valid or len(validation.coverage) != len(inputs.offerings):
+        raise HTTPException(
+            422,
+            {
+                "code": "schedule_conflict",
+                "message": (
+                    "The proposed revision has conflicts or incomplete instructional coverage."
+                ),
+                "validation": validation.model_dump(mode="json"),
+            },
+        )
+    result = current.generation_result.model_copy(
+        update={
+            "run_id": str(uuid4()),
+            "input_hash": scheduling_input_hash(inputs),
+            "assignments": assignments,
+            "total_offerings_scheduled": len(inputs.offerings),
+            "coverage": validation.coverage,
+            "hard_conflict_count": validation.hard_conflict_count,
+            "diagnostics": [],
+            "validation": validation,
+        }
+    )
+    storage.remember_run(inputs, result)
+    saved, _ = storage.save(
+        SaveDraftRequest(
+            run_id=result.run_id,
+            input_hash=result.input_hash,
+            title=body.title.strip(),
+            idempotency_key=body.idempotency_key,
+        )
+    )
+    return saved
+
+
 def academic_scope(request, sandbox):
     if sandbox:
         require_sandbox(settings)
@@ -296,7 +482,8 @@ def persisted_academic_snapshot(period_id, request, sandbox):
     path = f"/api/v1/academic/{'sandbox/' if sandbox else ''}periods/{period_id}"
     try:
         headers = service_headers(
-            settings.cloud_run_iam_enabled, settings.academic_service_url,
+            settings.cloud_run_iam_enabled,
+            settings.academic_service_url,
             {"Authorization": request.headers.get("Authorization", "")},
         )
         with httpx.Client(timeout=10, trust_env=False) as client:

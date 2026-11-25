@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -34,16 +34,20 @@ export function AcademicManagementPage({
 }) {
   const [search, setSearch] = useSearchParams();
   const periodId = search.get('period') ?? '';
+  const changePeriod = useCallback((id: string) => {
+    setSearch((current) => {
+      const next = new URLSearchParams(current);
+      if (id) next.set('period', id);
+      else next.delete('period');
+      return next;
+    });
+  }, [setSearch]);
   return (
     <ManagementContent
-      key={`${initialKind}:${periodId}`}
+      key={initialKind}
       kind={initialKind}
       periodId={periodId}
-      onPeriod={(id) => {
-        const next = new URLSearchParams(search);
-        next.set('period', id);
-        setSearch(next);
-      }}
+      onPeriod={changePeriod}
     />
   );
 }
@@ -81,26 +85,44 @@ function ManagementContent({
   useEffect(() => {
     if (!schedulingSandboxEnabled) return;
     let ignore = false;
-    Promise.all([
-      listAcademicPeriods(),
-      periodId ? loadAcademicPeriod(periodId) : Promise.resolve(null),
-    ])
-      .then(([data, period]) => {
+    setLoading(true);
+    setError('');
+    const periodsRequest = listAcademicPeriods()
+      .then((data) => {
         if (!ignore) {
           setPeriods(data.periods);
-          setSnapshot(period);
+          if (periodId && !data.periods.some((period) => period.id === periodId)) {
+            onPeriod(data.periods[0]?.id ?? '');
+          }
         }
       })
       .catch((e) => {
         if (!ignore) setError(e.message);
-      })
-      .finally(() => {
+      });
+    const selectedPeriodRequest = periodId
+      ? loadAcademicPeriod(periodId)
+          .then((period) => {
+            if (!ignore) {
+              setSnapshot(period);
+              setError('');
+            }
+          })
+          .catch((e) => {
+            if (!ignore) {
+              setSnapshot(null);
+              setError(e instanceof Error ? e.message : 'Academic period could not be loaded.');
+            }
+          })
+      : Promise.resolve().then(() => {
+          if (!ignore) setSnapshot(null);
+        });
+    void Promise.all([periodsRequest, selectedPeriodRequest]).finally(() => {
         if (!ignore) setLoading(false);
       });
     return () => {
       ignore = true;
     };
-  }, [periodId, retry]);
+  }, [periodId, retry, onPeriod]);
   useEffect(() => {
     if (notice) feedback.current?.focus({ preventScroll: true });
   }, [notice]);

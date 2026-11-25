@@ -89,6 +89,7 @@ export function AcademicPeriodSetup({
   const faculty = records('faculty').filter((record) => record.kind === 'faculty');
   const resources = records('resources').filter((record) => record.kind === 'resources');
   const offerings = records('offerings').filter((record) => record.kind === 'offerings');
+  const rosterCount = constraints?.enrollments?.length ?? 0;
   const steps = [
     {
       title: 'Academic Period & Scheduling Constraints',
@@ -109,7 +110,7 @@ export function AcademicPeriodSetup({
     {
       title: 'Sections & Student Roster',
       kind: 'sections' as const,
-      count: `${sections.length} sections`,
+      count: `${sections.length} sections · ${rosterCount} students`,
       started: sections.length > 0,
       ready: sections.length > 0 && sections.every((section) => section.identity_verified && section.cohort_assignment_verified && section.population_verified && (section.population ?? 0) > 0),
       detail: 'Set up sections by year; student enrollment uses the verified roster onboarding process.',
@@ -155,7 +156,7 @@ export function AcademicPeriodSetup({
       </header>
 
       <div className="academic-setup__progress" role="status">
-        <strong>{startedAreas} of 8 setup areas have saved information</strong>
+        <strong>{startedAreas} of 6 setup steps have saved information</strong>
         <span>
           This counts saved records only. It does not certify source accuracy or scheduling
           readiness.

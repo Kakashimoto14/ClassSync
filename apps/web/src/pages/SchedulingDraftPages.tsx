@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import {
@@ -10,7 +10,9 @@ import {
   type DraftDetail,
   type DraftList,
   type GenerationResult,
+  type Assignment,
 } from '../lib/scheduling-api';
+import { requestDraftAdvice, saveDraftRevision } from '../lib/scheduling-api';
 import { appMode } from '../config/runtime-config';
 const schedulingWorkspaceEnabled = appMode === 'institutional' || schedulingSandboxEnabled;
 import { SchedulingTimetable } from './SchedulingTimetable';
@@ -301,6 +303,7 @@ function DraftDetailContent({
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
+  const navigate = useNavigate();
   useEffect(() => {
     if (!schedulingWorkspaceEnabled) return;
     let ignore = false;
@@ -380,6 +383,8 @@ function DraftDetailContent({
             input={draft.input_snapshot}
             result={draft.generation_result}
           />
+          {source === 'academic' && appMode === 'institutional' && <DraftAdvisorPanel draft={draft} />}
+          {source === 'academic' && appMode === 'institutional' && <DraftAssignmentEditor draft={draft} onSaved={(value) => navigate(draftPath(value.id, 'academic'))} />}
           <PublicationPanel draft={draft} source={source} />
           {source === 'academic' && draft.input_snapshot.synthetic && (
             <Link
@@ -415,5 +420,133 @@ function DraftDetailContent({
         </>
       )}
     </div>
+  );
+}
+
+function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
+  const [busy, setBusy] = useState(false);
+  const [advice, setAdvice] = useState<{
+    message: string;
+    suggestions: Array<string | { assignment: Assignment; reason: string }>;
+  } | null>(null);
+  const [error, setError] = useState('');
+  const [targetId, setTargetId] = useState(draft.generation_result.assignments[0]?.id ?? '');
+  async function analyze(kind: 'health' | 'conflict') {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await requestDraftAdvice(
+        draft.id,
+        kind,
+        kind === 'conflict'
+          ? { assignment_id: targetId }
+          : undefined,
+      );
+      setAdvice(result);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Advisor is unavailable.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function apply(assignment: Assignment) {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const assignments = draft.generation_result.assignments.map((item) =>
+        item.id === assignment.id ? assignment : item,
+      );
+      const value = await saveDraftRevision(draft.id, {
+        assignments,
+        title: `${draft.title} · revised`,
+        idempotency_key: crypto.randomUUID(),
+      });
+      window.location.assign(draftPath(value.id, 'academic'));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'The proposed move failed deterministic validation.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="workspace-card" aria-labelledby="draft-advisor-heading" aria-busy={busy}>
+      <h2 id="draft-advisor-heading">Optional schedule advisor</h2>
+      <p>Suggestions are advisory. Deterministic validation remains the authority.</p>
+      <label>Assignment to review<select value={targetId} onChange={(event) => setTargetId(event.target.value)}>
+        {draft.generation_result.assignments.map((item) => <option key={item.id} value={item.id}>
+          {draft.input_snapshot.offerings?.find((offering) => offering.id === item.offering_id)?.subject_name ?? item.offering_id}
+        </option>)}
+      </select></label>
+      <div className="draft-actions">
+        <Button loading={busy} disabled={busy} onClick={() => void analyze('conflict')}>Ask AI for conflict options</Button>
+        <Button variant="secondary" loading={busy} disabled={busy} onClick={() => void analyze('health')}>Analyze Draft with AI</Button>
+      </div>
+      {error && <p role="alert">{error}</p>}
+      {advice && <div role="status"><p>{advice.message}</p><ul>{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
+        {typeof item === 'string' ? item : <>{item.reason} · Day {item.assignment.day + 1}, {String(Math.floor(item.assignment.start / 60)).padStart(2, '0')}:{String(item.assignment.start % 60).padStart(2, '0')} · {draft.input_snapshot.rooms?.find((room) => room.id === item.assignment.room_id)?.name}<Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment)}>Apply as validated revision</Button></>}
+      </li>)}</ul></div>}
+    </section>
+  );
+}
+
+function DraftAssignmentEditor({
+  draft,
+  onSaved,
+}: {
+  draft: DraftDetail;
+  onSaved: (draft: DraftDetail) => void;
+}) {
+  const assignments: Assignment[] = draft.generation_result.assignments;
+  const [selectedId, setSelectedId] = useState(assignments[0]?.id ?? '');
+  const [room, setRoom] = useState(assignments[0]?.room_id ?? '');
+  const [day, setDay] = useState(assignments[0]?.day ?? 0);
+  const [start, setStart] = useState(assignments[0] ? `${String(Math.floor(assignments[0].start / 60)).padStart(2, '0')}:${String(assignments[0].start % 60).padStart(2, '0')}` : '08:00');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const selected = assignments.find((item) => item.id === selectedId);
+  function select(id: string) {
+    const assignment = assignments.find((item) => item.id === id);
+    if (!assignment) return;
+    setSelectedId(id);
+    setRoom(assignment.room_id);
+    setDay(assignment.day);
+    setStart(`${String(Math.floor(assignment.start / 60)).padStart(2, '0')}:${String(assignment.start % 60).padStart(2, '0')}`);
+  }
+  async function save() {
+    if (!selected || busy) return;
+    const startMinutes = Number(start.slice(0, 2)) * 60 + Number(start.slice(3));
+    const changed = assignments.map((item) => item.id === selected.id
+      ? { ...item, room_id: room, day, start: startMinutes, end: startMinutes + selected.end - selected.start }
+      : item);
+    setBusy(true);
+    setError('');
+    try {
+      const value = await saveDraftRevision(draft.id, {
+        assignments: changed,
+        title: `${draft.title} · revised`,
+        idempotency_key: crypto.randomUUID(),
+      });
+      onSaved(value);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Revision was not saved.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="workspace-card" aria-labelledby="draft-edit-heading" aria-busy={busy}>
+      <h2 id="draft-edit-heading">Edit draft assignment</h2>
+      <p>Changes create a separate draft. The original remains unchanged until you review and publish the revision.</p>
+      <label>Class assignment<select value={selectedId} onChange={(event) => select(event.target.value)}>{assignments.map((item) => <option key={item.id} value={item.id}>{(draft.input_snapshot.offerings ?? []).find((offering) => offering.id === item.offering_id)?.subject_name ?? item.offering_id} · {item.id}</option>)}</select></label>
+      {selected && <>
+        <label>Room<select value={room} onChange={(event) => setRoom(event.target.value)}>{(draft.input_snapshot.rooms ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <label>Day<select value={day} onChange={(event) => setDay(Number(event.target.value))}>{['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((item, index) => <option key={item} value={index}>{item}</option>)}</select></label>
+        <label>Start time<input type="time" value={start} onChange={(event) => setStart(event.target.value)} /></label>
+      </>}
+      {error && <p role="alert">{error}</p>}
+      <Button loading={busy} disabled={busy || !selected} onClick={() => void save()}>Save validated revision</Button>
+    </section>
   );
 }

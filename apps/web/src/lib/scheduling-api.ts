@@ -1,4 +1,5 @@
 import type {
+  Assignment,
   GenerationInput,
   GenerationResult,
   ReadinessResult,
@@ -12,6 +13,7 @@ import { appMode, requireLiveCapability } from '../config/runtime-config';
 import { institutionalRequest } from './institutional-api';
 
 export type { GenerationInput, GenerationResult, ValidationResult };
+export type { Assignment };
 export type { DraftDetail, DraftList, SaveDraftRequest };
 export const schedulingSandboxEnabled = appMode === 'sandbox';
 
@@ -89,4 +91,27 @@ export const listSchedulingDrafts = (offset = 0, source: 'synthetic' | 'academic
 export const loadSchedulingDraft = (id: string, source: 'synthetic' | 'academic' = 'synthetic') =>
   request<DraftDetail>(
     `${source === 'academic' ? 'academic/' : ''}drafts/${encodeURIComponent(id)}`,
+  );
+
+export const saveDraftRevision = (
+  id: string,
+  body: {
+    assignments: Assignment[];
+    title: string;
+    idempotency_key: string;
+  },
+) => request<DraftDetail>(`drafts/${encodeURIComponent(id)}/revisions`, body);
+
+export const requestDraftAdvice = (
+  id: string,
+  kind: 'health' | 'conflict',
+  body?: { assignment_id: string },
+) =>
+  request<{
+    available: boolean;
+    message: string;
+    suggestions: Array<string | { assignment: Assignment; reason: string }>;
+  }>(
+    `drafts/${encodeURIComponent(id)}/advisor/${kind}`,
+    kind === 'health' ? {} : body,
   );

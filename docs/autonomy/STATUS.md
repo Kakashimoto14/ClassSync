@@ -1,5 +1,72 @@
 # ClassSync — autonomy status ledger
 
+## 26 November 2026 00:31 SGT — Phase 3 local scheduling slice
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base HEAD
+`f16739c5be22c3cfaa811a2484f4c23d97008972`. No live Neon, Firebase, Render/Vercel,
+or Gemini provider was contacted; the seed `--apply` command was not run. No commit or push.
+
+Seed-generated period, program, subject, section, faculty, offering, and student person
+identifiers now use UUIDv5; roster student numbers remain the institutional `YY-NNNNN`
+format and the constraint record retains its contract-defined `rules` identity. Repeated
+roster numbers across A/B sections were corrected. The known invalid legacy period is
+renamed as an archive inside the same seed transaction as replacement; it is not deleted
+because immutable Administrator activity rows reference its ID. Migration
+`0026_archived_period_audit.py` adds a period-archive event, which the seed writes with the
+new revision. Archived entries are excluded from the active period picker, so stale deep
+links fall back to the available valid period without deleting audit history.
+
+Admin period loading now retains the period list if deep-linked detail fails, coalesces
+in-flight period reads and same-role membership checks, counts six checklist steps and
+roster students, and wraps setup tabs responsively. Institutional schedule drafts now
+support validated revision saves while preserving the exact academic constraint snapshot;
+pin changes stay in Academic Setup, which is also the source for future generation. Optional Gemini calls
+run only server-side with a ten-second timeout and a 16 KiB response cap. Conflict advice
+is limited to 120-assignment drafts and 24 deterministic candidate checks; Gemini receives
+opaque option IDs and non-identifying slot features only. Applying one creates a separate
+validated draft. Existing immutable publication flow remains in place.
+
+Files changed: `apps/web/src/auth/university-session.ts` and tests,
+`apps/web/src/lib/academic-api.ts` and new tests, `apps/web/src/lib/scheduling-api.ts`,
+`apps/web/src/operational-ui.css`, `apps/web/src/pages/AcademicManagementPage.tsx` and
+tests, `apps/web/src/pages/AcademicPeriodSetup.tsx`,
+`apps/web/src/pages/SchedulingDraftPages.tsx`, `docs/autonomy/APPROVALS.md`,
+`render.yaml`, `scripts/seed_campus_data.py` and tests,
+`packages/persistence/classync_persistence/academic_periods.py`,
+`packages/persistence/classync_persistence/migrations/versions/0026_archived_period_audit.py`,
+`services/gateway/app/main.py`, `services/scheduling/app/main.py`, new
+`services/scheduling/app/advisor.py`, and scheduling tests.
+
+Fresh local checks:
+
+- `\.venv\Scripts\python.exe -m pytest` — **1,220 passed**, one existing Starlette/httpx
+  deprecation warning, including migration `0026` and the final archive-list filter.
+- Focused seed/advisor/migration checks — **47 passed**; targeted scheduling publish/request
+  tests also passed.
+- In `apps/web`: `npm run lint`, `npm run typecheck`, `npm test` (**898 passed across 72
+  files**), and `npm run build` — PASS. Main entry `index-*.js`: **97.74 kB raw / 26.23 kB
+  gzip**; no new runtime dependency.
+- `\.venv\Scripts\ruff.exe check scripts services packages` and targeted Ruff format check —
+  PASS. Contract export `--check` — PASS with `PYTHONPATH=packages/api-contracts;packages/persistence`.
+- Seeded in-memory Academic readiness/generation — **54/54 offerings**, 8 sections,
+  32 subjects, 12 faculty, 41 schedulable rooms, all 12 excluded rooms omitted from input;
+  complete timetable independently validated with zero conflicts.
+- Seeded generation and migration/period-boundary tests — pass. `git diff --check` — PASS.
+
+Remaining Phase 3 gates: no connected institutional PostgreSQL generation/revision/publication
+or live Admin→Teacher→Student journey was exercised. Classroom request approve/reject still
+only records the decision; it does not publish the schedule revision. Request room options are
+not checked against occupied slots, and no Resend email or targeted in-app notification is
+triggered. A durable notification outbox and verified recipient-email binding are absent.
+Teacher/Student room and timetable projection tests are local only. The defense curriculum,
+people, and room defaults remain owner-authorized but institutionally unverified. Do not run
+the supplied `--apply` or live-account provisioning commands until a separately authorized
+operator performs the real target/project and roster checks.
+
+Next: review the remaining notification delivery and connected role journey requirements,
+then qualify against an explicitly authorized disposable PostgreSQL identity/database and
+provider mocks. Production remains unverified.
+
 ## 23 November 2026 14:26 SGT — Phase 5 deployment and CI polish
 
 Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD

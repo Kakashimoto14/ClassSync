@@ -62,6 +62,7 @@ class PostgresAcademicPeriods:
                 JOIN classsync_identity.tenants t ON t.id=m.tenant_id
                 LEFT JOIN classsync_academic.period_metadata p
                     ON p.tenant_id=m.tenant_id AND p.owner_uid=m.uid
+                    AND p.title NOT LIKE 'Archived invalid period · %'
                 WHERE m.tenant_id=:tenant AND m.uid=:uid AND m.state='active'
                     AND 'administrator'=ANY(m.roles) AND t.firebase_project_id=:project
                 ORDER BY p.created_at, p.id

@@ -271,6 +271,62 @@ def test_real_gateway_draft_workflow_and_forgery(api):
     )
 
 
+def test_admin_revision_is_saved_as_new_validated_immutable_draft(api, identity_adapters):
+    for module in (gateway, main):
+        identity_adapters(module, uid="revision-admin")
+    headers = {"Authorization": "Bearer e30.e30.synthetic-signature"}
+    generated = api.post(
+        "/api/v1/scheduling/generate", headers=headers, json=tiny().model_dump(mode="json")
+    )
+    assert generated.status_code == 200, generated.text
+    run = generated.json()["data"]
+    saved = api.post(
+        "/api/v1/scheduling/drafts",
+        headers=headers,
+        json={
+            "run_id": run["run_id"],
+            "input_hash": run["input_hash"],
+            "title": "Original schedule",
+            "idempotency_key": "original-key",
+        },
+    ).json()["data"]
+    assignments = saved["generation_result"]["assignments"]
+    revision = api.post(
+        f"/api/v1/scheduling/drafts/{saved['id']}/revisions",
+        headers=headers,
+        json={
+            "assignments": assignments,
+            "title": "Reviewed revision",
+            "idempotency_key": "revision-key",
+        },
+    )
+    assert revision.status_code == 200, revision.text
+    revised = revision.json()["data"]
+    assert revised["id"] != saved["id"]
+    assert (
+        revised["input_snapshot"]["locked_assignments"]
+        == saved["input_snapshot"]["locked_assignments"]
+    )
+    assert revised["validation"]["valid"]
+    assert (
+        api.get(f"/api/v1/scheduling/drafts/{saved['id']}", headers=headers).json()["data"] == saved
+    )
+
+    invalid = [dict(item) for item in assignments]
+    if len(invalid) > 1:
+        invalid[0].update({key: invalid[1][key] for key in ("day", "start", "end", "room_id")})
+        rejected = api.post(
+            f"/api/v1/scheduling/drafts/{saved['id']}/revisions",
+            headers=headers,
+            json={
+                "assignments": invalid,
+                "title": "Rejected conflict",
+                "idempotency_key": "reject-key",
+            },
+        )
+        assert rejected.status_code == 422
+
+
 def test_gateway_database_failure_is_explicit_and_retry_is_safe(api, tmp_path, monkeypatch):
     prefix = "/api/v1/scheduling/sandbox"
     run = api.post(prefix + "/generate", json=tiny().model_dump(mode="json")).json()["data"]

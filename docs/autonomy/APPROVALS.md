@@ -1,5 +1,19 @@
 # ClassSync autonomy — authority and approvals
 
+## 25 November 2026 — Phase 3 local implementation authorization
+
+The owner authorizes local source, test, and documentation changes for the Phase 3 request:
+deterministic UUIDv5 identifiers and safe target-period repair in the defense seeder; Admin
+academic dashboard recovery/count/tab fixes; validation and improvement of deterministic
+scheduling, conflict editing, and publication paths; optional backend-only Gemini scheduling
+advice; and local Teacher/Admin/Student workflow tests. Existing security, tenant, validation,
+independent schedule checking, and publication guards remain required. Gemini calls are mocked
+in tests; do not send external requests during this work. The seeder may be implemented and
+dry-run checked, but do not run `--apply`, connect to live Neon, provision real users, change
+provider settings, deploy, commit, or push. Do not expose a Gemini key to the browser. Synthetic
+defense records remain non-authoritative and do not authorize real accounts or an institutional
+schedule publication. Record unverified provider, live-browser, and original-database gates.
+
 ## 18 November 2026 — identity hardening, owner bootstrap, and named-ref cleanup
 
 Owner explicitly authorizes local feature-branch implementation on

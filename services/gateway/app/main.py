@@ -90,11 +90,20 @@ class Settings(SchedulingSecuritySettings):
             raise ValueError("At most twenty explicit CORS origins are allowed")
         for value in values:
             parsed = urlsplit(value)
-            if (parsed.scheme not in {"https", "http"} or not parsed.hostname
-                    or "*" in value or parsed.username or parsed.password or parsed.path
-                    or parsed.query or parsed.fragment
-                    or (parsed.scheme == "http" and parsed.hostname not in {
-                        "localhost", "127.0.0.1", "::1"})):
+            if (
+                parsed.scheme not in {"https", "http"}
+                or not parsed.hostname
+                or "*" in value
+                or parsed.username
+                or parsed.password
+                or parsed.path
+                or parsed.query
+                or parsed.fragment
+                or (
+                    parsed.scheme == "http"
+                    and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}
+                )
+            ):
                 raise ValueError("Use exact HTTPS origins or explicit loopback development origins")
             _ = parsed.port
         return values
@@ -111,13 +120,14 @@ class Settings(SchedulingSecuritySettings):
             or parsed.path not in {"", "/"}
             or parsed.query
             or parsed.fragment
-            or (parsed.scheme == "http" and parsed.hostname not in {
-                "localhost", "127.0.0.1", "::1"
-            })
+            or (
+                parsed.scheme == "http" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}
+            )
         ):
             raise ValueError("Use an HTTPS application origin")
         _ = parsed.port
         return f"{parsed.scheme}://{parsed.netloc}"
+
 
 settings = Settings()
 SERVICES = {
@@ -174,15 +184,21 @@ async def request_context(request: Request, call_next):
     except Exception as error:
         logger.error(
             "gateway_unhandled_request_error",
-            extra={"request_id": request.state.request_id,
-                   "reason_code": "unhandled_request_error",
-                   "failure_type": type(error).__name__},
+            extra={
+                "request_id": request.state.request_id,
+                "reason_code": "unhandled_request_error",
+                "failure_type": type(error).__name__,
+            },
         )
         response = JSONResponse(
             status_code=500,
-            content={"error": {"code": "internal_error",
-                                "message": "The request could not be completed. Please try again.",
-                                "requestId": request.state.request_id}},
+            content={
+                "error": {
+                    "code": "internal_error",
+                    "message": "The request could not be completed. Please try again.",
+                    "requestId": request.state.request_id,
+                }
+            },
         )
     response.headers["X-Request-ID"] = request.state.request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -190,9 +206,7 @@ async def request_context(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     if settings.classsync_env == "production":
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     if request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/"):
         response.headers["Cache-Control"] = "no-store"
     return response
@@ -323,11 +337,15 @@ async def scheduling_proxy(operation: str, request: Request, sandbox: bool):
             re.fullmatch(r"academic/[a-f0-9-]{36}/generate", operation) and request.method == "POST"
         )
     )
+    advisor_operation = request.method == "POST" and re.fullmatch(
+        r"drafts/[a-f0-9-]{36}/(?:revisions|advisor/(?:health|conflict))", operation
+    )
     if (
         not academic_operation
         and not (sandbox and request.method == "GET" and operation == "calendar-samples")
         and operation not in allowed
         and not (request.method == "GET" and operation.startswith("drafts/"))
+        and not advisor_operation
     ):
         raise HTTPException(404, "Unknown scheduling operation; publication is not implemented")
     path = f"/api/v1/scheduling/{'sandbox/' if sandbox else ''}{operation}"
@@ -341,9 +359,11 @@ async def service_proxy(service_name, path, request):
     try:
         target = getattr(settings, f"{service_name}_service_url")
         headers = await run_in_threadpool(
-            service_headers, settings.cloud_run_iam_enabled, target,
-            forwarded_headers(request) | {"Content-Type": "application/json",
-                                           "X-Request-ID": request.state.request_id},
+            service_headers,
+            settings.cloud_run_iam_enabled,
+            target,
+            forwarded_headers(request)
+            | {"Content-Type": "application/json", "X-Request-ID": request.state.request_id},
         )
         async with httpx.AsyncClient(timeout=45.0, trust_env=False) as client:
             response = await client.request(
@@ -394,8 +414,11 @@ def downstream_error(payload: object) -> tuple[str, str]:
 def forwarded_headers(request):
     return {
         "Authorization": request.headers.get("Authorization", ""),
-        **({"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
-           if "X-ClassSync-Role" in request.headers else {}),
+        **(
+            {"X-ClassSync-Role": request.headers["X-ClassSync-Role"]}
+            if "X-ClassSync-Role" in request.headers
+            else {}
+        ),
     }
 
 
@@ -422,6 +445,18 @@ async def sandbox_draft_detail(draft_id: UUID, request: Request):
 @app.get("/api/v1/scheduling/drafts/{draft_id}")
 async def draft_detail(draft_id: UUID, request: Request):
     return await scheduling_proxy(f"drafts/{draft_id}", request, False)
+
+
+@app.post("/api/v1/scheduling/drafts/{draft_id}/advisor/{kind}")
+async def scheduling_draft_advisor(draft_id: UUID, kind: str, request: Request):
+    if kind not in {"health", "conflict"}:
+        raise HTTPException(404, "Scheduling advisor action not found")
+    return await scheduling_proxy(f"drafts/{draft_id}/advisor/{kind}", request, False)
+
+
+@app.post("/api/v1/scheduling/drafts/{draft_id}/revisions")
+async def revise_scheduling_draft(draft_id: UUID, request: Request):
+    return await scheduling_proxy(f"drafts/{draft_id}/revisions", request, False)
 
 
 async def academic_proxy(path, request, sandbox):
@@ -550,7 +585,9 @@ async def timetable_proxy(operation: str, request: Request):
     client = httpx.AsyncClient(timeout=httpx.Timeout(30, read=None), trust_env=False)
     try:
         headers = await run_in_threadpool(
-            service_headers, settings.cloud_run_iam_enabled, settings.scheduling_service_url,
+            service_headers,
+            settings.cloud_run_iam_enabled,
+            settings.scheduling_service_url,
             forwarded_headers(request),
         )
         upstream = await client.send(

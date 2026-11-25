@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from scripts.seed_campus_data import (
     PERIOD_ID,
     _arguments,
@@ -7,6 +9,7 @@ from scripts.seed_campus_data import (
     load_json,
     merge_room_defaults,
     room_defaults,
+    stable_uuid,
 )
 
 
@@ -27,9 +30,28 @@ def test_defense_seed_plan_is_stable_and_covers_all_years_without_database_acces
     )
     assert len(curriculum_subjects()) == 32
     assert len(roster) == 96
+    assert len({student["id"] for student in roster}) == 96
     assert {record.year_level for record in first if record.kind == "subjects"} == {1, 2, 3, 4}
     assert sum(record.kind == "sections" for record in first) == 8
     assert sum(record.kind == "faculty" for record in first) == 12
+
+
+def test_generated_seed_entity_ids_are_deterministic_uuids():
+    catalog = load_json("packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json")
+    records, roster = build_academic_records(PERIOD_ID, catalog)
+    UUID(PERIOD_ID)
+    for record in records:
+        if record.kind == "resources":
+            continue  # canonical campus inventory IDs are source identifiers
+        if record.kind == "constraints":
+            assert record.id == "rules"  # contract-defined singleton identity
+        else:
+            UUID(record.id)
+    for student in roster:
+        UUID(student["person_id"])
+        assert student["id"].count("-") == 1  # institutional student-number contract
+    assert stable_uuid("period", "ay-2026-2027-first") == PERIOD_ID
+    assert "defense-" not in PERIOD_ID
 
 
 def test_room_defaults_activate_exactly_the_schedulable_catalog_and_preserve_exclusions():

@@ -59,6 +59,8 @@ export function createUniversitySession(
   let logoutBlocked = false;
   let offline = false;
   let abort: AbortController | undefined;
+  let requestUid: string | undefined;
+  let requestRole: UserRole | undefined;
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const emit = (state: UniversitySession) => {
     if (!disposed) changed(state);
@@ -66,6 +68,9 @@ export function createUniversitySession(
   const cancel = () => {
     generation++;
     abort?.abort();
+    abort = undefined;
+    requestUid = undefined;
+    requestRole = undefined;
     clearTimeout(timeout);
   };
   const refresh = async (role = selected) => {
@@ -82,12 +87,20 @@ export function createUniversitySession(
       emit({ status: 'offline' });
       return;
     }
+    if (
+      abort &&
+      !abort.signal.aborted &&
+      requestUid === user.uid &&
+      requestRole === role
+    ) return;
     cancel();
     selected = role;
     const current = generation;
     const identity = user;
     const request = new AbortController();
     abort = request;
+    requestUid = identity.uid;
+    requestRole = role;
     emit({ status: 'checking' });
     timeout = setTimeout(() => {
       if (current !== generation || disposed) return;
@@ -109,7 +122,12 @@ export function createUniversitySession(
         } else emit({ status });
       }
     } finally {
-      if (current === generation) clearTimeout(timeout);
+      if (current === generation) {
+        clearTimeout(timeout);
+        abort = undefined;
+        requestUid = undefined;
+        requestRole = undefined;
+      }
     }
   };
   const unsubscribe = driver.observe(
