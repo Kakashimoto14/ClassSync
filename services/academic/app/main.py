@@ -17,7 +17,7 @@ from classync_contracts.scheduling_security import (
     require_administrator,
     require_sandbox,
 )
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
@@ -158,6 +158,27 @@ def snapshot(period_id: str, request: Request):
     return connected_repository(request, owner).snapshot(period_id)
 
 
+@app.get("/api/v1/academic/periods/{period_id}/roster")
+def roster(
+    period_id: str,
+    request: Request,
+    limit: int = Query(default=20, ge=1, le=25),
+    offset: int = Query(default=0, ge=0, le=100000),
+    search: str = Query(default="", max_length=100),
+    year_level: int | None = Query(default=None, ge=1, le=4),
+    section_id: str | None = Query(default=None, max_length=80),
+):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).roster_page(
+        period_id,
+        limit=limit,
+        offset=offset,
+        search=search,
+        year_level=year_level,
+        section_id=section_id,
+    )
+
+
 @app.put(
     "/api/v1/academic/sandbox/periods/{period_id}/records/{kind}/{record_id}",
     response_model=AcademicSnapshot,
@@ -167,6 +188,17 @@ def sandbox_save(period_id: str, kind: str, record_id: str, body: RecordWrite, r
     return repository().save(scope, owner, period_id, kind, record_id, body)
 
 
+@app.delete(
+    "/api/v1/academic/sandbox/periods/{period_id}/records/{kind}/{record_id}",
+    response_model=AcademicSnapshot,
+)
+def sandbox_delete(
+    period_id: str, kind: str, record_id: str, expected_revision: int, request: Request
+):
+    scope, owner = authorize(request, True)
+    return repository().delete(scope, owner, period_id, kind, record_id, expected_revision)
+
+
 @app.put(
     "/api/v1/academic/periods/{period_id}/records/{kind}/{record_id}",
     response_model=AcademicSnapshot,
@@ -174,6 +206,17 @@ def sandbox_save(period_id: str, kind: str, record_id: str, body: RecordWrite, r
 def save(period_id: str, kind: str, record_id: str, body: RecordWrite, request: Request):
     scope, owner = authorize(request, False)
     return connected_repository(request, owner).save(period_id, kind, record_id, body)
+
+
+@app.delete(
+    "/api/v1/academic/periods/{period_id}/records/{kind}/{record_id}",
+    response_model=AcademicSnapshot,
+)
+def delete(period_id: str, kind: str, record_id: str, expected_revision: int, request: Request):
+    scope, owner = authorize(request, False)
+    return connected_repository(request, owner).delete(
+        period_id, kind, record_id, expected_revision
+    )
 
 
 @app.put("/api/v1/academic/sandbox/periods/{period_id}/calendar")

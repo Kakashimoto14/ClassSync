@@ -480,6 +480,68 @@ def test_sandbox_qualification_fixture_is_blocked_in_institutional_mode(repo):
     } <= codes
 
 
+def test_verified_catalog_rooms_can_be_used_with_explicit_admin_metadata(repo):
+    saved = complete(repo)
+    institutional = saved.model_copy(
+        update={"period": saved.period.model_copy(update={"source": "institutional"})}
+    )
+    rooms = [e for e in institutional.records if e.record.kind == "resources"]
+    for envelope in rooms:
+        envelope.record.source = "cdm-provisional"
+        envelope.record.room_type = "lecture_classroom"
+        envelope.record.type_verified = True
+        envelope.record.availability_verified = True
+    codes = {issue.code for issue in academic_readiness(institutional).issues}
+    assert "noninstitutional_room" not in codes
+
+
+def test_ten_minute_transition_buffer_is_a_valid_academic_constraint():
+    from classync_contracts.academic import AcademicConstraints
+    from classync_contracts.scheduling import GenerationInput
+
+    assert AcademicConstraints(transition_buffer_minutes=10).transition_buffer_minutes == 10
+    assert (
+        GenerationInput(
+            period_id="p",
+            data_version="v1",
+            scope_description="unit test",
+            transition_buffer_minutes=10,
+        ).transition_buffer_minutes
+        == 10
+    )
+
+
+def test_admin_can_delete_unreferenced_record_and_references_block_delete(repo):
+    snapshot = complete(repo)
+    period_id = snapshot.period.id
+    snapshot = add(
+        repo,
+        period_id,
+        {
+            "kind": "subjects",
+            "id": "unused-subject",
+            "code": "UNUSED",
+            "name": "Unused record",
+            "program_ids": ["bsit"],
+            "required_weekly_minutes": 180,
+            "patterns": [{"id": "one", "durations": [180]}],
+        },
+    )
+    target = next(e for e in snapshot.records if e.record.id == "unused-subject")
+    deleted = repo.delete(
+        "sandbox",
+        "development-academic-sandbox",
+        period_id,
+        "subjects",
+        "unused-subject",
+        target.revision,
+    )
+    assert all(e.record.id != "unused-subject" for e in deleted.records)
+
+    with pytest.raises(AcademicError, match="reference"):
+        repo.delete("sandbox", "development-academic-sandbox", period_id, "programs", "bsit", 1)
+
+
 def test_real_gateway_entered_generation_save_and_isolation(api):
     # Persist input fixtures, then exercise the real HTTP boundary and solver.
     repo = academic.repository()

@@ -85,4 +85,4 @@ def test_synthetic_provider_fixture_requires_unique_student_records():
 
 
 def test_provider_qualification_uses_current_alembic_head():
-    assert current_migration_head() == "0021_student_email_and_cor_source"
+    assert current_migration_head() == "0024_academic_record_deletion_audit"

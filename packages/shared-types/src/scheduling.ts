@@ -43,6 +43,7 @@ export type AcademicFaculty = {
   availability_verified?: boolean;
   workload_verified?: boolean;
   verification_reference?: string | null;
+  weekly_unit_cap?: number | null;
 };
 
 export type AcademicGenerationRequest = {
@@ -150,6 +151,7 @@ export type AcademicSection = {
   cohort_assignment_verified?: boolean;
   identity_verified?: boolean;
   population?: number | null;
+  capacity?: number | null;
   population_verified?: boolean;
   verification_reference?: string | null;
 };
@@ -181,6 +183,9 @@ export type AcademicSubject = {
   required_room_type?: string | null;
   required_equipment?: Array<string>;
   minimum_capacity?: number | null;
+  lec_hours?: number | null;
+  lab_hours?: number | null;
+  units?: number | null;
 };
 
 export type ActivityType = "academic_instruction" | "computer_lab_instruction" | "bse_science_instruction" | "pahfit" | "sports" | "assembly" | "rotc" | "special_booking";

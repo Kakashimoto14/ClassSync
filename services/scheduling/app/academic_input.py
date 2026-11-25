@@ -252,11 +252,19 @@ def academic_readiness(snapshot: AcademicSnapshot):
         for identity in offering.room_ids:
             room = rooms.get(identity)
             if not simulation and snapshot.period.source == "institutional" and room:
-                if room.source != "administrator-supplied":
+                owner_verified_catalog_room = (
+                    room.source == "cdm-provisional"
+                    and room.schedulable
+                    and room.condition == "operational"
+                    and room.type_verified
+                    and room.capacity_verified
+                    and room.availability_verified
+                )
+                if room.source != "administrator-supplied" and not owner_verified_catalog_room:
                     issue(
                         "noninstitutional_room",
-                        f"{room.name}: synthetic or provisional resources cannot serve an "
-                        "institutional offering.",
+                        f"{room.name}: provisional resources require administrator-verified "
+                        "operational, type, capacity and availability metadata before use.",
                         room.id,
                     )
                 if not room.availability_verified:

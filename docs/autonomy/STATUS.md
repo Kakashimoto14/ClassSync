@@ -2787,3 +2787,46 @@ deprecation warning); `.venv\\Scripts\\ruff.exe check scripts services packages`
 (Git reported only LF-to-CRLF normalization notices). No hosted settings, live database or external
 service was changed. Seed acceptance and end-to-end institutional verification remain pending
 official source data and a separately authorized live-data operation.
+
+### 25 November 2026 09:44 SGT — owner-authorized defense dataset implementation
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`6dbb2c1d454023e52eb3f2393a020f656ed73b39`. The approval records a narrow defense-data exception:
+AY 2026–2027 first semester (2026-08-01 through 2026-12-31), 41 catalog schedulable spaces and
+12 catalog-excluded spaces. No commit/push, deployment, live database connection, migration, or
+`--apply` occurred.
+
+Added `scripts/seed_campus_data.py` with an explicit defense environment gate, exact tenant
+confirmation for `--apply`, stable IDs, TLS `verify-full`, atomic repository writes, seed rerun
+preservation, and a dry-run path. It provisions 32 editable BSIT curriculum records, 8 sections,
+12 faculty, 54 offerings, 96 unverified roster identities, owner-authorized defaults, and only the
+41 catalog-approved schedulable rooms. The 12 excluded rooms are not written. Added migrations
+0023/0024 for display names and academic record deletion audit, and an Admin UI bulk action whose
+candidate list and ready counts both use the canonical 41-ID allowlist. Individual academic
+records retain normal edit/delete actions. Added a paginated institutional roster view; student
+identity rows are currently displayed read-only because the existing service has no authorized
+student-profile edit/delete route. Student CRUD remains open and must not be represented as complete.
+
+The owner authorized synthetic defense records, but those records remain unverified against
+Registrar/Facilities source. The roster identities are unverified and do not create Firebase
+accounts, memberships, consent, or email delivery. Migration execution and RLS behavior against an
+isolated PostgreSQL instance remain IMPLEMENTED-UNVERIFIED; no live Neon query/write was made.
+
+Changed files: `AGENTS.md`, `docs/autonomy/APPROVALS.md`, `apps/web/src/lib/academic-api.ts`,
+`apps/web/src/pages/AcademicManagementPage.tsx`, `apps/web/src/pages/AcademicManagementPage.test.tsx`,
+`apps/web/src/pages/AcademicRecordEditor.tsx`, `apps/web/src/pages/ProductScreenPage.tsx`,
+`apps/web/src/pages/AcademicStudentRosterPage.tsx`,
+`apps/web/src/pages/AcademicStudentRosterPage.test.tsx`, Academic and Scheduling contract models,
+generated scheduling JSON/TypeScript contracts, Academic service repositories/routes/tests,
+`services/scheduling/app/academic_input.py`, migrations `0023_person_display_name.py` and
+`0024_academic_record_deletion_audit.py`, `scripts/seed_campus_data.py`,
+`scripts/tests/test_seed_campus_data.py`, and `scripts/tests/test_postgres_qualification_regressions.py`.
+
+Verification: `.venv\\Scripts\\python.exe -m pytest` — 1,201 passed, one existing Starlette/httpx
+deprecation warning; seed/migration regression subset — 12 passed; Ruff — passed; contract export
+`--check` — passed; frontend lint/typecheck — passed; final `npm test` — 891 passed across 71 files.
+Final `npm run build` passed; main entry `index-H1SfvGhn.js` is 97.62 kB raw / 26.19 kB gzip.
+`git diff --check` passed with line-ending normalization notices only. The initial frontend run
+under concurrent heavy load had 4 route/navigation timeouts; the isolated full rerun and final
+full rerun both passed. Independent review findings on unknown room IDs, post-action count
+consistency, and seed overwrite preservation were addressed; review did not access a database.

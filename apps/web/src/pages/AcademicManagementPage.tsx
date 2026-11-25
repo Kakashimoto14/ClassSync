@@ -5,8 +5,10 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import {
   checkAcademicReadiness,
   createAcademicPeriod,
+  deleteAcademicRecord,
   listAcademicPeriods,
   loadAcademicPeriod,
+  saveAcademicRecord,
   type AcademicKind,
   type AcademicPeriod,
   type AcademicReadiness,
@@ -22,6 +24,7 @@ import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicPeriodSetup } from './AcademicPeriodSetup';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { provisionalCdmRooms } from '../data/cdm-room-inventory';
 const schedulingSandboxEnabled = appMode !== 'presentation';
 
 export function AcademicManagementPage({
@@ -143,6 +146,24 @@ function ManagementContent({
       setBusy(false);
     }
   }
+  async function removeRecord(entry: AcademicSnapshot['records'][number]) {
+    if (!snapshot || active.current) return;
+    const label = academicLabel(entry.record as AcademicRecord, snapshot);
+    if (!window.confirm(`Delete ${label}? Records that still reference it must be updated first.`)) return;
+    active.current = true;
+    setBusy(true);
+    setError('');
+    try {
+      setSnapshot(await deleteAcademicRecord(snapshot.period.id, kind, entry.record.id ?? '', entry.revision));
+      setChecked(null);
+      setNotice(`${label} deleted.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Record could not be deleted.');
+    } finally {
+      active.current = false;
+      setBusy(false);
+    }
+  }
   const all = snapshot?.records.filter((e) => e.record.kind === kind) ?? [];
   const sections = (snapshot?.records ?? []).flatMap((entry) =>
     entry.record.kind === 'sections' ? [entry.record as AcademicRecord] : [],
@@ -163,12 +184,60 @@ function ManagementContent({
         return true;
       })
     : [];
-  const verifiedRooms = all.filter((entry) => entry.record.kind === 'resources' && entry.record.condition === 'operational' && entry.record.schedulable && entry.record.type_verified && entry.record.capacity_verified && entry.record.availability_verified).length;
+  const schedulableCatalogIds = new Set(provisionalCdmRooms.filter((room) => room.schedulable).map((room) => room.id));
+  const excludedCatalogIds = new Set(provisionalCdmRooms.filter((room) => !room.schedulable).map((room) => room.id));
+  const schedulableRooms = all.filter((entry) => entry.record.kind === 'resources' && schedulableCatalogIds.has(entry.record.id) && entry.record.schedulable);
+  const verifiedRooms = schedulableRooms.filter((entry) => entry.record.kind === 'resources' && entry.record.condition === 'operational' && entry.record.type_verified && entry.record.capacity_verified && entry.record.availability_verified).length;
+  const excludedRooms = all.filter((entry) => entry.record.kind === 'resources' && excludedCatalogIds.has(entry.record.id));
+  const roomsNeedingVerification = schedulableRooms.filter((entry) => entry.record.kind === 'resources' && entry.record.condition !== 'maintenance' && !(entry.record.condition === 'operational' && entry.record.type_verified && entry.record.capacity_verified && entry.record.availability_verified));
   const visible = matching.slice(page * 20, page * 20 + 20);
   const editRecord = snapshot?.records.find(
     (e) => e.record.kind === editingKind && e.record.id === editing,
   );
   const hasSelectedPeriod = Boolean(periodId && periods.some((period) => period.id === periodId));
+  async function verifySchedulableRooms() {
+    if (!snapshot || active.current || !roomsNeedingVerification.length) return;
+    const summary = `${roomsNeedingVerification.length} schedulable rooms will receive editable capacity and availability defaults. ${excludedRooms.length} excluded spaces will be preserved.`;
+    if (!window.confirm(summary)) return;
+    active.current = true;
+    setBusy(true);
+    setError('');
+    let currentSnapshot = snapshot;
+    try {
+      for (const entry of roomsNeedingVerification) {
+        if (entry.record.kind !== 'resources' || !entry.record.schedulable) continue;
+        const room = entry.record;
+        const type = room.room_type ?? (room.allowed_activity_types?.includes('sports') || room.allowed_activity_types?.includes('pahfit') ? 'athletic_space' : room.name.toLowerCase().includes('lab') || room.name.toLowerCase().startsWith('cl-') ? 'computer_lab' : 'lecture_classroom');
+        const capacity = type === 'computer_lab' ? 40 : type === 'athletic_space' || type === 'special_activity' ? 60 : 45;
+        const next = {
+          ...room,
+          room_type: type,
+          capacity: room.capacity ?? capacity,
+          condition: 'operational' as const,
+          schedulable: true,
+          type_verified: true,
+          capacity_verified: true,
+          availability: room.availability?.length ? room.availability : [0, 1, 2, 3, 4, 5].map((day) => ({ day, start: 420, end: 1260 })),
+          availability_verified: true,
+          verification_note: room.verification_note || 'Owner-authorized defense dataset defaults; administrator review remains available.',
+        };
+        currentSnapshot = await saveAcademicRecord(snapshot.period.id, {
+          expected_revision: currentSnapshot.records.find((candidate) => candidate.record.kind === 'resources' && candidate.record.id === room.id)?.revision ?? entry.revision,
+          record: next,
+        });
+        setSnapshot(currentSnapshot);
+      }
+      setChecked(null);
+      const ready = currentSnapshot.records.filter((entry) => entry.record.kind === 'resources' && schedulableCatalogIds.has(entry.record.id) && entry.record.schedulable && entry.record.condition === 'operational' && entry.record.type_verified && entry.record.capacity_verified && entry.record.availability_verified).length;
+      setNotice(`${ready}/${schedulableRooms.length} schedulable rooms ready · ${excludedRooms.length} excluded spaces preserved`);
+    } catch (e) {
+      setSnapshot(currentSnapshot);
+      setError(e instanceof Error ? e.message : 'Room verification stopped. Successfully saved changes are shown.');
+    } finally {
+      active.current = false;
+      setBusy(false);
+    }
+  }
   return (
     <div className="weekly-scheduler academic-management">
       <p className="academic-workspace-note">
@@ -473,7 +542,10 @@ function ManagementContent({
                     ? 'Edit Scheduling Constraints'
                     : `Add ${kind === 'faculty' ? 'Faculty' : kind === 'offerings' ? 'Subject Offering' : kind === 'resources' ? 'Resource' : current.label.replace(/s$/, '')}`}
                 </Button>
-                {kind === 'resources' && <p role="status" className="academic-record-summary">{verifiedRooms}/{all.length} rooms verified for scheduling</p>}
+                {kind === 'resources' && <>
+                  <p role="status" className="academic-record-summary">{verifiedRooms}/{schedulableRooms.length} schedulable rooms ready · {excludedRooms.length} excluded spaces preserved</p>
+                  <Button type="button" variant="secondary" disabled={busy || roomsNeedingVerification.length === 0} loading={busy} onClick={verifySchedulableRooms}>Verify Schedulable Rooms</Button>
+                </>}
               </div>
               {!matching.length && (
                 <p>
@@ -541,6 +613,14 @@ function ManagementContent({
                         aria-label={`Edit ${academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)}`}
                       >
                         Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        disabled={busy}
+                        onClick={() => void removeRecord(e)}
+                        aria-label={`Delete ${academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)}`}
+                      >
+                        Delete
                       </Button>
                     </div>
                   </li>

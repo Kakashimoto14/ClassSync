@@ -222,7 +222,7 @@ class GenerationInput(Contract):
     all_intended_offerings_supplied: bool = False
     synthetic: bool = False
     operating_windows: list[Window] = Field(default_factory=list, max_length=70)
-    transition_buffer_minutes: int = Field(default=0, ge=0, le=120, multiple_of=30)
+    transition_buffer_minutes: int = Field(default=0, ge=0, le=120)
     programs: list[Program] = Field(default_factory=list, max_length=50)
     sections: list[Section] = Field(default_factory=list, max_length=500)
     teachers: list[Teacher] = Field(default_factory=list, max_length=500)

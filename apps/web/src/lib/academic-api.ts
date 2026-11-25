@@ -72,6 +72,38 @@ export const saveAcademicRecord = (period: string, body: RecordWrite) =>
     body,
     'PUT',
   );
+export const deleteAcademicRecord = (period: string, kind: AcademicKind, id: string, revision: number) =>
+  academicRequest<AcademicSnapshot>(
+    `${base}/${encodeURIComponent(period)}/records/${kind}/${encodeURIComponent(id)}?expected_revision=${revision}`,
+    undefined,
+    'DELETE',
+  );
+export interface AcademicRosterPage {
+  items: Array<{
+    student_id: string;
+    display_name: string | null;
+    registered_email: string | null;
+    enrollment_status: 'active' | 'inactive' | 'unverified';
+    section_id: string;
+    section_label: string;
+    year_level: number;
+  }>;
+  total: number;
+  limit: number;
+  offset: number;
+  sections: Array<{ id: string; year_level: string; label: string }>;
+}
+export const loadAcademicRoster = (period: string, filters: {
+  limit?: number; offset?: number; search?: string; year_level?: number; section_id?: string;
+}) => {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '') query.set(key, String(value));
+  }
+  return academicRequest<AcademicRosterPage>(
+    `academic/periods/${encodeURIComponent(period)}/roster?${query.toString()}`,
+  );
+};
 export const checkAcademicReadiness = (period: string) =>
   academicRequest<AcademicReadiness>(
     `scheduling/${prefix}academic/${encodeURIComponent(period)}/readiness`,

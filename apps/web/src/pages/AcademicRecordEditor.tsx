@@ -137,9 +137,9 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
   const active = useRef(false);
   const update = (name: string, value: unknown) => setRecord(r => {
     const next = { ...r, [name]: value } as AcademicRecord;
-    if (r.kind === 'subjects' && next.kind === 'subjects') {
+      if (r.kind === 'subjects' && next.kind === 'subjects') {
       if (['code', 'name', 'curriculum_version_id', 'curriculum_course_id'].includes(name)) next.curriculum_review_verified = false;
-      if (['required_weekly_minutes', 'patterns'].includes(name)) next.contact_minutes_verified = false;
+      if (['required_weekly_minutes', 'patterns', 'lec_hours', 'lab_hours'].includes(name)) next.contact_minutes_verified = false;
     } else if (r.kind === 'sections' && next.kind === 'sections') {
       if (['entry_cohort_year', 'curriculum_version_id'].includes(name)) next.cohort_assignment_verified = false;
       if (['year_level', 'section_letter', 'custom_label', 'program_id'].includes(name)) next.identity_verified = false;
@@ -147,7 +147,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
     } else if (r.kind === 'faculty' && next.kind === 'faculty') {
       if (name === 'subject_ids') next.eligibility_verified = false;
       if (['availability', 'unavailable'].includes(name)) next.availability_verified = false;
-      if (['max_weekly_minutes', 'max_daily_minutes'].includes(name)) next.workload_verified = false;
+      if (['max_weekly_minutes', 'max_daily_minutes', 'weekly_unit_cap'].includes(name)) next.workload_verified = false;
     } else if (r.kind === 'resources' && next.kind === 'resources') {
       if (['availability', 'blocked'].includes(name)) next.availability_verified = false;
       if (name === 'room_type') next.type_verified = false;
@@ -240,7 +240,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         {check('Contact minutes and delivery patterns approved', 'contact_minutes_verified', record.contact_minutes_verified)}
         {text('Approved minutes/pattern reference', 'contact_minutes_reference', record.contact_minutes_reference, record.contact_minutes_verified)}
         {!record.curriculum_version_id && <p className="muted">A subject without an exact versioned source requires an approved Registrar exception or equivalency before institutional readiness can pass.</p>}
-        <div className="academic-field-grid">{text('Subject code', 'code', record.code, true)}{text('Subject name', 'name', record.name, true)}{number('Required weekly contact minutes', 'required_weekly_minutes', record.required_weekly_minutes, 30, 30)}</div>
+        <div className="academic-field-grid">{text('Subject code', 'code', record.code, true)}{text('Subject name', 'name', record.name, true)}{number('Lecture hours per week', 'lec_hours', record.lec_hours, 1)}{number('Lab hours per week', 'lab_hours', record.lab_hours, 1)}{number('Credit units', 'units', record.units, 1)}{number('Required weekly contact minutes', 'required_weekly_minutes', record.required_weekly_minutes, 30, 30)}</div>
         <p className="muted">{record.curriculum_version_id ? 'No contact-minute default is applied to prospectus courses. Enter the approved minutes and meeting patterns.' : '180 minutes is a proposed default. Contact minutes are not academic credit units.'}</p>
         <ChoiceList label="Associated programs" options={choices('programs')} value={record.program_ids ?? []} onChange={v => update('program_ids', v)}/>
         <Patterns weekly={record.required_weekly_minutes ?? null} value={record.patterns ?? []} onChange={v => update('patterns', v)}/>
@@ -251,7 +251,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         <label>Program<select required value={record.program_id} onChange={e => { update('program_id', e.target.value); update('custom_label', null); }}><option value="">Choose program</option>{choices('programs').map(p => <option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
         {customSection ? text('Program-specific section label', 'custom_label', record.custom_label, true) : <div className="academic-field-grid"><label>Year level<select required value={record.year_level ?? ''} onChange={e => update('year_level', e.target.value ? Number(e.target.value) : null)}><option value="">Choose year level</option>{[1, 2, 3, 4].map(year => <option key={year} value={year}>{year}</option>)}</select></label><label>Section identifier<select required value={record.section_letter ?? ''} onChange={e => update('section_letter', e.target.value || null)}><option value="">Choose section</option>{'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => <option key={letter} value={letter}>{letter}</option>)}</select></label></div>}
         <p className="muted">Belongs to {snapshot.period.title}. Section identifiers are separate from stable database IDs.</p>
-        <details><summary>Verified student population</summary>{number('Student population', 'population', record.population, 1, 1)}{check('Population is verified', 'population_verified', record.population_verified)}</details>
+        <details><summary>Section capacity and student population</summary>{number('Section capacity', 'capacity', record.capacity, 1, 1)}{number('Student population', 'population', record.population, 1, 1)}{check('Population is verified', 'population_verified', record.population_verified)}</details>
         <details><summary>Institutional section verification</summary>{number('Entry cohort year', 'entry_cohort_year', record.entry_cohort_year, 1, 1900)}{check('Cohort-to-curriculum assignment is verified', 'cohort_assignment_verified', record.cohort_assignment_verified)}{check('Official section identity is verified', 'identity_verified', record.identity_verified)}{text('Verification source/reference', 'verification_reference', record.verification_reference, record.cohort_assignment_verified || record.identity_verified || record.population_verified)}</details>
       </>}
       {record.kind === 'faculty' && <>
@@ -259,7 +259,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         <div className="academic-field-grid">{text('Faculty name', 'name', record.name, true)}{text('Institutional faculty identifier (optional)', 'institutional_id', record.institutional_id)}</div>
         <ChoiceList label="Eligible teaching subjects" options={choices('subjects')} value={record.subject_ids ?? []} onChange={v => update('subject_ids', v)}/>
         <WeeklyWindows label="Faculty availability" value={record.availability ?? []} onChange={v => update('availability', v)}/>
-        <details><summary>Workload and unavailable times</summary><div className="academic-field-grid">{number('Maximum weekly teaching minutes', 'max_weekly_minutes', record.max_weekly_minutes, 30)}{number('Maximum daily teaching minutes', 'max_daily_minutes', record.max_daily_minutes, 30)}</div><WeeklyWindows label="Faculty unavailable" value={record.unavailable ?? []} onChange={v => update('unavailable', v)}/></details>
+        <details><summary>Workload and unavailable times</summary><div className="academic-field-grid">{number('Weekly unit cap', 'weekly_unit_cap', record.weekly_unit_cap, 1, 1)}{number('Maximum weekly teaching minutes', 'max_weekly_minutes', record.max_weekly_minutes, 30)}{number('Maximum daily teaching minutes', 'max_daily_minutes', record.max_daily_minutes, 30)}</div><WeeklyWindows label="Faculty unavailable" value={record.unavailable ?? []} onChange={v => update('unavailable', v)}/></details>
         {check('Subject eligibility is verified', 'eligibility_verified', record.eligibility_verified)}{check('Availability is verified', 'availability_verified', record.availability_verified)}{check('Workload is verified', 'workload_verified', record.workload_verified)}{text('Verification source/reference', 'verification_reference', record.verification_reference, record.eligibility_verified || record.availability_verified || record.workload_verified)}
         {existing && <p>Referenced by {academicRecords(snapshot, 'offerings').filter(o => o.kind === 'offerings' && o.teacher_ids?.includes(record.id)).length} offerings in this period. Manage assignments in Subject Offerings.</p>}
       </>}

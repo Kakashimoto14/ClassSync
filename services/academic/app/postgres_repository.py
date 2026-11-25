@@ -154,11 +154,7 @@ class PostgresAcademicRepository:
                 value = AcademicCalendar.model_validate(json.loads(calendar["payload"]))
             return AcademicPeriod(
                 **{**period, "created_at": utc_timestamp(row["created_at"])},
-                source=(
-                    "synthetic-review"
-                    if data_mode == "synthetic-review"
-                    else "institutional"
-                ),
+                source=("synthetic-review" if data_mode == "synthetic-review" else "institutional"),
                 calendar=value,
             )
         except ValueError as error:
@@ -292,6 +288,139 @@ class PostgresAcademicRepository:
             self.period_in(db, period_id, lock=True)
             self.write_in(db, period_id, body)
             return self.snapshot_in(db, period_id)
+
+    def delete(self, period_id, kind, record_id, expected_revision):
+        with self.session(write=True) as db:
+            self.period_in(db, period_id, lock=True)
+            row = self.record_in(db, period_id, kind, record_id)
+            if row is None:
+                raise AcademicError(404, "record_not_found", "Academic record was not found.")
+            if row["revision"] != expected_revision:
+                raise AcademicError(
+                    409,
+                    "academic_version_conflict",
+                    "This record changed; reload before deleting it.",
+                )
+            referenced = db.scalar(
+                text("""
+                SELECT 1 FROM classsync_academic.record_references
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND period_id=:period
+                    AND target_kind=:kind AND target_id=:id LIMIT 1
+            """),
+                self.params(period_id, kind=kind, id=record_id),
+            )
+            if referenced:
+                raise AcademicError(
+                    409,
+                    "record_in_use",
+                    "Remove or update records that reference this item before deleting it.",
+                )
+            db.execute(
+                text("""
+                DELETE FROM classsync_academic.records
+                WHERE tenant_id=:tenant AND owner_uid=:owner AND period_id=:period
+                    AND kind=:kind AND id=:id AND revision=:revision
+            """),
+                self.params(period_id, kind=kind, id=record_id, revision=expected_revision),
+            )
+            self.bump(db, period_id)
+            return self.snapshot_in(db, period_id)
+
+    def roster_page(
+        self, period_id, *, limit=20, offset=0, search="", year_level=None, section_id=None
+    ):
+        if not 1 <= limit <= 25 or not 0 <= offset <= 100000 or len(search) > 100:
+            raise AcademicError(422, "invalid_roster_page", "Roster page filters are invalid.")
+        with self.session() as db:
+            self.period_in(db, period_id)
+            rows = (
+                db.execute(
+                    text("""
+                    WITH roster AS (
+                        SELECT DISTINCT e.value->>'student_id' AS student_id,
+                               offering.payload::jsonb->>'section_id' AS section_id
+                        FROM classsync_academic.records rules
+                        CROSS JOIN LATERAL jsonb_array_elements(
+                            rules.payload::jsonb->'enrollments') e(value)
+                        CROSS JOIN LATERAL jsonb_array_elements_text(
+                            e.value->'offering_ids') offering_id(value)
+                        JOIN classsync_academic.records offering
+                          ON offering.tenant_id=rules.tenant_id
+                         AND offering.owner_uid=rules.owner_uid
+                         AND offering.period_id=rules.period_id
+                         AND offering.kind='offerings' AND offering.id=offering_id.value
+                        WHERE rules.tenant_id=:tenant AND rules.owner_uid=:owner
+                          AND rules.period_id=:period AND rules.kind='constraints'
+                    ), joined AS (
+                        SELECT DISTINCT s.id AS student_id,p.display_name,s.registered_email,
+                               s.enrollment_status,r.section_id,
+                               (section.payload::jsonb->>'year_level')::integer AS year_level,
+                               COALESCE(section.payload::jsonb->>'custom_label',
+                                   program.payload::jsonb->>'acronym' || '-' ||
+                                   (section.payload::jsonb->>'year_level') ||
+                                   (section.payload::jsonb->>'section_letter')) AS section_label
+                        FROM roster r
+                        JOIN classsync_identity.students s
+                          ON s.tenant_id=:tenant AND s.id=r.student_id
+                        JOIN classsync_identity.people p
+                          ON p.tenant_id=s.tenant_id AND p.id=s.person_id
+                        JOIN classsync_academic.records section
+                          ON section.tenant_id=:tenant AND section.owner_uid=:owner
+                         AND section.period_id=:period AND section.kind='sections'
+                         AND section.id=r.section_id
+                        JOIN classsync_academic.records program
+                          ON program.tenant_id=:tenant AND program.owner_uid=:owner
+                         AND program.period_id=:period AND program.kind='programs'
+                         AND program.id=section.payload::jsonb->>'program_id'
+                    )
+                    SELECT *,count(*) OVER() AS total FROM joined
+                    WHERE (:query='' OR student_id ILIKE :query OR
+                           display_name ILIKE :query OR registered_email ILIKE :query)
+                      AND (:year IS NULL OR year_level=:year)
+                      AND (:section IS NULL OR section_id=:section)
+                    ORDER BY year_level,section_label,student_id
+                    LIMIT :limit OFFSET :offset
+                """),
+                    {
+                        **self.keys,
+                        "period": period_id,
+                        "query": f"%{search.strip()}%" if search.strip() else "",
+                        "year": year_level,
+                        "section": section_id,
+                        "limit": limit,
+                        "offset": offset,
+                    },
+                )
+                .mappings()
+                .all()
+            )
+            section_rows = (
+                db.execute(
+                    text("""
+                    SELECT r.id,r.payload::jsonb->>'year_level' AS year_level,
+                           COALESCE(r.payload::jsonb->>'custom_label',
+                               p.payload::jsonb->>'acronym' || '-' ||
+                               (r.payload::jsonb->>'year_level') ||
+                               (r.payload::jsonb->>'section_letter')) AS label
+                    FROM classsync_academic.records r
+                    JOIN classsync_academic.records p ON p.tenant_id=r.tenant_id
+                     AND p.owner_uid=r.owner_uid AND p.period_id=r.period_id
+                     AND p.kind='programs' AND p.id=r.payload::jsonb->>'program_id'
+                    WHERE r.tenant_id=:tenant AND r.owner_uid=:owner AND r.period_id=:period
+                      AND r.kind='sections' ORDER BY year_level,label
+                """),
+                    self.params(period_id),
+                )
+                .mappings()
+                .all()
+            )
+            return {
+                "items": [dict(row) for row in rows],
+                "total": int(rows[0]["total"]) if rows else 0,
+                "limit": limit,
+                "offset": offset,
+                "sections": [dict(row) for row in section_rows],
+            }
 
     def record_in(self, db, period_id, kind, record_id):
         return (

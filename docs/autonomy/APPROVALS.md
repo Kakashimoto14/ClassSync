@@ -294,3 +294,27 @@ worktree/remote verification.
 ## 23 November 2026 — Phase 3 CSS and design-system cleanup
 
 Owner authorizes this local cleanup on `main`: remove only the 21 verified orphan CSS files under `apps/web/src/styles/`; consolidate the two auth stylesheets into `apps/web/src/pages/institutional-entrance.css`; remove only exact, later-shadowed auth, academic, and topbar declarations; update clearly stale HCI plan references. Preserve Tailwind directives, PostCSS, Preflight, Soft Rouge `theme.css`, all unrelated work, and do not commit or push. Verify web lint, typecheck, tests, build, and diff/status.
+
+## 25 November 2026 — AY 2026–2027 BSIT defense dataset and room verification
+
+The project owner explicitly supersedes the earlier official-source-only/no-seeded-records restriction
+for the isolated ClassSync academic demonstration and defense environment. Local implementation is
+authorized for an idempotent AY 2026–2027 · 1st Semester seed covering BSIT curriculum, sections,
+96 student roster rows, faculty/availability, subject offerings, scheduling constraints and the
+existing campus room catalog. Owner-authorized defaults are editable administrator inputs; they are
+not represented as Facilities/Registrar-confirmed policy. Do not create duplicate campus rooms.
+Only the 41 catalog rows marked schedulable may be activated/verified; preserve all 12 excluded
+rows as excluded and unchanged. No production tenant or actual student account/membership is to be
+provisioned by the seed. Student rows must not receive Firebase memberships/passwords or trigger
+email delivery. Connected UI does not display synthetic/sample badges for this authorized seed;
+existing isolated local presentation remains separately identified.
+
+Owner authorizes a lightweight identity schema migration only if needed to persist the requested
+roster display names, plus the local script/tests and Admin bulk-verify UI. Effective dates for this
+defense calendar are approved as 2026-08-01 through 2026-12-31. The script must require
+explicit environment/tenant/project/admin context, verify current Administrator authority and
+migration head, honor FORCE RLS and record revisions/checksums/audit triggers, default to dry-run,
+and require explicit `--apply` with exact defense-tenant confirmation. Dry-run and unit tests must use disposable/local fixtures and must
+not connect to Neon. This approval does not authorize the assistant to run `--apply`, alter hosted
+configuration, deploy, commit or push; owner will run the reviewed Windows commands against the
+intended demonstration/defense Neon target. No generation or publication is authorized by seeding.

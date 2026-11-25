@@ -38,6 +38,9 @@ const PreviewBuildingDirectory = lazy(() =>
 const PreviewBuildingDetail = lazy(() =>
   import('./PreviewBuildingViews').then((module) => ({ default: module.PreviewBuildingDetail })),
 );
+const AcademicStudentRosterPage = lazy(() =>
+  import('./AcademicStudentRosterPage').then((module) => ({ default: module.AcademicStudentRosterPage })),
+);
 
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
   const [params] = useSearchParams();
@@ -182,7 +185,9 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       {definition.kind === 'report-issue' && <IssueReportScreen />}
       {definition.kind === 'buildings' && <PreviewBuildingDirectory />}
       {definition.kind === 'building-detail' && <PreviewBuildingDetail />}
-      {definition.kind === 'academic-list' && <AcademicListScreen definition={definition} />}
+      {definition.kind === 'academic-list' && (definition.id === 'administrator.students'
+        ? <AcademicStudentRosterPage />
+        : <AcademicListScreen definition={definition} />)}
       {definition.kind === 'academic-detail' && <AcademicDetailScreen />}
       {definition.kind === 'reports' && (
         <ReportScreen utilization={definition.id.endsWith('.utilization')} />

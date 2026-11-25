@@ -59,6 +59,9 @@ class AcademicSubject(Identity):
     required_room_type: str | None = None
     required_equipment: list[str] = Field(default_factory=list)
     minimum_capacity: int | None = Field(default=None, gt=0)
+    lec_hours: int | None = Field(default=None, ge=0, le=12)
+    lab_hours: int | None = Field(default=None, ge=0, le=12)
+    units: int | None = Field(default=None, ge=0, le=30)
 
     @model_validator(mode="after")
     def exact_patterns(self):
@@ -85,6 +88,7 @@ class AcademicSection(Section):
     cohort_assignment_verified: bool = False
     identity_verified: bool = False
     population: int | None = Field(default=None, gt=0)
+    capacity: int | None = Field(default=None, gt=0, le=500)
     population_verified: bool = False
     verification_reference: str | None = Field(default=None, max_length=160)
 
@@ -104,6 +108,7 @@ class AcademicFaculty(Teacher):
     availability_verified: bool = False
     workload_verified: bool = False
     verification_reference: str | None = Field(default=None, max_length=160)
+    weekly_unit_cap: int | None = Field(default=None, ge=1, le=40)
 
 
 class AcademicResource(Room):
@@ -158,6 +163,7 @@ class AcademicOffering(Identity):
             except ValueError:
                 return value
         return value
+
     allowed_buildings: list[str] | None = None
     term_offering_verified: bool = False
     override_requirements_verified: bool = False
@@ -168,7 +174,7 @@ class AcademicConstraints(Contract):
     kind: Literal["constraints"] = "constraints"
     id: Literal["rules"] = "rules"
     operating_windows: list[Window] = Field(default_factory=list, max_length=70)
-    transition_buffer_minutes: int = Field(default=0, ge=0, le=120, multiple_of=30)
+    transition_buffer_minutes: int = Field(default=0, ge=0, le=120)
     locked_assignments: list[Assignment] = Field(default_factory=list)
     enrollments: list[Enrollment] = Field(default_factory=list)
     options: SolverOptions = Field(default_factory=SolverOptions)

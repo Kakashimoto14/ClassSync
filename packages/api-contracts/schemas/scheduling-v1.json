@@ -811,7 +811,6 @@
         "default": 0,
         "maximum": 120,
         "minimum": 0,
-        "multipleOf": 30,
         "title": "Transition Buffer Minutes",
         "type": "integer"
       },
@@ -1445,7 +1444,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -2358,7 +2356,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -3469,7 +3466,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -4799,7 +4795,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -4991,6 +4986,20 @@
             ],
             "default": null,
             "title": "Verification Reference"
+          },
+          "weekly_unit_cap": {
+            "anyOf": [
+              {
+                "maximum": 40,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Unit Cap"
           }
         },
         "required": [
@@ -5607,6 +5616,20 @@
             "default": null,
             "title": "Population"
           },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 500,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
           "population_verified": {
             "default": false,
             "title": "Population Verified",
@@ -5827,6 +5850,48 @@
             ],
             "default": null,
             "title": "Minimum Capacity"
+          },
+          "lec_hours": {
+            "anyOf": [
+              {
+                "maximum": 12,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lec Hours"
+          },
+          "lab_hours": {
+            "anyOf": [
+              {
+                "maximum": 12,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lab Hours"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "maximum": 30,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Units"
           }
         },
         "required": [
@@ -6885,7 +6950,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -8271,7 +8335,6 @@
             "default": 0,
             "maximum": 120,
             "minimum": 0,
-            "multipleOf": 30,
             "title": "Transition Buffer Minutes",
             "type": "integer"
           },
@@ -8463,6 +8526,20 @@
             ],
             "default": null,
             "title": "Verification Reference"
+          },
+          "weekly_unit_cap": {
+            "anyOf": [
+              {
+                "maximum": 40,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Weekly Unit Cap"
           }
         },
         "required": [
@@ -9029,6 +9106,20 @@
             "default": null,
             "title": "Population"
           },
+          "capacity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 500,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Capacity"
+          },
           "population_verified": {
             "default": false,
             "title": "Population Verified",
@@ -9249,6 +9340,48 @@
             ],
             "default": null,
             "title": "Minimum Capacity"
+          },
+          "lec_hours": {
+            "anyOf": [
+              {
+                "maximum": 12,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lec Hours"
+          },
+          "lab_hours": {
+            "anyOf": [
+              {
+                "maximum": 12,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lab Hours"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "maximum": 30,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Units"
           }
         },
         "required": [

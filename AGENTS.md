@@ -8,7 +8,7 @@ Build a genuinely functioning, maintainable, accessible and secure university cl
 ## Source of truth and honesty
 - Actual current code, schema, contract and fresh tests outrank stale documentation. Reconcile disagreements and update docs as authorized.
 - Distinguish VERIFIED / IMPLEMENTED-UNVERIFIED / PLANNED / BLOCKED. An earlier report is not current evidence.
-- Never invent CdM policy, programs, curriculum, room equipment/capacity, teacher availability, enrollment, consent, costs, institutional delegation or hosting authorization.
+- Never invent CdM policy, programs, curriculum, room equipment/capacity, teacher availability, enrollment, consent, costs, institutional delegation or hosting authorization, except for a narrowly scoped dataset explicitly authorized in `docs/autonomy/APPROVALS.md` for an isolated demonstration/defense environment. Such owner-authorized defaults must retain internal provenance and must not be described as Registrar/Facilities-verified or used to provision actual student accounts.
 - Inspect `docs/autonomy/STATUS.md`, `ROADMAP.md`, `QUALITY_GATES.md`, `APPROVALS.md` and `GOALS.md` at the start of every work session. Update status/evidence after each accepted milestone.
 - Do not falsely report that tests, scans, screenshots, deployments or cloud checks happened.
 

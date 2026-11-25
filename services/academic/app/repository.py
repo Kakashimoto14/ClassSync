@@ -215,6 +215,46 @@ class AcademicRepository:
             self.write_in(db, scope, owner, period_id, body)
         return self.snapshot(scope, owner, period_id)
 
+    def delete(self, scope, owner, period_id, kind, record_id, expected_revision):
+        with self.connection(True) as db:
+            self.period(db, scope, owner, period_id)
+            row = db.execute(
+                "SELECT revision FROM academic_records "
+                "WHERE scope=? AND owner=? AND period_id=? AND kind=? AND id=?",
+                (scope, owner, period_id, kind, record_id),
+            ).fetchone()
+            if not row:
+                raise AcademicError(404, "record_not_found", "Academic record was not found.")
+            if row["revision"] != expected_revision:
+                raise AcademicError(
+                    409,
+                    "academic_version_conflict",
+                    "This record changed; reload before deleting it.",
+                )
+            referenced = db.execute(
+                "SELECT 1 FROM academic_references "
+                "WHERE scope=? AND owner=? AND period_id=? AND target_kind=? "
+                "AND target_id=? LIMIT 1",
+                (scope, owner, period_id, kind, record_id),
+            ).fetchone()
+            if referenced:
+                raise AcademicError(
+                    409,
+                    "record_in_use",
+                    "Remove or update records that reference this item before deleting it.",
+                )
+            db.execute(
+                "DELETE FROM academic_records "
+                "WHERE scope=? AND owner=? AND period_id=? AND kind=? AND id=?",
+                (scope, owner, period_id, kind, record_id),
+            )
+            db.execute(
+                "UPDATE academic_periods SET revision=revision+1 "
+                "WHERE scope=? AND owner=? AND id=?",
+                (scope, owner, period_id),
+            )
+        return self.snapshot(scope, owner, period_id)
+
     def save_calendar(self, scope, owner, period_id, body):
         validate_calendar(body.calendar)
         with self.connection(True) as db:

@@ -138,6 +138,70 @@ describe('persisted academic data management', () => {
     expect(within(steps).getByRole('link', { name: 'Manage' })).toHaveAttribute('href', expect.stringContaining('/admin/subjects'));
   });
 
+  it('bulk verification updates only unverified schedulable rooms and preserves excluded spaces', async () => {
+    const roomSnapshot = structuredClone(snapshot) as AcademicSnapshot;
+    roomSnapshot.records.push(
+      {
+        revision: 3, updated_at: period.created_at, updated_by: 'admin',
+        record: {
+          kind: 'resources', id: 'cdm-prrc-302', name: 'PRRC 302', building: 'PRRC',
+          source: 'cdm-provisional', schedulable: true, condition: 'unknown',
+          capacity: null, room_type: 'lecture_classroom', type_verified: false,
+          capacity_verified: false, availability: [], availability_verified: false,
+          verification_note: 'Catalog row for the defense dataset', active: true,
+        },
+      },
+      {
+        revision: 1, updated_at: period.created_at, updated_by: 'admin',
+        record: {
+          kind: 'resources', id: 'cdm-prrc-101', name: 'PRRC 101', building: 'PRRC',
+          source: 'cdm-provisional', schedulable: true, condition: 'unknown',
+          capacity: null, room_type: 'excluded', type_verified: false,
+          capacity_verified: false, availability: [], availability_verified: false,
+          verification_note: '', active: true,
+        },
+      },
+      {
+        revision: 1, updated_at: period.created_at, updated_by: 'admin',
+        record: {
+          kind: 'resources', id: 'ad-hoc-room', name: 'Ad hoc room', building: 'Unknown',
+          source: 'administrator-supplied', schedulable: true, condition: 'unknown',
+          capacity: null, room_type: 'lecture_classroom', type_verified: false,
+          capacity_verified: false, availability: [], availability_verified: false,
+          verification_note: 'Existing resource outside the approved campus catalog', active: true,
+        },
+      },
+    );
+    vi.mocked(api.loadAcademicPeriod).mockResolvedValue(roomSnapshot);
+    const savedRoomSnapshot = structuredClone(roomSnapshot) as AcademicSnapshot;
+    const savedRoom = savedRoomSnapshot.records.find(
+      (entry) => entry.record.kind === 'resources' && entry.record.id === 'cdm-prrc-302',
+    );
+    if (savedRoom?.record.kind === 'resources') {
+      savedRoom.record.condition = 'operational';
+      savedRoom.record.capacity = 40;
+      savedRoom.record.type_verified = true;
+      savedRoom.record.capacity_verified = true;
+      savedRoom.record.availability_verified = true;
+    }
+    vi.mocked(api.saveAcademicRecord).mockResolvedValue(savedRoomSnapshot);
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(
+      <MemoryRouter initialEntries={['/admin/academic/resources?period=period-a']}>
+        <AcademicManagementPage initialKind="resources" />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Verify Schedulable Rooms' }));
+    await waitFor(() => expect(api.saveAcademicRecord).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.saveAcademicRecord).mock.calls[0][1].record.id).toBe('cdm-prrc-302');
+    expect(vi.mocked(api.saveAcademicRecord).mock.calls[0][1].record.kind).toBe('resources');
+    await waitFor(() => expect(screen.getAllByRole('status').some(
+      (item) => item.getAttribute('tabindex') === '-1' &&
+        item.textContent === '1/1 schedulable rooms ready · 1 excluded spaces preserved',
+    )).toBe(true));
+    confirm.mockRestore();
+  });
+
   it('offers a prefilled first-period action without pre-filling unverified calendar dates', async () => {
     vi.mocked(api.listAcademicPeriods).mockResolvedValueOnce({ periods: [] });
     vi.mocked(api.loadAcademicPeriod).mockResolvedValueOnce(null as never);
