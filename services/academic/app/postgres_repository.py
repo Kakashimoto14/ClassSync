@@ -23,7 +23,11 @@ from classync_contracts.identity import (
     MembershipErrorCode,
     VerifiedPrincipal,
 )
-from classync_persistence.academic_periods import PostgresAcademicPeriods, utc_timestamp
+from classync_persistence.academic_periods import (
+    ARCHIVED_PERIOD_TITLE_PATTERN,
+    PostgresAcademicPeriods,
+    utc_timestamp,
+)
 from classync_persistence.database import transaction
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError, IntegrityError, SQLAlchemyError
@@ -214,9 +218,10 @@ class PostgresAcademicRepository:
                 text("""
                 SELECT id FROM classsync_academic.period_metadata
                 WHERE tenant_id=:tenant AND owner_uid=:owner AND data_mode='institutional'
+                  AND title NOT LIKE :archived
                 ORDER BY created_at DESC,id
             """),
-                self.keys,
+                {**self.keys, "archived": ARCHIVED_PERIOD_TITLE_PATTERN},
             ).all()
             return [self.period_in(db, identity) for identity in ids]
 
@@ -401,8 +406,9 @@ class PostgresAcademicRepository:
                     SELECT *,count(*) OVER() AS total FROM joined
                     WHERE (:query='' OR student_id ILIKE :query OR
                            display_name ILIKE :query OR registered_email ILIKE :query)
-                      AND (:year IS NULL OR year_level=:year)
-                      AND (:section IS NULL OR section_id=:section)
+                      AND (CAST(:year AS integer) IS NULL
+                           OR year_level=CAST(:year AS integer))
+                      AND (CAST(:section AS text) IS NULL OR section_id=CAST(:section AS text))
                     ORDER BY year_level,section_label,student_id
                     LIMIT :limit OFFSET :offset
                 """),
@@ -595,7 +601,7 @@ class PostgresAcademicRepository:
                 db.execute(
                     text("""
                 SELECT id,person_id FROM classsync_identity.students
-                WHERE tenant_id=:tenant AND id=:student FOR UPDATE
+                WHERE tenant_id=:tenant AND id=:student
             """),
                     {**self.keys, "student": student_id},
                 )
@@ -677,7 +683,7 @@ class PostgresAcademicRepository:
                 db.scalar(
                     text(
                         "SELECT 1 FROM classsync_identity.students "
-                        "WHERE tenant_id=:tenant AND id=:student FOR UPDATE"
+                        "WHERE tenant_id=:tenant AND id=:student"
                     ),
                     {**self.keys, "student": student_id},
                 )

@@ -347,3 +347,22 @@ transaction, unchanged reject-with-note, non-blocking Teacher decision email via
 provisioning runbook. Owner decisions: faculty availability stays Admin-edited; Teacher requests
 remain one-date room swaps; a non-owner publication head returns a clear 409. No new migration is
 planned. Slice 4 (all 9 CDM programs, H1–H15 audit) is a separate future session.
+
+## 26 November 2026 — Roster 503, archived-period listing, and R1 presentation race
+
+Owner instruction, quoted: "Record a dated approval entry in `docs/autonomy/APPROVALS.md` quoting my
+instruction: local code, migrations if strictly required, tests, and docs only — do NOT commit, push,
+deploy, or contact live Neon, Firebase, or Render." Scope: (1) fix the production
+`/admin/students` HTTP 503, adding a forward-only `0027_*` migration only if a grant or policy is
+the root cause, with a non-owner-role regression test; (2) exclude archived invalid periods from
+active Academic and Scheduling period listings and default selection while retaining the rows;
+(3) fix the `R1Presentation.test.tsx` reset race and confirm it with five consecutive runs. Full
+verification and a report are required. No commit is authorized.
+
+## 26 November 2026 — Request-approval PostgreSQL verification and Linux CI
+
+Owner instruction, quoted: "Do NOT commit, push, deploy, or contact live Neon, Firebase, or Render."
+Scope on top of the uncommitted Phase A tree: (1) a disposable local PostgreSQL runtime test of the
+Teacher classroom-request and Administrator approval/rejection workflow, fixing real defects it
+exposes (minimal forward-only migration only if strictly needed); (2) keep that and the roster
+PostgreSQL test compatible with the GitHub Actions `python` job; (3) run and report verification.

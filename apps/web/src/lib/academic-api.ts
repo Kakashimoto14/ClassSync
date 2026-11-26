@@ -81,7 +81,20 @@ async function dedupeAcademicRead<T>(path: string): Promise<T> {
   return pending;
 }
 
-export const listAcademicPeriods = () => dedupeAcademicRead<AcademicPeriodList>(base);
+// Archived broken periods stay in the database for audit history and are never selectable.
+const ARCHIVED_PERIOD_TITLE_PREFIX = 'Archived invalid period · ';
+
+export const listAcademicPeriods = async (): Promise<AcademicPeriodList> => {
+  const list = await dedupeAcademicRead<AcademicPeriodList>(base);
+  // A response without a list is passed through unchanged, never turned into "no periods".
+  if (!list.periods) return list;
+  return {
+    ...list,
+    periods: list.periods.filter(
+      (period) => !period.title.startsWith(ARCHIVED_PERIOD_TITLE_PREFIX),
+    ),
+  };
+};
 export const createAcademicPeriod = (body: PeriodCreate) =>
   academicRequest<AcademicSnapshot>(base, body, 'POST');
 export const loadAcademicPeriod = (id: string) =>

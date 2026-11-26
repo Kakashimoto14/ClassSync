@@ -1,5 +1,24 @@
 # Requirements -> implementation -> evidence
 
+### 26 November 2026 — Request approval on PostgreSQL
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Teacher request submission under the runtime role | Advisory lock replaces identity row lock; `test_request_approval_postgres_runtime.py` | VERIFIED on disposable PostgreSQL 18; hosted unverified |
+| Atomic approval, conflict rollback, rejection, triggers and RLS | Same test | VERIFIED on disposable PostgreSQL 18; supersedes the "IMPLEMENTED-UNVERIFIED against PostgreSQL" rows below |
+| PostgreSQL tests run in the Linux CI `python` job | `services/testing/postgres_cluster.py` | IMPLEMENTED-UNVERIFIED (not run on Linux / PostgreSQL 16) |
+
+
+### 26 November 2026 — Roster 503 and archived periods
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Admin roster list/search/filter works under the runtime role | Typed filter casts; `test_roster_postgres_runtime.py` | VERIFIED on disposable PostgreSQL 18; hosted page unverified |
+| Admin roster create/activate/re-key/delete with audit | Migration `0027_roster_audit_events`; no row lock on identity tables; same test | VERIFIED on disposable PostgreSQL; `0027` NOT applied to Neon |
+| Archived periods never listed or auto-selected, rows retained | `periods()`, publication `periods()`, `listAcademicPeriods`; PostgreSQL, unit and Vitest tests | VERIFIED locally |
+
+Supersedes the "Admin roster reachable + Mark active" row below: writes could not succeed before `0027`.
+
 ### 26 November 2026 — Defense readiness Slices 1–3
 
 | Requirement | Implementation / evidence | Current status |

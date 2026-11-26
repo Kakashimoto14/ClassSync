@@ -19,6 +19,9 @@ from sqlalchemy import Engine, text
 from .database import transaction
 from .memberships import identity_context
 
+# Broken legacy periods are renamed, never deleted: audit rows reference their IDs.
+ARCHIVED_PERIOD_TITLE_PATTERN = "Archived invalid period · %"
+
 
 def utc_timestamp(value):
     """Stable contract text independent of the database session's display timezone."""

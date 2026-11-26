@@ -10,8 +10,10 @@ Administrator account is never modified by these steps.
 
 ## 0. Prerequisites
 
-- The migration head is current (`0026_archived_period_audit` at the time of writing). Both scripts
-  run `migrate(head)` and fail closed on drift.
+- The migration head is current (`0027_roster_audit_events` at the time of writing). Both scripts
+  run `migrate(head)` and fail closed on drift. The deployed services never migrate. Without
+  `0027`, every roster add, edit, **Mark active** and delete fails; the seed `--apply` in step 1
+  applies it. Use the database owner (migration) role.
 - The Administrator who will approve requests is the same Administrator who publishes the
   timetable. Publication heads are owner-scoped, and a different Admin's approval returns a clear
   409 `publication_owner_conflict`.

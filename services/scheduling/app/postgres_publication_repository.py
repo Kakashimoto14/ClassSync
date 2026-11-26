@@ -15,7 +15,10 @@ from classync_contracts.identity import (
     VerifiedPrincipal,
 )
 from classync_contracts.publication import PublicationCommand, RoomRestriction
-from classync_persistence.academic_periods import utc_timestamp
+from classync_persistence.academic_periods import (
+    ARCHIVED_PERIOD_TITLE_PATTERN,
+    utc_timestamp,
+)
 from classync_persistence.database import transaction
 from pydantic import ValidationError
 from sqlalchemy import text
@@ -300,9 +303,19 @@ class PostgresPublicationRepository(PublicationRules):
             ids = db.execute(text("""
                 SELECT period_id,revision FROM classsync_scheduling.publication_heads
                 WHERE tenant_id=:tenant AND dataset=:dataset ORDER BY period_id
-            """), self.params(dataset)).mappings()
+            """), self.params(dataset)).mappings().all()
+            # Only Administrators can read period metadata under row-level security. A
+            # non-UUID legacy period can never have been published through the Gateway.
+            archived = set()
+            if role == "administrator":
+                archived = set(db.scalars(text("""
+                    SELECT id FROM classsync_academic.period_metadata
+                    WHERE tenant_id=:tenant AND title LIKE :archived
+                """), {**self.keys, "archived": ARCHIVED_PERIOD_TITLE_PATTERN}).all())
             result = []
             for item in ids:
+                if item["period_id"] in archived:
+                    continue
                 versions = self.rows(db, self.keys["tenant"], dataset, item["period_id"])
                 if not versions:
                     continue

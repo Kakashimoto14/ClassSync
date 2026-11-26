@@ -1,5 +1,78 @@
 # ClassSync — autonomy status ledger
 
+## 26 November 2026 21:21 +0800 — Request-approval PostgreSQL runtime and Linux CI
+
+Branch `main`, base/current HEAD `93f18eeb8b72df48b172eb71527a2de42ba22aea` plus the uncommitted
+Phase A tree (no commit or push). No Neon, Firebase or Render contact.
+
+**Defect found on real PostgreSQL 18.** Every Teacher request submission returned HTTP 503:
+`42501 permission denied for table memberships`, from `SELECT ... FOR UPDATE` on identity
+memberships, which requires UPDATE privilege. Replaced with a per-tenant, per-Teacher advisory
+transaction lock in `classroom_requests.py`. No migration or new grant. Hosted behaviour depends on
+the hosted runtime grants, which were not inspected.
+
+**Verified by `services/scheduling/tests/test_request_approval_postgres_runtime.py` (7 tests).**
+Defense seed, real solver, draft and publication as a runtime role with read-only identity; options
+and 41-room slot occupancy; 201 / 409 occupied / 422 for each of 12 excluded rooms; preflight;
+post-submission reservation conflict and injected final-statement failure both leave all four tables
+unchanged; approval commits request, version, head and audit in one transaction (`xmin`); idempotent
+retry; transition guard; rejection leaves the timetable unchanged. HTTP identity verification and
+the clock (pinned to 2026-09-01) are substituted. The test defines the runtime grants it assumes.
+
+**CI.** Cluster setup moved to `services/testing/postgres_cluster.py` (shared with the roster test):
+`PATH`, `/usr/lib/postgresql/*/bin`, Windows `Program Files`; missing binaries or a root user fail
+in GitHub Actions and skip elsewhere. The `ubuntu-latest` image readme lists PostgreSQL 16.16, so no
+workflow change. **Not run on Linux or PostgreSQL 16.**
+
+**Verification.** `pytest --basetemp=.pytest_tmp`: 14 failed, 1323 passed, because providers require
+temporary SQLite paths under the system temp directory. With `TEMP`/`TMP` also pointed into
+`.pytest_tmp`: 1337 passed; with the base temp under system temp: 1337 passed. Ruff, contract export
+`--check` and `git diff --check` passed. Web suite not re-run (no web change in this task).
+
+**Open.** Teacher occupancy reads only publications visible to that Teacher under RLS (approval
+re-checks all). `.pytest_cache` is not writable on this machine (warning only).
+
+
+## 26 November 2026 — Roster 503, archived-period listing, R1 race
+
+Worktree `C:\Projects\ClassSync`, branch `main`, base/current HEAD `93f18ee` (no commit or push).
+Approval: `APPROVALS.md` 26 November 2026 roster entry. No Neon, Firebase or Render contact.
+
+**Roster root causes (reproduced on a disposable local PostgreSQL 18 cluster).**
+1. Every roster read failed with `42P08`: `roster_page` used untyped `:year`/`:section` parameters
+   in `IS NULL`. This is the production 503. Fixed with explicit casts.
+2. Every roster create/update/delete failed with `23514`: migration `0026` rebuilt the activity
+   event constraint without the three `academic.student.*` events added by `0025`. Fixed by
+   forward-only `0027_roster_audit_events`. **Not yet applied to Neon.**
+3. Under a runtime role with read-only identity tables, update/delete failed with `42501` because
+   Python took `FOR UPDATE` on `students`. Removed; the definer function locks the row.
+
+The earlier Slices 1–3 roster work was tested only against fakes and did not detect these.
+
+**Archived periods.** `PostgresAcademicRepository.periods()` had no archived filter (only the
+period-metadata `list_for` path did). It now excludes `Archived invalid period · %`; the
+Administrator publication period list skips them; `listAcademicPeriods` filters them in the web
+client. Rows are retained. Teacher/Student publication lists cannot read period metadata under
+RLS; a non-UUID legacy period cannot be generated through the Gateway.
+
+**R1 race.** Already fixed in `93f18ee` (present on local `origin/main`); no further change. Five
+consecutive runs of `R1Presentation.test.tsx` passed 6/6.
+
+New tests: `services/academic/tests/test_roster_postgres_runtime.py` (own loopback cluster,
+non-superuser non-BYPASSRLS migrator and least-privilege runtime role; skips only without server
+binaries, fails instead of skipping in GitHub Actions; 9 of 12 failed before the fixes),
+`services/scheduling/tests/test_publication_periods.py`,
+`apps/web/src/pages/AcademicStudentRosterPage.archived.test.tsx` (fails without the guard).
+
+Verification: pytest with `--basetemp` **1,330 passed**, no skips; Ruff and contract `--check`
+passed; lint and typecheck passed; `npm run test:web` **912 passed / 75 files**; build main entry
+98.02 kB raw / 26.29 kB gzip; `git diff --check` clean. Plain `pytest` without `--basetemp`:
+709 passed, 621 errors, all `PermissionError` on the local `Temp\pytest-of-lenovo` folder.
+`test:web` took 254 s against the runner's 300 s limit and exited 1 once while pytest ran
+concurrently. IMPLEMENTED-UNVERIFIED: the new PostgreSQL test on Linux CI, Neon runtime-role
+grants, and the hosted roster page. Classroom request approval SQL is still not exercised against
+PostgreSQL.
+
 ## 26 November 2026 17:55 MPST — Defense readiness Slices 1–3
 
 Worktree `C:\Projects\ClassSync`, branch `main`, base/current HEAD

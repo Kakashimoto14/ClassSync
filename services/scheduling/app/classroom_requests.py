@@ -148,12 +148,11 @@ class Requests:
         p, key = self.publication, str(body.idempotency_key)
         fingerprint = digest(encode(body.model_dump(mode="json")))
         with p.session(role="teacher", record_id=claims["faculty_id"]) as db:
+            # Serialize one Teacher's submissions without a row lock: FOR UPDATE would need
+            # UPDATE on identity memberships, which the runtime role must never hold.
             db.execute(
-                text(
-                    "SELECT uid FROM classsync_identity.memberships "
-                    "WHERE tenant_id=:tenant AND uid=:owner FOR UPDATE"
-                ),
-                p.keys,
+                text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"),
+                {"key": encode(["classsync-request", p.keys["tenant"], p.keys["owner"]])},
             )
             previous = (
                 db.execute(
