@@ -241,12 +241,14 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       setConnected,
     );
   }, [mode, period, prefix, query]);
+  // Only institutional published reads depend on the period list. Depending on the array
+  // itself would reload (and clear a shown error) whenever a sample list arrived late.
+  const periodUnlisted =
+    appMode === 'institutional' &&
+    mode === 'published' &&
+    !periods.some((item) => item.id === period);
   useEffect(() => {
-    if (
-      appMode === 'institutional' &&
-      mode === 'published' &&
-      !periods.some((item) => item.id === period)
-    ) {
+    if (periodUnlisted) {
       setData(null);
       previous.current = null;
       setLoading(false);
@@ -308,7 +310,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [draft, drafts, end, identity, mode, period, periods, prefix, query, refresh, role, start]);
+  }, [draft, drafts, end, identity, mode, period, periodUnlisted, prefix, query, refresh, role, start]);
   const records =
     data?.occurrences.filter(
       (o) =>

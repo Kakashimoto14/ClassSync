@@ -6,11 +6,18 @@ import { PresentationConflictSummary } from '../components/scheduling/Presentati
 import { PublishedRoomAvailability } from './PublishedRoomAvailability';
 import { readWorkspace, rememberWorkspace } from '../lib/workspace-context';
 import { subscribeTimetable, timetableRequest } from '../lib/publication-api';
-vi.mock('../lib/presentation-sample', async (original) => ({
-  ...(await original<typeof import('../lib/presentation-sample')>()),
-  presentationEnabled: true,
-  presentationOnlyBuild: true,
-}));
+import { presentationCalendar, presentationData } from '../lib/presentation-sample';
+vi.mock('../lib/presentation-sample', async (original) => {
+  const actual = await original<typeof import('../lib/presentation-sample')>();
+  return {
+    ...actual,
+    // Pass-through spies so tests can order and count the two sample loads.
+    presentationData: vi.fn(actual.presentationData),
+    presentationCalendar: vi.fn(actual.presentationCalendar),
+    presentationEnabled: true,
+    presentationOnlyBuild: true,
+  };
+});
 vi.mock('../lib/publication-api', () => ({
   timetableRequest: vi.fn(),
   subscribeTimetable: vi.fn(),
@@ -76,6 +83,35 @@ it('recovers an invalid presentation identity deliberately without substituting 
     expect(document.querySelectorAll('.ux-agenda-row').length).toBeGreaterThan(0),
   );
   expect(timetableRequest).not.toHaveBeenCalled();
+});
+it('keeps the identity alert actionable when the sample period list arrives late', async () => {
+  saved('presentation', 'missing-identity');
+  const actual = await vi.importActual<typeof import('../lib/presentation-sample')>(
+    '../lib/presentation-sample',
+  );
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  vi.mocked(presentationData).mockImplementationOnce(async () => {
+    await gate;
+    return actual.presentationData();
+  });
+  render(
+    <MemoryRouter>
+      <RoleScheduleWorkspace role="student" />
+    </MemoryRouter>,
+  );
+  const alert = await screen.findByRole('alert');
+  await act(async () => {
+    release();
+    await vi.mocked(presentationData).mock.results[0].value;
+  });
+  // The late period list must not reload the calendar and replace the alert under the user.
+  expect(presentationCalendar).toHaveBeenCalledTimes(1);
+  expect(alert).toBeInTheDocument();
+  fireEvent.click(within(alert).getByRole('button', { name: 'Reset sample identity' }));
+  await waitFor(() => expect(readWorkspace('student').identity).toBe('syn-bsit-3-A'));
 });
 it('keeps the loaded agenda when selecting another date within the same sample month', async () => {
   saved('published', 'old-enrollment');
