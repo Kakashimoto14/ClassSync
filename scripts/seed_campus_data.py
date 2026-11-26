@@ -48,6 +48,7 @@ from services.academic.app.record_rules import unique_label  # noqa: E402
 
 PERIOD_TITLE = "AY 2026-2027 · 1st Semester"
 LEGACY_PERIOD_ID = "defense-ay-2026-2027-first"
+ARCHIVED_LEGACY_TITLE = f"Archived invalid period · {LEGACY_PERIOD_ID}"
 SEED_NAMESPACE = uuid5(NAMESPACE_URL, "classsync:authorized-defense-dataset:v1")
 
 
@@ -718,6 +719,8 @@ def _archive_legacy_period(db, repo) -> bool:
     )
     if legacy is None:
         return False
+    if legacy["title"] == ARCHIVED_LEGACY_TITLE and legacy["data_mode"] == "institutional":
+        return False  # Archived by an earlier run: no revision bump, no duplicate audit row.
     if legacy["title"] != PERIOD_TITLE or legacy["data_mode"] != "institutional":
         raise ValueError(
             "The legacy period does not match the approved defense period; preserving it"
@@ -735,7 +738,7 @@ def _archive_legacy_period(db, repo) -> bool:
             WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:period
             RETURNING revision
         """),
-            {**params, "title": f"Archived invalid period · {LEGACY_PERIOD_ID}"},
+            {**params, "title": ARCHIVED_LEGACY_TITLE},
         )
         .mappings()
         .one_or_none()

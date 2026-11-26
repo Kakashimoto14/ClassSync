@@ -6,8 +6,13 @@ from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
 
+import pytest
+
 from scripts.seed_campus_data import (
+    ARCHIVED_LEGACY_TITLE,
+    LEGACY_PERIOD_ID,
     PERIOD_ID,
+    PERIOD_TITLE,
     _arguments,
     _same,
     apply_seed,
@@ -117,120 +122,129 @@ def test_apply_requires_exact_tenant_confirmation_before_any_database_access(mon
         main(["--apply"])
 
 
+class MemoryResult:
+    def __init__(self, values=()):
+        self.values = list(values)
+
+    def scalars(self):
+        return self
+
+    def all(self):
+        return self.values
+
+    def mappings(self):
+        return self
+
+    def one_or_none(self):
+        return self.values[0] if self.values else None
+
+class MemoryDB:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def execute(self, statement, params=None):
+        sql = str(statement)
+        params = params or {}
+        if "SELECT id FROM classsync_academic.period_metadata" in sql:
+            return MemoryResult([self.repo.period_id])
+        if "id=:legacy" in sql and "period_metadata" in sql:
+            return MemoryResult([dict(self.repo.legacy)] if self.repo.legacy else [])
+        if "UPDATE classsync_academic.period_metadata" in sql:
+            self.repo.legacy["title"] = params["title"]
+            self.repo.legacy["revision"] += 1
+            return MemoryResult([{"revision": self.repo.legacy["revision"]}])
+        if "academic.period.archived" in sql:
+            self.repo.archive_events.append(params["revision"])
+        if "INSERT INTO classsync_identity.students" in sql:
+            self.repo.students.add(params["student"])
+        if "INSERT INTO classsync_identity.faculty" in sql:
+            self.repo.faculty[params["faculty"]] = params["person"]
+            self.repo.faculty_inserts += 1
+        if "INSERT INTO classsync_identity.people" in sql:
+            self.repo.people.add(params["person"])
+        return MemoryResult()
+
+    def scalar(self, statement, params=None):
+        params = params or {}
+        if "classsync_identity.faculty" in str(statement):
+            return int(params.get("faculty") in self.repo.faculty)
+        return int(params.get("student") in self.repo.students)
+
+class MemoryRepo:
+    keys = {"tenant": "cdm", "owner": "test-admin"}
+
+    def __init__(self):
+        self.period_id = PERIOD_ID
+        self.calendar = defense_calendar()
+        self.records = {}
+        self.students = set()
+        self.faculty = {}
+        self.faculty_inserts = 0
+        self.people = set()
+        self.labels = {}
+        self.legacy = None
+        self.archive_events = []
+        # Simulate create-period's revision-1 default programs, 53 spaces and
+        # singleton constraints, enforcing the same scoped unique-label key.
+        for record in initial_records(True):
+            self.store(record, revision=1)
+
+    @contextmanager
+    def session(self, *, write=False):
+        yield MemoryDB(self)
+
+    def params(self, period_id, **extra):
+        return {**self.keys, "period": period_id, **extra}
+
+    def snapshot_in(self, db, period_id):
+        records = [
+            SimpleNamespace(record=record, revision=revision)
+            for (kind, _), (record, revision) in self.records.items()
+            if kind
+        ]
+        return SimpleNamespace(
+            period=SimpleNamespace(calendar=self.calendar), records=records
+        )
+
+    def store(self, record, revision):
+        key = (record.kind, record.id)
+        label_key = (record.kind, unique_label(record))
+        other_id = self.labels.get(label_key)
+        if other_id is not None and other_id != record.id:
+            raise AssertionError(f"duplicate scoped unique_label: {label_key}")
+        self.records[key] = (record, revision)
+        self.labels[label_key] = record.id
+
+    def write_in(self, db, period_id, body, *, allow_cohort_change=False):
+        record = body.record
+        key = (record.kind, record.id)
+        current = self.records.get(key)
+        revision = current[1] if current else 0
+        assert body.expected_revision == revision
+        label_key = (record.kind, unique_label(record))
+        conflicting_id = self.labels.get(label_key)
+        assert conflicting_id in (None, record.id), (
+            f"duplicate scoped unique_label: {label_key}"
+        )
+
+        def lookup(kind, identity):
+            found = self.records.get((kind, identity))
+            return found[0] if found else None
+
+        validate_record(
+            record,
+            period_id,
+            lookup,
+            allow_cohort_change=allow_cohort_change,
+        )
+        self.store(record, revision + 1)
+
+    def bump(self, period_id):
+        return None
+
+
 def test_apply_reuses_prepopulated_catalog_ids_and_is_idempotent():
     """Model the scoped Postgres unique key against a new period's default catalog rows."""
-    class MemoryResult:
-        def __init__(self, values=()):
-            self.values = list(values)
-
-        def scalars(self):
-            return self
-
-        def all(self):
-            return self.values
-
-        def mappings(self):
-            return self
-
-        def one_or_none(self):
-            return self.values[0] if self.values else None
-
-    class MemoryDB:
-        def __init__(self, repo):
-            self.repo = repo
-
-        def execute(self, statement, params=None):
-            sql = str(statement)
-            params = params or {}
-            if "SELECT id FROM classsync_academic.period_metadata" in sql:
-                return MemoryResult([self.repo.period_id])
-            if "id=:legacy" in sql and "period_metadata" in sql:
-                return MemoryResult()
-            if "INSERT INTO classsync_identity.students" in sql:
-                self.repo.students.add(params["student"])
-            if "INSERT INTO classsync_identity.faculty" in sql:
-                self.repo.faculty[params["faculty"]] = params["person"]
-                self.repo.faculty_inserts += 1
-            if "INSERT INTO classsync_identity.people" in sql:
-                self.repo.people.add(params["person"])
-            return MemoryResult()
-
-        def scalar(self, statement, params=None):
-            params = params or {}
-            if "classsync_identity.faculty" in str(statement):
-                return int(params.get("faculty") in self.repo.faculty)
-            return int(params.get("student") in self.repo.students)
-
-    class MemoryRepo:
-        keys = {"tenant": "cdm", "owner": "test-admin"}
-
-        def __init__(self):
-            self.period_id = PERIOD_ID
-            self.calendar = defense_calendar()
-            self.records = {}
-            self.students = set()
-            self.faculty = {}
-            self.faculty_inserts = 0
-            self.people = set()
-            self.labels = {}
-            # Simulate create-period's revision-1 default programs, 53 spaces and
-            # singleton constraints, enforcing the same scoped unique-label key.
-            for record in initial_records(True):
-                self.store(record, revision=1)
-
-        @contextmanager
-        def session(self, *, write=False):
-            yield MemoryDB(self)
-
-        def params(self, period_id, **extra):
-            return {**self.keys, "period": period_id, **extra}
-
-        def snapshot_in(self, db, period_id):
-            records = [
-                SimpleNamespace(record=record, revision=revision)
-                for (kind, _), (record, revision) in self.records.items()
-                if kind
-            ]
-            return SimpleNamespace(
-                period=SimpleNamespace(calendar=self.calendar), records=records
-            )
-
-        def store(self, record, revision):
-            key = (record.kind, record.id)
-            label_key = (record.kind, unique_label(record))
-            other_id = self.labels.get(label_key)
-            if other_id is not None and other_id != record.id:
-                raise AssertionError(f"duplicate scoped unique_label: {label_key}")
-            self.records[key] = (record, revision)
-            self.labels[label_key] = record.id
-
-        def write_in(self, db, period_id, body, *, allow_cohort_change=False):
-            record = body.record
-            key = (record.kind, record.id)
-            current = self.records.get(key)
-            revision = current[1] if current else 0
-            assert body.expected_revision == revision
-            label_key = (record.kind, unique_label(record))
-            conflicting_id = self.labels.get(label_key)
-            assert conflicting_id in (None, record.id), (
-                f"duplicate scoped unique_label: {label_key}"
-            )
-
-            def lookup(kind, identity):
-                found = self.records.get((kind, identity))
-                return found[0] if found else None
-
-            validate_record(
-                record,
-                period_id,
-                lookup,
-                allow_cohort_change=allow_cohort_change,
-            )
-            self.store(record, revision + 1)
-
-        def bump(self, period_id):
-            return None
-
     repo = MemoryRepo()
     preseeded_rooms = {
         record.id: record
@@ -294,3 +308,39 @@ def test_cli_help_runs_standalone_without_pythonpath():
     )
     assert result.returncode == 0, result.stderr
     assert "--apply" in result.stdout
+
+
+def test_reapplying_after_the_legacy_period_was_archived_is_a_clean_no_op():
+    repo = MemoryRepo()
+    repo.legacy = {
+        "id": LEGACY_PERIOD_ID,
+        "title": PERIOD_TITLE,
+        "data_mode": "institutional",
+        "revision": 4,
+    }
+    apply_seed(repo)
+    assert repo.legacy["title"] == ARCHIVED_LEGACY_TITLE
+    assert (repo.legacy["revision"], repo.archive_events) == (5, [5])
+
+    # A database seeded before faculty identities existed receives them on the rerun.
+    expected = set(repo.faculty)
+    repo.faculty.clear()
+    repo.faculty_inserts = 0
+    assert apply_seed(repo) == (0, 0)
+    assert set(repo.faculty) == expected and repo.faculty_inserts == 12
+    assert (repo.legacy["revision"], repo.archive_events) == (5, [5])
+
+
+@pytest.mark.parametrize(
+    ("title", "data_mode"),
+    [
+        ("Renamed by an administrator", "institutional"),
+        (ARCHIVED_LEGACY_TITLE, "synthetic"),
+    ],
+)
+def test_an_unrecognised_legacy_period_is_still_preserved(title, data_mode):
+    repo = MemoryRepo()
+    repo.legacy = {"id": LEGACY_PERIOD_ID, "title": title, "data_mode": data_mode, "revision": 4}
+    with pytest.raises(ValueError, match="legacy period does not match"):
+        apply_seed(repo)
+    assert (repo.legacy["title"], repo.legacy["revision"], repo.archive_events) == (title, 4, [])
