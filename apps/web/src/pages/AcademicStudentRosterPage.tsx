@@ -131,6 +131,29 @@ export function AcademicStudentRosterPage() {
       setSaving(false);
     }
   }
+  async function markActive(item: AcademicRosterPage['items'][number]) {
+    if (!page || saving || deletingId || !item.registered_email || !item.display_name) return;
+    setSaving(true);
+    setError('');
+    setNotice('');
+    try {
+      await updateAcademicRosterStudent(periodId, item.student_id, {
+        student_id: item.student_id,
+        full_name: item.display_name,
+        email: item.registered_email,
+        year_level: item.year_level,
+        section_id: item.section_id,
+        enrollment_status: 'active',
+        expected_period_revision: page.period_revision,
+      });
+      await reloadRoster(offset);
+      setNotice(`Student ${item.student_id} is now active and can be provisioned for sign-in.`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Student status could not be updated.');
+    } finally {
+      setSaving(false);
+    }
+  }
   async function removeStudent(item: AcademicRosterPage['items'][number]) {
     if (!page || saving || deletingId) return;
     if (!window.confirm(`Delete ${item.display_name ?? item.student_id} (${item.student_id}) from this roster? This cannot be undone.`)) return;
@@ -203,6 +226,10 @@ export function AcademicStudentRosterPage() {
           <td>{item.section_label} · Year {item.year_level}</td><td>{item.registered_email ?? 'Email not entered'}</td>
           <td><StatusBadge tone={item.enrollment_status === 'active' ? 'success' : 'warning'}>{item.enrollment_status === 'active' ? 'Active' : item.enrollment_status === 'inactive' ? 'Inactive' : 'Unverified'}</StatusBadge></td>
           <td><div className="student-roster-actions">
+            {item.enrollment_status !== 'active' && <>
+              <Button type="button" disabled={saving || Boolean(deletingId) || !item.registered_email || !item.display_name} aria-describedby={!item.registered_email || !item.display_name ? `activate-hint-${item.student_id}` : undefined} onClick={() => void markActive(item)}>Mark {item.student_id} active</Button>
+              {(!item.registered_email || !item.display_name) && <small id={`activate-hint-${item.student_id}`}>Add the student’s name and institutional email first.</small>}
+            </>}
             <Button type="button" variant="secondary" disabled={saving || Boolean(deletingId)} onClick={() => beginEdit(item)}>Edit {item.student_id}</Button>
             <Button type="button" variant="danger" loading={deletingId === item.student_id} disabled={saving || Boolean(deletingId)} onClick={() => void removeStudent(item)}>Delete {item.student_id}</Button>
           </div></td>

@@ -103,7 +103,10 @@ def test_request_options_respect_the_offerings_approved_room_list(monkeypatch):
         "room": {"id": "original"},
     }
     rooms = [
-        SimpleNamespace(id=value, name=value, building="Invented", floor=None)
+        SimpleNamespace(
+            id=value, name=value, building="Invented", floor=None,
+            capacity=40, capacity_verified=True,
+        )
         for value in ("original", "approved", "outside-approved-list")
     ]
     offering = SimpleNamespace(
@@ -120,8 +123,13 @@ def test_request_options_respect_the_offerings_approved_room_list(monkeypatch):
         head=lambda *_: 2,
         project=lambda *_: {"occurrences": [event]},
         decode=lambda *_: {"draft": SimpleNamespace(input_snapshot=source)},
+        occupancy_in=lambda *_, **__: (set(), set()),
     )
+    event.update(starts_at="2026-11-09T08:00:00+08:00", ends_at="2026-11-09T09:00:00+08:00")
     monkeypatch.setattr(module, "eligible_room", lambda *_: True)
+    monkeypatch.setattr(
+        module, "schedulable_space_ids", lambda: {"original", "approved", "outside-approved-list"}
+    )
     result = Requests(publication).options_in(
         Mock(), {"role": "teacher"}, "owned-period", date(2026, 11, 9), "owned-class"
     )

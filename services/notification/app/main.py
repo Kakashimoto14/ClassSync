@@ -132,6 +132,29 @@ class EmailAction(BaseModel):
         return value
 
 
+class RequestDecisionEmail(BaseModel):
+    """Teacher-only decision notice; never sent to student roster rows."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    email: str = Field(min_length=3, max_length=320)
+    decision: Literal["approved", "rejected"]
+    subject_code: str = Field(min_length=1, max_length=40)
+    section: str = Field(min_length=1, max_length=80)
+    class_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    time_range: str = Field(min_length=1, max_length=40)
+    from_room: str = Field(min_length=1, max_length=120)
+    to_room: str = Field(min_length=1, max_length=120)
+    note: str = Field(min_length=3, max_length=1000)
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        normalized = normalize_email(value)
+        if not normalized:
+            raise ValueError("Email address is invalid")
+        return normalized
+
+
 settings = Settings()
 app = FastAPI(title="ClassSync Notification Service", version="1.0.0")
 
@@ -254,4 +277,35 @@ async def password_reset_email(
 
     html, text = render_password_reset_email(body.reset_url.get_secret_value())
     await deliver_email(body.email, "Reset your ClassSync password", text, html)
+    return {"data": {"accepted": True}}
+
+
+@app.post("/internal/v1/request-decision-email", status_code=202)
+async def request_decision_email(
+    body: RequestDecisionEmail,
+    x_classsync_service_token: str | None = Header(default=None),
+):
+    token = settings.notification_service_token
+    if token is None or not x_classsync_service_token or not hmac.compare_digest(
+        token.get_secret_value(), x_classsync_service_token
+    ):
+        raise HTTPException(403, "Service authorization required")
+    from .email_templates import render_request_decision_email
+
+    html, text = render_request_decision_email(
+        decision=body.decision,
+        subject_code=body.subject_code,
+        section=body.section,
+        class_date=body.class_date,
+        time_range=body.time_range,
+        from_room=body.from_room,
+        to_room=body.to_room,
+        note=body.note,
+        app_url=settings.classsync_web_url,
+    )
+    subject = (
+        "Classroom change approved" if body.decision == "approved"
+        else "Classroom change declined"
+    )
+    await deliver_email(body.email, f"ClassSync · {subject}", text, html)
     return {"data": {"accepted": True}}

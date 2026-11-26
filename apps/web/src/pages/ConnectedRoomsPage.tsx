@@ -7,6 +7,7 @@ import { timeRange } from '../lib/student-presentation';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
+import { RoomSlotChecker } from '../components/rooms/RoomSlotChecker';
 import type { UserRole } from '../types/ui';
 import './student-rooms.css';
 
@@ -37,7 +38,10 @@ export function ConnectedRoomsPage({ role, detail = false }: { role: UserRole; d
   return (
     <section className="student-rooms-page" aria-busy={w.loading || directory.loading}>
       <h1>{detail ? (room?.name ?? 'Room details') : 'Rooms'}</h1>
-      <p>Published university room information. Physical availability is not confirmed.</p>
+      <p>
+        Published university room information. Check a time to see which rooms have a published
+        class.
+      </p>
       <label>
         Academic period
         <select value={w.context.period} onChange={(e) => w.change({ period: e.target.value })}>
@@ -116,6 +120,7 @@ export function ConnectedRoomsPage({ role, detail = false }: { role: UserRole; d
         </>
       ) : (
         <>
+          <RoomSlotChecker role={role} period={w.context.period} initialDate={w.date} />
           <label>
             Search rooms
             <input

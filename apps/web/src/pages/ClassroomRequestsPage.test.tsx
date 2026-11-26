@@ -40,22 +40,32 @@ beforeEach(() => {
   vi.clearAllMocks();
   fixture.request.mockResolvedValue({ requests: [request] });
 });
-it('records an Administrator decision without claiming a classroom is already published', async () => {
-  fixture.request.mockImplementation(async (path) =>
-    path.endsWith('/decision')
-      ? { ...request, status: 'approved', revision: 2 }
-      : { requests: [request] },
-  );
+const respond = (overrides: Record<string, unknown> = {}) =>
+  fixture.request.mockImplementation(async (path: string) => {
+    if (path.endsWith('/preflight')) return overrides.preflight ?? { state: 'clear', reasons: [] };
+    if (path.endsWith('/decision')) {
+      if (overrides.decision instanceof Error) throw overrides.decision;
+      return overrides.decision ?? { ...request, status: 'fulfilled', revision: 3 };
+    }
+    return { requests: [request] };
+  });
+it('approves only after a clear live check and reports the published change', async () => {
+  respond();
   render(
     <MemoryRouter>
       <ClassroomRequestsPage role="administrator" />
     </MemoryRouter>,
   );
-  fireEvent.change(await screen.findByLabelText('Decision note for TEST101'), {
+  expect(await screen.findByText('No conflicts · ready to publish')).toBeInTheDocument();
+  expect(fixture.request).toHaveBeenCalledWith(
+    'timetables/requests/owned-request/preflight',
+    expect.objectContaining({ role: 'administrator' }),
+  );
+  fireEvent.change(screen.getByLabelText('Decision note for TEST101'), {
     target: { value: 'Approved synthetic control for publication review' },
   });
-  fireEvent.click(screen.getByRole('button', { name: 'Approve for publication' }));
-  await screen.findByRole('link', { name: 'Review classroom change' });
+  fireEvent.click(screen.getByRole('button', { name: 'Approve and publish change' }));
+  expect(await screen.findByRole('status')).toHaveTextContent('Classroom change published');
   expect(fixture.request).toHaveBeenCalledWith(
     'timetables/requests/owned-request/decision',
     expect.objectContaining({
@@ -68,8 +78,47 @@ it('records an Administrator decision without claiming a classroom is already pu
       },
     }),
   );
-  expect(screen.getByRole('button', { name: /Classroom change published/ })).toBeInTheDocument();
-  expect(screen.getByRole('status')).toHaveTextContent('Approved · awaiting publication');
+  expect(screen.queryByRole('link', { name: 'Review classroom change' })).not.toBeInTheDocument();
+});
+it('blocks approval while the live check reports a conflict but still allows declining', async () => {
+  respond({ preflight: { state: 'conflict', reasons: ['Room conflict between a and b.'] } });
+  render(
+    <MemoryRouter>
+      <ClassroomRequestsPage role="administrator" />
+    </MemoryRouter>,
+  );
+  expect(await screen.findByText('Conflict found')).toBeInTheDocument();
+  expect(screen.getByText(/Room conflict between a and b\./)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Decision note for TEST101'), {
+    target: { value: 'Room is double booked' },
+  });
+  expect(screen.getByRole('button', { name: 'Approve and publish change' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Decline request' })).toBeEnabled();
+});
+it('re-checks conflicts after an approval is rejected by the server', async () => {
+  respond({
+    decision: Object.assign(new Error('The proposed room is now occupied at this class time.'), {
+      status: 409,
+    }),
+  });
+  render(
+    <MemoryRouter>
+      <ClassroomRequestsPage role="administrator" />
+    </MemoryRouter>,
+  );
+  await screen.findByText('No conflicts · ready to publish');
+  fireEvent.change(screen.getByLabelText('Decision note for TEST101'), {
+    target: { value: 'Approve this change' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Approve and publish change' }));
+  await waitFor(() =>
+    expect(screen.getByRole('alert')).toHaveTextContent('now occupied at this class time'),
+  );
+  await waitFor(() =>
+    expect(
+      fixture.request.mock.calls.filter(([path]) => String(path).endsWith('/preflight')),
+    ).toHaveLength(2),
+  );
 });
 it('clears the previous request list when refreshed access is denied', async () => {
   render(
@@ -93,8 +142,10 @@ it('keeps a failed decision unconfirmed and permits a deliberate reload', async 
     target: { value: 'Invented local decision' },
   });
   fixture.request.mockRejectedValue(new Error('This request changed. Reload before deciding.'));
-  fireEvent.click(screen.getByRole('button', { name: 'Approve for publication' }));
-  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('request changed'));
+  fireEvent.click(screen.getByRole('button', { name: 'Approve and publish change' }));
+  await waitFor(() =>
+    expect(screen.getAllByRole('alert')[0]).toHaveTextContent('request changed'),
+  );
   expect(screen.queryByRole('link', { name: 'Review classroom change' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Reload requests' })).toBeEnabled();
 });
@@ -142,4 +193,44 @@ it('labels the classroom selector exactly and waits for confirmed submission bef
   expect(screen.queryByText('Confirmed request list')).not.toBeInTheDocument();
   await act(async () => complete({ id: 'server-confirmed-request' }));
   expect(await screen.findByText('Confirmed request list')).toBeInTheDocument();
+});
+
+it('labels room occupancy, disables occupied rooms and refreshes after a 409', async () => {
+  let options = 0;
+  fixture.request.mockImplementation(async (_path: string, init?: { method?: string }) => {
+    if (init?.method === 'POST')
+      throw Object.assign(new Error('That room is occupied at this class time. Choose another room.'), {
+        status: 409,
+      });
+    options += 1;
+    return {
+      publication_id: 'owned-version',
+      rooms: [
+        { id: 'free-room', name: 'Lab 3', capacity: 40, occupancy: 'available' },
+        { id: 'busy-room', name: 'Room 204', capacity: null, occupancy: 'occupied' },
+      ],
+    };
+  });
+  render(
+    <MemoryRouter>
+      <ClassroomRequestsPage role="teacher" create />
+    </MemoryRouter>,
+  );
+  fireEvent.change(screen.getByRole('combobox', { name: 'Published class' }), {
+    target: { value: 'owned-class' },
+  });
+  expect(await screen.findByRole('option', { name: 'Lab 3 · 40 seats · Available' })).toBeEnabled();
+  expect(screen.getByRole('option', { name: 'Room 204 · Occupied' })).toBeDisabled();
+  expect(screen.getByRole('status')).toHaveTextContent(
+    '1 of 2 eligible rooms are available at this class time.',
+  );
+  fireEvent.change(screen.getByRole('combobox', { name: 'Proposed classroom' }), {
+    target: { value: 'free-room' },
+  });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Reason for change' }), {
+    target: { value: 'Projector is broken' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Submit classroom request' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('occupied at this class time');
+  await waitFor(() => expect(options).toBe(2));
 });

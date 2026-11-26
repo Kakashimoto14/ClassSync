@@ -1,5 +1,47 @@
 # ClassSync — autonomy status ledger
 
+## 26 November 2026 17:55 MPST — Defense readiness Slices 1–3
+
+Worktree `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`5087c927f93c30132766b73054beff1885327e66` (no commit or push). Approval: `APPROVALS.md`
+26 November 2026 entry. No Neon, Firebase, Render, Resend or Gemini contact; no seed `--apply`;
+no migration added (head remains `0026_archived_period_audit`). The pre-existing uncommitted seed
+reconciliation work was preserved and extended.
+
+**Slice 1.** Seed CLI imports `services.*` without `PYTHONPATH` (root added at module import);
+Alembic-head regression now derives the single head from migration files; `scripts/tests` is
+collected by default pytest; `apps/web` `npm test` uses `--pool=threads` like CI; stale
+provisioning summary text corrected.
+
+**Slice 2 (Phase 3B).** Teacher request options carry live published occupancy for catalog-
+schedulable rooms only; submission rejects occupied (409) and excluded (422) rooms. New slot
+endpoint lists all 41 schedulable rooms with occupancy and room metadata only. Admin preflight
+reports clear/conflict/stale; approval re-validates (stale class, head owner, excluded, occupied,
+reservations, full publication review incl. academic input hash) and, in one transaction,
+publishes a one-date room-swap `CalendarException` as a new immutable version, then marks the
+request approved and fulfilled. Any failure rolls back with a typed 409. Reject unchanged. A lost
+approval response retried with the same note returns the recorded result. Gateway sends a
+post-commit Teacher email via the notification service (Resend) with 5 s timeout and sanitized
+logs; failures never change the decision. Teacher Updates lists decisions; students see changed
+classes. No student email.
+
+**Slice 3.** Connected `/admin/students` route, Gateway roster proxy routes, roster “Mark active”
+action, seed-created faculty identities (required by `provision_live_accounts.py`; no users or
+memberships), and `docs/defense/RUNBOOK.md`.
+
+Independent read-only review: no important defects. Fixed nits: review no longer locks the
+academic period, retry idempotency, already-moved class marked stale, slot labels bound to the
+queried range. Open nits: non-Admin occupancy reflects only RLS-visible versions (approval
+re-checks as Admin); seed has no `ON CONFLICT` for an orphan person row (fails safe).
+
+Verification: `.venv\Scripts\python.exe -m pytest` — **1,312 passed** (one existing
+deprecation warning); Ruff — passed; contract export `--check` — passed; seed `--help` with empty
+`PYTHONPATH` — exit 0; `npm run lint` / `typecheck` — passed; `npm test` and `npm run test:web`
+— **910 passed / 74 files**; `npm run build` — main entry 98.02 kB raw / 26.29 kB gzip (was
+97.62 kB); `git diff --check` — clean. PostgreSQL trigger/RLS behavior of the new approval path,
+live 3-role journey, real email delivery, and responsive/screen-reader review remain
+IMPLEMENTED-UNVERIFIED. Next: Slice 4 (all 9 CDM programs, H1–H15 audit) in a fresh session.
+
 ## 26 November 2026 00:31 SGT — Phase 3 local scheduling slice
 
 Worktree: `C:\Projects\ClassSync`, branch `main`, base HEAD

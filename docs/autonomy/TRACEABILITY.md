@@ -1,5 +1,18 @@
 # Requirements -> implementation -> evidence
 
+### 26 November 2026 — Defense readiness Slices 1–3
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Standalone seed CLI and stale-head regression | `seed_campus_data.py` adds repo root at import; `test_cli_help_runs_standalone_without_pythonpath`; head test derives the single head from migration files; `scripts/tests` added to `testpaths` | VERIFIED locally (32 scripts tests run in default pytest) |
+| Live room occupancy on Teacher requests (41 schedulable, 12 excluded) | `catalog.schedulable_spaces`; `occupancy_in`; `options_in` occupancy labels; `create` 409 occupied / 422 excluded; `RoomSlotChecker` + `GET /timetables/rooms/{period}/slot` (room metadata + occupancy only) | IMPLEMENTED; unit/API tests pass with faked storage; PostgreSQL/RLS runtime IMPLEMENTED-UNVERIFIED; reservations visible to Administrators only |
+| Conflict-validated atomic approval | `Requests.preflight`/`check_candidate`/`approve_in`; `publish_in` within the decision transaction; `request_exception` calendar move; real review detects an injected conflict (`test_request_exception_conflict_is_caught_by_real_publication_review`) | IMPLEMENTED; trigger compatibility reviewed by reading only — IMPLEMENTED-UNVERIFIED against PostgreSQL |
+| Reject with reason, no schedule mutation | Existing decide path unchanged | VERIFIED by existing and new tests |
+| Non-blocking Teacher email + in-app updates | Notification `/internal/v1/request-decision-email`; Gateway decision route schedules post-commit task (5 s, sanitized logs); `ConnectedUpdatesPage` decisions; students see changed occurrences | IMPLEMENTED; Resend/Firebase only mocked; no student email by approval |
+| Admin roster reachable + Mark active | `RouteGuard` connected `/admin/students`; Gateway roster GET/POST/PUT/DELETE proxies; `markActive` | IMPLEMENTED; focused UI/Gateway tests pass; live provisioning not run |
+| Teacher provisioning precondition | Seed creates `classsync_identity.people`/`faculty` identities for 12 seeded faculty (no users/memberships) | IMPLEMENTED-UNVERIFIED against Neon; owner must re-run `--apply` |
+| Defense runbook | `docs/defense/RUNBOOK.md` | DOCUMENTED; commands not executed by assistant |
+
 ### 26 November 2026 — Phase 3 local implementation slice
 
 | Requirement | Implementation / evidence | Current status |
@@ -8,7 +21,7 @@
 | Seeded generation and independent hard-conflict detection | `test_seeded_defense_dataset.py`: owner-authorized local fixture, 54/54 generated assignments, 41 room metadata records, zero conflicts; override overlap regression | VERIFIED in-memory only; no PostgreSQL-backed period readiness or live generation |
 | Admin draft edit and publication | Scheduling revision route saves a separate complete immutable draft after independent validator success while preserving the exact academic input/pin snapshot; current publish/review flow tests remain green | IMPLEMENTED-UNVERIFIED on institutional PostgreSQL; pins are managed in Academic Setup; no connected Admin publication performed |
 | Gemini conflict and health advice | Scheduling backend `advisor.py`, Render env declarations, bounded REST call and 16 KiB response, 10s timeout, 120-assignment/24-candidate cap, opaque options and aggregate metrics; mock fallback/schema tests | IMPLEMENTED locally; provider/key/rate-limit behavior only mocked; UI candidates apply through deterministic revision validator |
-| Admin → Teacher → Student workflow | Existing request, publish, teacher/student projection tests and room directory checks pass locally | PARTIAL; connected live role journey unverified; request decision only records approval/rejection (it does not publish a schedule change), request room options are not checked against occupied slots, and no Resend/in-app notification is triggered |
+| Admin → Teacher → Student workflow | Existing request, publish, teacher/student projection tests and room directory checks pass locally | SUPERSEDED by the Slices 1–3 rows above; connected live role journey still unverified |
 | Admin period recovery and checklist | Period/detail fallback, request coalescing, six-step label/student count, responsive tab layout; focused and full Web tests | VERIFIED locally; production browser/session remains unverified |
 | Full local gates | Python 1,220 passed including migration `0026`; web 898 passed; Ruff, lint, typecheck, build, contract check and diff check pass; focused seed/advisor/migration tests pass | Local checks VERIFIED; no live data or provider operation |
 

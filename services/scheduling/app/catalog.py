@@ -1,6 +1,7 @@
 """Owner-supplied catalogs and explicitly fictional INPUTS, never solver outputs."""
 
 import json
+from functools import lru_cache
 from pathlib import Path
 
 from classync_contracts import scheduling
@@ -20,6 +21,24 @@ def catalogs():
         for r in json.loads((root / "cdm-spaces.json").read_text())
     ]
     return {"programs": programs, "cdm_spaces": rooms}
+
+
+@lru_cache(maxsize=1)
+def _catalog_spaces():
+    return tuple(catalogs()["cdm_spaces"])
+
+
+def schedulable_spaces():
+    """The catalog's schedulable CdM spaces (41); the 12 excluded spaces never appear."""
+    return [room for room in _catalog_spaces() if room.schedulable]
+
+
+def schedulable_space_ids():
+    return frozenset(room.id for room in schedulable_spaces())
+
+
+def excluded_space_ids():
+    return frozenset(room.id for room in _catalog_spaces() if not room.schedulable)
 
 
 def synthetic_scenario(infeasible=False):

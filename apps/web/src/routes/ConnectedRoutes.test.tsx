@@ -19,6 +19,9 @@ vi.mock('../pages/StructuredCalendarPage', () => ({
 vi.mock('../pages/AcademicManagementPage', () => ({
   AcademicManagementPage: () => <p>Connected academic inputs</p>,
 }));
+vi.mock('../pages/AcademicStudentRosterPage', () => ({
+  AcademicStudentRosterPage: () => <p>Connected student roster</p>,
+}));
 function view(state: UniversitySession, path = '/teacher/schedule') {
   return (
     <MemoryRouter>
@@ -73,4 +76,27 @@ it('admits current Administrator inputs through the connected branch', async () 
     ),
   );
   expect(await screen.findByText('Connected academic inputs')).toBeInTheDocument();
+});
+
+it('serves the Administrator student roster in the connected workspace', async () => {
+  render(
+    view(
+      {
+        status: 'authorized',
+        membership: {
+          uid: 'approved-admin',
+          tenant_id: 'owned-tenant',
+          role: 'administrator',
+          membership_revision: 2,
+        },
+      },
+      '/admin/students',
+    ),
+  );
+  expect(await screen.findByText('Connected student roster')).toBeInTheDocument();
+  expect(screen.queryByText('This service is not connected')).not.toBeInTheDocument();
+});
+it('never serves the student roster to a Teacher', () => {
+  render(view(teacher, '/admin/students'));
+  expect(screen.queryByText('Connected student roster')).not.toBeInTheDocument();
 });

@@ -29,6 +29,90 @@ const stateLabel = {
   rejected: 'Not approved',
   fulfilled: 'Classroom change published',
 };
+type Preflight = {
+  state: 'clear' | 'conflict' | 'stale' | 'decided';
+  reasons: string[];
+};
+type RoomOption = {
+  id: string;
+  name: string;
+  capacity?: number | null;
+  occupancy?: 'available' | 'occupied';
+};
+// Each check reviews the whole semester, so only the first few pending cards auto-check.
+const AUTO_PREFLIGHT_LIMIT = 5;
+
+function RequestPreflight({
+  requestId,
+  auto,
+  refresh,
+  onResult,
+}: {
+  requestId: string;
+  auto: boolean;
+  refresh: number;
+  onResult: (result: Preflight | null) => void;
+}) {
+  const [result, setResult] = useState<Preflight | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [failed, setFailed] = useState('');
+  const [requested, setRequested] = useState(auto ? 1 : 0);
+  useEffect(() => {
+    if (!requested) return;
+    const controller = new AbortController();
+    setChecking(true);
+    setFailed('');
+    institutionalRequest<Preflight>(`timetables/requests/${encodeURIComponent(requestId)}/preflight`, {
+      role: 'administrator',
+      signal: controller.signal,
+      timeout: 30000,
+    })
+      .then((value) => {
+        if (controller.signal.aborted) return;
+        setResult(value);
+        onResult(value);
+      })
+      .catch((failure) => {
+        if (controller.signal.aborted) return;
+        setResult(null);
+        onResult(null);
+        setFailed(failure instanceof Error ? failure.message : 'Conflict check unavailable.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setChecking(false);
+      });
+    return () => controller.abort();
+    // onResult is a stable state setter wrapper owned by the parent card.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestId, requested, refresh]);
+  const label =
+    result?.state === 'clear'
+      ? 'No conflicts · ready to publish'
+      : result?.state === 'conflict'
+        ? 'Conflict found'
+        : result?.state === 'stale'
+          ? 'Request out of date'
+          : null;
+  return (
+    <div className="admin-request-preflight" aria-live="polite">
+      {checking && <p className="muted">Checking live schedule conflicts…</p>}
+      {!checking && label && (
+        <p>
+          <span className={`admin-request-status admin-request-status--${result?.state}`}>
+            {label}
+          </span>
+          {result?.reasons?.length ? ` ${result.reasons.join(' ')}` : ''}
+        </p>
+      )}
+      {!checking && failed && <p role="alert">{failed}</p>}
+      {!checking && (
+        <Button variant="secondary" onClick={() => setRequested((value) => value + 1)}>
+          {result || failed ? 'Re-check conflicts' : 'Check conflicts'}
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export function ClassroomRequestsPage({ role, create = false }: { role: Role; create?: boolean }) {
   const [requests, setRequests] = useState<ClassroomRequest[] | null>(null);
@@ -38,6 +122,8 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ClassroomRequest['status'] | 'all'>('all');
+  const [preflight, setPreflight] = useState<Record<string, Preflight | null>>({});
+  const [recheck, setRecheck] = useState(0);
   useEffect(() => {
     if (create) return;
     const controller = new AbortController();
@@ -78,13 +164,19 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
         (current) =>
           current?.map((row) => (row.id === request.id ? { ...row, ...updated } : row)) ?? null,
       );
-      setNotice(stateLabel[updated.status]);
+      setNotice(
+        updated.status === 'fulfilled'
+          ? 'Classroom change published. The Teacher and affected students see the updated room.'
+          : stateLabel[updated.status],
+      );
     } catch (failure) {
       setError(
         failure instanceof Error
           ? failure.message
           : 'The decision was not confirmed. Reload and retry.',
       );
+      // A conflict may have appeared since the last check; refresh the live status.
+      setRecheck((value) => value + 1);
     } finally {
       setBusy(false);
     }
@@ -116,7 +208,10 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
       {!requests && !error && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
       {requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
       {requests?.length && !requests.filter((request) => statusFilter === 'all' || request.status === statusFilter).length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
-      {requests?.filter((request) => statusFilter === 'all' || request.status === statusFilter).map((request) => (
+      {requests?.filter((request) => statusFilter === 'all' || request.status === statusFilter).map((request) => {
+        const pendingIndex = requests.filter((item) => item.status === 'pending').indexOf(request);
+        const blocked = ['conflict', 'stale'].includes(preflight[request.id]?.state ?? '');
+        return (
         <article className="workspace-card admin-request-card" key={request.id}>
           <header className="admin-request-card__header"><div><span className={`admin-request-status admin-request-status--${request.status}`}>{stateLabel[request.status]}</span><h2>
             {request.context.class.subject.code} · {request.context.class.subject.name}
@@ -130,6 +225,14 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
           {request.decision_note && <p className="muted">Decision: {request.decision_note}</p>}
           {role === 'administrator' && request.status === 'pending' && (
             <div>
+              <RequestPreflight
+                requestId={request.id}
+                auto={pendingIndex >= 0 && pendingIndex < AUTO_PREFLIGHT_LIMIT}
+                refresh={recheck}
+                onResult={(result) =>
+                  setPreflight((current) => ({ ...current, [request.id]: result }))
+                }
+              />
               <label htmlFor={`note-${request.id}`}>
                 Decision note for {request.context.class.subject.code}
               </label>
@@ -143,10 +246,11 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
               />
               <div className="draft-actions">
                 <Button
-                  disabled={busy || (notes[request.id]?.trim().length ?? 0) < 3}
+                  loading={busy}
+                  disabled={busy || blocked || (notes[request.id]?.trim().length ?? 0) < 3}
                   onClick={() => void decide(request, 'approved')}
                 >
-                  Approve for publication
+                  Approve and publish change
                 </Button>
                 <Button
                   variant="secondary"
@@ -178,7 +282,8 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
             </div>
           )}
         </article>
-      ))}
+        );
+      })}
     </section>
   );
 }
@@ -193,13 +298,17 @@ function CreateClassroomRequest() {
   const eventDate = event?.date;
   const [options, setOptions] = useState<{
     publication_id: string;
-    rooms: Array<{ id: string; name: string }>;
+    rooms: RoomOption[];
   } | null>(null);
   const [room, setRoom] = useState('');
   const [reason, setReason] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [refreshOptions, setRefreshOptions] = useState(0);
+  const [conflict, setConflict] = useState('');
+  useEffect(() => setConflict(''), [eventId]);
+  const available = options?.rooms.filter((item) => item.occupancy !== 'occupied') ?? [];
   useEffect(() => {
     const controller = new AbortController();
     setOptions(null);
@@ -212,7 +321,7 @@ function CreateClassroomRequest() {
         occurrence_id: eventId,
         class_date: eventDate,
       });
-      institutionalRequest<{ publication_id: string; rooms: Array<{ id: string; name: string }> }>(
+      institutionalRequest<{ publication_id: string; rooms: RoomOption[] }>(
         `timetables/requests/options?${query}`,
         { role: 'teacher', signal: controller.signal },
       )
@@ -224,7 +333,7 @@ function CreateClassroomRequest() {
         });
     }
     return () => controller.abort();
-  }, [eventId, eventDate, workspace.context.period, workspace.data?.version]);
+  }, [eventId, eventDate, workspace.context.period, workspace.data?.version, refreshOptions]);
   const submit = async (submitEvent: FormEvent) => {
     submitEvent.preventDefault();
     if (!event || !options || busy) return;
@@ -246,11 +355,15 @@ function CreateClassroomRequest() {
       });
       navigate('/teacher/change-requests');
     } catch (failure) {
-      setError(
+      const message =
         failure instanceof Error
           ? failure.message
-          : 'Request submission was not confirmed. Check your requests before retrying.',
-      );
+          : 'Request submission was not confirmed. Check your requests before retrying.';
+      if ((failure as { status?: number }).status === 409) {
+        // The room was taken since the options loaded: refresh live occupancy.
+        setConflict(message);
+        setRefreshOptions((value) => value + 1);
+      } else setError(message);
     } finally {
       setBusy(false);
     }
@@ -259,11 +372,12 @@ function CreateClassroomRequest() {
     <section className="workspace-card" aria-busy={busy}>
       <h1>Request a classroom change</h1>
       <p>
-        Your published classroom stays in effect until an Administrator reviews and publishes a
-        validated change.
+        Your published classroom stays in effect until an Administrator approves the change.
+        Approval re-checks conflicts and publishes the new room for you and your students.
       </p>
       <Link to="/teacher/change-requests">Your requests</Link>
       {(error || workspace.error) && <p role="alert">{error || workspace.error}</p>}
+      {conflict && !error && <p role="alert">{conflict}</p>}
       {workspace.loading && <ClassSyncSkeleton layout="table" label="Loading your published classes" />}
       <form className="academic-create-period" onSubmit={(event) => void submit(event)}>
         <div>
@@ -321,11 +435,23 @@ function CreateClassroomRequest() {
             >
               <option value="">Choose a classroom</option>
               {options.rooms.map((room) => (
-                <option key={room.id} value={room.id}>
+                <option key={room.id} value={room.id} disabled={room.occupancy === 'occupied'}>
                   {room.name}
+                  {room.capacity ? ` · ${room.capacity} seats` : ''}
+                  {room.occupancy === 'occupied'
+                    ? ' · Occupied'
+                    : room.occupancy === 'available'
+                      ? ' · Available'
+                      : ''}
                 </option>
               ))}
             </select>
+            {options.rooms.length > 0 && (
+              <p className="muted" role="status" aria-live="polite">
+                {available.length} of {options.rooms.length} eligible rooms are available at this
+                class time. Approval re-checks reservations and every scheduling rule.
+              </p>
+            )}
           </div>
         )}
         {options?.rooms.length === 0 && (

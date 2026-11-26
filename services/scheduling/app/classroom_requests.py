@@ -1,20 +1,29 @@
 """Requests from current teaching assignments; validated publication remains authoritative."""
 
 import json
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 from uuid import UUID, uuid4
 
 from classync_contracts.models import UserRole
+from classync_contracts.publication import PublicationCommand
 from classync_contracts.request_authorization import request_identity
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 
-from .draft_rules import digest, encode
+from .catalog import excluded_space_ids, schedulable_space_ids
+from .draft_rules import DraftError, digest, encode
+from .occurrences import ZONE
 from .postgres_publication_repository import PostgresPublicationRepository
 from .publication_api import scoped_repo, settings_only
+from .publication_rules import request_exception
 from .readiness import eligible_room
+
+
+class StaleRequest(Exception):
+    """The class or timetable changed so the request no longer applies."""
+
 
 router = APIRouter(prefix="/api/v1/timetables/requests")
 
@@ -93,18 +102,42 @@ class Requests:
         source = p.decode(rows[-1])["draft"].input_snapshot
         offering = next(item for item in source.offerings if item.id == event["offering_id"])
         section = next(item for item in source.sections if item.id == offering.section_id)
-        rooms = [
-            {"id": room.id, "name": room.name, "building": room.building, "floor": room.floor}
+        # Only the catalog's schedulable spaces are candidates; excluded spaces never appear.
+        allowed = schedulable_space_ids()
+        candidates = [
+            room
             for room in source.rooms
-            if room.id in offering.eligible_room_ids
+            if room.id in allowed
+            and room.id in offering.eligible_room_ids
             and eligible_room(room, offering, section.program_id)
             and room.id != event["room"]["id"]
+        ]
+        occupied, _ = p.occupancy_in(
+            db,
+            "institutional",
+            datetime.fromisoformat(event["starts_at"]),
+            datetime.fromisoformat(event["ends_at"]),
+            restrictions=False,
+        )
+        rooms = [
+            {
+                "id": room.id,
+                "name": room.name,
+                "building": room.building,
+                "floor": room.floor,
+                "capacity": room.capacity if room.capacity_verified else None,
+                "occupancy": "occupied" if room.id in occupied else "available",
+            }
+            for room in candidates
         ]
         return {
             "publication_id": rows[-1]["id"],
             "class": event,
             "rooms": rooms,
-            "availability_note": "Proposals require review and validated publication.",
+            "availability_note": (
+                "Occupancy reflects the published timetable for this class time. "
+                "Reservations and all hard constraints are re-checked at approval."
+            ),
         }
 
     def options(self, claims, period, class_date, occurrence):
@@ -156,8 +189,14 @@ class Requests:
                 (item for item in options["rooms"] if item["id"] == body.proposed_room_id), None
             )
             if room is None:
+                if body.proposed_room_id in excluded_space_ids():
+                    raise HTTPException(422, "This space is excluded from class scheduling")
                 raise HTTPException(
                     422, "Choose an eligible room from this published academic scope"
+                )
+            if room["occupancy"] != "available":
+                raise HTTPException(
+                    409, "That room is occupied at this class time. Choose another room."
                 )
             context = {
                 "class": options["class"],
@@ -231,31 +270,181 @@ class Requests:
                 for row in rows
             ]
 
+    def request_row(self, db, request_id, *, lock):
+        p = self.publication
+        row = (
+            db.execute(
+                text(
+                    "SELECT * FROM classsync_scheduling.classroom_requests "
+                    "WHERE tenant_id=:tenant AND id=:id" + (" FOR UPDATE" if lock else "")
+                ),
+                {**p.keys, "id": str(request_id)},
+            )
+            .mappings()
+            .first()
+        )
+        if row is None:
+            raise HTTPException(404, "This request is unavailable")
+        return row
+
+    def candidate(self, db, row, *, today=None):
+        """Build the publication command that applies this request to the current head.
+
+        Raises StaleRequest when the class or publication owner no longer matches.
+        """
+        p = self.publication
+        tenant, period = p.keys["tenant"], row["period_id"]
+        versions = p.rows(db, tenant, "institutional", period)
+        revision = p.head(db, tenant, "institutional", period)
+        if not versions or versions[-1]["revision"] != revision:
+            raise StaleRequest("No current published timetable exists for this period.")
+        owner = db.scalar(
+            text(
+                "SELECT owner_uid FROM classsync_scheduling.publication_heads "
+                "WHERE tenant_id=:tenant AND dataset='institutional' AND period_id=:period"
+            ),
+            {"tenant": tenant, "period": period},
+        )
+        if owner != p.principal.uid:
+            raise DraftError(
+                409,
+                "publication_owner_conflict",
+                "Only the Administrator who owns the published timetable can approve "
+                "classroom changes.",
+            )
+        original = row["context"]["class"]
+        day = date.fromisoformat(original["date"])
+        if day < (today or datetime.now(ZONE).date()):
+            raise StaleRequest("This class date has passed.")
+        viewer = {"role": "administrator"}
+        current = p.project(db, tenant, "institutional", period, day, day, viewer)
+        event = next(
+            (item for item in current["occurrences"] if item["id"] == row["occurrence_id"]), None
+        )
+        if (
+            not event
+            or event["teacher"]["id"] != row["faculty_id"]
+            or any(event[key] != original[key] for key in ("date", "starts_at", "ends_at"))
+        ):
+            raise StaleRequest("The class changed since this request was submitted.")
+        if event["room"]["id"] not in {original["room"]["id"], row["proposed_room_id"]}:
+            raise StaleRequest("The class was moved to another room since this request.")
+        if event["room"]["id"] == row["proposed_room_id"]:
+            raise StaleRequest("The class is already published in the proposed room.")
+        latest = versions[-1]
+        calendar = request_exception(
+            p.decode(latest)["calendar"], row["context"], row["proposed_room_id"]
+        )
+        snapshot = p.academic.snapshot_in(db, period)
+        return PublicationCommand(
+            draft_id=latest["draft_id"],
+            source="administrator",
+            dataset="institutional",
+            expected_version=revision,
+            expected_academic_revision=snapshot.period.revision,
+            idempotency_key=f"classroom-request:{row['id']}:{row['revision']}",
+            calendar=calendar,
+        )
+
+    def check_candidate(self, db, row):
+        """Run every hard publication check for the proposed change, without writing."""
+        p = self.publication
+        command = self.candidate(db, row)
+        if row["proposed_room_id"] not in schedulable_space_ids():
+            raise DraftError(422, "room_excluded", "This space is excluded from class scheduling.")
+        original = row["context"]["class"]
+        occupied, restricted = p.occupancy_in(
+            db,
+            "institutional",
+            datetime.fromisoformat(original["starts_at"]),
+            datetime.fromisoformat(original["ends_at"]),
+            restrictions=True,
+        )
+        if row["proposed_room_id"] in restricted:
+            raise DraftError(422, "room_restricted", "The proposed room is reserved at this time.")
+        if row["proposed_room_id"] in occupied:
+            raise DraftError(
+                422, "room_occupied", "The proposed room is now occupied at this class time."
+            )
+        return command
+
+    def preflight(self, request_id):
+        p = self.publication
+        with p.session() as db:
+            row = self.request_row(db, request_id, lock=False)
+            if row["status"] != "pending":
+                return {"state": "decided", "status": row["status"], "reasons": []}
+            try:
+                command = self.check_candidate(db, row)
+                report = p.publish_in(db, command, commit=False)
+            except StaleRequest as error:
+                return {"state": "stale", "reasons": [str(error)]}
+            except DraftError as error:
+                if error.status >= 500:
+                    raise
+                return {"state": "conflict", "code": error.code, "reasons": [str(error)]}
+            return {"state": "clear", "reasons": [], "review": report}
+
+    def transition(self, db, request_id, status, note, version):
+        p = self.publication
+        return (
+            db.execute(
+                text(
+                    "UPDATE classsync_scheduling.classroom_requests "
+                    "SET status=:status,revision=revision+1,decided_by=CASE "
+                    "WHEN :status='fulfilled' THEN decided_by ELSE :owner END,"
+                    "fulfilled_by=CASE WHEN :status='fulfilled' "
+                    "THEN :owner ELSE NULL END,decision_note=:note,"
+                    "fulfilled_version=:version,updated_at=transaction_timestamp() "
+                    "WHERE tenant_id=:tenant AND id=:id RETURNING *"
+                ),
+                {
+                    **p.keys,
+                    "id": str(request_id),
+                    "status": status,
+                    "note": note,
+                    "version": version,
+                },
+            )
+            .mappings()
+            .one()
+        )
+
+    def approve_in(self, db, row, request_id, note):
+        """Re-validate and publish the change, then approve and fulfil, in one transaction."""
+        try:
+            command = self.check_candidate(db, row)
+            receipt = self.publication.publish_in(db, command, commit=True)
+        except StaleRequest as error:
+            raise DraftError(409, "request_stale", str(error)) from error
+        except DraftError as error:
+            if error.status >= 500:
+                raise
+            # Raising here rolls back the whole transaction: no version, no status change.
+            raise DraftError(409, error.code, str(error)) from error
+        self.transition(db, request_id, "approved", note, None)
+        return self.transition(db, request_id, "fulfilled", note, receipt["id"])
+
     def decide(self, claims, request_id, body, *, fulfill=False):
         p = self.publication
         with p.session(dataset="institutional") as db:
-            row = (
-                db.execute(
-                    text(
-                        "SELECT * FROM classsync_scheduling.classroom_requests "
-                        "WHERE tenant_id=:tenant AND id=:id FOR UPDATE"
-                    ),
-                    {**p.keys, "id": str(request_id)},
-                )
-                .mappings()
-                .first()
-            )
-            if row is None:
-                raise HTTPException(404, "This request is unavailable")
+            row = self.request_row(db, request_id, lock=True)
+            target = "fulfilled" if fulfill else body.decision
+            if (
+                not fulfill
+                and body.expected_revision + 2 == row["revision"]
+                and row["status"] == "fulfilled"
+                and body.decision == "approved"
+                and row["decision_note"] == body.note
+            ):
+                # A retried approval whose response was lost returns the recorded result.
+                return self.summary(row)
             if row["revision"] != body.expected_revision:
                 raise HTTPException(409, "This request changed. Reload before deciding.")
-            target = "fulfilled" if fulfill else body.decision
             if row["status"] != ("approved" if fulfill else "pending"):
                 raise HTTPException(409, "This request was already decided")
-            versions = p.rows(db, p.keys["tenant"], "institutional", row["period_id"])
-            latest = versions[-1] if versions else None
-            if target == "approved" and (not latest or latest["id"] != row["publication_id"]):
-                raise HTTPException(409, "The timetable changed. Ask for a new request.")
+            if target == "approved":
+                return self.summary(self.approve_in(db, row, request_id, body.note))
             if fulfill:
                 day = date.fromisoformat(row["context"]["class"]["date"])
                 current = p.project(
@@ -279,27 +468,12 @@ class Requests:
                     or any(event[key] != original[key] for key in ("date", "starts_at", "ends_at"))
                 ):
                     raise HTTPException(409, "Publish the reviewed classroom change first")
-            result = (
-                db.execute(
-                    text(
-                        "UPDATE classsync_scheduling.classroom_requests "
-                        "SET status=:status,revision=revision+1,decided_by=CASE "
-                        "WHEN :status='fulfilled' THEN decided_by ELSE :owner END,"
-                        "fulfilled_by=CASE WHEN :status='fulfilled' "
-                        "THEN :owner ELSE NULL END,decision_note=:note,"
-                        "fulfilled_version=:version,updated_at=transaction_timestamp() "
-                        "WHERE tenant_id=:tenant AND id=:id RETURNING *"
-                    ),
-                    {
-                        **p.keys,
-                        "id": str(request_id),
-                        "status": target,
-                        "note": row["decision_note"] if fulfill else body.note,
-                        "version": event["version"] if fulfill else None,
-                    },
-                )
-                .mappings()
-                .one()
+            result = self.transition(
+                db,
+                request_id,
+                target,
+                row["decision_note"] if fulfill else body.note,
+                event["version"] if fulfill else None,
             )
             return self.summary(result)
 
@@ -328,6 +502,12 @@ def create(body: RequestInput, request: Request):
 def read(request_id: UUID, request: Request):
     repo, claims = repository(request)
     return repo.list(claims, request_id)[0]
+
+
+@router.get("/{request_id}/preflight")
+def preflight(request_id: UUID, request: Request):
+    repo, _ = repository(request, admin=True)
+    return repo.preflight(request_id)
 
 
 @router.post("/{request_id}/decision")

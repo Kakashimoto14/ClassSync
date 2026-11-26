@@ -332,3 +332,18 @@ and require explicit `--apply` with exact defense-tenant confirmation. Dry-run a
 not connect to Neon. This approval does not authorize the assistant to run `--apply`, alter hosted
 configuration, deploy, commit or push; owner will run the reviewed Windows commands against the
 intended demonstration/defense Neon target. No generation or publication is authorized by seeding.
+
+## 26 November 2026 — Defense readiness Slices 1–3 (blocker cleanup, Phase 3B request loop, account readiness)
+
+Owner approved the reviewed plan for local code, tests and docs only — no commit, push, deploy,
+seed `--apply`, or live Neon/Firebase/Render access. Scope: (1) seed CLI standalone import path,
+dynamic Alembic-head regression test, Vitest pool parity with CI; (2) Phase 3B: server-enforced
+live room occupancy for Teacher requests restricted to the 41 catalog-schedulable rooms (12 excluded
+spaces blocked), Admin preflight conflict status, atomic conflict-validated approval that publishes a
+one-date room-swap `CalendarException` as a new immutable version and fulfils the request in one
+transaction, unchanged reject-with-note, non-blocking Teacher decision email via
+`services/notification` (Resend) and in-app decision updates (no student email); (3) connected
+`/admin/students` route, Gateway roster proxy routes, a "Mark active" roster action and a defense
+provisioning runbook. Owner decisions: faculty availability stays Admin-edited; Teacher requests
+remain one-date room swaps; a non-owner publication head returns a clear 409. No new migration is
+planned. Slice 4 (all 9 CDM programs, H1–H15 audit) is a separate future session.

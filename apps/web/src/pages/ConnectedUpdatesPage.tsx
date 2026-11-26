@@ -1,10 +1,79 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { institutionalRequest } from '../lib/institutional-api';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { calendarDateLabel } from '../lib/calendar-model';
 import { timeRange } from '../lib/student-presentation';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import type { UserRole } from '../types/ui';
+
+type DecidedRequest = {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected' | 'fulfilled';
+  decision_note: string | null;
+  updated_at?: string;
+  context: {
+    class: { date: string; subject: { code: string }; room: { name: string } };
+    proposed_room: { name: string };
+  };
+};
+const decisionLabel = {
+  approved: 'Approved · awaiting publication',
+  fulfilled: 'Approved · new room published',
+  rejected: 'Declined',
+} as const;
+
+/** Teacher-only: Administrator decisions on this Teacher's own classroom requests. */
+function RequestDecisions() {
+  const [decided, setDecided] = useState<DecidedRequest[] | null>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    institutionalRequest<{ requests: DecidedRequest[] }>('timetables/requests', {
+      role: 'teacher',
+      signal: controller.signal,
+    })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setDecided(
+          data.requests
+            .filter((item) => item.status !== 'pending')
+            .sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''))
+            .slice(0, 10),
+        );
+      })
+      .catch((failure) => {
+        if (!controller.signal.aborted)
+          setError(failure instanceof Error ? failure.message : 'Request decisions unavailable.');
+      });
+    return () => controller.abort();
+  }, []);
+  return (
+    <section aria-labelledby="request-decisions-heading">
+      <h2 id="request-decisions-heading">Classroom request decisions</h2>
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : !decided ? (
+        <ClassSyncSkeleton rows={2} label="Loading request decisions" />
+      ) : decided.length ? (
+        <ul>
+          {decided.map((item) => (
+            <li key={item.id}>
+              <strong>{decisionLabel[item.status as keyof typeof decisionLabel]}</strong> ·{' '}
+              {item.context.class.subject.code} · {calendarDateLabel(item.context.class.date)} ·{' '}
+              {item.context.class.room.name} → {item.context.proposed_room.name}
+              {item.decision_note && <p className="muted">Note: {item.decision_note}</p>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No decided classroom requests yet.</p>
+      )}
+      <Link to="/teacher/change-requests">All classroom requests</Link>
+    </section>
+  );
+}
 
 export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
   const w = useScheduleWorkspace(role, true);
@@ -67,8 +136,13 @@ export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
           )}
         </>
       )}
+      {role === 'teacher' && <RequestDecisions />}
       <Link to={base + '/announcements'}>University announcements</Link>
-      <p>ClassSync does not send email or push alerts for these changes.</p>
+      <p>
+        {role === 'teacher'
+          ? 'Published room changes appear here. Classroom request decisions are also emailed to you when email delivery is configured.'
+          : 'Published room changes appear here as soon as they take effect.'}
+      </p>
     </section>
   );
 }

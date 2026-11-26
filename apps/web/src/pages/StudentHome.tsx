@@ -167,7 +167,7 @@ export function StudentHome({
           ) : (
             <p>No changes flagged in your current schedule.</p>
           )}
-          <p className="muted">Notifications are not available. Check your schedule for changes.</p>
+          <p className="muted">Approved room changes appear here as soon as they are published.</p>
           {source === 'Sample schedule' && (
             <Link to="/student/announcements">Sample announcements</Link>
           )}

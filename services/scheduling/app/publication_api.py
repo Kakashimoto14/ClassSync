@@ -3,6 +3,7 @@
 import asyncio
 import json
 from datetime import date, datetime, timedelta
+from typing import Annotated
 from uuid import UUID
 
 from classync_contracts.publication import PublicationCommand, RoomRestriction
@@ -398,6 +399,24 @@ def room_directory(period: UUID, request: Request):
         raise HTTPException(error.status, str(error)) from error
 
 
+@router.get("/rooms/{period}/slot")
+def room_slot(
+    period: UUID,
+    request: Request,
+    day: Annotated[date, Query(alias="date")],
+    start: Annotated[int, Query(ge=0, le=1440)],
+    end: Annotated[int, Query(ge=0, le=1440)],
+):
+    """All 41 schedulable spaces for one slot: occupancy and room metadata only."""
+    repo, _, _, viewer = read_scope(request, False)
+    if not hasattr(repo, "room_slot"):
+        raise HTTPException(503, "Connected room availability is unavailable")
+    try:
+        return repo.room_slot(str(period), day, start, end, viewer)
+    except DraftError as error:
+        raise HTTPException(error.status, str(error)) from error
+
+
 def availability_for(request, sandbox, room_id, start, end):
     repo, tenant, dataset, viewer = read_scope(request, sandbox, "administrator", "", "")
     if (
@@ -412,7 +431,7 @@ def availability_for(request, sandbox, room_id, start, end):
     start, end = start.astimezone(ZONE), end.astimezone(ZONE)
     if hasattr(repo, "availability"):
         try:
-            return repo.availability(dataset, room_id, start, end)
+            return repo.availability(dataset, room_id, start, end, viewer)
         except DraftError as error:
             raise HTTPException(error.status, detail={"error": {
                 "code": error.code, "message": str(error),

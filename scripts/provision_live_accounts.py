@@ -475,7 +475,7 @@ def main() -> int:
                 accounts.append((role, identifier or "", email, passwords[email]))
             _print_summary(accounts)
             print(f"Tenant: {args.tenant_id} · Firebase project: {app.project_id} · TLS: {sslmode}")
-            print("Database migration: head (0001–0021).")
+            print("Database migration: current Alembic head.")
             print("Existing student roster or faculty identity evidence was required.")
             return 0
         finally:

@@ -16,7 +16,13 @@ from pathlib import Path
 from uuid import NAMESPACE_URL, uuid4, uuid5
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path[:0] = [str(ROOT / "packages/api-contracts"), str(ROOT / "packages/persistence")]
+# Standalone CLI runs place scripts/ (not the repository root) on sys.path; add the root
+# explicitly so the module-level services.* import works without PYTHONPATH.
+sys.path[:0] = [
+    str(ROOT),
+    str(ROOT / "packages/api-contracts"),
+    str(ROOT / "packages/persistence"),
+]
 
 from classync_contracts.academic import (  # noqa: E402
     AcademicCalendar,
@@ -37,6 +43,8 @@ from classync_persistence.schema import migrate  # noqa: E402
 from pydantic import SecretStr, TypeAdapter  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 from sqlalchemy.engine import make_url  # noqa: E402
+
+from services.academic.app.record_rules import unique_label  # noqa: E402
 
 PERIOD_TITLE = "AY 2026-2027 · 1st Semester"
 LEGACY_PERIOD_ID = "defense-ay-2026-2027-first"
@@ -413,6 +421,133 @@ def _same(a, b) -> bool:
     )
 
 
+def _remap_reference(kind: str, identity: str, remapped: dict[tuple[str, str], str]) -> str:
+    return remapped.get((kind, identity), identity)
+
+
+def _remap_record_references(record, remapped: dict[tuple[str, str], str]):
+    """Rewrite payload foreign keys using IDs already reconciled earlier in seed order."""
+    if record.kind == "subjects":
+        updates = {
+            "program_ids": [
+                _remap_reference("programs", value, remapped) for value in record.program_ids
+            ]
+        }
+    elif record.kind == "sections":
+        updates = {"program_id": _remap_reference("programs", record.program_id, remapped)}
+    elif record.kind == "faculty":
+        updates = {
+            "subject_ids": [
+                _remap_reference("subjects", value, remapped) for value in record.subject_ids
+            ]
+        }
+    elif record.kind == "resources":
+        updates = {
+            "allowed_program_ids": (
+                [
+                    _remap_reference("programs", value, remapped)
+                    for value in record.allowed_program_ids
+                ]
+                if record.allowed_program_ids is not None
+                else None
+            )
+        }
+    elif record.kind == "offerings":
+        updates = {
+            "subject_id": _remap_reference("subjects", record.subject_id, remapped),
+            "section_id": _remap_reference("sections", record.section_id, remapped),
+            "teacher_ids": [
+                _remap_reference("faculty", value, remapped) for value in record.teacher_ids
+            ],
+            "room_ids": [
+                _remap_reference("resources", value, remapped) for value in record.room_ids
+            ],
+        }
+    elif record.kind == "constraints":
+        updates = {
+            "locked_assignments": [
+                assignment.model_copy(
+                    update={
+                        "offering_id": _remap_reference(
+                            "offerings", assignment.offering_id, remapped
+                        ),
+                        "section_id": _remap_reference(
+                            "sections", assignment.section_id, remapped
+                        ),
+                        "teacher_id": _remap_reference(
+                            "faculty", assignment.teacher_id, remapped
+                        ),
+                        "room_id": _remap_reference(
+                            "resources", assignment.room_id, remapped
+                        ),
+                        "subject_id": _remap_reference(
+                            "subjects", assignment.subject_id, remapped
+                        ),
+                    }
+                )
+                for assignment in record.locked_assignments
+            ],
+            "enrollments": [
+                enrollment.model_copy(
+                    update={
+                        "offering_ids": [
+                            _remap_reference("offerings", value, remapped)
+                            for value in enrollment.offering_ids
+                        ]
+                    }
+                )
+                for enrollment in record.enrollments
+            ],
+        }
+    else:
+        return record
+    return record.model_copy(update=updates)
+
+
+def _record_indexes(snapshot):
+    """Index existing records by identity and the repository's normalized unique label."""
+    by_identity = {}
+    by_label = {}
+    for entry in snapshot.records:
+        record = entry.record
+        identity_key = (record.kind, record.id)
+        label_key = (record.kind, unique_label(record))
+        previous = by_label.get(label_key)
+        if previous is not None and previous.record.id != record.id:
+            raise ValueError(
+                f"Existing {record.kind} records share a unique label; review the period first"
+            )
+        by_identity[identity_key] = entry
+        by_label[label_key] = entry
+    return by_identity, by_label
+
+
+def _reconcile_seed_records(records, snapshot):
+    """Reuse matching existing IDs and remap downstream references before writing."""
+    by_identity, by_label = _record_indexes(snapshot)
+    remapped: dict[tuple[str, str], str] = {}
+    reconciled = []
+    for source in records:
+        record = _remap_record_references(source, remapped)
+        identity_match = by_identity.get((record.kind, record.id))
+        label_match = by_label.get((record.kind, unique_label(record)))
+        if (
+            identity_match is not None
+            and label_match is not None
+            and identity_match.record.id != label_match.record.id
+        ):
+            raise ValueError(
+                f"Existing {record.kind} identity and unique label resolve to different records"
+            )
+        existing = identity_match or label_match
+        original_id = record.id
+        if existing is not None and record.id != existing.record.id:
+            record = record.model_copy(update={"id": existing.record.id})
+        remapped[(record.kind, original_id)] = record.id
+        reconciled.append(record)
+    return reconciled, remapped
+
+
 def apply_seed(repo) -> tuple[int, int]:
     """Apply all new/seed-default rows atomically; preserve existing admin edits."""
     calendar = defense_calendar()
@@ -458,7 +593,15 @@ def apply_seed(repo) -> tuple[int, int]:
             )
         catalog = load_json("packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json")
         records, students = build_academic_records(period_id, catalog)
-        index = {(e.record.kind, e.record.id): e for e in snapshot.records}
+        records, remapped_ids = _reconcile_seed_records(records, snapshot)
+        students = [
+            {
+                **student,
+                "section_id": _remap_reference("sections", student["section_id"], remapped_ids),
+            }
+            for student in students
+        ]
+        index, _ = _record_indexes(snapshot)
         written = 0
         for record in records:
             previous = index.get((record.kind, record.id))
@@ -482,10 +625,7 @@ def apply_seed(repo) -> tuple[int, int]:
                         )
                         written += 1
                         # Refresh revisions after each successful record write.
-                        index = {
-                            (e.record.kind, e.record.id): e
-                            for e in repo.snapshot_in(db, period_id).records
-                        }
+                        index, _ = _record_indexes(repo.snapshot_in(db, period_id))
                 elif record.kind == "constraints" and _same(previous.record, AcademicConstraints()):
                     repo.write_in(
                         db,
@@ -493,19 +633,14 @@ def apply_seed(repo) -> tuple[int, int]:
                         RecordWrite(expected_revision=previous.revision, record=record),
                     )
                     written += 1
-                    index = {
-                        (e.record.kind, e.record.id): e
-                        for e in repo.snapshot_in(db, period_id).records
-                    }
+                    index, _ = _record_indexes(repo.snapshot_in(db, period_id))
                 elif not _same(previous.record, record) and record.kind != "resources":
                     # Existing records belong to the administrator; never overwrite edits.
                     continue
                 continue
             repo.write_in(db, period_id, RecordWrite(expected_revision=0, record=record))
             written += 1
-            index = {
-                (e.record.kind, e.record.id): e for e in repo.snapshot_in(db, period_id).records
-            }
+            index, _ = _record_indexes(repo.snapshot_in(db, period_id))
         inserted_students = 0
         for student in students:
             if db.scalar(
@@ -538,6 +673,32 @@ def apply_seed(repo) -> tuple[int, int]:
                 },
             )
             inserted_students += 1
+        # Faculty identities let an operator bind a Teacher login later
+        # (provision_live_accounts.py requires one). No membership or user is created.
+        for record in records:
+            if record.kind != "faculty" or db.scalar(
+                text(
+                    "SELECT 1 FROM classsync_identity.faculty "
+                    "WHERE tenant_id=:tenant AND id=:faculty"
+                ),
+                {**repo.keys, "faculty": record.id},
+            ):
+                continue
+            person = stable_uuid("faculty-person", record.id)
+            db.execute(
+                text(
+                    "INSERT INTO classsync_identity.people "
+                    "(tenant_id,id,display_name) VALUES (:tenant,:person,:name)"
+                ),
+                {**repo.keys, "person": person, "name": record.name},
+            )
+            db.execute(
+                text(
+                    "INSERT INTO classsync_identity.faculty (tenant_id,id,person_id) "
+                    "VALUES (:tenant,:faculty,:person)"
+                ),
+                {**repo.keys, "faculty": record.id, "person": person},
+            )
     return written, inserted_students
 
 
@@ -649,7 +810,6 @@ def main(argv=None) -> int:
         tls_root_cert=certifi.where(),
     )
     engine = postgres_engine(url, connect_args=options, pool_size=1, max_overflow=0, pool_timeout=5)
-    sys.path.insert(0, str(ROOT))
     from services.academic.app.postgres_repository import PostgresAcademicRepository
 
     try:

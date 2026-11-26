@@ -6,7 +6,7 @@ import { appMode, liveFetch } from '../config/runtime-config';
 import { loadAcademicPeriod } from '../lib/academic-api';
 import { OccurrenceExceptionEditor } from './OccurrenceExceptionEditor';
 import type { DraftDetail } from '../lib/scheduling-api';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { institutionalRequest } from '../lib/institutional-api';
 import type { ClassroomRequest } from './ClassroomRequestsPage';
 
@@ -277,6 +277,11 @@ function PublicationContent({
         </Button>
       )}
       {error && <p role="alert">{error}</p>}
+      {appMode === 'institutional' && (
+        <p>
+          <Link to="/admin/requests">Review Teacher classroom requests</Link>
+        </p>
+      )}
       {report && (
         <p>
           Review impact: {report.sections} sections · {report.teachers} teachers · {report.rooms}{' '}

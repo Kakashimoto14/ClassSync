@@ -89,4 +89,30 @@ describe('connected academic student roster', () => {
     expect(await screen.findByText('Student 26-00101 deleted from the roster.')).toBeInTheDocument();
     confirm.mockRestore();
   });
+
+  it('marks a seeded student active with the current profile and period revision', async () => {
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Mark 26-00101 active' }));
+    await waitFor(() => expect(updateAcademicRosterStudent).toHaveBeenCalledWith('period', '26-00101', {
+      student_id: '26-00101', full_name: 'Aira Santos',
+      email: 'student.26.00101@student.pnm.edu.ph', year_level: 1, section_id: 'section',
+      enrollment_status: 'active', expected_period_revision: 7,
+    }));
+    expect(await screen.findByRole('status')).toHaveTextContent('26-00101 is now active');
+  });
+
+  it('requires a name and email before a student can be marked active', async () => {
+    vi.mocked(loadAcademicRoster).mockResolvedValue({
+      items: [{ student_id: '26-00103', display_name: 'Ben Cruz', registered_email: null,
+        enrollment_status: 'unverified', section_id: 'section', section_label: 'BSIT-1A',
+        year_level: 1 }],
+      total: 1, limit: 20, offset: 0, period_revision: 7,
+      sections: [{ id: 'section', year_level: 1, label: 'BSIT-1A', active: true }],
+    });
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    const button = await screen.findByRole('button', { name: 'Mark 26-00103 active' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAccessibleDescription('Add the student’s name and institutional email first.');
+    expect(updateAcademicRosterStudent).not.toHaveBeenCalled();
+  });
 });

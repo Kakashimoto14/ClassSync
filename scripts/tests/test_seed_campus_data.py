@@ -1,16 +1,25 @@
+import os
+import subprocess
+import sys
+from contextlib import contextmanager
+from pathlib import Path
+from types import SimpleNamespace
 from uuid import UUID
 
 from scripts.seed_campus_data import (
     PERIOD_ID,
     _arguments,
     _same,
+    apply_seed,
     build_academic_records,
     curriculum_subjects,
+    defense_calendar,
     load_json,
     merge_room_defaults,
     room_defaults,
     stable_uuid,
 )
+from services.academic.app.record_rules import initial_records, unique_label, validate_record
 
 
 def test_dry_run_is_required_as_an_explicit_cli_action():
@@ -106,3 +115,182 @@ def test_apply_requires_exact_tenant_confirmation_before_any_database_access(mon
     monkeypatch.setenv("CLASSYNC_SEED_ADMIN_UID", "defense-admin")
     with pytest.raises(SystemExit, match="exact.*INSTITUTIONAL_TENANT_ID"):
         main(["--apply"])
+
+
+def test_apply_reuses_prepopulated_catalog_ids_and_is_idempotent():
+    """Model the scoped Postgres unique key against a new period's default catalog rows."""
+    class MemoryResult:
+        def __init__(self, values=()):
+            self.values = list(values)
+
+        def scalars(self):
+            return self
+
+        def all(self):
+            return self.values
+
+        def mappings(self):
+            return self
+
+        def one_or_none(self):
+            return self.values[0] if self.values else None
+
+    class MemoryDB:
+        def __init__(self, repo):
+            self.repo = repo
+
+        def execute(self, statement, params=None):
+            sql = str(statement)
+            params = params or {}
+            if "SELECT id FROM classsync_academic.period_metadata" in sql:
+                return MemoryResult([self.repo.period_id])
+            if "id=:legacy" in sql and "period_metadata" in sql:
+                return MemoryResult()
+            if "INSERT INTO classsync_identity.students" in sql:
+                self.repo.students.add(params["student"])
+            if "INSERT INTO classsync_identity.faculty" in sql:
+                self.repo.faculty[params["faculty"]] = params["person"]
+                self.repo.faculty_inserts += 1
+            if "INSERT INTO classsync_identity.people" in sql:
+                self.repo.people.add(params["person"])
+            return MemoryResult()
+
+        def scalar(self, statement, params=None):
+            params = params or {}
+            if "classsync_identity.faculty" in str(statement):
+                return int(params.get("faculty") in self.repo.faculty)
+            return int(params.get("student") in self.repo.students)
+
+    class MemoryRepo:
+        keys = {"tenant": "cdm", "owner": "test-admin"}
+
+        def __init__(self):
+            self.period_id = PERIOD_ID
+            self.calendar = defense_calendar()
+            self.records = {}
+            self.students = set()
+            self.faculty = {}
+            self.faculty_inserts = 0
+            self.people = set()
+            self.labels = {}
+            # Simulate create-period's revision-1 default programs, 53 spaces and
+            # singleton constraints, enforcing the same scoped unique-label key.
+            for record in initial_records(True):
+                self.store(record, revision=1)
+
+        @contextmanager
+        def session(self, *, write=False):
+            yield MemoryDB(self)
+
+        def params(self, period_id, **extra):
+            return {**self.keys, "period": period_id, **extra}
+
+        def snapshot_in(self, db, period_id):
+            records = [
+                SimpleNamespace(record=record, revision=revision)
+                for (kind, _), (record, revision) in self.records.items()
+                if kind
+            ]
+            return SimpleNamespace(
+                period=SimpleNamespace(calendar=self.calendar), records=records
+            )
+
+        def store(self, record, revision):
+            key = (record.kind, record.id)
+            label_key = (record.kind, unique_label(record))
+            other_id = self.labels.get(label_key)
+            if other_id is not None and other_id != record.id:
+                raise AssertionError(f"duplicate scoped unique_label: {label_key}")
+            self.records[key] = (record, revision)
+            self.labels[label_key] = record.id
+
+        def write_in(self, db, period_id, body, *, allow_cohort_change=False):
+            record = body.record
+            key = (record.kind, record.id)
+            current = self.records.get(key)
+            revision = current[1] if current else 0
+            assert body.expected_revision == revision
+            label_key = (record.kind, unique_label(record))
+            conflicting_id = self.labels.get(label_key)
+            assert conflicting_id in (None, record.id), (
+                f"duplicate scoped unique_label: {label_key}"
+            )
+
+            def lookup(kind, identity):
+                found = self.records.get((kind, identity))
+                return found[0] if found else None
+
+            validate_record(
+                record,
+                period_id,
+                lookup,
+                allow_cohort_change=allow_cohort_change,
+            )
+            self.store(record, revision + 1)
+
+        def bump(self, period_id):
+            return None
+
+    repo = MemoryRepo()
+    preseeded_rooms = {
+        record.id: record
+        for record, _revision in repo.records.values()
+        if record.kind == "resources"
+    }
+    assert len(preseeded_rooms) == 53
+
+    first_written, first_students = apply_seed(repo)
+    second_written, second_students = apply_seed(repo)
+
+    records = [record for record, _ in repo.records.values()]
+    programs = {record.id for record in records if record.kind == "programs"}
+    assert sum(record.kind == "offerings" for record in records) == 54
+    assert first_written > 0
+    assert second_written == 0
+    assert first_students == 96
+    assert second_students == 0
+    seeded_faculty = {record.id for record in records if record.kind == "faculty"}
+    assert len(seeded_faculty) == 12
+    # Every seeded faculty record gets exactly one identity, once, linked to a person row.
+    assert set(repo.faculty) == seeded_faculty
+    assert repo.faculty_inserts == 12  # the rerun inserted none
+    assert set(repo.faculty.values()) <= repo.people
+    assert len(repo.people) == 96 + 12
+    assert all(
+        set(record.program_ids) <= programs
+        for record in records
+        if record.kind == "subjects"
+    )
+    assert all(
+        record.program_id in programs
+        for record in records
+        if record.kind == "sections"
+    )
+    rooms = [record for record in records if record.kind == "resources"]
+    schedulable = [record for record in rooms if record.schedulable]
+    excluded = [record for record in rooms if not record.schedulable]
+    assert len(schedulable) == 41
+    assert len(excluded) == 12
+    assert all(_same(room, preseeded_rooms[room.id]) for room in excluded)
+    assert all(
+        room.type_verified and room.capacity_verified and room.availability_verified
+        for room in schedulable
+    )
+    assert all(not room.type_verified and not room.capacity_verified for room in excluded)
+
+
+def test_cli_help_runs_standalone_without_pythonpath():
+    """`python scripts/seed_campus_data.py` must import services.* without PYTHONPATH."""
+    root = Path(__file__).resolve().parents[2]
+    env = {**os.environ, "PYTHONPATH": ""}
+    result = subprocess.run(
+        [sys.executable, str(root / "scripts" / "seed_campus_data.py"), "--help"],
+        cwd=root / "scripts",
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--apply" in result.stdout

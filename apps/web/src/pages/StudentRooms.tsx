@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Building2, MapPin, Search, X } from 'lucide-react';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { presentationEnabled } from '../lib/presentation-sample';
+import { RoomSlotChecker } from '../components/rooms/RoomSlotChecker';
 import { provisionalCdmRooms } from '../data/cdm-room-inventory';
 import {
   matchesRoom,
@@ -350,6 +351,9 @@ export function StudentRooms({ detail = false }: { detail?: boolean }) {
                 </p>
               )}
             </>
+          )}
+          {!presentationEnabled && ready && (
+            <RoomSlotChecker role="student" period={w.context.period} initialDate={w.date} />
           )}
           {presentationEnabled && (
             <details className="student-room-preview">

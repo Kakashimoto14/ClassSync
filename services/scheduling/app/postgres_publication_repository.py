@@ -6,7 +6,7 @@ or SQLite fallback. Institutional approval and production release remain separat
 
 import json
 from contextlib import contextmanager
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from uuid import uuid4
 
 from classync_contracts.identity import (
@@ -25,10 +25,49 @@ from services.academic.app.postgres_repository import PostgresAcademicRepository
 from services.academic.app.record_rules import AcademicError
 
 from .academic_input import academic_readiness
+from .catalog import schedulable_spaces
 from .draft_rules import DraftError, digest, encode, now
 from .occurrences import ZONE
 from .postgres_draft_repository import PostgresDraftRepository
 from .publication_rules import PublicationRules
+
+
+def viewer_record(viewer):
+    role = viewer.get("role")
+    if role not in {"administrator", "teacher", "student"}:
+        raise MembershipAuthorizationError(MembershipErrorCode.DENIED)
+    record = viewer.get("student_id") if role == "student" else (
+        viewer.get("faculty_id") if role == "teacher" else None
+    )
+    return role, record
+
+
+def current_room_scope(repo, db, period, role, record):
+    """Return the current published rows/payload when this viewer belongs to them."""
+    revision = repo.head(db, repo.keys["tenant"], "institutional", period)
+    rows = repo.rows(db, repo.keys["tenant"], "institutional", period)
+    if not rows or rows[-1]["revision"] != revision:
+        raise DraftError(
+            403, "projection_forbidden", "No permitted current room directory."
+        )
+    value = repo.decode(rows[-1])
+    draft = value["draft"]
+    eligible = role == "administrator" or (
+        role == "teacher" and any(
+            assignment.teacher_id == record
+            for assignment in draft.generation_result.assignments
+        )
+    ) or (
+        role == "student" and any(
+            enrollment.student_id == record and enrollment.offering_ids
+            for enrollment in draft.input_snapshot.enrollments
+        )
+    )
+    if not eligible:
+        raise DraftError(
+            403, "projection_forbidden", "No permitted current room directory."
+        )
+    return rows, value
 
 
 class PostgresPublicationRepository(PublicationRules):
@@ -286,34 +325,9 @@ class PostgresPublicationRepository(PublicationRules):
             return {"periods": result}
 
     def room_directory(self, period, viewer):
-        role = viewer["role"]
-        record = viewer.get("student_id") if role == "student" else (
-            viewer.get("faculty_id") if role == "teacher" else None
-        )
+        role, record = viewer_record(viewer)
         with self.session(role=role, record_id=record) as db:
-            revision = self.head(db, self.keys["tenant"], "institutional", period)
-            rows = self.rows(db, self.keys["tenant"], "institutional", period)
-            if not rows or rows[-1]["revision"] != revision:
-                raise DraftError(
-                    403, "projection_forbidden", "No permitted current room directory."
-                )
-            value = self.decode(rows[-1])
-            draft = value["draft"]
-            eligible = role == "administrator" or (
-                role == "teacher" and any(
-                    assignment.teacher_id == record
-                    for assignment in draft.generation_result.assignments
-                )
-            ) or (
-                role == "student" and any(
-                    enrollment.student_id == record and enrollment.offering_ids
-                    for enrollment in draft.input_snapshot.enrollments
-                )
-            )
-            if not eligible:
-                raise DraftError(
-                    403, "projection_forbidden", "No permitted current room directory."
-                )
+            rows, value = current_room_scope(self, db, period, role, record)
             # Return room metadata only; never expose the enclosing academic snapshot.
             rooms = [
                 {
@@ -327,7 +341,7 @@ class PostgresPublicationRepository(PublicationRules):
             ]
             return {"version": rows[-1]["id"], "rooms": rooms}
 
-    def availability(self, dataset, room_id, start, end):
+    def availability(self, dataset, room_id, start, end, viewer=None):
         if (
             not isinstance(room_id, str) or not room_id.strip()
             or start.tzinfo is None or end.tzinfo is None
@@ -339,7 +353,8 @@ class PostgresPublicationRepository(PublicationRules):
                 "Choose a room and an interval within two days.",
             )
         start, end = start.astimezone(ZONE), end.astimezone(ZONE)
-        with self.session() as db:
+        role, record = viewer_record(viewer or {"role": "administrator"})
+        with self.session(role=role, record_id=record) as db:
             rows = self.rows(db, self.keys["tenant"], dataset)
             if not rows:
                 raise DraftError(
@@ -377,6 +392,97 @@ class PostgresPublicationRepository(PublicationRules):
                 "occupancy": "restricted" if restricted else "occupied" if matches
                 else "unoccupied" if covered else "unknown",
                 "suitability": "unknown", "sessions": len(matches), "timezone": "Asia/Manila",
+            }
+
+    def occupancy_in(self, db, dataset, begin, finish, *, restrictions):
+        """Rooms with a published session (and, for Administrators, a restriction) in a slot.
+
+        Occupancy uses every visible published version (latest per day). Restrictions are
+        Administrator-readable only under RLS, so other callers pass False; approval
+        re-validates restrictions before any schedule change is published.
+        """
+        if begin.tzinfo is None or finish.tzinfo is None or not begin < finish:
+            raise DraftError(422, "availability_range", "Choose an increasing time range.")
+        day = begin.astimezone(ZONE).date()
+        if (finish - timedelta(microseconds=1)).astimezone(ZONE).date() != day:
+            raise DraftError(422, "availability_range", "Choose a time range within one day.")
+        rows = self.rows(db, self.keys["tenant"], dataset)
+        occupied = {
+            event["room"]["id"]
+            for event in self.expanded(rows, day, day)
+            if datetime.fromisoformat(event["starts_at"]) < finish
+            and begin < datetime.fromisoformat(event["ends_at"])
+        }
+        restricted = set()
+        if restrictions:
+            stored = db.execute(text("""
+                SELECT payload,checksum FROM classsync_scheduling.room_restrictions
+                WHERE tenant_id=:tenant AND dataset=:dataset
+            """), self.params(dataset)).mappings()
+            for row in stored:
+                value = self.restriction_value(row)
+                if (
+                    datetime.fromisoformat(value["starts_at"]) < finish
+                    and begin < datetime.fromisoformat(value["ends_at"])
+                ):
+                    restricted.add(value["room_id"])
+        return occupied, restricted
+
+    def room_slot(self, period, day, start, end, viewer):
+        """Occupancy of every catalog-schedulable space in one slot; room metadata only."""
+        if (
+            type(day) is not date
+            or type(start) is not int or type(end) is not int
+            or not 0 <= start < end <= 1440
+            or start % 30 or end % 30
+        ):
+            raise DraftError(
+                422, "availability_range", "Choose a date and a 30-minute aligned time range."
+            )
+        role, record = viewer_record(viewer)
+        with self.session(role=role, record_id=record) as db:
+            _, value = current_room_scope(self, db, period, role, record)
+            calendar, inputs = value["calendar"], value["draft"].input_snapshot
+            if (
+                not calendar.effective_start <= day <= calendar.effective_end
+                or day.weekday() not in calendar.instructional_days
+            ):
+                raise DraftError(
+                    422, "availability_day", "Choose an instructional day in this period."
+                )
+            if not any(
+                window.day == day.weekday() and window.start <= start and end <= window.end
+                for window in inputs.operating_windows
+            ):
+                raise DraftError(
+                    422, "availability_hours", "Choose a time within campus operating hours."
+                )
+            midnight = datetime.combine(day, time(), ZONE)
+            checked = role == "administrator"
+            occupied, restricted = self.occupancy_in(
+                db,
+                "institutional",
+                midnight + timedelta(minutes=start),
+                midnight + timedelta(minutes=end),
+                restrictions=checked,
+            )
+            return {
+                "date": day.isoformat(),
+                "start": start,
+                "end": end,
+                "timezone": "Asia/Manila",
+                "restrictions_checked": checked,
+                "rooms": [
+                    {
+                        "id": room.id,
+                        "name": room.name,
+                        "building": room.building,
+                        "floor": room.floor,
+                        "occupancy": "restricted" if room.id in restricted
+                        else "occupied" if room.id in occupied else "free",
+                    }
+                    for room in schedulable_spaces()
+                ],
             }
 
     def receipt(self, row, db):
@@ -466,133 +572,150 @@ class PostgresPublicationRepository(PublicationRules):
                 "Use an owned server draft and a calendar without a client version.",
             )
         self.scope(command.dataset)
-        value = encode(command.model_dump(mode="json"))
         with self.session(dataset=command.dataset) as db:
-            existing = (
-                db.execute(
-                    text("""
-                SELECT * FROM classsync_scheduling.published_versions
-                WHERE tenant_id=:tenant AND dataset=:dataset AND idempotency_key=:key
-            """),
-                    self.params(command.dataset, key=command.idempotency_key),
-                )
-                .mappings()
-                .one_or_none()
+            return self.publish_in(db, command, commit=commit)
+
+    def publish_in(self, db, command, *, commit):
+        """Validate and optionally publish inside a caller-held publication session.
+
+        The caller must hold ``session(dataset=...)`` (advisory lock and publication
+        authority) when ``commit`` is true.
+        """
+        command = self.typed(command, PublicationCommand)
+        if command.calendar.published_version or command.source != "administrator":
+            raise DraftError(
+                422,
+                "publication_command",
+                "Use an owned server draft and a calendar without a client version.",
             )
-            if existing is not None:
-                if existing["owner_uid"] != self.principal.uid or existing[
-                    "request_hash"
-                ] != digest(value):
-                    raise DraftError(
-                        409, "publish_key_conflict", "This key belongs to another command."
-                    )
-                return self.receipt(self.record(existing), db)
-            row = (
-                db.execute(
-                    text("""
-                SELECT * FROM classsync_scheduling.drafts
-                WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:draft
-            """),
-                    {**self.keys, "draft": command.draft_id},
-                )
-                .mappings()
-                .one_or_none()
-            )
-            if row is None:
-                raise DraftError(404, "draft_not_found", "No permitted saved draft exists.")
-            draft = self.drafts.detail(self.drafts.metadata(row))
-            self.validate_candidate(command, draft)
-            self.academic.period_in(db, draft.period_id, lock=True)
-            snapshot = self.academic.snapshot_in(db, draft.period_id)
-            checked = academic_readiness(snapshot)
-            self.validate_academic_scope(command, draft, snapshot, checked)
-            calendar = command.calendar
-            rows = self.rows(db, self.keys["tenant"], command.dataset)
-            revision = self.head(db, self.keys["tenant"], command.dataset, draft.period_id)
-            owner = db.scalar(
+        self.scope(command.dataset)
+        value = encode(command.model_dump(mode="json"))
+        existing = (
+            db.execute(
                 text("""
-                SELECT owner_uid FROM classsync_scheduling.publication_heads
+            SELECT * FROM classsync_scheduling.published_versions
+            WHERE tenant_id=:tenant AND dataset=:dataset AND idempotency_key=:key
+        """),
+                self.params(command.dataset, key=command.idempotency_key),
+            )
+            .mappings()
+            .one_or_none()
+        )
+        if existing is not None:
+            if existing["owner_uid"] != self.principal.uid or existing[
+                "request_hash"
+            ] != digest(value):
+                raise DraftError(
+                    409, "publish_key_conflict", "This key belongs to another command."
+                )
+            return self.receipt(self.record(existing), db)
+        row = (
+            db.execute(
+                text("""
+            SELECT * FROM classsync_scheduling.drafts
+            WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:draft
+        """),
+                {**self.keys, "draft": command.draft_id},
+            )
+            .mappings()
+            .one_or_none()
+        )
+        if row is None:
+            raise DraftError(404, "draft_not_found", "No permitted saved draft exists.")
+        draft = self.drafts.detail(self.drafts.metadata(row))
+        self.validate_candidate(command, draft)
+        # Only a committing publication locks the academic period; reviews stay read-only.
+        self.academic.period_in(db, draft.period_id, lock=commit)
+        snapshot = self.academic.snapshot_in(db, draft.period_id)
+        checked = academic_readiness(snapshot)
+        self.validate_academic_scope(command, draft, snapshot, checked)
+        calendar = command.calendar
+        rows = self.rows(db, self.keys["tenant"], command.dataset)
+        revision = self.head(db, self.keys["tenant"], command.dataset, draft.period_id)
+        owner = db.scalar(
+            text("""
+            SELECT owner_uid FROM classsync_scheduling.publication_heads
+            WHERE tenant_id=:tenant AND dataset=:dataset AND period_id=:period
+        """),
+            self.params(command.dataset, period=draft.period_id),
+        )
+        if owner is not None and owner != self.principal.uid:
+            raise DraftError(
+                409,
+                "publication_owner_conflict",
+                "This published scope belongs to another Administrator.",
+            )
+        if revision != command.expected_version:
+            raise DraftError(
+                409, "publication_version_conflict", "Review the latest published version."
+            )
+        report = self.review_scope(db, self.keys["tenant"], command, draft, rows, revision)
+        if not commit:
+            return report
+        if any(
+            row["period_id"] == draft.period_id
+            and row["revision"] == revision
+            and row["draft_id"] == draft.id
+            and self.decode(row)["calendar"] == calendar
+            for row in rows
+        ):
+            raise DraftError(
+                409, "duplicate_publication", "This draft and calendar are currently published."
+            )
+        payload = encode(
+            {
+                "draft": draft.model_dump(mode="json"),
+                "calendar": calendar.model_dump(mode="json"),
+                "review": report,
+            }
+        )
+        parameters = self.params(
+            command.dataset,
+            period=draft.period_id,
+            draft=draft.id,
+            id=str(uuid4()),
+            revision=revision + 1,
+            academic=command.expected_academic_revision,
+            created=now(),
+            key=command.idempotency_key,
+            command=value,
+            request_hash=digest(value),
+            payload=payload,
+            checksum=digest(payload),
+        )
+        created = (
+            db.execute(
+                text("""
+            INSERT INTO classsync_scheduling.published_versions
+            (tenant_id,dataset,period_id,owner_uid,actor_uid,draft_id,id,revision,academic_revision,
+             created_at,idempotency_key,command,request_hash,payload,checksum)
+            VALUES (:tenant,:dataset,:period,:owner,:owner,:draft,:id,:revision,:academic,
+                    :created,:key,:command,:request_hash,:payload,:checksum) RETURNING *
+        """),
+                parameters,
+            )
+            .mappings()
+            .one()
+        )
+        if revision == 0:
+            statement = text("""
+            INSERT INTO classsync_scheduling.publication_heads
+            (tenant_id,dataset,period_id,owner_uid,revision)
+            VALUES (:tenant,:dataset,:period,:owner,:revision)
+            """)
+        else:
+            statement = text("""
+                UPDATE classsync_scheduling.publication_heads SET revision=:revision
                 WHERE tenant_id=:tenant AND dataset=:dataset AND period_id=:period
-            """),
-                self.params(command.dataset, period=draft.period_id),
+                    AND owner_uid=:owner AND revision=:expected
+            """)
+        if db.execute(statement, parameters | {"expected": revision}).rowcount != 1:
+            raise DraftError(
+                409,
+                "publication_version_conflict",
+                "A competing change updated this published scope.",
             )
-            if owner is not None and owner != self.principal.uid:
-                raise DraftError(
-                    409,
-                    "publication_owner_conflict",
-                    "This published scope belongs to another Administrator.",
-                )
-            if revision != command.expected_version:
-                raise DraftError(
-                    409, "publication_version_conflict", "Review the latest published version."
-                )
-            report = self.review_scope(db, self.keys["tenant"], command, draft, rows, revision)
-            if not commit:
-                return report
-            if any(
-                row["period_id"] == draft.period_id
-                and row["revision"] == revision
-                and row["draft_id"] == draft.id
-                and self.decode(row)["calendar"] == calendar
-                for row in rows
-            ):
-                raise DraftError(
-                    409, "duplicate_publication", "This draft and calendar are currently published."
-                )
-            payload = encode(
-                {
-                    "draft": draft.model_dump(mode="json"),
-                    "calendar": calendar.model_dump(mode="json"),
-                    "review": report,
-                }
-            )
-            parameters = self.params(
-                command.dataset,
-                period=draft.period_id,
-                draft=draft.id,
-                id=str(uuid4()),
-                revision=revision + 1,
-                academic=command.expected_academic_revision,
-                created=now(),
-                key=command.idempotency_key,
-                command=value,
-                request_hash=digest(value),
-                payload=payload,
-                checksum=digest(payload),
-            )
-            created = (
-                db.execute(
-                    text("""
-                INSERT INTO classsync_scheduling.published_versions
-                (tenant_id,dataset,period_id,owner_uid,actor_uid,draft_id,id,revision,academic_revision,
-                 created_at,idempotency_key,command,request_hash,payload,checksum)
-                VALUES (:tenant,:dataset,:period,:owner,:owner,:draft,:id,:revision,:academic,
-                        :created,:key,:command,:request_hash,:payload,:checksum) RETURNING *
-            """),
-                    parameters,
-                )
-                .mappings()
-                .one()
-            )
-            if revision == 0:
-                statement = text("""
-                INSERT INTO classsync_scheduling.publication_heads
-                (tenant_id,dataset,period_id,owner_uid,revision)
-                VALUES (:tenant,:dataset,:period,:owner,:revision)
-                """)
-            else:
-                statement = text("""
-                    UPDATE classsync_scheduling.publication_heads SET revision=:revision
-                    WHERE tenant_id=:tenant AND dataset=:dataset AND period_id=:period
-                        AND owner_uid=:owner AND revision=:expected
-                """)
-            if db.execute(statement, parameters | {"expected": revision}).rowcount != 1:
-                raise DraftError(
-                    409,
-                    "publication_version_conflict",
-                    "A competing change updated this published scope.",
-                )
-            return self.receipt(self.record(created), db)
+        return self.receipt(self.record(created), db)
 
     def put_restriction(self, body):
         body = self.typed(body, RoomRestriction)

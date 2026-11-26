@@ -305,3 +305,20 @@
     padding: 24px 20px;
   }
 }
+
+/* Live room availability for one published slot (Soft Rouge tokens). */
+.room-slot-checker { display: grid; gap: 0.75rem; }
+.room-slot-form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; }
+.room-slot-form label { display: grid; gap: 0.25rem; min-width: 8rem; }
+.room-slot-list {
+  display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+}
+.room-slot {
+  display: grid; gap: 0.125rem; padding: 0.625rem 0.75rem;
+  border: 1px solid var(--line); border-radius: 0.75rem;
+}
+.room-slot__state { font-weight: 600; }
+.room-slot--free .room-slot__state { color: var(--success); }
+.room-slot--occupied .room-slot__state,
+.room-slot--restricted .room-slot__state { color: var(--primary); }

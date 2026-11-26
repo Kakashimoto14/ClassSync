@@ -5,17 +5,56 @@ SQLite and PostgreSQL repositories share these exact domain rules.
 """
 
 import json
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 
-from classync_contracts.calendar import AcademicCalendar
+from classync_contracts.calendar import AcademicCalendar, CalendarException
 from classync_contracts.scheduling import scheduling_input_hash
 
 from .draft_rules import DraftError, DraftSnapshot, digest, encode, verified_result
-from .occurrences import dated_occurrences
+from .occurrences import ZONE, dated_occurrences
 
 
 def overlap(a, b):
     return a["starts_at"] < b["ends_at"] and b["starts_at"] < a["ends_at"]
+
+
+def request_exception(calendar, context, proposed_room_id):
+    """Apply one approved classroom request as a same-date, same-time room move.
+
+    Replaces any earlier exception for the same assignment/date and returns a validated
+    calendar without a client-assigned published version.
+    """
+    try:
+        session = context["class"]
+        original = date.fromisoformat(context["original_date"])
+        moved_to = date.fromisoformat(session["date"])
+        begins = datetime.fromisoformat(session["starts_at"]).astimezone(ZONE)
+        assignment = session["assignment_id"]
+        exception = CalendarException(
+            date=original,
+            reason="Approved classroom change request",
+            assignment_id=assignment,
+            cancelled=False,
+            moved_to=moved_to,
+            room_id=proposed_room_id,
+            start=begins.hour * 60 + begins.minute,
+        )
+        kept = [
+            item for item in calendar.exceptions
+            if not (item.assignment_id == assignment and item.date == original)
+        ]
+        return AcademicCalendar.model_validate(
+            calendar.model_dump(mode="json")
+            | {
+                "exceptions": [item.model_dump(mode="json") for item in kept]
+                + [exception.model_dump(mode="json")],
+                "published_version": None,
+            }
+        )
+    except (KeyError, TypeError, ValueError) as error:
+        raise DraftError(
+            422, "request_exception", "This request cannot be applied to the calendar."
+        ) from error
 
 
 class PublicationRules:

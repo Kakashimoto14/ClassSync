@@ -1,3 +1,4 @@
+import asyncio
 import ipaddress
 import json
 import logging
@@ -536,6 +537,21 @@ async def academic_write(period_id: UUID, kind: str, record_id: str, request: Re
     return await academic_proxy(academic_record_path(period_id, kind, record_id), request, False)
 
 
+# Administrator-only roster management; the Academic service re-checks role and tenant.
+@app.api_route("/api/v1/academic/periods/{period_id}/roster", methods=["GET", "POST"])
+async def academic_roster(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/roster", request, False)
+
+
+@app.api_route(
+    "/api/v1/academic/periods/{period_id}/roster/{student_id}", methods=["PUT", "DELETE"]
+)
+async def academic_roster_student(period_id: UUID, student_id: str, request: Request):
+    if not re.fullmatch(r"[0-9]{2}-[0-9]{5}", student_id):
+        raise HTTPException(422, "Invalid student identifier")
+    return await academic_proxy(f"periods/{period_id}/roster/{student_id}", request, False)
+
+
 @app.api_route(
     "/api/v1/scheduling/sandbox/academic/{period_id:uuid}/{action}", methods=["GET", "POST"]
 )
@@ -560,6 +576,89 @@ async def sandbox_academic_drafts(request: Request):
 @app.get("/api/v1/scheduling/sandbox/academic/drafts/{draft_id}")
 async def sandbox_academic_draft(draft_id: UUID, request: Request):
     return await scheduling_proxy(f"academic/drafts/{draft_id}", request, True)
+
+
+_decision_email_tasks: set = set()
+
+
+def request_decision_email(payload: object) -> dict | None:
+    """Build the Teacher notice from a decided request; None when it is not notifiable."""
+    if not isinstance(payload, dict):
+        return None
+    status = payload.get("status")
+    decision = {"fulfilled": "approved", "approved": "approved", "rejected": "rejected"}.get(
+        status
+    )
+    context = payload.get("context")
+    if decision is None or not isinstance(context, dict):
+        return None
+    session = context.get("class") or {}
+    proposed = context.get("proposed_room") or {}
+    starts, ends = str(session.get("starts_at", "")), str(session.get("ends_at", ""))
+    return {
+        "decision": decision,
+        "subject_code": str((session.get("subject") or {}).get("code") or "Class")[:40],
+        "section": str((session.get("section") or {}).get("name") or "Section")[:80],
+        "class_date": str(session.get("date", "")),
+        "time_range": f"{starts[11:16]}–{ends[11:16]}",
+        "from_room": str((session.get("room") or {}).get("name") or "Current room")[:120],
+        "to_room": str(proposed.get("name") or "Proposed room")[:120],
+        "note": str(payload.get("decision_note") or "No note provided.")[:1000],
+    }
+
+
+async def send_request_decision_email(owner_uid: object, notice: dict) -> None:
+    """Post-commit, best-effort Teacher email. Failures never change the decision."""
+    try:
+        if not settings.notification_service_token:
+            logger.warning("request_decision_email_unavailable")
+            return
+        if not isinstance(owner_uid, str) or not owner_uid:
+            raise ValueError("Request owner is unavailable")
+        from classync_contracts.firebase import initialize_firebase
+        from firebase_admin import auth as firebase_auth
+
+        firebase_app = await run_in_threadpool(initialize_firebase, settings)
+        user = await run_in_threadpool(firebase_auth.get_user, owner_uid, app=firebase_app)
+        if not user.email:
+            raise ValueError("Teacher email is unavailable")
+        url = settings.notification_service_url
+        headers = await run_in_threadpool(
+            service_headers,
+            settings.cloud_run_iam_enabled,
+            url,
+            {"X-ClassSync-Service-Token": settings.notification_service_token.get_secret_value()},
+        )
+        async with httpx.AsyncClient(timeout=5.0, trust_env=False) as client:
+            sent = await client.post(
+                url + "/internal/v1/request-decision-email",
+                json={"email": user.email, **notice},
+                headers=headers,
+            )
+            sent.raise_for_status()
+    except Exception as error:  # noqa: BLE001 - background delivery must never raise
+        logger.warning(
+            "request_decision_email_failed", extra={"failure_type": type(error).__name__}
+        )
+
+
+@app.post("/api/v1/timetables/requests/{request_id}/decision")
+async def classroom_request_decision(request_id: UUID, request: Request):
+    """Commit the decision first, then notify the requesting Teacher without blocking."""
+    await run_in_threadpool(require_administrator, request, settings)
+    response = await service_proxy(
+        "scheduling", f"/api/v1/timetables/requests/{request_id}/decision", request
+    )
+    if 200 <= response.status_code < 300:
+        payload = json.loads(response.body).get("data")
+        notice = request_decision_email(payload)
+        if notice is not None:
+            task = asyncio.create_task(
+                send_request_decision_email(payload.get("owner_uid"), notice)
+            )
+            _decision_email_tasks.add(task)
+            task.add_done_callback(_decision_email_tasks.discard)
+    return response
 
 
 # Timetable publication is independent from the legacy Administrator-only proxy.

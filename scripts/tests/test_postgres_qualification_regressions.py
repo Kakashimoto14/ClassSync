@@ -81,4 +81,20 @@ def test_synthetic_provider_fixture_requires_unique_student_records():
 
 
 def test_provider_qualification_uses_current_alembic_head():
-    assert current_migration_head() == "0025_student_roster_crud"
+    """Derive the expected head from the migration files so new migrations cannot stale it."""
+    import re
+    from pathlib import Path
+
+    from alembic.script import ScriptDirectory
+    from classync_persistence import schema
+
+    migrations = Path(schema.__file__).parent / "migrations"
+    heads = ScriptDirectory(str(migrations)).get_heads()
+    assert len(heads) == 1, f"Expected a single Alembic head, found {heads}"
+    revisions = []
+    for path in (migrations / "versions").glob("[0-9][0-9][0-9][0-9]_*.py"):
+        match = re.search(r'^revision\s*=\s*"([^"]+)"', path.read_text(encoding="utf-8"), re.M)
+        assert match, f"{path.name} declares no revision"
+        revisions.append(match.group(1))
+    newest = max(revisions, key=lambda revision: int(revision[:4]))
+    assert current_migration_head() == heads[0] == newest

@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-testpaths = ["services"]
+testpaths = ["services", "scripts/tests"]
 pythonpath = ["packages/api-contracts", "packages/persistence"]
 addopts = "--import-mode=importlib"
 [tool.ruff]

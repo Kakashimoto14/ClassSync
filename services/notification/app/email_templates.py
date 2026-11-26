@@ -86,3 +86,52 @@ def render_password_reset_email(reset_url: str) -> tuple[str, str]:
         "this message."
     )
     return html, text
+
+
+def render_request_decision_email(
+    *,
+    decision: str,
+    subject_code: str,
+    section: str,
+    class_date: str,
+    time_range: str,
+    from_room: str,
+    to_room: str,
+    note: str,
+    app_url: str,
+) -> tuple[str, str]:
+    """Concise Teacher notice for an Administrator classroom-request decision."""
+    if decision not in {"approved", "rejected"}:
+        raise ValueError("Unsupported request decision")
+    approved = decision == "approved"
+    title = "Classroom change approved" if approved else "Classroom change declined"
+    outcome = (
+        f"Your class now meets in {to_room}. The published timetable has been updated."
+        if approved
+        else f"Your class stays in {from_room}. The timetable was not changed."
+    )
+    summary = f"{subject_code} · {section} · {class_date} · {time_range}"
+    link = app_url.rstrip("/") + "/teacher/change-requests"
+    safe = {key: escape(value, quote=True) for key, value in {
+        "title": title, "outcome": outcome, "summary": summary, "from": from_room,
+        "to": to_room, "note": note, "link": link,
+    }.items()}
+    html = f"""<!doctype html>
+<html lang="en"><body style="margin:0;padding:24px 12px;background:#F8FAFC;color:#1E293B;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8FAFC"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;overflow:hidden">
+<tr><td style="height:5px;background:#7A1C32;font-size:0">&nbsp;</td></tr>
+<tr><td style="padding:24px 28px;border-bottom:1px solid #F1F5F9"><strong style="font-size:20px;color:#0F172A">Class<span style="color:#7A1C32">Sync</span></strong>
+<div style="margin-top:4px;color:#64748B;font-size:11px;letter-spacing:1px;text-transform:uppercase">Colegio de Montalban · Campus Scheduling</div></td></tr>
+<tr><td style="padding:28px"><h1 style="margin:0 0 10px;font-size:22px;color:#0F172A">{safe["title"]}</h1>
+<p style="margin:0 0 14px;color:#475569;font-size:14px;line-height:1.6">{safe["summary"]}</p>
+<p style="margin:0 0 14px;color:#0F172A;font-size:14px;line-height:1.6">{safe["from"]} → {safe["to"]}<br/>{safe["outcome"]}</p>
+<p style="margin:0 0 22px;color:#475569;font-size:13px;line-height:1.6"><strong>Administrator note:</strong> {safe["note"]}</p>
+<p style="margin:0;text-align:center"><a href="{safe["link"]}" style="display:inline-block;padding:12px 26px;border-radius:9px;background:#7A1C32;color:#FFFFFF;font-size:14px;font-weight:bold;text-decoration:none">View request</a></p></td></tr>
+<tr><td align="center" style="padding:17px 24px;background:#F8FAFC;border-top:1px solid #F1F5F9;color:#64748B;font-size:11px">ClassSync · Academic &amp; Scheduling Services</td></tr>
+</table></td></tr></table></body></html>"""
+    text = (
+        f"{title}. {summary}. {from_room} -> {to_room}. {outcome} "
+        f"Administrator note: {note} View the request: {link}"
+    )
+    return html, text

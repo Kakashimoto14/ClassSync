@@ -36,6 +36,9 @@ const RegistrationScannerPage = lazy(() =>
 const AcademicManagementPage = lazy(() =>
   import('../pages/AcademicManagementPage').then((module) => ({ default: module.AcademicManagementPage })),
 );
+const AcademicStudentRosterPage = lazy(() =>
+  import('../pages/AcademicStudentRosterPage').then((module) => ({ default: module.AcademicStudentRosterPage })),
+);
 const SchedulingSourcePage = lazy(() =>
   import('../pages/AcademicGenerationPage').then((module) => ({ default: module.SchedulingSourcePage })),
 );
@@ -156,6 +159,8 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
           ) : definition.role === 'administrator' &&
             ['dashboard', 'academic-manage'].includes(definition.kind) ? (
             <AcademicManagementPage initialKind={definition.academicKind} />
+          ) : definition.role === 'administrator' && definition.id === 'administrator.students' ? (
+            <AcademicStudentRosterPage />
           ) : definition.role === 'administrator' && definition.kind === 'schedule-create' ? (
             <SchedulingSourcePage />
           ) : definition.role === 'administrator' && definition.kind === 'schedule-drafts' ? (
