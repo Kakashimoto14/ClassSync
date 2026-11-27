@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 import pytest
 from classync_contracts.identity import VerifiedPrincipal
-from classync_contracts.publication import PublicationCommand
+from classync_contracts.publication import PublicationCommand, RoomRestriction
 from classync_contracts.scheduling import SaveDraftRequest
 from classync_persistence.database import transaction
 from classync_persistence.membership_changes import audit_actor
@@ -32,6 +32,7 @@ from services.testing.postgres_cluster import cluster, execute, provision  # noq
 
 TENANT, PROJECT, ADMIN = "cdm", "demo-classsync-occupancy", "admin-uid"
 TEACHER, STUDENT = "teacher-uid", "student-uid"
+SECOND_ADMIN = "second-admin-uid"
 OTHER_PERIOD = "00000000-0000-5000-8000-0000000000b2"
 SECRET = "IBE board review — confidential"
 OUTSIDER_TEACHER = "outsider-faculty"
@@ -55,7 +56,8 @@ def world(cluster):  # noqa: F811
     with transaction(engine("boot")) as db:
         for table in ("solver_runs", "drafts", "published_versions"):
             execute(db, f"GRANT INSERT ON classsync_scheduling.{table} TO runtime")
-        execute(db, "GRANT INSERT,UPDATE ON classsync_scheduling.publication_heads TO runtime")
+        for table in ("publication_heads", "room_restrictions"):
+            execute(db, f"GRANT INSERT,UPDATE ON classsync_scheduling.{table} TO runtime")
         execute(db, "GRANT EXECUTE ON FUNCTION "
                     "classsync_scheduling.lock_publication_authority() TO runtime")
         execute(db, "INSERT INTO classsync_identity.tenants VALUES (:t,:p)", t=TENANT, p=PROJECT)
@@ -95,6 +97,14 @@ def world(cluster):  # noqa: F811
     class_date = (FIRST_WEEK + timedelta(days=mine.day)).isoformat()
 
     with transaction(engine("boot")) as db:
+        identity_context(db, tenant_id=TENANT, uid=SECOND_ADMIN)
+        audit_actor(db, VerifiedPrincipal(uid="synthetic-provisioner"))
+        execute(db, "INSERT INTO classsync_identity.people(tenant_id,id) VALUES (:t,'p-second')",
+                t=TENANT)
+        execute(db, "INSERT INTO classsync_identity.memberships "
+                    "(tenant_id,uid,person_id,roles,state,revision) VALUES "
+                    "(:t,:u,'p-second',ARRAY['administrator'],'active',1)",
+                t=TENANT, u=SECOND_ADMIN)
         _member(db, TEACHER, stable_uuid("faculty-person", mine.teacher_id), "teacher",
                 faculty_id=mine.teacher_id)
         person = db.scalar(text("SELECT person_id FROM classsync_identity.students "
@@ -236,3 +246,47 @@ def test_projection_functions_require_an_active_membership(world):
             with pytest.raises(DBAPIError) as error:
                 db.execute(text(f"SELECT * FROM classsync_scheduling.{function}"))
             assert error.value.orig.sqlstate == "42501"
+
+
+def test_another_administrator_cancels_a_restriction_and_frees_the_room(world):
+    """0029: restrictions are shared, and cancelled windows leave the projection."""
+    second = world.repository("runtime", PostgresPublicationRepository, uid=SECOND_ADMIN)
+    stored = second.restriction_list("institutional")[0]
+    assert stored["id"] == "board-review" and stored["status"] == "active"
+    body = RoomRestriction(
+        **{key: stored[key] for key in
+           ("id", "room_id", "dataset", "starts_at", "ends_at", "kind")},
+        reason="Cancelled by a second Administrator", expected_revision=1, status="cancelled",
+    )
+    assert second.put_restriction(body)["status"] == "cancelled"
+
+    slot = _slot(world, TEACHER, {"role": "teacher", "faculty_id": world.mine.teacher_id})
+    states = {room["id"]: room["occupancy"] for room in slot["rooms"]}
+    assert states[world.restricted_room] == "free"
+    repo = world.repository("runtime", PostgresPublicationRepository, uid=TEACHER)
+    with repo.session(role="teacher", record_id=world.mine.teacher_id) as db:
+        assert not db.execute(text(
+            "SELECT * FROM classsync_scheduling.room_restriction_windows('institutional')"
+        )).all()
+    with transaction(world.engine("boot")) as db:
+        actors = db.execute(text(
+            "SELECT revision,actor_uid FROM classsync_scheduling.restriction_audit "
+            "ORDER BY revision"
+        )).all()
+        events = db.execute(text(
+            "SELECT owner_uid,revision,period_id FROM classsync_scheduling.administrator_activity "
+            "WHERE event_type='scheduling.restriction.saved' ORDER BY revision"
+        )).all()
+    assert actors == [(1, ADMIN), (2, SECOND_ADMIN)]
+    assert events == [(ADMIN, 1, None), (SECOND_ADMIN, 2, None)]
+
+
+def test_a_non_administrator_cannot_update_a_restriction(world):
+    with transaction(world.engine("runtime")) as db:
+        identity_context(db, tenant_id=TENANT, uid=TEACHER)
+        db.execute(text("SELECT set_config('classsync.project_id',:p,true)"), {"p": PROJECT})
+        changed = db.execute(text(
+            "UPDATE classsync_scheduling.room_restrictions SET owner_uid=:u,revision=revision+1"
+        ), {"u": TEACHER})
+        # Row-level security hides every restriction from a Teacher.
+        assert changed.rowcount == 0

@@ -1,8 +1,10 @@
 """All-program defense seed on a throwaway PostgreSQL cluster: idempotent, edit-preserving,
 and generating a complete, independently valid, deterministic campus timetable.
 
-Guardrails (owner-approved 27 November 2026): wall time at most 10 s on CI runners, with the
-measured duration printed; peak RSS under 400 MB where the platform reports it (Linux).
+Guardrails (owner-approved 27 November 2026): wall time bounded on CI runners, with the
+measured duration printed; peak RSS under 400 MB where the platform reports it (Linux). The
+wall ceiling was widened from 10 s to 20 s for slow runners (Slice C2 instruction); the
+deterministic search budget and memory gate are unchanged.
 """
 
 import sys
@@ -23,7 +25,7 @@ from services.scheduling.app.validation import validate_timetable
 from services.testing.postgres_cluster import cluster, execute, provision  # noqa: F401
 
 TENANT, PROJECT, ADMIN = "cdm", "demo-classsync-campus", "admin-uid"
-WALL_SECONDS = 10
+WALL_SECONDS = 20
 PEAK_RSS_MB = 400
 
 

@@ -1,0 +1,19 @@
+/* Administrator operations pages; loaded only with their lazy chunks. */
+.admin-ops { display: grid; gap: 16px; min-width: 0; }
+.admin-ops h2, .admin-ops h3, .admin-ops p { margin: 0; }
+.admin-ops .workspace-card { display: grid; gap: 12px; min-width: 0; }
+.admin-ops__bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.admin-ops label { display: grid; gap: 6px; min-width: 0; font-weight: 600; }
+.admin-ops input, .admin-ops select { min-width: 0; min-height: 40px; max-width: 100%; }
+.admin-ops__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
+.admin-ops__facts div { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.admin-ops__facts dt { color: var(--ink-soft); font-size: .8125rem; }
+.admin-ops__facts dd { margin: 4px 0 0; font-size: 1.375rem; font-weight: 700; }
+.admin-ops table { width: 100%; border-collapse: collapse; }
+.admin-ops th, .admin-ops td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.admin-ops__scroll { max-height: 420px; overflow: auto; }
+.admin-ops__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
+.admin-ops__form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; align-items: end; }
+.admin-ops__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.admin-ops__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.admin-ops__list li { display: grid; gap: 6px; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }

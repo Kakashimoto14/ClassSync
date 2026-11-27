@@ -552,6 +552,29 @@ async def academic_roster_student(period_id: UUID, student_id: str, request: Req
     return await academic_proxy(f"periods/{period_id}/roster/{student_id}", request, False)
 
 
+# Bulk roster and period lifecycle; the Academic service re-checks role and tenant.
+@app.post("/api/v1/academic/periods/{period_id}/roster/bulk-status")
+async def academic_roster_bulk_status(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/roster/bulk-status", request, False)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/roster/import/{step}")
+async def academic_roster_import(
+    period_id: UUID, step: Literal["preview", "commit"], request: Request
+):
+    return await academic_proxy(f"periods/{period_id}/roster/import/{step}", request, False)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/clone")
+async def academic_period_clone(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/clone", request, False)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/archive")
+async def academic_period_archive(period_id: UUID, request: Request):
+    return await academic_proxy(f"periods/{period_id}/archive", request, False)
+
+
 @app.api_route(
     "/api/v1/scheduling/sandbox/academic/{period_id:uuid}/{action}", methods=["GET", "POST"]
 )
@@ -675,7 +698,9 @@ async def timetable_proxy(operation: str, request: Request):
     else:
         if operation == "requests" and request.method == "POST":
             await run_in_threadpool(request_identity, request, settings, UserRole.TEACHER)
-        elif request.method != "GET" or operation.startswith(("history/", "audit/")):
+        elif request.method != "GET" or operation.startswith(
+            ("history/", "audit/", "reports/", "restrictions")
+        ):
             await run_in_threadpool(require_administrator, request, settings)
         else:
             await run_in_threadpool(require_identity, request, settings)

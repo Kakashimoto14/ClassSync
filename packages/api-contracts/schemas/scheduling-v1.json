@@ -5999,6 +5999,18 @@
               }
             ],
             "default": null
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Archived At"
           }
         },
         "required": [
@@ -7572,6 +7584,18 @@
               }
             ],
             "default": null
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Archived At"
           }
         },
         "required": [
@@ -8945,6 +8969,18 @@
               }
             ],
             "default": null
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Archived At"
           }
         },
         "required": [
@@ -11141,6 +11177,15 @@
         "maxLength": 200,
         "minLength": 1,
         "title": "Reason",
+        "type": "string"
+      },
+      "status": {
+        "default": "active",
+        "enum": [
+          "active",
+          "cancelled"
+        ],
+        "title": "Status",
         "type": "string"
       },
       "expected_revision": {

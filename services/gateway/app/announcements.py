@@ -38,7 +38,7 @@ class Announcements:
         self.engine, self.tenant, self.project = engine, tenant, project
 
     @contextmanager
-    def session(self, claims):
+    def session(self, claims, *, write=False):
         if claims.get("tenant_id") != self.tenant:
             raise HTTPException(403, "Current university access required")
         try:
@@ -51,12 +51,19 @@ class Announcements:
                     ),
                     {"role": claims["role"], "project": self.project},
                 )
-                # Hold current authority until commit; revocation cannot race a write.
+                if write:
+                    # One author's writes run one at a time, which also bounds the create rate.
+                    # No row lock: FOR SHARE needs UPDATE on memberships, which the runtime
+                    # role does not have. Row-level security re-checks membership on the write.
+                    db.execute(
+                        text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"),
+                        {"key": f"notice:{self.tenant}:{claims['uid']}"},
+                    )
                 member = db.scalar(
                     text("""SELECT 1 FROM classsync_identity.memberships m
                     JOIN classsync_identity.tenants t ON t.id=m.tenant_id
                     WHERE m.tenant_id=:tenant AND m.uid=:uid AND m.state='active'
-                    AND :role=ANY(m.roles) AND t.firebase_project_id=:project FOR SHARE OF m"""),
+                    AND :role=ANY(m.roles) AND t.firebase_project_id=:project"""),
                     self.params(claims, project=self.project, role=claims["role"]),
                 )
                 if not member:
@@ -86,12 +93,8 @@ class Announcements:
             return {"announcements": [self.summary(row) for row in rows]}
 
     def create(self, claims, body):
-        with self.session(claims) as db:
-            # Serialize this author's bounded create rate, including archived notices.
-            db.execute(
-                text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"),
-                {"key": f"notice:{self.tenant}:{claims['uid']}"},
-            )
+        with self.session(claims, write=True) as db:
+            # The rate bound includes archived notices.
             count = db.scalar(
                 text("""SELECT count(*) FROM classsync_academic.announcements
                 WHERE tenant_id=:tenant AND created_by=:uid
@@ -114,7 +117,7 @@ class Announcements:
             return self.summary(row)
 
     def change(self, claims, notice_id, revision, body=None):
-        with self.session(claims) as db:
+        with self.session(claims, write=True) as db:
             values = self.params(claims, id=str(notice_id), revision=revision)
             update = (
                 "archived=true"

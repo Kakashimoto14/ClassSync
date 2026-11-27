@@ -474,7 +474,8 @@ def availability_for(request, sandbox, room_id, start, end):
             )
         ]
         restricted = any(
-            r["room_id"] == room_id
+            r.get("status", "active") == "active"
+            and r["room_id"] == room_id
             and r["starts_at"] < requested["ends_at"]
             and requested["starts_at"] < r["ends_at"]
             for r in restrictions
@@ -515,15 +516,68 @@ def term_restrictions(request):
             return repo.restriction_list("institutional")
         except DraftError as error:
             raise HTTPException(error.status, str(error)) from error
+    stored = local_restrictions(claims.get("tenant_id"), "institutional")
+    return [value for value in stored if value.get("status", "active") == "active"]
+
+
+def local_restrictions(tenant, dataset):
     _, repo = settings_and_repo()
     with repo.drafts.connection() as db:
         return [
             json.loads(row[0])
             for row in db.execute(
                 "SELECT payload FROM publication_room_restrictions WHERE tenant=? AND dataset=?",
-                (claims.get("tenant_id"), "institutional"),
+                (tenant, dataset),
             )
         ]
+
+
+def institutional_repo(request, feature):
+    """Verified Administrator on PostgreSQL storage; there is no local fallback."""
+    settings = settings_only()
+    claims = require_administrator(request, settings)
+    if settings.scheduling_database_url is None:
+        raise HTTPException(503, f"{feature} requires PostgreSQL storage")
+    require_local_publication(settings, False)
+    _, repo = scoped_repo(request, claims)
+    return repo
+
+
+@router.get("/reports/{period}")
+def report(period: UUID, request: Request):
+    return institutional_repo(request, "Reporting").report(str(period))
+
+
+@router.get("/restrictions")
+def list_restrictions(request: Request, dataset: str = "institutional"):
+    settings = settings_only()
+    claims = require_administrator(request, settings)
+    if dataset not in {"institutional", "synthetic"}:
+        raise HTTPException(422, "Unknown dataset")
+    if dataset == "synthetic":
+        require_sandbox(settings)
+        tenant = "development-synthetic"
+    else:
+        tenant = claims.get("tenant_id")
+        if not tenant:
+            raise HTTPException(403, "Verified tenant required")
+    require_local_publication(settings, dataset == "synthetic")
+    if settings.scheduling_database_url is None:
+        return {
+            "restrictions": [
+                {"status": "active", **value} for value in local_restrictions(tenant, dataset)
+            ]
+        }
+    _, repo = scoped_repo(request, claims)
+    return {"restrictions": repo.restriction_list(dataset, include_cancelled=True)}
+
+
+@router.post("/restrictions/preflight")
+def restriction_preflight(body: RoomRestriction, request: Request):
+    repo = institutional_repo(request, "Restriction preflight")
+    if body.dataset != "institutional":
+        raise HTTPException(422, "Preflight reviews institutional publications")
+    return repo.restriction_preflight(body)
 
 
 @router.put("/restrictions/{restriction_id}")
@@ -551,12 +605,7 @@ def save_restriction(restriction_id: str, body: RoomRestriction, request: Reques
     require_local_publication(settings, body.dataset == "synthetic")
     if settings.scheduling_database_url is not None:
         _, repo = scoped_repo(request, claims)
-        try:
-            return repo.put_restriction(body)
-        except DraftError as error:
-            raise HTTPException(error.status, detail={"error": {
-                "code": error.code, "message": str(error),
-            }}) from error
+        return repo.put_restriction(body)
     _, repo = settings_and_repo()
     value = {
         **body.model_dump(),

@@ -2,6 +2,7 @@ import { StudentHome } from './StudentHome';
 import { StudentRooms } from './StudentRooms';
 import { presentationOnlyBuild } from '../lib/presentation-sample';
 import { capabilitiesFor } from '../config/app-mode';
+import { appMode } from '../config/runtime-config';
 import { PresentationConflictSummary } from '../components/scheduling/PresentationConflictSummary';
 import { lazy, Suspense, useState } from 'react';
 import { previewViewer, schedulePreview } from '../data/schedule-preview';
@@ -42,6 +43,12 @@ const AcademicStudentRosterPage = lazy(() =>
   import('./AcademicStudentRosterPage').then((module) => ({ default: module.AcademicStudentRosterPage })),
 );
 
+const ReportsPage = lazy(() =>
+  import('./ReportsPage').then((module) => ({ default: module.ReportsPage })),
+);
+const BuildingsPage = lazy(() =>
+  import('./BuildingsPage').then((module) => ({ default: module.BuildingsPage })),
+);
 const SchedulingRulesPage = lazy(() =>
   import('./SchedulingRulesPage').then((module) => ({ default: module.SchedulingRulesPage })),
 );
@@ -190,15 +197,20 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       {definition.kind === 'request-create' && <RequestCreateScreen />}
       {definition.kind === 'request-detail' && <RequestDetailScreen role={definition.role} />}
       {definition.kind === 'report-issue' && <IssueReportScreen />}
-      {definition.kind === 'buildings' && <PreviewBuildingDirectory />}
-      {definition.kind === 'building-detail' && <PreviewBuildingDetail />}
+      {definition.kind === 'buildings' &&
+        (appMode === 'institutional' ? <BuildingsPage /> : <PreviewBuildingDirectory />)}
+      {definition.kind === 'building-detail' &&
+        (appMode === 'institutional' ? <BuildingsPage detail /> : <PreviewBuildingDetail />)}
       {definition.kind === 'academic-list' && (definition.id === 'administrator.students'
         ? <AcademicStudentRosterPage />
         : <AcademicListScreen definition={definition} />)}
       {definition.kind === 'academic-detail' && <AcademicDetailScreen />}
-      {definition.kind === 'reports' && (
-        <ReportScreen utilization={definition.id.endsWith('.utilization')} />
-      )}
+      {definition.kind === 'reports' &&
+        (appMode === 'institutional' ? (
+          <ReportsPage key={definition.id} utilization={definition.id.endsWith('.utilization')} />
+        ) : (
+          <ReportScreen utilization={definition.id.endsWith('.utilization')} />
+        ))}
       {definition.kind === 'notifications' && <PreviewUpdatesView role={definition.role} />}
       {definition.kind === 'announcements' && <AnnouncementScreen role={definition.role} />}
       {definition.kind === 'profile' && <ProfileScreen role={definition.role} />}

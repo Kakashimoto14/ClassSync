@@ -61,6 +61,7 @@ class PublicationRepository(PublicationRules):
             (tenant, dataset),
         ).fetchall()
         restrictions = [json.loads(r[0]) for r in rows]
+        restrictions = [r for r in restrictions if r.get("status", "active") == "active"]
         for event in events:
             if any(r["room_id"] == event["room"]["id"] and overlap(r, event) for r in restrictions):
                 raise DraftError(

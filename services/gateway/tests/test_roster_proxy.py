@@ -77,3 +77,38 @@ def test_malformed_roster_targets_are_rejected_before_forwarding(
     )
     assert response.status_code in {404, 422}
     assert forwarded == []
+
+
+NEW_PERIOD_ROUTES = [
+    "roster/bulk-status", "roster/import/preview", "roster/import/commit", "clone", "archive",
+]
+
+
+@pytest.mark.parametrize("suffix", NEW_PERIOD_ROUTES)
+def test_bulk_roster_and_lifecycle_routes_are_administrator_only(
+    identity_adapters, forwarded, suffix
+):
+    path = f"/api/v1/academic/periods/{uuid4()}/{suffix}"
+    client = TestClient(main.app)
+    for role in ("teacher", "student"):
+        identity_adapters(main, role)
+        assert client.post(path, headers=HEADERS, json={}).status_code == 403
+    assert forwarded == []
+    identity_adapters(main, "administrator")
+    assert client.post(path, headers=HEADERS, json={}).status_code == 200
+    assert forwarded == [("academic", "POST", path, {})]
+
+
+@pytest.mark.parametrize(
+    "suffix", ["reports/00000000-0000-0000-0000-000000000001", "restrictions"]
+)
+def test_reports_and_restrictions_are_administrator_only(identity_adapters, forwarded, suffix):
+    path = f"/api/v1/timetables/{suffix}"
+    client = TestClient(main.app)
+    for role in ("teacher", "student"):
+        identity_adapters(main, role)
+        assert client.get(path, headers=HEADERS).status_code == 403
+    assert forwarded == []
+    identity_adapters(main, "administrator")
+    assert client.get(path, headers=HEADERS).status_code == 200
+    assert forwarded == [("scheduling", "GET", path, {})]

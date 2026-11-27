@@ -84,14 +84,16 @@ async function dedupeAcademicRead<T>(path: string): Promise<T> {
 // Archived broken periods stay in the database for audit history and are never selectable.
 const ARCHIVED_PERIOD_TITLE_PREFIX = 'Archived invalid period · ';
 
-export const listAcademicPeriods = async (): Promise<AcademicPeriodList> => {
+export const listAcademicPeriods = async (includeArchived = false): Promise<AcademicPeriodList> => {
   const list = await dedupeAcademicRead<AcademicPeriodList>(base);
   // A response without a list is passed through unchanged, never turned into "no periods".
   if (!list.periods) return list;
   return {
     ...list,
     periods: list.periods.filter(
-      (period) => !period.title.startsWith(ARCHIVED_PERIOD_TITLE_PREFIX),
+      (period) =>
+        !period.title.startsWith(ARCHIVED_PERIOD_TITLE_PREFIX) &&
+        (includeArchived || !period.archived_at),
     ),
   };
 };
@@ -148,9 +150,11 @@ export const loadAcademicRoster = (period: string, filters: {
   );
 };
 export const createAcademicRosterStudent = (period: string, body: RosterStudentWrite) =>
-  academicRequest<{ created: true }>(
-    `academic/periods/${encodeURIComponent(period)}/roster`, body, 'POST',
-  );
+  academicRequest<{
+    created: true;
+    continuing?: boolean;
+    enrollment_status?: RosterStudentWrite['enrollment_status'];
+  }>(`academic/periods/${encodeURIComponent(period)}/roster`, body, 'POST');
 export const updateAcademicRosterStudent = (
   period: string, studentId: string, body: RosterStudentWrite,
 ) => academicRequest<{ updated: true }>(

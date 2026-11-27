@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -8,6 +8,11 @@ import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicRecordEditor } from './AcademicRecordEditor';
 import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
+import { appMode } from '../config/runtime-config';
+
+const PeriodLifecycleControls = lazy(() =>
+  import('./PeriodLifecycleControls').then((module) => ({ default: module.PeriodLifecycleControls })),
+);
 
 const setupDescriptions: Record<AcademicKind, string> = {
   programs: 'Review the supplied program list and naming rules for this period.',
@@ -63,6 +68,7 @@ export function AcademicPeriodSetup({
   onCancel,
   onSaved,
   onReload,
+  onCloned,
 }: {
   snapshot: AcademicSnapshot;
   readiness?: AcademicReadiness | null;
@@ -72,6 +78,7 @@ export function AcademicPeriodSetup({
   onCancel: () => void;
   onSaved: (next: AcademicSnapshot) => void;
   onReload: () => void;
+  onCloned?: (periodId: string) => void;
 }) {
   const [activeKind, setActiveKind] = useState<AcademicKind>('programs');
   const populatedAreas = academicTabs.filter((tab) =>
@@ -154,6 +161,17 @@ export function AcademicPeriodSetup({
         </div>
         <StatusBadge tone="neutral">{`Revision ${snapshot.period.revision}`}</StatusBadge>
       </header>
+
+      {appMode === 'institutional' && onCloned && (
+        <Suspense fallback={null}>
+          <PeriodLifecycleControls
+            key={snapshot.period.id}
+            period={snapshot.period}
+            onCloned={onCloned}
+            onArchived={onReload}
+          />
+        </Suspense>
+      )}
 
       <div className="academic-setup__progress" role="status">
         <strong>{startedAreas} of 6 setup steps have saved information</strong>

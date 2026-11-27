@@ -6,8 +6,13 @@ from classync_contracts.academic import (
     AcademicPeriodList,
     AcademicSnapshot,
     CalendarWrite,
+    PeriodArchive,
+    PeriodClone,
     PeriodCreate,
     RecordWrite,
+    RosterBulkStatus,
+    RosterImportCommit,
+    RosterImportPreview,
     RosterStudentWrite,
 )
 from classync_contracts.identity import MembershipAuthorizationError, MembershipErrorCode
@@ -186,8 +191,42 @@ def roster(
 )
 def create_roster_student(period_id: str, body: RosterStudentWrite, request: Request):
     _, owner = authorize(request, False)
-    connected_repository(request, owner).create_roster_student(period_id, body)
-    return {"created": True}
+    result = connected_repository(request, owner).create_roster_student(period_id, body)
+    return {"created": True, **(result or {})}
+
+
+@app.post("/api/v1/academic/periods/{period_id}/roster/bulk-status")
+def bulk_roster_status(period_id: str, body: RosterBulkStatus, request: Request):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).bulk_roster_status(period_id, body)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/roster/import/preview")
+def preview_roster_import(period_id: str, body: RosterImportPreview, request: Request):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).preview_roster_import(period_id, body)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/roster/import/commit", status_code=201)
+def commit_roster_import(period_id: str, body: RosterImportCommit, request: Request):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).commit_roster_import(period_id, body)
+
+
+@app.post(
+    "/api/v1/academic/periods/{period_id}/clone",
+    response_model=AcademicSnapshot,
+    status_code=201,
+)
+def clone_period(period_id: str, body: PeriodClone, request: Request):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).clone_period(period_id, body)
+
+
+@app.post("/api/v1/academic/periods/{period_id}/archive", response_model=AcademicSnapshot)
+def archive_period(period_id: str, body: PeriodArchive, request: Request):
+    _, owner = authorize(request, False)
+    return connected_repository(request, owner).archive_period(period_id, body)
 
 
 @app.put("/api/v1/academic/periods/{period_id}/roster/{student_id}")

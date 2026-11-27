@@ -81,6 +81,7 @@ export type AcademicPeriod = {
   created_at: string;
   source: "development-entered" | "institutional" | "synthetic-review";
   calendar?: AcademicCalendar | null;
+  archived_at?: string | null;
 };
 
 export type AcademicPeriodList = {
@@ -464,6 +465,7 @@ export type RoomRestriction = {
   ends_at: string;
   kind: "operational" | "reservation";
   reason: string;
+  status?: "active" | "cancelled";
   expected_revision: number;
 };
 

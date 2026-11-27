@@ -53,6 +53,13 @@ export function AcademicManagementPage({
   );
 }
 
+/** Clones share calendar dates with their source, so add the title when labels collide. */
+function periodOption(period: AcademicPeriod, periods: AcademicPeriod[]) {
+  const label = periodLabel(period);
+  const repeated = periods.filter((item) => periodLabel(item) === label).length > 1;
+  return `${label}${repeated ? ` · ${period.title}` : ''}${period.archived_at ? ' (Archived)' : ''}`;
+}
+
 function ManagementContent({
   kind,
   periodId,
@@ -90,7 +97,7 @@ function ManagementContent({
     let ignore = false;
     setLoading(true);
     setError('');
-    const periodsRequest = listAcademicPeriods()
+    const periodsRequest = listAcademicPeriods(true)
       .then((data) => {
         if (!ignore) {
           setPeriods(data.periods);
@@ -318,7 +325,7 @@ function ManagementContent({
                   </option>
                   {periods.map((p) => (
                     <option value={p.id} key={p.id}>
-                      {periodLabel(p)}
+                      {periodOption(p, periods)}
                     </option>
                   ))}
                 </select>
@@ -376,7 +383,7 @@ function ManagementContent({
                 <option value="">Choose a period</option>
                 {periods.map((p) => (
                   <option value={p.id} key={p.id}>
-                    {periodLabel(p)}
+                    {periodOption(p, periods)}
                   </option>
                 ))}
               </select>
@@ -484,6 +491,13 @@ function ManagementContent({
             <AcademicPeriodSetup
               snapshot={snapshot}
               readiness={checked}
+              onCloned={(id) => {
+                setEditing(null);
+                setChecked(null);
+                setSnapshot(null);
+                setLoading(true);
+                onPeriod(id);
+              }}
               editing={editing}
               editingKind={editingKind}
               onEdit={(nextKind, id) => {

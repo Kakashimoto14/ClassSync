@@ -248,6 +248,57 @@ class RosterStudentWrite(Contract):
         return normalized
 
 
+class RosterBulkStatus(Contract):
+    expected_period_revision: int = Field(ge=1)
+    student_ids: list[Annotated[str, Field(pattern=r"^[0-9]{2}-[0-9]{5}$")]] = Field(
+        min_length=1, max_length=500
+    )
+    enrollment_status: Literal["active", "inactive", "unverified"]
+
+    @field_validator("student_ids")
+    @classmethod
+    def unique_students(cls, value):
+        if len(set(value)) != len(value):
+            raise ValueError("Select each student once")
+        return value
+
+
+# 1 MB of CSV text; the repository also bounds the row count.
+ROSTER_IMPORT_MAX_BYTES = 1_048_576
+
+
+class RosterImportPreview(Contract):
+    csv: str = Field(min_length=1, max_length=ROSTER_IMPORT_MAX_BYTES)
+
+    @field_validator("csv")
+    @classmethod
+    def bounded_bytes(cls, value):
+        if len(value.encode("utf-8", errors="replace")) > ROSTER_IMPORT_MAX_BYTES:
+            raise ValueError("The CSV file exceeds 1 MB")
+        return value
+
+
+class RosterImportCommit(RosterImportPreview):
+    rows_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    expected_period_revision: int = Field(ge=1)
+
+
+class PeriodClone(Contract):
+    title: str = Field(min_length=1, max_length=160)
+
+    @field_validator("title")
+    @classmethod
+    def meaningful_title(cls, value):
+        result = value.strip()
+        if not result or result.startswith("Archived invalid period"):
+            raise ValueError("Enter an academic period title")
+        return result
+
+
+class PeriodArchive(Contract):
+    expected_revision: int = Field(ge=1)
+
+
 class CalendarWrite(Contract):
     expected_revision: int = Field(ge=1)
     calendar: AcademicCalendar
@@ -280,6 +331,11 @@ class AcademicPeriod(Contract):
     created_at: str
     source: Literal["development-entered", "institutional", "synthetic-review"]
     calendar: AcademicCalendar | None = None
+    archived_at: str | None = None
+
+    @model_serializer(mode="wrap")
+    def omit_absent_archive(self, handler):
+        return omit_none(handler(self), "archived_at")
 
 
 class AcademicPeriodList(Contract):

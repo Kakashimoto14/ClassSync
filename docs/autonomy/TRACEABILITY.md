@@ -1,5 +1,21 @@
 # Requirements -> implementation -> evidence
 
+### 28 November 2026 — Phase C / Slice C2
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Migration 0029, non-superuser owner, upgrade, downgrade refusal, single head | `0029_restrictions_and_period_lifecycle.py`; `test_period_lifecycle_postgres_runtime.py` | VERIFIED on disposable PostgreSQL 18; Neon not migrated |
+| No activity event dropped; three added | `test_0029_keeps_every_earlier_activity_event_and_adds_three` and the history test | VERIFIED locally |
+| Any tenant Administrator revises or cancels a restriction, with acting-UID audit | 0029 trigger and policy; reports and occupancy runtime tests | VERIFIED locally |
+| Cancelled restrictions release rooms | revised `room_restriction_windows`; occupancy, report runtime tests | VERIFIED locally |
+| Reports and utilization (41 rooms, 57 instructors), formula-safe CSV | `reports.py`, `ReportsPage.tsx`, `csv.ts`; runtime and Vitest | VERIFIED locally; no browser check |
+| Buildings, 41/12 separation, restriction CRUD and preflight | `BuildingsPage.tsx`, restriction routes; runtime and Vitest | VERIFIED locally; no browser check |
+| Bulk status (<= 500, atomic) and CSV import (<= 2,000 rows / 1 MB) | `roster_operations.py`, `roster_import.py`, `RosterImportDialog.tsx`; roster runtime and Vitest | VERIFIED locally |
+| Clone without enrollments or locks; one-way archive | `roster_operations.py`, `PeriodLifecycleControls.tsx`; lifecycle runtime and Vitest | VERIFIED locally |
+| Continuing students enrolled into new/cloned periods without new identities | `create_roster_student`, `roster_import.py`; `test_continuing_students_join_a_cloned_period_without_new_identities` | VERIFIED locally; limited to students in the acting Administrator's own periods |
+| Announcements work with read-only identity grants | `announcements.py`; `test_announcements_postgres_runtime.py` | VERIFIED locally; hosted grants not checked |
+| Administrator-only Gateway routes | `test_roster_proxy.py` | VERIFIED with test identity adapters |
+
 ### 28 November 2026 — Phase C / Slice C1
 
 | Requirement | Implementation / evidence | Current status |

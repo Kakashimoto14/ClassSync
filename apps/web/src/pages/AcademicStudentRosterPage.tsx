@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react';
 import { listAcademicPeriods, loadAcademicRoster, createAcademicRosterStudent,
   updateAcademicRosterStudent, deleteAcademicRosterStudent,
   type AcademicPeriod, type AcademicRosterPage, type RosterStudentWrite } from '../lib/academic-api';
@@ -6,6 +6,11 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { appMode } from '../config/runtime-config';
+
+const RosterImportDialog = lazy(() =>
+  import('./RosterImportDialog').then((module) => ({ default: module.RosterImportDialog })),
+);
+const BULK_LIMIT = 500;
 
 type StudentForm = Omit<RosterStudentWrite, 'expected_period_revision'>;
 const blankStudent = (): StudentForm => ({
@@ -29,6 +34,9 @@ export function AcademicStudentRosterPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState('');
   const [form, setForm] = useState<StudentForm>(blankStudent);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkStatus, setBulkStatus] = useState<StudentForm['enrollment_status']>('active');
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
     if (appMode !== 'institutional') return;
@@ -67,6 +75,34 @@ export function AcademicStudentRosterPage() {
 
   const activeSections = (page?.sections ?? []).filter((item) => item.active);
   const sectionsForYear = activeSections.filter((item) => item.year_level === form.year_level);
+  const busy = saving || Boolean(deletingId);
+  const pageIds = (page?.items ?? []).map((item) => item.student_id);
+  const pageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+  const toggle = (ids: string[], on: boolean) =>
+    setSelected((current) =>
+      on ? [...new Set([...current, ...ids])] : current.filter((id) => !ids.includes(id)));
+  async function applyBulkStatus() {
+    if (!page || busy || !selected.length || selected.length > BULK_LIMIT) return;
+    if (!window.confirm(`Set ${selected.length} students to ${bulkStatus}?`)) return;
+    setSaving(true);
+    setError('');
+    setNotice('');
+    try {
+      const { bulkRosterStatus } = await import('../lib/admin-operations-api');
+      const result = await bulkRosterStatus(periodId, {
+        expected_period_revision: page.period_revision,
+        student_ids: selected,
+        enrollment_status: bulkStatus,
+      });
+      setSelected([]);
+      await reloadRoster(offset);
+      setNotice(`${result.updated} students updated · ${result.skipped} already ${bulkStatus}.`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Selected students could not be updated.');
+    } finally {
+      setSaving(false);
+    }
+  }
   function beginCreate() {
     const firstSection = activeSections[0];
     setEditingId('');
@@ -119,9 +155,11 @@ export function AcademicStudentRosterPage() {
         await reloadRoster(offset);
         setNotice(`Student ${body.student_id} updated.`);
       } else {
-        await createAcademicRosterStudent(periodId, body);
+        const result = await createAcademicRosterStudent(periodId, body);
         await reloadRoster(0);
-        setNotice(`Student ${body.student_id} added to the roster.`);
+        setNotice(result.continuing
+          ? `Student ${body.student_id} already had a university record and is now enrolled in this period. Status stays ${result.enrollment_status}.`
+          : `Student ${body.student_id} added to the roster.`);
       }
       setFormOpen(false);
       setEditingId('');
@@ -163,6 +201,7 @@ export function AcademicStudentRosterPage() {
     try {
       const nextOffset = offset > 0 && offset >= page.total - 1 ? Math.max(0, offset - 20) : offset;
       await deleteAcademicRosterStudent(periodId, item.student_id, page.period_revision);
+      toggle([item.student_id], false);
       await reloadRoster(nextOffset);
       setNotice(`Student ${item.student_id} deleted from the roster.`);
     } catch (cause) {
@@ -177,10 +216,13 @@ export function AcademicStudentRosterPage() {
       <div><h2 id="student-roster-title">Student roster</h2>
         {page && <p className="academic-record-summary">{page.total} roster records · 20 per page</p>}
       </div>
-      <Button type="button" disabled={!page || loading || saving || Boolean(deletingId)} onClick={beginCreate}>+ Add Student</Button>
+      <div className="student-roster-actions">
+        <Button type="button" variant="secondary" disabled={!page || loading || busy} onClick={() => { setNotice(''); setImportOpen(true); }}>Import CSV</Button>
+        <Button type="button" disabled={!page || loading || saving || Boolean(deletingId)} onClick={beginCreate}>+ Add Student</Button>
+      </div>
     </div>
     <div className="academic-list-toolbar">
-      <label>Academic period<select value={periodId} onChange={(event) => { setPeriodId(event.target.value); setOffset(0); setFormOpen(false); }}>
+      <label>Academic period<select value={periodId} onChange={(event) => { setPeriodId(event.target.value); setOffset(0); setFormOpen(false); setSelected([]); }}>
         <option value="">Choose a period</option>{periods.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
       </select></label>
       <label>Search roster<input type="search" value={search} placeholder="Name, student ID, or email" onChange={(event) => { setSearch(event.target.value); setOffset(0); }}/></label>
@@ -196,6 +238,7 @@ export function AcademicStudentRosterPage() {
     {error && <p role="alert" className="scheduler-error">{error}</p>}
     {formOpen && <form className="student-roster-form" aria-label={editingId ? 'Edit student' : 'Add student'} onSubmit={saveStudent}>
       <h3>{editingId ? `Edit ${editingId}` : 'Add student'}</h3>
+      {!editingId && <p>To enroll a student from an earlier period, enter the same student ID, name and email. Their university record and status are not changed.</p>}
       <label>Full name<input required maxLength={160} value={form.full_name} placeholder="e.g., Aira Santos" onChange={(event) => setForm({ ...form, full_name: event.target.value })}/><small>Enter the student’s registered full name. Required.</small></label>
       <label>Student ID<input required pattern="[0-9]{2}-[0-9]{5}" maxLength={8} value={form.student_id} placeholder="24-00101" onChange={(event) => setForm({ ...form, student_id: event.target.value })}/><small>Use the student number from the roster. Required.</small></label>
       <label>Email<input required type="email" maxLength={320} value={form.email} placeholder="student@student.pnm.edu.ph" onChange={(event) => setForm({ ...form, email: event.target.value })}/><small>Enter the roster contact email. A changed address is marked unverified. Required.</small></label>
@@ -218,10 +261,28 @@ export function AcademicStudentRosterPage() {
       </div>
     </form>}
     {!loading && !error && page && !page.items.length && <p>No roster records match these filters.</p>}
+    {importOpen && <Suspense fallback={null}>
+      <RosterImportDialog periodId={periodId} onClose={() => setImportOpen(false)} onImported={(count) => {
+        setImportOpen(false);
+        void reloadRoster(0)
+          .then(() => setNotice(`${count} students imported.`))
+          .catch(() => setError(`${count} students imported, but the roster could not be reloaded.`));
+      }}/>
+    </Suspense>}
+    {selected.length > 0 && <div className="student-roster-actions" role="group" aria-label="Bulk roster actions">
+      <strong role="status">{selected.length} selected</strong>
+      <label>New status <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value as StudentForm['enrollment_status'])}>
+        <option value="active">Active</option><option value="inactive">Inactive</option><option value="unverified">Unverified</option>
+      </select></label>
+      <Button type="button" loading={saving} disabled={busy || loading || selected.length > BULK_LIMIT} onClick={() => void applyBulkStatus()}>Apply to selected</Button>
+      <Button type="button" variant="secondary" disabled={busy} onClick={() => setSelected([])}>Clear selection</Button>
+      {selected.length > BULK_LIMIT && <small>Select at most {BULK_LIMIT} students at a time.</small>}
+    </div>}
     {!loading && page?.items.length ? <>
       <div className="table-wrap"><table>
-        <thead><tr><th>Student</th><th>Student ID</th><th>Section</th><th>Email</th><th>Enrollment</th><th>Actions</th></tr></thead>
+        <thead><tr><th><input type="checkbox" aria-label="Select all students on this page" checked={pageSelected} disabled={busy} onChange={(event) => toggle(pageIds, event.target.checked)}/></th><th>Student</th><th>Student ID</th><th>Section</th><th>Email</th><th>Enrollment</th><th>Actions</th></tr></thead>
         <tbody>{page.items.map((item) => <tr key={item.student_id}>
+          <td><input type="checkbox" aria-label={`Select ${item.student_id}`} checked={selected.includes(item.student_id)} disabled={busy} onChange={(event) => toggle([item.student_id], event.target.checked)}/></td>
           <td>{item.display_name ?? 'Name not entered'}</td><td>{item.student_id}</td>
           <td>{item.section_label} · Year {item.year_level}</td><td>{item.registered_email ?? 'Email not entered'}</td>
           <td><StatusBadge tone={item.enrollment_status === 'active' ? 'success' : 'warning'}>{item.enrollment_status === 'active' ? 'Active' : item.enrollment_status === 'inactive' ? 'Inactive' : 'Unverified'}</StatusBadge></td>

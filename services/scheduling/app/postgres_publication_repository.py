@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from datetime import UTC, date, datetime, time, timedelta
 from uuid import uuid4
 
+from classync_contracts.calendar import AcademicCalendar
 from classync_contracts.identity import (
     MembershipAuthorizationError,
     MembershipErrorCode,
@@ -28,11 +29,12 @@ from services.academic.app.postgres_repository import PostgresAcademicRepository
 from services.academic.app.record_rules import AcademicError
 
 from .academic_input import academic_readiness
-from .catalog import schedulable_spaces
+from .catalog import excluded_space_ids, schedulable_space_ids, schedulable_spaces
 from .draft_rules import DraftError, digest, encode, now
 from .occurrences import ZONE
 from .postgres_draft_repository import PostgresDraftRepository
 from .publication_rules import PublicationRules
+from .reports import booked_sessions, build_report
 from .room_occupancy import occupied_rooms
 
 
@@ -149,6 +151,11 @@ class PostgresPublicationRepository(PublicationRules):
                         raise MembershipAuthorizationError(MembershipErrorCode.DENIED)
                 yield db
         except IntegrityError as error:
+            constraint = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
+            if constraint == "academic_period_archived":
+                raise DraftError(
+                    409, "period_archived", "This academic period is archived and read-only."
+                ) from error
             raise DraftError(
                 409,
                 "publication_integrity",
@@ -266,9 +273,10 @@ class PostgresPublicationRepository(PublicationRules):
         with self.session() as db:
             rows = db.execute(
                 text("""
-                    SELECT event_id,event_type,entity_type,entity_ref,revision,actor_uid,created_at
+                    SELECT event_id,event_type,entity_type,entity_ref,revision,
+                        owner_uid AS actor_uid,created_at
                     FROM classsync_scheduling.administrator_activity
-                    WHERE tenant_id=:tenant AND period_id=:period
+                    WHERE tenant_id=:tenant AND (period_id=:period OR period_id IS NULL)
                     ORDER BY created_at DESC,event_id DESC LIMIT :limit
                 """),
                 {"tenant": self.keys["tenant"], "period": period, "limit": limit},
@@ -396,7 +404,8 @@ class PostgresPublicationRepository(PublicationRules):
                 WHERE tenant_id=:tenant AND dataset=:dataset
             """), self.params(dataset)).mappings()
             restricted = any(
-                value["room_id"] == room_id
+                value.get("status", "active") == "active"
+                and value["room_id"] == room_id
                 and datetime.fromisoformat(value["starts_at"]) < end
                 and start < datetime.fromisoformat(value["ends_at"])
                 for value in (self.restriction_value(row) for row in restrictions)
@@ -439,7 +448,8 @@ class PostgresPublicationRepository(PublicationRules):
             for row in stored:
                 value = self.restriction_value(row)
                 if (
-                    datetime.fromisoformat(value["starts_at"]) < finish
+                    value.get("status", "active") == "active"
+                    and datetime.fromisoformat(value["starts_at"]) < finish
                     and begin < datetime.fromisoformat(value["ends_at"])
                 ):
                     restricted.add(value["room_id"])
@@ -592,7 +602,8 @@ class PostgresPublicationRepository(PublicationRules):
             begin, finish = (datetime.fromisoformat(value[key]) for key in ("starts_at", "ends_at"))
             for event in events:
                 if (
-                    event["room"]["id"] == value["room_id"]
+                    value.get("status", "active") == "active"
+                    and event["room"]["id"] == value["room_id"]
                     and begin < datetime.fromisoformat(event["ends_at"])
                     and datetime.fromisoformat(event["starts_at"]) < finish
                 ):
@@ -758,20 +769,104 @@ class PostgresPublicationRepository(PublicationRules):
             )
         return self.receipt(self.record(created), db)
 
-    def restriction_list(self, dataset):
+    def report_versions(self, rows, current, decoded_current, calendar):
+        """Versions that can still win a date inside the period, each decoded once.
+
+        Rooms are shared, so every period's publications count. A version whose dates are
+        fully covered by a later one of its period is never decoded.
+        """
+        covered, chosen = {}, []
+        for row in reversed(rows):
+            try:
+                dates = AcademicCalendar.model_validate(json.loads(row["payload"])["calendar"])
+            except (ValueError, KeyError, TypeError) as error:
+                raise DraftError(
+                    409, "publication_integrity", "Stored publication is corrupt or incompatible."
+                ) from error
+            spans = covered.setdefault(row["period_id"], [])
+            if (
+                dates.effective_end < calendar.effective_start
+                or calendar.effective_end < dates.effective_start
+                or any(
+                    first <= dates.effective_start and dates.effective_end <= last
+                    for first, last in spans
+                )
+            ):
+                continue
+            spans.append((dates.effective_start, dates.effective_end))
+            payload = decoded_current if row is current else self.decode(row)
+            chosen.append(
+                (
+                    row["period_id"],
+                    payload["calendar"],
+                    payload["draft"].generation_result.assignments,
+                )
+            )
+        return chosen[::-1]
+
+    def report(self, period):
+        """Utilization and workload for one owned period, from a single consistent read."""
+        with self.session() as db:
+            academic_period = self.academic.period_in(db, period)
+            snapshot = self.academic.snapshot_in(db, period)
+            rows = self.rows(db, self.keys["tenant"], "institutional")
+            own = [row for row in rows if row["period_id"] == period]
+            published = self.decode(own[-1]) if own else None
+            calendar = published["calendar"] if published else academic_period.calendar
+            events = []
+            if calendar:
+                events = booked_sessions(
+                    self.report_versions(rows, own[-1] if own else None, published, calendar),
+                    calendar.effective_start,
+                    calendar.effective_end,
+                )
+            stored = db.execute(
+                text("""
+                SELECT payload,checksum FROM classsync_scheduling.room_restrictions
+                WHERE tenant_id=:tenant AND dataset='institutional'
+            """),
+                self.params("institutional"),
+            ).mappings()
+            result = build_report(
+                [entry.record for entry in snapshot.records],
+                academic_period.calendar,
+                published,
+                events,
+                [self.restriction_value(row) for row in stored],
+            )
+            return {
+                "period": {
+                    "id": academic_period.id,
+                    "title": academic_period.title,
+                    "revision": academic_period.revision,
+                    "archived_at": academic_period.archived_at,
+                },
+                "published": {
+                    "version": own[-1]["id"],
+                    "revision": own[-1]["revision"],
+                    "created_at": own[-1]["created_at"],
+                }
+                if own
+                else None,
+                **result,
+            }
+
+    def restriction_list(self, dataset, *, include_cancelled=False):
         """Administrator read of every stored restriction, checksum-verified."""
+        self.scope(dataset)
         with self.session() as db:
             rows = db.execute(
                 text("""
                 SELECT payload,checksum FROM classsync_scheduling.room_restrictions
-                WHERE tenant_id=:tenant AND dataset=:dataset ORDER BY id
+                WHERE tenant_id=:tenant AND dataset=:dataset ORDER BY starts_at,id
             """),
                 self.params(dataset),
             ).mappings()
-            return [self.restriction_value(row) for row in rows]
+            values = [self.restriction_value(row) for row in rows]
+            return [v for v in values if include_cancelled or v["status"] == "active"]
 
-    def put_restriction(self, body):
-        body = self.typed(body, RoomRestriction)
+    @staticmethod
+    def restriction_interval(body):
         try:
             start, end = (datetime.fromisoformat(value) for value in (body.starts_at, body.ends_at))
             if (
@@ -787,22 +882,83 @@ class PostgresPublicationRepository(PublicationRules):
                 "restriction_interval",
                 "Use timezone-aware timestamps, in order, within 366 days.",
             ) from error
-        value = body.model_dump(exclude={"expected_revision"}) | {
+        return start, end
+
+    def restriction_room_in(self, rows, dataset, room_id):
+        """A published-scope room, or (institutional) any catalog-schedulable space."""
+        known = {
+            room.id for row in rows for room in self.decode(row)["draft"].input_snapshot.rooms
+        }
+        if dataset == "institutional":
+            known = (known | schedulable_space_ids()) - excluded_space_ids()
+        if room_id not in known:
+            raise DraftError(422, "restriction_room", "Choose a room in the published scope.")
+
+    def impacted_sessions(self, rows, room_id, start, end):
+        """Published dated sessions that overlap a proposed restriction of one room."""
+        day, stop = start.astimezone(ZONE).date(), end.astimezone(ZONE).date()
+        reviewed = 0
+        while day <= stop:
+            last = min(day + timedelta(days=62), stop)
+            for event in self.expanded(rows, day, last):
+                reviewed += 1
+                if reviewed > 100000:
+                    raise DraftError(
+                        413,
+                        "publication_scope_limit",
+                        "Limit a restriction review to 100,000 occurrences.",
+                    )
+                if (
+                    event["room"]["id"] == room_id
+                    and start < datetime.fromisoformat(event["ends_at"])
+                    and datetime.fromisoformat(event["starts_at"]) < end
+                ):
+                    yield event
+            day = last + timedelta(days=1)
+
+    def restriction_preflight(self, body, *, limit=50):
+        """List published sessions a proposed restriction would collide with; writes nothing."""
+        body = self.typed(body, RoomRestriction)
+        start, end = self.restriction_interval(body)
+        with self.session() as db:
+            rows = self.rows(db, self.keys["tenant"], body.dataset)
+            self.restriction_room_in(rows, body.dataset, body.room_id)
+            sessions, total = [], 0
+            for event in self.impacted_sessions(rows, body.room_id, start, end):
+                total += 1
+                if len(sessions) < limit:
+                    sessions.append(
+                        {
+                            key: event[key]
+                            for key in (
+                                "date", "starts_at", "ends_at", "period_id", "subject",
+                                "section", "teacher",
+                            )
+                        }
+                    )
+            return {"total": total, "sessions": sessions}
+
+    def put_restriction(self, body):
+        body = self.typed(body, RoomRestriction)
+        start, end = self.restriction_interval(body)
+        cancelling = body.status == "cancelled"
+        if cancelling and body.expected_revision == 0:
+            raise DraftError(
+                422, "restriction_status", "Only a saved restriction can be cancelled."
+            )
+        value = body.model_dump(exclude={"expected_revision", "status"}) | {
             "starts_at": start.astimezone(UTC).isoformat(),
             "ends_at": end.astimezone(UTC).isoformat(),
             "revision": body.expected_revision + 1,
         }
+        # Only cancelled rows carry a status, so active payloads keep their earlier shape.
+        if cancelling:
+            value["status"] = "cancelled"
         with self.session(dataset=body.dataset) as db:
-            rows = self.rows(db, self.keys["tenant"], body.dataset)
-            known = {
-                room.id for row in rows for room in self.decode(row)["draft"].input_snapshot.rooms
-            }
-            if body.room_id not in known:
-                raise DraftError(422, "restriction_room", "Choose a room in the published scope.")
             old = (
                 db.execute(
                     text("""
-                SELECT owner_uid,revision,payload,checksum
+                SELECT revision,payload,checksum
                 FROM classsync_scheduling.room_restrictions
                 WHERE tenant_id=:tenant AND dataset=:dataset AND id=:id
             """),
@@ -813,38 +969,21 @@ class PostgresPublicationRepository(PublicationRules):
             )
             if old is not None:
                 self.restriction_value(old)
-            if (
-                old
-                and old["owner_uid"] != self.principal.uid
-                or (old["revision"] if old else 0) != body.expected_revision
-            ):
+            if (old["revision"] if old else 0) != body.expected_revision:
                 raise DraftError(
                     409, "restriction_version_conflict", "Restriction changed; reload it."
                 )
-            # A new restriction must not silently invalidate an already published session.
-            day, stop = start.astimezone(ZONE).date(), end.astimezone(ZONE).date()
-            reviewed = 0
-            while day <= stop:
-                last = min(day + timedelta(days=62), stop)
-                for event in self.expanded(rows, day, last):
-                    reviewed += 1
-                    if reviewed > 100000:
-                        raise DraftError(
-                            413,
-                            "publication_scope_limit",
-                            "Limit a restriction review to 100,000 occurrences.",
-                        )
-                    if (
-                        event["room"]["id"] == body.room_id
-                        and start < datetime.fromisoformat(event["ends_at"])
-                        and datetime.fromisoformat(event["starts_at"]) < end
-                    ):
-                        raise DraftError(
-                            409,
-                            "restriction_publication_conflict",
-                            "Revise the overlapping published session first.",
-                        )
-                day = last + timedelta(days=1)
+            # Cancelling only releases the room, so it needs no publication review.
+            if not cancelling:
+                rows = self.rows(db, self.keys["tenant"], body.dataset)
+                self.restriction_room_in(rows, body.dataset, body.room_id)
+                # A restriction must not silently invalidate an already published session.
+                if next(self.impacted_sessions(rows, body.room_id, start, end), None):
+                    raise DraftError(
+                        409,
+                        "restriction_publication_conflict",
+                        "Revise the overlapping published session first.",
+                    )
             payload = encode(value)
             if old is None:
                 statement = text("""
@@ -853,12 +992,13 @@ class PostgresPublicationRepository(PublicationRules):
                 VALUES (:tenant,:dataset,:id,:owner,:room,:revision,:start,:end,:payload,:checksum)
                 """)
             else:
+                # Any tenant Administrator may revise; owner_uid records who did (0029).
                 statement = text("""
                     UPDATE classsync_scheduling.room_restrictions
-                    SET room_id=:room,revision=:revision,starts_at=:start,ends_at=:end,
-                        payload=:payload,checksum=:checksum
+                    SET owner_uid=:owner,room_id=:room,revision=:revision,starts_at=:start,
+                        ends_at=:end,payload=:payload,checksum=:checksum
                     WHERE tenant_id=:tenant AND dataset=:dataset AND id=:id
-                        AND owner_uid=:owner AND revision=:expected
+                        AND revision=:expected
                 """)
             changed = db.execute(
                 statement,
@@ -880,4 +1020,4 @@ class PostgresPublicationRepository(PublicationRules):
                     "restriction_version_conflict",
                     "Restriction changed; reload before editing.",
                 )
-            return value
+            return value | {"status": body.status}

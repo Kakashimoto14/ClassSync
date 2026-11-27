@@ -53,6 +53,11 @@ class PostgresDraftRepository(DraftSnapshot):
                     raise MembershipAuthorizationError(MembershipErrorCode.DENIED)
                 yield db
         except IntegrityError as error:
+            constraint = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
+            if constraint == "academic_period_archived":
+                raise DraftError(
+                    409, "period_archived", "This academic period is archived and read-only."
+                ) from error
             raise DraftError(
                 409,
                 "idempotency_conflict",

@@ -45,10 +45,14 @@ from .record_rules import (
     validate_record,
 )
 from .repository import AcademicRepository
+from .roster_import import continuing_problem
+from .roster_operations import RosterOperations
 from .student_roster import enrollment_for_section
 
+ARCHIVED_MESSAGE = "This academic period is archived and read-only. Clone it to make changes."
 
-class PostgresAcademicRepository:
+
+class PostgresAcademicRepository(RosterOperations):
     def __init__(self, engine, *, tenant_id, firebase_project_id, principal: VerifiedPrincipal):
         PostgresAcademicPeriods.validate_principal(principal)
         self.context = PostgresAcademicPeriods(
@@ -80,6 +84,8 @@ class PostgresAcademicRepository:
                 yield db
         except IntegrityError as error:
             constraint = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
+            if constraint == "academic_period_archived":
+                raise AcademicError(409, "period_archived", ARCHIVED_MESSAGE) from error
             if constraint == "students_pkey":
                 raise AcademicError(
                     409, "student_id_conflict", "That student ID already exists in this tenant."
@@ -146,7 +152,8 @@ class PostgresAcademicRepository:
             db.execute(
                 text(
                     """
-            SELECT id,title,revision,created_at,data_mode FROM classsync_academic.period_metadata
+            SELECT id,title,revision,created_at,data_mode,archived_at
+            FROM classsync_academic.period_metadata
             WHERE tenant_id=:tenant AND owner_uid=:owner AND id=:period
         """
                     + (" FOR UPDATE" if lock else "")
@@ -177,6 +184,7 @@ class PostgresAcademicRepository:
             value = None
             period = dict(row)
             data_mode = period.pop("data_mode")
+            archived = period.pop("archived_at", None)
             if calendar is not None:
                 if checksum(calendar["payload"]) != calendar["checksum"]:
                     raise ValueError("Checksum mismatch")
@@ -185,6 +193,7 @@ class PostgresAcademicRepository:
                 **{**period, "created_at": utc_timestamp(row["created_at"])},
                 source=("synthetic-review" if data_mode == "synthetic-review" else "institutional"),
                 calendar=value,
+                archived_at=utc_timestamp(archived) if archived else None,
             )
         except ValueError as error:
             raise AcademicError(
@@ -219,7 +228,7 @@ class PostgresAcademicRepository:
                 SELECT id FROM classsync_academic.period_metadata
                 WHERE tenant_id=:tenant AND owner_uid=:owner AND data_mode='institutional'
                   AND title NOT LIKE :archived
-                ORDER BY created_at DESC,id
+                ORDER BY archived_at IS NOT NULL,created_at DESC,id
             """),
                 {**self.keys, "archived": ARCHIVED_PERIOD_TITLE_PATTERN},
             ).all()
@@ -457,6 +466,9 @@ class PostgresAcademicRepository:
 
     def _roster_period_in(self, db, period_id, expected_period_revision):
         period = self.period_in(db, period_id, lock=True)
+        # Roster identity writes do not all touch period records, so check here as well.
+        if period.archived_at:
+            raise AcademicError(409, "period_archived", ARCHIVED_MESSAGE)
         if period.revision != expected_period_revision:
             raise AcademicError(
                 409, "roster_version_conflict", "Academic data changed; reload the roster."
@@ -541,40 +553,42 @@ class PostgresAcademicRepository:
         )
 
     def create_roster_student(self, period_id, body: RosterStudentWrite):
+        """Add a new student, or enroll a continuing one without touching their record."""
         with self.session(write=True) as db:
             _, constraints_row, constraints = self._roster_period_in(
                 db, period_id, body.expected_period_revision
             )
-            if db.scalar(
-                text(
-                    "SELECT 1 FROM classsync_identity.students "
-                    "WHERE tenant_id=:tenant AND id=:student"
-                ),
-                {**self.keys, "student": body.student_id},
-            ):
-                raise AcademicError(
-                    409, "student_id_conflict", "That student ID already exists in this tenant."
-                )
             if any(item.student_id == body.student_id for item in constraints.enrollments):
                 raise AcademicError(
                     409,
                     "student_roster_duplicate",
                     "That student is already in this period roster.",
                 )
-            enrollment = self._roster_enrollment(db, period_id, body.student_id, body)
-            db.execute(
-                text("""
-                SELECT classsync_identity.manage_student_roster(
-                    'create',:student,NULL,:name,:email,:status)
-            """),
-                {
-                    **self.keys,
-                    "student": body.student_id,
-                    "name": body.full_name,
-                    "email": body.email,
-                    "status": body.enrollment_status,
-                },
+            existing = self._university_students(db, period_id, [body.student_id]).get(
+                body.student_id
             )
+            enrollment = self._roster_enrollment(db, period_id, body.student_id, body)
+            if existing is None:
+                db.execute(
+                    text("""
+                    SELECT classsync_identity.manage_student_roster(
+                        'create',:student,NULL,:name,:email,:status)
+                """),
+                    {
+                        **self.keys,
+                        "student": body.student_id,
+                        "name": body.full_name,
+                        "email": body.email,
+                        "status": body.enrollment_status,
+                    },
+                )
+            else:
+                section = self.envelope(
+                    self.record_in(db, period_id, "sections", body.section_id)
+                ).record
+                problem = continuing_problem(existing, body.full_name, body.email, section)
+                if problem:
+                    raise AcademicError(409, "student_id_conflict", problem)
             next_record = constraints.model_copy(
                 update={"enrollments": [*constraints.enrollments, enrollment]}
             )
@@ -591,6 +605,12 @@ class PostgresAcademicRepository:
                 body.student_id,
                 constraints_row["revision"] + 1,
             )
+            return {
+                "continuing": existing is not None,
+                "enrollment_status": existing["enrollment_status"]
+                if existing
+                else body.enrollment_status,
+            }
 
     def update_roster_student(self, period_id, student_id, body: RosterStudentWrite):
         with self.session(write=True) as db:

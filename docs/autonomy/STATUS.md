@@ -1,5 +1,88 @@
 # ClassSync — autonomy status ledger
 
+## 28 November 2026 — Phase C / Slice C2 addendum: continuing students
+
+Same branch and HEAD `bde6403`, uncommitted. Owner instruction in chat: add enrollment of
+existing tenant students into a new or cloned period; no commit, push or live Neon. No migration
+or grant change beyond `0029`; no Neon contact.
+
+**Behaviour.** Add Student and CSV import enroll an existing student who is not in the target
+period without writing their `students` or `people` row, so prior periods are unchanged. Name
+(ignoring case and spacing) and email must match; duplicates within the target period are still
+refused. The stored enrollment status is kept: preview shows it and notes an ignored file value,
+and Add Student says so afterwards. A curriculum cohort different from the student's binding is
+refused. Preview labels every row `Create new` or `Enroll existing`.
+
+**Narrower than "any tenant student".** The record must already be enrolled in another period
+owned by the acting Administrator (archived periods count). Roster removal deletes the shared
+record unless it can see another period using it, and row-level security hides other
+Administrators' periods, so enrolling an unseen record could later delete it. Records in none of
+your periods (including self-verified accounts never rostered) are still refused. Widening this
+needs a new migration.
+
+**Evidence.** Real-PostgreSQL tests in `test_roster_postgres_runtime.py` (clone, single add, CSV
+import, prior enrollments and identity rows unchanged, one new identity only, removal keeps the
+record, outside record refused). Affected suites: roster, lifecycle and proxy 51 passed; all of
+`services/academic` plus proxy, request approval and seed unit tests 132 passed. The full pytest
+suite was not rerun after this addendum (last full run: 1426 passed). `ruff`, contract
+`--check`, web lint and typecheck, `npm run test:web` (945 passed / 80 files), build, bundle
+(99,532 of 101,376 bytes) and `git diff --check` passed; `.pytest_tmp` removed. No browser check.
+
+**Rules to know.** Promoting students to a higher year in a new academic year requires the target
+section to carry their entry cohort and curriculum version; a clone copies the old values, so
+edit section cohorts first.
+
+## 28 November 2026 — Phase C / Slice C2: Administrator operations, migration 0029, announcements fix
+
+Branch `main`, base/current HEAD `bde6403`, uncommitted (no commit or push). Approval:
+`APPROVALS.md` 27 November 2026 Phase C entry. No Neon, Firebase, Render, Resend or Gemini
+contact; seed `--apply` not run. C3 not started.
+
+**Delivered.** Migration `0029_restrictions_and_period_lifecycle`; Administrator report and
+utilization pages with formula-safe CSV; buildings pages with dated restriction create, edit,
+cancel and published-session preflight; roster multi-select status change and CSV import (preview
+hash plus revision, at most 2,000 rows / 1 MB, atomic); period clone and one-way archive; the
+announcements `42501` fix; Gateway routes; lazy UI with no new npm package.
+
+**Pre-existing defect also fixed.** `GET /timetables/audit/{period}` selected an `actor_uid`
+column no migration creates, so it could not work on PostgreSQL. It now reads `owner_uid`.
+
+**Choices beyond the instruction (please confirm).**
+- `period_metadata.cloned_from` added so the clone audit event comes from a trigger.
+- Archive also blocks new published versions. Already published timetables stay visible to all
+  roles and keep their rooms booked until their end date.
+- Restriction events have no period: `administrator_activity.period_id` is nullable for that event
+  only, entity type `restriction` added, and each period's activity list shows them.
+- A restriction's `owner_uid` is now the last acting Administrator; `restriction_audit` revision 1
+  keeps the creator.
+- Institutional restrictions accept any of the 41 schedulable rooms, also before a publication
+  covers them. The 12 excluded spaces are refused.
+- Utilization is dated over the period and counts every publication in that range (rooms are
+  shared). Faculty, program and section figures use only the selected period's publication.
+- Seeded campus wall ceiling widened from 10 s to 20 s; search budget and 400 MB gate unchanged.
+
+**Evidence (Windows, disposable PostgreSQL 18).** `ruff check scripts services packages` and
+contract `--check`: passed. Full pytest with repo-local `TEMP`/`--basetemp`: 1426 passed, no
+skips; `.pytest_tmp` removed. Web lint and typecheck passed; `npm run test:web` 943 passed / 80
+files; `npm run build`; main entry 99,532 bytes of 101,376 (was 99,502); `git diff --check`
+passed with line-ending notices. Measured: 2,000-row import commit 4.79 s; campus generation
+5.72 s. An earlier pytest run had one failure (a stub without `status`; fixed in code), and an
+earlier web run had one `PresentationRoutes` failure that did not recur (full rerun and three
+file reruns passed; treated as load flakiness, not diagnosed).
+
+**Open.**
+- Continuing-student enrollment was open at the first C2 report; see the addendum above.
+- A clone keeps the source calendar dates and verification flags. Same-dated periods are told
+  apart by title only in the Academic Setup selector.
+- No rendered-browser or screen-reader check (360/1440 px, 200% zoom, dialogs, file picker).
+- Linux CI, PostgreSQL 16, peak RSS and Neon latency/grants not verified. Self-review only.
+- Re-running the seed against an archived defense period will be refused.
+
+**Deploy order and rollback.** Apply `0029` first (`docs/defense/RUNBOOK.md` section 0a), then
+deploy backend and web together. Services built before C2 reject a cancelled restriction's stored
+`status`, so do not roll the backend back after a cancel. Downgrade is refused once a cancel,
+archive, clone, import or restriction event exists.
+
 ## 28 November 2026 — Phase C / Slice C1: session resilience and commuter-friendly rules
 
 Branch `main`, base/current HEAD `3edea55`, uncommitted (no commit or push). Approval:

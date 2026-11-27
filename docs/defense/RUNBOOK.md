@@ -10,10 +10,9 @@ Administrator account is never modified by these steps.
 
 ## 0. Prerequisites
 
-- The migration head is current (`0027_roster_audit_events` at the time of writing). Both scripts
-  run `migrate(head)` and fail closed on drift. The deployed services never migrate. Without
-  `0027`, every roster add, edit, **Mark active** and delete fails; the seed `--apply` in step 1
-  applies it. Use the database owner (migration) role.
+- The migration head is current (`0029_restrictions_and_period_lifecycle`). Apply it with section
+  0a **before** deploying services built for Slice C2. The deployed services never migrate. Use the
+  migration owner role (`classsync_migrator`), never the runtime role.
 - The Administrator who will approve requests is the same Administrator who publishes the
   timetable. Publication heads are owner-scoped, and a different Admin's approval returns a clear
   409 `publication_owner_conflict`.
@@ -22,6 +21,54 @@ Administrator account is never modified by these steps.
 ```powershell
 $env:PYTHONPATH = "packages/api-contracts;packages/persistence;."
 ```
+
+## 0a. Apply migration 0029 only (no seed, no data writes)
+
+The URL must name the migration owner and include the port (`:5432`). Take a Neon branch or restore
+point first. The command prints the connected role, the new head, and whether `classsync_app` holds
+the privileges Slice C2 uses; every value after the head should be `True`.
+
+```powershell
+$env:PYTHONPATH = "packages/api-contracts;packages/persistence;."
+$env:MIGRATION_DATABASE_URL = "postgresql://classsync_migrator:<password>@<neon-host>:5432/<database>"
+```
+
+```powershell
+@'
+import os, certifi
+from pydantic import SecretStr
+from sqlalchemy import text
+from sqlalchemy.engine import make_url
+from classync_persistence.configuration import postgres_configuration
+from classync_persistence.database import postgres_engine
+from classync_persistence.schema import migrate
+
+target = make_url(os.environ["MIGRATION_DATABASE_URL"]).set(drivername="postgresql+psycopg", query={})
+url, options = postgres_configuration(
+    SecretStr(target.render_as_string(hide_password=False)), transport="verify-full",
+    environment="production", firebase_project_id="classsync-8af14", tenant_id="cdm",
+    application_name="classsync-migrate", tls_root_cert=certifi.where())
+engine = postgres_engine(url, connect_args=options, pool_size=1, max_overflow=0)
+with engine.begin() as db:
+    migrate(db, target="0029_restrictions_and_period_lifecycle")
+with engine.connect() as db:
+    print(db.execute(text("SELECT current_user, version_num FROM public.alembic_version")).one())
+    print(db.execute(text('''SELECT
+        has_table_privilege('classsync_app','classsync_scheduling.room_restrictions','INSERT'),
+        has_table_privilege('classsync_app','classsync_scheduling.room_restrictions','UPDATE'),
+        has_table_privilege('classsync_app','classsync_academic.period_metadata','UPDATE'),
+        has_table_privilege('classsync_app','classsync_academic.announcements','UPDATE'),
+        has_function_privilege('classsync_app',
+            'classsync_scheduling.audit_roster_import(text,bigint)','EXECUTE'),
+        has_function_privilege('classsync_app',
+            'classsync_scheduling.room_restriction_windows(text)','EXECUTE')''')).one())
+engine.dispose()
+'@ | .venv\Scripts\python.exe -
+```
+
+If a table privilege prints `False`, stop and review the runtime grants before deploying. Roll back
+by restoring the Neon restore point; the Alembic downgrade is refused once any restriction cancel,
+period archive or clone, or roster import has been recorded.
 
 ## 1. Seed (or re-seed) the defense dataset
 

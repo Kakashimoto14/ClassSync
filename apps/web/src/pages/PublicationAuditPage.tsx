@@ -22,6 +22,14 @@ const eventLabel: Record<string, string> = {
   'academic.calendar.saved': 'Academic calendar saved',
   'scheduling.draft.saved': 'Schedule draft saved',
   'scheduling.publication.published': 'Timetable published',
+  'academic.record.deleted': 'Academic record deleted',
+  'academic.period.archived': 'Academic period archived',
+  'academic.period.cloned': 'Academic period cloned',
+  'academic.student.created': 'Student added to roster',
+  'academic.student.updated': 'Student roster record updated',
+  'academic.student.deleted': 'Student removed from roster',
+  'academic.roster.imported': 'Student roster imported',
+  'scheduling.restriction.saved': 'Room restriction saved',
 };
 
 export function PublicationAuditPage() {

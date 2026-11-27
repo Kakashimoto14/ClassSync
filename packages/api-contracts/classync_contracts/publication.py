@@ -33,4 +33,5 @@ class RoomRestriction(Contract):
     ends_at: str
     kind: Literal["operational", "reservation"]
     reason: str = Field(min_length=1, max_length=200)
+    status: Literal["active", "cancelled"] = "active"
     expected_revision: int = Field(ge=0)

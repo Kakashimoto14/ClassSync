@@ -6,6 +6,8 @@ import { listAcademicPeriods, loadAcademicRoster, createAcademicRosterStudent,
   updateAcademicRosterStudent, deleteAcademicRosterStudent } from '../lib/academic-api';
 
 vi.mock('../config/runtime-config', () => ({ appMode: 'institutional' }));
+const bulkRosterStatus = vi.hoisted(() => vi.fn());
+vi.mock('../lib/admin-operations-api', () => ({ bulkRosterStatus }));
 vi.mock('../lib/academic-api', () => ({
   listAcademicPeriods: vi.fn(),
   loadAcademicRoster: vi.fn(),
@@ -114,5 +116,39 @@ describe('connected academic student roster', () => {
     expect(button).toBeDisabled();
     expect(button).toHaveAccessibleDescription('Add the student’s name and institutional email first.');
     expect(updateAcademicRosterStudent).not.toHaveBeenCalled();
+  });
+
+  it('says when Add Student enrolled a continuing student and kept their status', async () => {
+    vi.mocked(createAcademicRosterStudent).mockResolvedValue({
+      created: true, continuing: true, enrollment_status: 'active',
+    });
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '+ Add Student' }));
+    const form = screen.getByRole('form', { name: 'Add student' });
+    const inputs = form.querySelectorAll('input');
+    fireEvent.change(inputs[0], { target: { value: 'Ben Cruz' } });
+    fireEvent.change(inputs[1], { target: { value: '25-00103' } });
+    fireEvent.change(inputs[2], { target: { value: 'ben.cruz@student.pnm.edu.ph' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Add Student' }));
+    expect(await screen.findByText(/already had a university record.*Status stays active/))
+      .toBeInTheDocument();
+  });
+
+  it('applies a status to the selected students with the current revision', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    bulkRosterStatus.mockResolvedValue({ updated: 1, skipped: 0, period_revision: 8 });
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Bulk roster actions' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select all students on this page' }));
+    const bar = screen.getByRole('group', { name: 'Bulk roster actions' });
+    expect(within(bar).getByText('1 selected')).toBeInTheDocument();
+    fireEvent.change(within(bar).getByLabelText('New status'), { target: { value: 'inactive' } });
+    fireEvent.click(within(bar).getByRole('button', { name: 'Apply to selected' }));
+    await waitFor(() => expect(bulkRosterStatus).toHaveBeenCalledWith('period', {
+      expected_period_revision: 7, student_ids: ['26-00101'], enrollment_status: 'inactive',
+    }));
+    expect(await screen.findByText('1 students updated · 0 already inactive.')).toBeInTheDocument();
   });
 });
