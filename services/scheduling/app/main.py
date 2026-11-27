@@ -571,7 +571,9 @@ def generate_academic(period_id, body, request, sandbox):
     if not sandbox:
         # Dated restrictions would block publication of any weekly placement they touch.
         inputs = with_room_restrictions(
-            inputs, snapshot.period.calendar, term_restrictions(request)
+            inputs,
+            restrictions=term_restrictions(request),
+            calendar=snapshot.period.calendar,
         )
     return execute(inputs, scope, owner, storage=storage)
 
