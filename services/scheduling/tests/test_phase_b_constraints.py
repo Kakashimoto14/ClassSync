@@ -1,8 +1,8 @@
 """Phase B hard and soft rules: continuous teaching, restrictions, audits and soft terms."""
 
 from datetime import date
-from types import SimpleNamespace
 
+from classync_contracts.calendar import AcademicCalendar
 from classync_contracts.scheduling import (
     Assignment,
     Diagnostic,
@@ -143,9 +143,9 @@ def test_transition_buffer_is_counted_in_capacity():
     assert "room_pool_capacity" in codes and "section_time_capacity" in codes
 
 
-CALENDAR = SimpleNamespace(
-    effective_start=date(2026, 8, 3), effective_end=date(2026, 12, 18),
-    instructional_days=[0, 1, 2, 3, 4, 5],
+CALENDAR = AcademicCalendar(
+    academic_year="2026-2027", semester="first", effective_start=date(2026, 8, 3),
+    effective_end=date(2026, 12, 18), timezone="Asia/Manila", instructional_days=[0, 1, 2, 3, 4, 5],
 )
 
 
@@ -178,9 +178,9 @@ def test_generation_never_uses_a_restricted_weekly_time():
     room = inputs.rooms[0].id
     restricted = with_room_restrictions(
         inputs,
-        [{"room_id": room, "starts_at": "2026-09-07T08:00:00+08:00",
-          "ends_at": "2026-09-07T12:00:00+08:00"}],
-        CALENDAR,
+        restrictions=[{"room_id": room, "starts_at": "2026-09-07T08:00:00+08:00",
+                       "ends_at": "2026-09-07T12:00:00+08:00"}],
+        calendar=CALENDAR,
     )
     assert [(w.day, w.start, w.end) for w in restricted.rooms[0].blocked] == [(0, 480, 720)]
     assert placed(restricted)[0].start >= 780

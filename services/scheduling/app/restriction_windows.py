@@ -6,15 +6,20 @@ term, so one overlapping date is enough to make the whole placement unpublishabl
 restriction therefore blocks its room at that weekday and time for the full week pattern.
 """
 
+from collections.abc import Sequence
 from datetime import datetime, time, timedelta
 
-from classync_contracts.scheduling import Window
+from classync_contracts.calendar import AcademicCalendar
+from classync_contracts.scheduling import GenerationInput, Window
 
 from .occurrences import ZONE
 
 
-def weekly_blocks(restrictions, calendar):
+def weekly_blocks(
+    restrictions: Sequence[dict], calendar: AcademicCalendar
+) -> dict[str, list[Window]]:
     """Return {room_id: [Window]} for restrictions touching the calendar's instructional dates."""
+    _require_types(restrictions, calendar)
     blocks = {}
     first, last = calendar.effective_start, calendar.effective_end
     for restriction in restrictions:
@@ -49,9 +54,29 @@ def merge(intervals):
     return [tuple(item) for item in merged]
 
 
-def with_room_restrictions(inputs, restrictions, calendar):
-    """Copy generation input with restricted weekly room times added to `blocked`."""
-    if calendar is None or not restrictions:
+def _require_types(restrictions, calendar):
+    # Both arguments are keyword-only in `with_room_restrictions`; this also fails loudly if a
+    # caller passes them swapped (the calendar as the restriction list, or a list as calendar).
+    if not isinstance(calendar, AcademicCalendar):
+        raise TypeError(f"calendar must be an AcademicCalendar, not {type(calendar).__name__}")
+    if isinstance(restrictions, (str, bytes, dict)) or not isinstance(restrictions, Sequence):
+        raise TypeError(f"restrictions must be a list, not {type(restrictions).__name__}")
+
+
+def with_room_restrictions(
+    inputs: GenerationInput,
+    *,
+    restrictions: Sequence[dict],
+    calendar: AcademicCalendar | None,
+) -> GenerationInput:
+    """Copy generation input with restricted weekly room times added to `blocked`.
+
+    A period without a calendar cannot have dated occurrences, so it is returned unchanged.
+    """
+    if calendar is None:
+        return inputs
+    _require_types(restrictions, calendar)
+    if not restrictions:
         return inputs
     blocks = weekly_blocks(restrictions, calendar)
     if not blocks:
