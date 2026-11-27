@@ -14,9 +14,9 @@ export interface UniversityMembership {
   available_roles?: UserRole[];
 }
 export type UniversitySession =
+  | { status: 'checking'; waking?: boolean }
   | {
       status:
-        | 'checking'
         | 'signed-out'
         | 'verification-required'
         | 'expired'
@@ -32,6 +32,8 @@ export class UniversitySessionError extends Error {
   constructor(
     public readonly issue: SessionIssue,
     public readonly availableRoles?: UserRole[],
+    /** A cold start, gateway restart or network blip that may succeed shortly. */
+    public readonly retryable = false,
   ) {
     super(issue);
   }
@@ -46,34 +48,66 @@ export interface UniversitySessionDriver {
   signOut: () => Promise<void>;
 }
 
-/** In-memory authority only. Every check discards prior membership first. */
+/**
+ * In-memory authority only. A first check, a user change or a role change discards prior
+ * membership before asking. Re-checking the same granted membership is silent: only a
+ * confirmed server answer revokes it, and every API call is still authorized server-side.
+ */
 export function createUniversitySession(
   driver: UniversitySessionDriver,
   changed: (state: UniversitySession) => void,
   timeoutMs = 10_000,
+  { retryDelaysMs = [1500, 4000], cooldownMs = 60_000 } = {},
 ) {
   let user: UniversityIdentity | null = null;
   let selected: UserRole | undefined;
+  let granted: UniversityMembership | undefined;
+  let verifiedAt = 0;
   let generation = 0;
   let disposed = false;
   let logoutBlocked = false;
   let offline = false;
+  let busy = false;
   let abort: AbortController | undefined;
   let requestUid: string | undefined;
   let requestRole: UserRole | undefined;
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const emit = (state: UniversitySession) => {
+    granted = state.status === 'authorized' ? state.membership : undefined;
     if (!disposed) changed(state);
   };
   const cancel = () => {
     generation++;
     abort?.abort();
     abort = undefined;
+    busy = false;
     requestUid = undefined;
     requestRole = undefined;
     clearTimeout(timeout);
   };
-  const refresh = async (role = selected) => {
+  /** Bounds token and lookup work even when the underlying promise never settles. */
+  const lookup = (identity: UniversityIdentity, role: UserRole | undefined) => {
+    const request = new AbortController();
+    abort = request;
+    return new Promise<UniversityMembership>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        request.abort();
+        reject(new UniversitySessionError('unavailable', undefined, true));
+      }, timeoutMs);
+      request.signal.addEventListener('abort', () => clearTimeout(timer), { once: true });
+      driver.lookup(identity, role, request.signal).then(
+        (value) => {
+          clearTimeout(timer);
+          resolve(value);
+        },
+        (error: unknown) => {
+          clearTimeout(timer);
+          reject(error);
+        },
+      );
+    });
+  };
+  const refresh = async (role = selected, force = false) => {
     if (disposed) return;
     if (logoutBlocked) {
       emit({ status: 'unavailable' });
@@ -83,58 +117,70 @@ export function createUniversitySession(
       emit({ status: 'signed-out' });
       return;
     }
+    const quiet = granted?.uid === user.uid && (role === undefined || role === granted.role);
     if (offline) {
-      emit({ status: 'offline' });
+      if (!quiet) emit({ status: 'offline' });
       return;
     }
-    if (
-      abort &&
-      !abort.signal.aborted &&
-      requestUid === user.uid &&
-      requestRole === role
-    ) return;
+    if (quiet && !force && Date.now() - verifiedAt < cooldownMs) return;
+    if (busy && requestUid === user.uid && requestRole === role) return;
     cancel();
     selected = role;
     const current = generation;
+    const stale = () => current !== generation || disposed;
     const identity = user;
-    const request = new AbortController();
-    abort = request;
+    busy = true;
     requestUid = identity.uid;
     requestRole = role;
-    emit({ status: 'checking' });
-    timeout = setTimeout(() => {
-      if (current !== generation || disposed) return;
-      generation++;
-      request.abort();
-      emit({ status: 'unavailable' });
-    }, timeoutMs);
-    try {
-      const result = await driver.lookup(identity, role, request.signal);
-      const membership = parseUniversityMembership({ data: result }, identity.uid, role);
-      if (current === generation && !disposed) emit({ status: 'authorized', membership });
-    } catch (error) {
-      if (current === generation && !disposed) {
-        const status = error instanceof UniversitySessionError ? error.issue : 'unavailable';
-        if (status === 'denied') selected = undefined;
-        if (status === 'role-required') {
-          const availableRoles = (error as UniversitySessionError).availableRoles;
-          emit({ status, ...(availableRoles ? { availableRoles } : {}) });
-        } else emit({ status });
+    if (!quiet) emit({ status: 'checking' });
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const result = await lookup(identity, role);
+        if (stale()) return;
+        const membership = parseUniversityMembership({ data: result }, identity.uid, role);
+        verifiedAt = Date.now();
+        if (!quiet || JSON.stringify(membership) !== JSON.stringify(granted))
+          emit({ status: 'authorized', membership });
+      } catch (error) {
+        if (stale()) return;
+        const known = error instanceof UniversitySessionError ? error : undefined;
+        if (known?.retryable && attempt < retryDelaysMs.length) {
+          if (!quiet) emit({ status: 'checking', waking: true });
+          await new Promise((resolve) => {
+            timeout = setTimeout(resolve, retryDelaysMs[attempt]);
+          });
+          if (stale()) return;
+          continue;
+        }
+        const status = known?.issue ?? 'unavailable';
+        // A transient failure is not a denial: keep the verified workspace on screen.
+        if (!quiet || (status !== 'unavailable' && status !== 'offline')) {
+          if (status === 'denied') selected = undefined;
+          if (status === 'role-required') {
+            const availableRoles = known?.availableRoles;
+            emit({ status, ...(availableRoles ? { availableRoles } : {}) });
+          } else emit({ status });
+        }
       }
-    } finally {
-      if (current === generation) {
-        clearTimeout(timeout);
-        abort = undefined;
-        requestUid = undefined;
-        requestRole = undefined;
-      }
+      break;
     }
+    busy = false;
+    abort = undefined;
+    requestUid = undefined;
+    requestRole = undefined;
   };
   const unsubscribe = driver.observe(
     (next) => {
       if (disposed || logoutBlocked) return;
+      // Hourly token refreshes re-announce the same user and must not disturb the workspace.
+      if (next && granted && next.uid === user?.uid) {
+        user = next;
+        void refresh();
+        return;
+      }
       if (next?.uid !== user?.uid) selected = undefined;
       cancel();
+      granted = undefined;
       user = next;
       if (!next) emit({ status: 'signed-out' });
       else void refresh();
@@ -148,16 +194,17 @@ export function createUniversitySession(
   );
   return {
     refresh: (role?: UserRole) => {
-      void refresh(role);
+      void refresh(role, true);
     },
     offline: () => {
       offline = true;
       cancel();
-      emit({ status: 'offline' });
+      if (!granted) emit({ status: 'offline' });
     },
-    online: (role?: UserRole) => {
+    online: (role?: UserRole, force = false) => {
+      const resumed = offline;
       offline = false;
-      void refresh(role);
+      void refresh(role, force || resumed);
     },
     signOut: async () => {
       if (disposed) return;
@@ -189,6 +236,7 @@ export function createUniversitySession(
       disposed = true;
       cancel();
       user = null;
+      granted = undefined;
       unsubscribe();
     },
   };

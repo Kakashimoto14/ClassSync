@@ -15,6 +15,7 @@ from ortools.sat.python import cp_model
 
 from .constraint_model import build_model
 from .objectives import add_objectives
+from .polish import polish_timetable
 from .readiness import infeasibility_diagnostics, readiness
 from .validation import same_placement, validate_timetable
 
@@ -50,6 +51,30 @@ def configure(solver, inputs, deterministic_seconds, started):
     solver.parameters.linearization_level = 0
     solver.parameters.cp_model_probing_level = 0
     solver.parameters.max_presolve_iterations = 1
+
+
+def restrict_patterns(inputs: GenerationInput):
+    """Above the soft-phase limit, offer CP-SAT each unlocked offering's first pattern only.
+
+    The full flexible campus model does not solve within the budget; polish may still switch.
+    """
+    if (
+        sum(len(p.durations) for o in inputs.offerings for p in o.patterns)
+        <= SOFT_PHASE_SESSION_LIMIT
+        or all(len(o.patterns) == 1 for o in inputs.offerings)
+    ):
+        return inputs
+    locked = {a.offering_id for a in inputs.locked_assignments}
+    return inputs.model_copy(
+        update={
+            "offerings": [
+                o
+                if o.id in locked or len(o.patterns) == 1
+                else o.model_copy(update={"patterns": o.patterns[:1]})
+                for o in inputs.offerings
+            ]
+        }
+    )
 
 
 def generate_week(inputs: GenerationInput):
@@ -92,8 +117,12 @@ def generate_week(inputs: GenerationInput):
         result.solver_status = "infeasible"
         result.diagnostics = locked_validation.conflicts
         return finish()
+    budget = inputs.options.time_limit_seconds
+    # Campus-scale runs keep CP-SAT small: one pattern per unlocked offering. The polish
+    # pass may switch patterns afterwards, and an unsolved restricted model is retried whole.
+    restricted = restrict_patterns(inputs)
     try:
-        model, sessions = build_model(inputs)
+        model, sessions = build_model(restricted)
     except ValueError as error:
         result.diagnostics = [Diagnostic(code="run_limit", message=str(error))]
         return finish()
@@ -102,12 +131,17 @@ def generate_week(inputs: GenerationInput):
         result.solver_status = "invalid_model"
         result.diagnostics = [Diagnostic(code="invalid_model", message=invalid)]
         return finish()
-    budget = inputs.options.time_limit_seconds
     solver = cp_model.CpSolver()
     configure(solver, inputs, budget * FEASIBILITY_SHARE, started)
     # Find a complete feasible incumbent before optimizing expensive soft proxies.
     # Both phases use CP-SAT. A satisfaction proof is never labelled objective-optimal.
     status = solver.solve(model)
+    if restricted is not inputs and status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+        # Infeasibility of the restricted model proves nothing about the permitted patterns.
+        model, sessions = build_model(inputs)
+        solver = cp_model.CpSolver()
+        configure(solver, inputs, budget * FEASIBILITY_SHARE, started)
+        status = solver.solve(model)
     optimized = False
     soft_skipped = len(sessions) > SOFT_PHASE_SESSION_LIMIT
     if status in (cp_model.OPTIMAL, cp_model.FEASIBLE) and soft_skipped:
@@ -179,7 +213,38 @@ def generate_week(inputs: GenerationInput):
         used.add(a.id)
         result.assignments.append(a)
     result.assignments.sort(key=lambda a: (a.day, a.start, a.offering_id, a.id))
-    result.validation = validate_timetable(inputs, result.assignments)
+    polish_notes = []
+    # Without configured rules a gap-closing search would scatter classes into one-class
+    # days, so periods with no daily-shape rules keep the solver timetable unchanged.
+    if inputs.daily_shape is not None:
+        original = result.assignments
+        polished, report = polish_timetable(inputs, original)
+        checked = validate_timetable(inputs, polished)
+        if checked.valid:
+            result.assignments, result.validation = polished, checked
+            result.metadata.polish = report
+            if report.moves and optimized:
+                # The reported objective described the unpolished timetable.
+                optimized, result.solver_status = False, "feasible"
+                result.metadata.objective = result.metadata.best_bound = None
+            if report.truncated:
+                polish_notes.append(
+                    Diagnostic(
+                        code="polish_truncated",
+                        message="Commuter polish stopped at its search limit; the timetable "
+                        "is valid but some preferences may still be improvable.",
+                    )
+                )
+        else:
+            polish_notes.append(
+                Diagnostic(
+                    code="polish_rejected",
+                    message="Commuter polish was discarded because independent validation "
+                    "rejected it; the solver timetable is shown unchanged.",
+                )
+            )
+    if result.validation is None:
+        result.validation = validate_timetable(inputs, result.assignments)
     result.coverage = result.validation.coverage
     result.hard_conflict_count = result.validation.hard_conflict_count
     if not result.validation.valid:
@@ -201,7 +266,7 @@ def generate_week(inputs: GenerationInput):
                 )
             ),
         )
-    ]
+    ] + polish_notes
     if not optimized:
         result.diagnostics.append(
             Diagnostic(
@@ -216,6 +281,11 @@ def generate_week(inputs: GenerationInput):
                         "its limit; "
                     )
                     + "No optimum is claimed."
+                    + (
+                        " Set daily shape rules to apply the commuter-day polish."
+                        if soft_skipped and inputs.daily_shape is None
+                        else ""
+                    )
                 ),
             )
         )

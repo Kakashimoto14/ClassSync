@@ -19,6 +19,7 @@ import {
   readWorkspace,
   rememberWorkspace,
 } from '../lib/workspace-context';
+import { PolishSummary } from './PolishSummary';
 import { SaveDraftPanel } from './SchedulingDraftPages';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { WeeklySchedulingPage } from './WeeklySchedulingPage';
@@ -468,6 +469,9 @@ function AcademicGenerationPage() {
               <li key={i}>{d.message}</li>
             ))}
           </ul>
+          {success && checked?.inputs && result.metadata.polish && (
+            <PolishSummary report={result.metadata.polish} input={checked.inputs} />
+          )}
           {success && checked?.inputs && (
             <>
               <SchedulingTimetable key={result.run_id} input={checked.inputs} result={result} />

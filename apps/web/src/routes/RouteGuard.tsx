@@ -70,6 +70,10 @@ const ConnectedUpdatesPage = lazy(() =>
   import('../pages/ConnectedUpdatesPage').then((module) => ({ default: module.ConnectedUpdatesPage })),
 );
 
+const SchedulingRulesPage = lazy(() =>
+  import('../pages/SchedulingRulesPage').then((module) => ({ default: module.SchedulingRulesPage })),
+);
+
 function RouteLoading() {
   return <ClassSyncPageLoader label="Loading your workspace…" />;
 }
@@ -81,7 +85,12 @@ function LazyPage({ children }: { children: ReactNode }) {
 function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition }) {
   const { state } = useUniversitySession();
   const location = useLocation();
-  if (state.status === 'checking') return <ClassSyncPageLoader label="Checking university access…" />;
+  if (state.status === 'checking')
+    return (
+      <ClassSyncPageLoader
+        label={state.waking ? 'Waking university services…' : 'Checking university access…'}
+      />
+    );
   if (state.status === 'signed-out')
     return (
       <Navigate
@@ -159,6 +168,8 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
           ) : definition.role === 'administrator' &&
             ['dashboard', 'academic-manage'].includes(definition.kind) ? (
             <AcademicManagementPage initialKind={definition.academicKind} />
+          ) : definition.role === 'administrator' && definition.kind === 'scheduling-rules' ? (
+            <SchedulingRulesPage />
           ) : definition.role === 'administrator' && definition.id === 'administrator.students' ? (
             <AcademicStudentRosterPage />
           ) : definition.role === 'administrator' && definition.kind === 'schedule-create' ? (

@@ -85,6 +85,7 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   const [notice, setNotice] = useState('');
   const [connected, setConnected] = useState(true);
   const [refresh, setRefresh] = useState(0);
+  const listed = useRef('');
   const previous = useRef<{
     scope: string;
     sequence: number;
@@ -129,8 +130,10 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       (['period', 'mode', 'draft', 'identity'] as const).some(
         (key) => patch[key] !== undefined && patch[key] !== context[key],
       )
-    )
+    ) {
       setData(null);
+      previous.current = null;
+    }
     const next = new URLSearchParams(params);
     if (patch.date !== undefined) next.set('date', patch.date);
     if (patch.period !== undefined) next.set('period', patch.period);
@@ -166,8 +169,13 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
   }, [context, role]);
   useEffect(() => {
     let ignore = false;
-    setLoading(true);
-    setError('');
+    // Re-reading an already listed institutional workspace is a silent background refresh.
+    const key = [mode, prefix, draft, role].join(':');
+    const quiet = appMode === 'institutional' && mode === 'published' && listed.current === key;
+    if (!quiet) {
+      setLoading(true);
+      setError('');
+    }
     const load =
       mode === 'presentation' && presentationEnabled
         ? presentationData().then((p) => {
@@ -210,15 +218,20 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
               }
             });
     load
+      .then(() => {
+        if (!ignore) listed.current = key;
+      })
       .catch((e) => {
-        if (!ignore) {
+        if (!ignore && !(quiet && ![401, 403].includes(e.status))) {
+          listed.current = '';
+          previous.current = null;
           setError(e.message);
           setErrorStatus(e.status ?? 0);
           setData(null);
         }
       })
       .finally(() => {
-        if (!ignore) setLoading(false);
+        if (!ignore && !quiet) setLoading(false);
       });
     return () => {
       ignore = true;
@@ -261,8 +274,12 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
       previous.current = null;
     }
     const controller = new AbortController();
-    setLoading(true);
-    setError('');
+    const quiet =
+      appMode === 'institutional' && mode === 'published' && previous.current?.scope === scope;
+    if (!quiet) {
+      setLoading(true);
+      setError('');
+    }
     const load =
       mode === 'presentation' && presentationEnabled
         ? presentationCalendar(role, identity, start, end)
@@ -297,10 +314,14 @@ export function useScheduleWorkspace(role: UserRole, dashboard = false) {
         )
           setNotice('Your schedule has been updated.');
         previous.current = { scope, sequence, hash, version: value.version };
+        setError('');
         setData(value);
       })
       .catch((e) => {
+        // A failed background refresh keeps the shown timetable; a denial still removes it.
+        if (quiet && ![401, 403].includes(e.status)) return;
         if (!controller.signal.aborted && e.name !== 'AbortError') {
+          previous.current = null;
           setError(e.message);
           setErrorStatus(e.status ?? 0);
           setData(null);

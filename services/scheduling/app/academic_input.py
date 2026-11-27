@@ -3,13 +3,64 @@
 from collections import defaultdict
 
 from classync_contracts.academic import AcademicReadiness, AcademicSnapshot, ReadinessIssue
-from classync_contracts.scheduling import GenerationInput, Offering, Program, Room, Section, Teacher
+from classync_contracts.scheduling import (
+    ActivityType,
+    GenerationInput,
+    Offering,
+    Program,
+    Room,
+    Section,
+    SessionPattern,
+    Teacher,
+)
 from pydantic import ValidationError
 
 from .catalog import excluded_space_ids
-from .readiness import infeasibility_diagnostics, readiness
+from .readiness import infeasibility_diagnostics, readiness, shape_rule_warnings
 
 DAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+
+# The period-wide 180-minute default keeps laboratory and athletic sessions whole.
+WHOLE_BLOCK_ROOM_TYPES = {"computer_lab", "science_lab", "athletic_space"}
+WHOLE_BLOCK_ACTIVITIES = {
+    ActivityType.COMPUTER_LAB_INSTRUCTION,
+    ActivityType.BSE_SCIENCE_INSTRUCTION,
+    ActivityType.PAHFIT,
+    ActivityType.SPORTS,
+}
+
+
+def keeps_whole_block(offering, subject):
+    return bool(
+        subject.lab_hours
+        or (offering.required_room_type or subject.required_room_type) in WHOLE_BLOCK_ROOM_TYPES
+        or offering.activity_type in WHOLE_BLOCK_ACTIVITIES
+    )
+
+
+def policy_patterns(policy, stored):
+    single = SessionPattern(id="policy-single", durations=[180])
+    split = SessionPattern(id="policy-split", durations=[90, 90])
+    if policy == "single":
+        return [single]
+    if policy == "split":
+        return [split]
+    # Campus-scale runs start from the first pattern, so keep the stored preference first.
+    return [split, single] if stored and stored[0].durations == [90, 90] else [single, split]
+
+
+def resolve_patterns(offering, subject, rules, minutes):
+    """Most specific first: offering override, offering, subject, period, stored patterns."""
+    if offering.patterns_override is not None:
+        return offering.patterns_override
+    if minutes == 180:
+        policy = offering.pattern_policy or subject.pattern_policy
+        if policy is None and rules and not keeps_whole_block(offering, subject):
+            policy = rules.pattern_policy_180
+        if policy:
+            return policy_patterns(policy, subject.patterns)
+    return subject.patterns
 
 
 def solver_fields(record, model):
@@ -178,7 +229,9 @@ def academic_readiness(snapshot: AcademicSnapshot):
                     offering.id,
                 )
         if (
-            offering.weekly_minutes_override is not None or offering.patterns_override is not None
+            offering.weekly_minutes_override is not None
+            or offering.patterns_override is not None
+            or offering.pattern_policy is not None
         ) and not offering.override_requirements_verified:
             issue(
                 "offering_override_unverified",
@@ -291,11 +344,19 @@ def academic_readiness(snapshot: AcademicSnapshot):
                         room.id,
                     )
         minutes = offering.weekly_minutes_override or subject.required_weekly_minutes
-        patterns = (
-            offering.patterns_override
-            if offering.patterns_override is not None
-            else subject.patterns
-        )
+        patterns = resolve_patterns(offering, subject, rules, minutes)
+        if (
+            minutes != 180
+            and offering.patterns_override is None
+            and (offering.pattern_policy or subject.pattern_policy)
+        ):
+            issue(
+                "pattern_policy_ignored",
+                f"{label}: the 180-minute split/block policy does not apply to "
+                "other weekly minutes; the stored meeting patterns are used.",
+                offering.id,
+                "warning",
+            )
         if minutes is None:
             issue(
                 "missing_weekly_minutes",
@@ -439,6 +500,7 @@ def academic_readiness(snapshot: AcademicSnapshot):
                 locked_assignments=rules.locked_assignments,
                 enrollments=rules.enrollments,
                 options=rules.options,
+                daily_shape=rules.daily_shape,
             )
             offering_labels = {
                 o.id: f"{subjects[o.subject_id].code} · {section_labels[o.section_id]}"
@@ -459,6 +521,13 @@ def academic_readiness(snapshot: AcademicSnapshot):
 
             for diagnostic in readiness(inputs):
                 report(diagnostic)
+            for diagnostic in shape_rule_warnings(inputs):
+                issue(
+                    diagnostic.code,
+                    diagnostic.message,
+                    severity="warning",
+                    action_path=diagnostic.action_path,
+                )
             if not any(i.severity == "blocking" for i in issues):
                 for diagnostic in infeasibility_diagnostics(inputs):
                     report(diagnostic)

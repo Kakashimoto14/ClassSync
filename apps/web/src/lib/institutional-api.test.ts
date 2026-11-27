@@ -99,3 +99,23 @@ it.each(['teacher', 'administrator'] as const)(
     );
   },
 );
+it('retries one cold-start read but never repeats a mutation', async () => {
+  vi.useFakeTimers();
+  auth.user = { getIdToken: vi.fn().mockResolvedValue('synthetic-token') };
+  const reply = (status: number, body: string) =>
+    new Response(body, { status, headers: { 'content-type': 'application/json' } });
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(reply(503, '{"error":{"message":"Waking"}}'))
+    .mockResolvedValueOnce(reply(200, '{"data":{"periods":[]}}'));
+  vi.stubGlobal('fetch', fetcher);
+  const read = institutionalRequest('timetables/periods');
+  await vi.advanceTimersByTimeAsync(1500);
+  await expect(read).resolves.toEqual({ periods: [] });
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  fetcher.mockReset().mockResolvedValue(reply(503, '{"error":{"message":"Waking"}}'));
+  await expect(
+    institutionalRequest('timetables/publish', { method: 'POST', body: {} }),
+  ).rejects.toMatchObject({ status: 503 });
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});

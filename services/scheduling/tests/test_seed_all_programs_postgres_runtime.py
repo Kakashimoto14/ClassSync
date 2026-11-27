@@ -91,6 +91,19 @@ def test_campus_generation_is_complete_valid_deterministic_and_in_budget(campus)
     assert elapsed <= WALL_SECONDS, f"generation took {elapsed:.2f} s"
     second = generate_week(inputs)
     assert second.assignments == first.assignments  # deterministic search, same timetable
+    report = first.metadata.polish
+    assert report is not None, first.diagnostics
+    print(f"Polish: {report.moves} moves, {report.evaluations} evaluations, "
+          f"{report.elapsed_ms} ms, truncated={report.truncated}")
+    print(f"before={report.before.model_dump()}")
+    print(f"after ={report.after.model_dump()}")
+    for item in report.unmet:
+        print(f"unmet {item.model_dump()}")
+    # A wall-clock cut-off would make the result machine dependent.
+    assert not report.truncated
+    assert report.after.short_section_days <= report.before.short_section_days
+    assert report.after.over_span_section_days <= report.before.over_span_section_days
+    assert report.after.orphan_section_days == 0
     if sys.platform.startswith("linux"):
         import resource
 

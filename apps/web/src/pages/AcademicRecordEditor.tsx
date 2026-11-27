@@ -8,6 +8,7 @@ import { CurriculumSelection } from './CurriculumSelection';
 import { LockedAssignmentsEditor } from './LockedAssignmentsEditor';
 import { appMode } from '../config/runtime-config';
 import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
+import { PatternPolicySelect, ShapeRuleFields } from './SchedulingRuleFields';
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const activityOptions: Array<{ value: ActivityType; label: string }> = [
@@ -139,7 +140,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
     const next = { ...r, [name]: value } as AcademicRecord;
       if (r.kind === 'subjects' && next.kind === 'subjects') {
       if (['code', 'name', 'curriculum_version_id', 'curriculum_course_id'].includes(name)) next.curriculum_review_verified = false;
-      if (['required_weekly_minutes', 'patterns', 'lec_hours', 'lab_hours'].includes(name)) next.contact_minutes_verified = false;
+      if (['required_weekly_minutes', 'patterns', 'pattern_policy', 'lec_hours', 'lab_hours'].includes(name)) next.contact_minutes_verified = false;
     } else if (r.kind === 'sections' && next.kind === 'sections') {
       if (['entry_cohort_year', 'curriculum_version_id'].includes(name)) next.cohort_assignment_verified = false;
       if (['year_level', 'section_letter', 'custom_label', 'program_id'].includes(name)) next.identity_verified = false;
@@ -155,7 +156,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
       if (name === 'equipment') next.equipment_verified = false;
     } else if (r.kind === 'offerings' && next.kind === 'offerings') {
       if (['subject_id', 'section_id', 'teacher_ids', 'room_ids', 'activity_type'].includes(name)) next.term_offering_verified = false;
-      if (['weekly_minutes_override', 'patterns_override'].includes(name)) next.override_requirements_verified = false;
+      if (['weekly_minutes_override', 'patterns_override', 'pattern_policy'].includes(name)) next.override_requirements_verified = false;
     } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'operating_windows') {
       next.operating_windows_verified = false;
     } else if (r.kind === 'constraints' && next.kind === 'constraints' && name === 'verification_reference') {
@@ -244,6 +245,7 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         <p className="muted">{record.curriculum_version_id ? 'No contact-minute default is applied to prospectus courses. Enter the approved minutes and meeting patterns.' : '180 minutes is a proposed default. Contact minutes are not academic credit units.'}</p>
         <ChoiceList label="Associated programs" options={choices('programs')} value={record.program_ids ?? []} onChange={v => update('program_ids', v)}/>
         <Patterns weekly={record.required_weekly_minutes ?? null} value={record.patterns ?? []} onChange={v => update('patterns', v)}/>
+        {record.required_weekly_minutes === 180 && <PatternPolicySelect label="180-minute pattern policy" emptyLabel="Follow the period default" value={record.pattern_policy} onChange={v => update('pattern_policy', v)}/>}
         <details><summary>Classroom requirements</summary><label>Required room type<select value={record.required_room_type ?? ''} onChange={e => update('required_room_type', e.target.value || null)}><option value="">No specific type</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><CommaField label="Required equipment (comma-separated)" initial={record.required_equipment?.join(', ') ?? ''} onChange={value => update('required_equipment', comma(value))}/>{number('Minimum classroom capacity', 'minimum_capacity', record.minimum_capacity, 1, 1)}</details>
       </>}
       {record.kind === 'sections' && <>
@@ -291,7 +293,8 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         <details><summary>Offering-specific requirements</summary>{number('Weekly contact-minute override', 'weekly_minutes_override', record.weekly_minutes_override, 30, 30)}
           <label className="academic-checkbox"><input type="checkbox" checked={record.patterns_override != null} onChange={e => { const subject = academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id); update('patterns_override', e.target.checked && subject?.kind === 'subjects' ? structuredClone(subject.patterns ?? []) : null); update('override_requirements_verified', false); }}/>Override allowed meeting patterns</label>
           {record.patterns_override != null && <Patterns weekly={record.weekly_minutes_override ?? (academicRecords(snapshot, 'subjects').find(s => s.id === record.subject_id) as { required_weekly_minutes?: number } | undefined)?.required_weekly_minutes ?? null} value={record.patterns_override} onChange={v => update('patterns_override', v)}/>}
-          {(record.weekly_minutes_override != null || record.patterns_override != null) && check('Offering-specific minutes and patterns approved', 'override_requirements_verified', record.override_requirements_verified)}
+          <PatternPolicySelect label="180-minute pattern policy override" emptyLabel="Follow the subject or period" value={record.pattern_policy} onChange={v => update('pattern_policy', v)}/>
+          {(record.weekly_minutes_override != null || record.patterns_override != null || record.pattern_policy != null) && check('Offering-specific minutes and patterns approved', 'override_requirements_verified', record.override_requirements_verified)}
           <label>Required room-type override<select value={record.required_room_type ?? ''} onChange={e => update('required_room_type', e.target.value || null)}><option value="">No override</option>{roomTypeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{number('Minimum capacity override', 'minimum_capacity', record.minimum_capacity, 1, 1)}
           <CommaField label="Additional required equipment" initial={record.required_equipment?.join(', ') ?? ''} onChange={value => update('required_equipment', comma(value))}/><CommaField label="Allowed buildings (optional, comma-separated)" initial={record.allowed_buildings?.join(', ') ?? ''} onChange={value => update('allowed_buildings', value.trim() ? comma(value) : null)}/>
         </details>
@@ -310,6 +313,8 @@ export function AcademicRecordEditor({ kind, snapshot, existing, onSaved, onCanc
         <WeeklyWindows label="Operating hours" value={record.operating_windows ?? []} onChange={v => update('operating_windows', v)}/>
         {check('Operating windows are approved for this academic period', 'operating_windows_verified', record.operating_windows_verified)}{text('Calendar/rules source/reference', 'verification_reference', record.verification_reference, record.operating_windows_verified)}
         <label>Transition buffer <span className="academic-field-indicator" aria-hidden="true">Required</span><select aria-label="Transition buffer" value={record.transition_buffer_minutes ?? 0} onChange={e => update('transition_buffer_minutes', Number(e.target.value))}>{[0, 10, 30, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}</select><small className="muted">Time reserved between consecutive room or faculty assignments.</small></label>
+        <ShapeRuleFields value={record.daily_shape} onChange={v => update('daily_shape', v)}/>
+        <PatternPolicySelect label="Default pattern for 180-minute subjects" emptyLabel="Use each subject's saved patterns" value={record.pattern_policy_180} onChange={v => update('pattern_policy_180', v)}/>
         {check('I have supplied all intended offerings for this period', 'all_intended_offerings_supplied', record.all_intended_offerings_supplied)}
         <p className="muted">This is an administrator scope declaration, not independent verification of school-wide coverage.</p>
         <p className="muted">Include shared ICS, IBE and ITE rooms/faculty/locked sessions in this same period. Separate periods are not checked against each other.</p>

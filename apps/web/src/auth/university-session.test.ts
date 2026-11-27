@@ -70,7 +70,7 @@ describe('current university session authority', () => {
     vi.mocked(value.driver.lookup).mockRejectedValueOnce(
       new UniversitySessionError('role-required'),
     );
-    value.session.refresh();
+    value.session.refresh('teacher');
     expect(value.last()).toEqual({ status: 'checking' });
     await settle();
     expect(value.last()).toEqual({ status: 'role-required' });
@@ -154,18 +154,23 @@ describe('current university session authority', () => {
     const old = deferred<UniversityMembership>();
     vi.mocked(value.driver.lookup).mockReturnValueOnce(old.promise);
     value.next(identity());
+    vi.mocked(value.driver.lookup).mockReturnValue(new Promise(() => {}));
     await vi.advanceTimersByTimeAsync(100);
-    expect(value.last()).toEqual({ status: 'unavailable' });
+    expect(value.last()).toEqual({ status: 'checking', waking: true });
     expect(vi.mocked(value.driver.lookup).mock.calls[0][2].aborted).toBe(true);
+    // Two bounded retries (1.5 s and 4 s backoff), then an honest failure.
+    await vi.advanceTimersByTimeAsync(1500 + 100 + 4000 + 100);
+    expect(value.driver.lookup).toHaveBeenCalledTimes(3);
+    expect(value.last()).toEqual({ status: 'unavailable' });
     old.resolve(membership);
     await settle();
     expect(value.last()).toEqual({ status: 'unavailable' });
     value.session.dispose();
   });
-  it('keeps offline events cleared until online revalidation succeeds', async () => {
+  it('keeps a not-yet-verified session offline until online revalidation succeeds', async () => {
     const value = setup();
+    vi.mocked(value.driver.lookup).mockReturnValueOnce(new Promise(() => {}));
     value.next(identity());
-    await settle();
     value.session.offline();
     value.next(identity());
     await settle();
@@ -182,6 +187,86 @@ describe('current university session authority', () => {
     await settle();
     value.failure();
     expect(value.last()).toEqual({ status: 'unavailable' });
+    value.session.dispose();
+  });
+});
+
+describe('silent revalidation of a verified workspace', () => {
+  async function verified() {
+    vi.useFakeTimers();
+    const value = setup();
+    value.next(identity());
+    await vi.advanceTimersByTimeAsync(0);
+    value.states.length = 0;
+    return value;
+  }
+  const retryable = () => new UniversitySessionError('unavailable', undefined, true);
+
+  it('skips focus and token-refresh re-checks inside the 60 s cooldown', async () => {
+    const value = await verified();
+    value.session.online();
+    value.next(identity());
+    await vi.advanceTimersByTimeAsync(59_000);
+    value.session.online();
+    expect(value.driver.lookup).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(2_000);
+    value.next(identity());
+    await vi.advanceTimersByTimeAsync(0);
+    expect(value.driver.lookup).toHaveBeenCalledTimes(2);
+    // Same membership: nothing is announced, so nothing unmounts or clears.
+    expect(value.states).toEqual([]);
+    value.session.dispose();
+  });
+  it('keeps the workspace through transient failures and network loss', async () => {
+    const value = await verified();
+    vi.mocked(value.driver.lookup).mockRejectedValue(retryable());
+    value.session.refresh();
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(value.driver.lookup).toHaveBeenCalledTimes(4);
+    value.session.offline();
+    value.session.online();
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(value.states).toEqual([]);
+    value.session.dispose();
+  });
+  it.each(['expired', 'denied', 'verification-required'] as const)(
+    'revokes on a confirmed %s answer',
+    async (issue) => {
+      const value = await verified();
+      vi.mocked(value.driver.lookup).mockRejectedValueOnce(new UniversitySessionError(issue));
+      value.session.refresh();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(value.states).toEqual([{ status: issue }]);
+      value.session.dispose();
+    },
+  );
+  it('announces a changed membership revision', async () => {
+    const value = await verified();
+    vi.mocked(value.driver.lookup).mockResolvedValueOnce({
+      ...membership,
+      membership_revision: 2,
+    });
+    value.session.refresh();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(value.states).toEqual([
+      { status: 'authorized', membership: { ...membership, membership_revision: 2 } },
+    ]);
+    value.session.dispose();
+  });
+  it('recovers a cold start before reporting access as unavailable', async () => {
+    vi.useFakeTimers();
+    const value = setup();
+    vi.mocked(value.driver.lookup)
+      .mockRejectedValueOnce(retryable())
+      .mockRejectedValueOnce(retryable());
+    value.next(identity());
+    await vi.advanceTimersByTimeAsync(5500);
+    expect(value.states.map((state) => state.status)).toEqual([
+      'checking',
+      'checking',
+      'checking',
+      'authorized',
+    ]);
     value.session.dispose();
   });
 });

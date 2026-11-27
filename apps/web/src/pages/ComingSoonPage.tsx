@@ -1,10 +1,8 @@
 import {
   ArrowLeft,
   Bot,
-  Building2,
   CalendarDays,
   Check,
-  ClipboardCheck,
   FileSearch,
   ShieldAlert,
 } from 'lucide-react';
@@ -37,14 +35,6 @@ const details = {
     back: '/admin/schedule-manager',
     backLabel: 'Back to Schedule Manager',
     icon: CalendarDays,
-  },
-  'institutional-rules': {
-    title: 'Institutional Scheduling Rules',
-    description:
-      'Give authorized administrators a configurable place to maintain program, subject, section, building, and room assignment rules.',
-    back: '/admin/settings',
-    backLabel: 'Back to Settings',
-    icon: Building2,
   },
 } as const;
 
@@ -191,52 +181,6 @@ export function ComingSoonPage({ feature, role }: { feature: PlannedFeature; rol
               <p>
                 A recommendation is not a validated schedule. Server-side deterministic validation
                 must pass hard rules before authorized administrators can approve and publish.
-              </p>
-            </div>
-          </div>
-        )}
-        {feature === 'institutional-rules' && (
-          <div className="feature-preview">
-            <h3>Configurable rule examples</h3>
-            <p className="illustrative-label">
-              Illustrative only · these are not ClassSync defaults or institutional policy
-            </p>
-            <div className="rule-example-grid">
-              <article>
-                <Building2 size={19} />
-                <strong>Old Building</strong>
-                <span>Example permitted programs: ICS programs such as BSIT and BSCpE.</span>
-              </article>
-              <article>
-                <Building2 size={19} />
-                <strong>New Building</strong>
-                <span>
-                  Example permitted programs: BSED, BSBA, BTLED, and other institution-approved
-                  programs.
-                </span>
-              </article>
-            </div>
-            <div className="feature-columns">
-              <article>
-                <h4>Possible rule dimensions</h4>
-                <p>
-                  Academic unit, program, subject, section, building, room/type, facilities,
-                  capacity, period, and academic year/semester.
-                </p>
-              </article>
-              <article>
-                <h4>Governance</h4>
-                <p>
-                  Priority, effective dates, enabled state, visible authorized exceptions, approval,
-                  and audit history.
-                </p>
-              </article>
-            </div>
-            <div className="feature-note">
-              <ClipboardCheck size={18} />
-              <p>
-                Conflicting rules must be resolved explicitly. A prohibited building is never
-                silently assigned; if no eligible room exists, the future workflow must explain why.
               </p>
             </div>
           </div>

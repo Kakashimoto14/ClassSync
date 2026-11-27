@@ -42,6 +42,10 @@ const AcademicStudentRosterPage = lazy(() =>
   import('./AcademicStudentRosterPage').then((module) => ({ default: module.AcademicStudentRosterPage })),
 );
 
+const SchedulingRulesPage = lazy(() =>
+  import('./SchedulingRulesPage').then((module) => ({ default: module.SchedulingRulesPage })),
+);
+
 export function ProductScreenPage({ definition }: { definition: RouteDefinition }) {
   const [params] = useSearchParams();
   const scheduleRooms = params.get('schedule') === '1';
@@ -67,6 +71,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       'schedule-drafts',
       'schedule-draft-detail',
       'academic-manage',
+      'scheduling-rules',
       'conflicts',
       'conflict-detail',
       'audit',
@@ -116,6 +121,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
         <RoomDetailPage role={definition.role} />
       </AppShell>
     );
+  const ownHeading = definition.kind === 'scheduling-rules';
   const compactHeading = [
     'reports',
     'schedule-create',
@@ -128,7 +134,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
   return (
     <Suspense fallback={<ClassSyncPageLoader label="Loading this page…" />}>
     <AppShell>
-      <div className="page-heading">
+      <div className="page-heading" hidden={ownHeading}>
         <div>
           {!compactHeading && (
             <p className="eyebrow">
@@ -136,7 +142,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
                 (definition.role === 'administrator' ? 'Administrator' : definition.role)}
             </p>
           )}
-          <h1>{definition.title}</h1>
+          {!ownHeading && <h1>{definition.title}</h1>}
           {!compactHeading && <p>{definition.description}</p>}
         </div>
         {definition.kind === 'schedule' && definition.role === 'administrator' && (
@@ -175,6 +181,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
         </div>
       )}
       {definition.kind === 'schedule-drafts' && <SavedDraftsPage />}
+      {definition.kind === 'scheduling-rules' && <SchedulingRulesPage />}
       {definition.kind === 'schedule-draft-detail' && <SavedDraftDetailPage />}
       {definition.kind === 'calendar' && <StructuredCalendarPage role={definition.role} />}
       {definition.kind === 'conflicts' && <ConflictScreen />}

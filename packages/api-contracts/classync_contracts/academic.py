@@ -11,8 +11,10 @@ from .scheduling import (
     ActivityType,
     Assignment,
     Contract,
+    DailyShapeRules,
     Enrollment,
     GenerationInput,
+    PatternPolicy,
     Program,
     Room,
     Section,
@@ -20,6 +22,7 @@ from .scheduling import (
     SolverOptions,
     Teacher,
     Window,
+    omit_none,
 )
 
 
@@ -63,6 +66,11 @@ class AcademicSubject(Identity):
     lec_hours: int | None = Field(default=None, ge=0, le=12)
     lab_hours: int | None = Field(default=None, ge=0, le=12)
     units: int | None = Field(default=None, ge=0, le=30)
+    pattern_policy: PatternPolicy | None = None
+
+    @model_serializer(mode="wrap")
+    def omit_absent_policy(self, handler):
+        return omit_none(handler(self), "pattern_policy")
 
     @model_validator(mode="after")
     def exact_patterns(self):
@@ -151,6 +159,7 @@ class AcademicOffering(Identity):
     room_ids: list[str] = Field(default_factory=list)
     weekly_minutes_override: int | None = Field(default=None, gt=0, le=10080, multiple_of=30)
     patterns_override: list[SessionPattern] | None = None
+    pattern_policy: PatternPolicy | None = None
     required_room_type: str | None = None
     required_equipment: list[str] = Field(default_factory=list)
     minimum_capacity: int | None = Field(default=None, gt=0)
@@ -170,6 +179,10 @@ class AcademicOffering(Identity):
     override_requirements_verified: bool = False
     verification_reference: str | None = Field(default=None, max_length=160)
 
+    @model_serializer(mode="wrap")
+    def omit_absent_policy(self, handler):
+        return omit_none(handler(self), "pattern_policy")
+
 
 class AcademicConstraints(Contract):
     kind: Literal["constraints"] = "constraints"
@@ -184,6 +197,12 @@ class AcademicConstraints(Contract):
     shared_scope_verified: bool = False
     shared_scope_reference: str | None = Field(default=None, max_length=160)
     verification_reference: str | None = Field(default=None, max_length=160)
+    daily_shape: DailyShapeRules | None = None
+    pattern_policy_180: PatternPolicy | None = None
+
+    @model_serializer(mode="wrap")
+    def omit_absent_rules(self, handler):
+        return omit_none(handler(self), "daily_shape", "pattern_policy_180")
 
 
 AcademicRecord = Annotated[

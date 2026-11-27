@@ -46,9 +46,10 @@ export type ScreenKind =
   | 'profile'
   | 'settings'
   | 'audit'
+  | 'scheduling-rules'
   | 'coming-soon';
 export type PlannedFeature =
-  'registration-scanner' | 'ai-conflict-detection' | 'ai-scheduling' | 'institutional-rules';
+  'registration-scanner' | 'ai-conflict-detection' | 'ai-scheduling';
 export type RouteId = `${UserRole}.${string}`;
 export interface RouteDefinition {
   id: RouteId;
@@ -691,12 +692,11 @@ export const routeDefinitions = [
     path: '/admin/institutional-rules',
     role: 'administrator',
     title: 'Institutional Scheduling Rules',
-    description: 'Planned authorized management of institutional scheduling rules.',
-    kind: 'coming-soon',
+    description: 'Set commuter-friendly day shape and subject pattern rules per period.',
+    kind: 'scheduling-rules',
     navigationGroup: 'System',
     navigationLabel: 'Institutional Scheduling Rules',
     icon: ClipboardCheck,
-    plannedFeature: 'institutional-rules',
   }),
   make({
     id: 'administrator.settings',

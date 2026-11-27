@@ -92,6 +92,8 @@ export async function loadUniversitySessionDriver(): Promise<UniversitySessionDr
       const token = await user.getIdToken();
       if (signal.aborted) throw new UniversitySessionError('unavailable');
       if (auth.currentUser?.uid !== user.uid) throw new UniversitySessionError('denied');
+      // Render and Neon cold starts surface as network errors or gateway statuses.
+      const transient = () => new UniversitySessionError('unavailable', undefined, true);
       const response = await fetch(endpoint, {
         method: 'GET',
         credentials: 'omit',
@@ -103,7 +105,10 @@ export async function loadUniversitySessionDriver(): Promise<UniversitySessionDr
           Authorization: `Bearer ${token}`,
           ...(role ? { 'X-ClassSync-Role': role } : {}),
         },
+      }).catch(() => {
+        throw transient();
       });
+      if ([502, 503, 504].includes(response.status)) throw transient();
       if (!response.headers.get('content-type')?.includes('application/json'))
         throw new UniversitySessionError('unavailable');
       const payload = await response.json();

@@ -120,6 +120,19 @@ and the latest [local qualification record](docs/autonomy/STATUS.md).
 
 See [the frontend audit and route matrix](docs/frontend-audit.md), [architecture](docs/architecture.md), [development](docs/development.md), [API conventions](docs/api-conventions.md), [security](docs/security.md), and [UI/UX system](docs/ui-ux.md). Copy `.env.example` before configuring local services; never commit credentials.
 
+## Commuter-friendly scheduling rules
+
+Each academic period can store day-shape preferences (fewest and most classes on a class day, and
+the longest first-to-last day) and a default pattern for 180-minute subjects (single block, split
+2 × 90 minutes, or flexible). Set them at `/admin/institutional-rules`; subjects and offerings can
+override the pattern. New periods start with 2 classes minimum, 4 maximum, 9 hours and flexible.
+These are owner-chosen starting values, not verified CdM policy. Existing periods are not changed
+until an Administrator saves rules.
+
+Day-shape rules are preferences, not hard constraints. After the solver returns a valid timetable,
+a bounded deterministic polish pass improves it, the result is validated independently, and every
+section-day still outside the preferences is listed. Periods without rules are not polished.
+
 ## Validation
 
 Run `npm run lint`, `npm run typecheck`, `npm run test:web`, and `npm run build` from the repository root. Use `npm run dev:web` to start the client.

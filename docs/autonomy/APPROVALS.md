@@ -389,3 +389,33 @@ only the 41 schedulable rooms may be activated, and the assistant may not run `-
 CI wall-clock assertion for the seeded generation at most 10 s with the actual duration logged,
 peak RSS under 400 MB on Linux, and the main entry chunk at most 101,376 bytes. No commit is
 authorized.
+
+## 27 November 2026 — Phase C approval: institutional workflows and commuter-friendly scheduling
+
+Owner instruction, quoted: "Phase C plan approved for local code, migrations, tests, and docs only —
+do NOT commit, push, deploy, run `--apply`, or contact live Neon, Firebase, Render, Resend, or
+Gemini."
+
+Owner answers to the plan's open questions:
+1. H1–H15 mapping confirmed (H1 room, H2 teacher, H3 section, H4 student overlap; H5 eligibility
+   including excluded-space locks; H6 room type/capacity/equipment; H7 operating hours; H8 teacher
+   availability; H9 room availability/restrictions; H10 faculty subject readiness; H11 weekly/daily
+   workload; H12 continuous teaching; H13 transition buffer; H14 locked assignments; H15 weekly
+   minutes/pattern/distinct days).
+2. Daily shape rules (`min_sessions_per_active_day`, `max_sessions_per_day`,
+   `max_daily_span_minutes`) are preferences optimized by the deterministic post-solve polish in
+   v1, reported per section-day; they never make a feasible timetable infeasible.
+3. The period-level `flexible` 180-minute default skips lab and athletic subjects unless overridden
+   on the subject or offering.
+4. A period clone copies structure, rules and a calendar shell only; no section student enrollments
+   or locked assignments (Slice C2).
+5. Any active Administrator in the same tenant may edit or cancel a room restriction; `0029`
+   relaxes the `0008` single-owner trigger while keeping full actor-UID audit attribution (C2).
+6. Period archive is one-way, with clear confirmation; archived periods may still be cloned (C2).
+
+Execution scope for the current session, quoted: "implement **ONLY Slice C1** in this session, then
+**STOP**". C1 covers session/reload resilience, configurable commuter rules and pattern policy, the
+bounded deterministic polish pass (at most 1.0 s), Administrator rule UI, seed defaults for newly
+created constraints records only, and their tests. Bundle limit stays at 101,376 bytes. C2 and C3
+are separate later sessions. The new-period defaults (minimum 2, maximum 4, span 540 minutes,
+`flexible`) are owner-authorized defaults, not Registrar-verified CdM policy.

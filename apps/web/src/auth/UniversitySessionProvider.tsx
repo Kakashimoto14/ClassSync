@@ -33,9 +33,16 @@ function ConnectedSessionProvider({ children }: { children: ReactNode }) {
           return;
         }
         setAvailable(true);
+        let scope = '';
         owned = createUniversitySession(driver, (next) => {
           if (closed) return;
-          if (next.status !== 'authorized') queryClient.clear();
+          // Cached data survives only while the same verified membership stays current.
+          const member = next.status === 'authorized' ? next.membership : undefined;
+          const key = member
+            ? [member.uid, member.tenant_id, member.role, member.membership_revision].join(':')
+            : '';
+          if (!key || (scope && scope !== key)) queryClient.clear();
+          scope = key;
           setState(next);
         });
         current.current = owned;
@@ -66,7 +73,7 @@ function ConnectedSessionProvider({ children }: { children: ReactNode }) {
   }, [attempt, queryClient]);
   const refresh = useCallback((role?: UserRole) => {
     if (current.current) {
-      if (navigator.onLine) current.current.online(role);
+      if (navigator.onLine) current.current.online(role, true);
       else current.current.offline();
     } else {
       setState({ status: 'checking' });

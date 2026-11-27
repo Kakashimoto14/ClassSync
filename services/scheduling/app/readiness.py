@@ -1,5 +1,7 @@
 """Input/reference normalization and unary feasibility, independent of CP-SAT."""
 
+from collections import defaultdict
+
 from classync_contracts.scheduling import Diagnostic, GenerationInput
 
 
@@ -141,6 +143,44 @@ def readiness(inputs: GenerationInput):
             ):
                 issue("missing_reference", f"{field}: assignment {a.id} has invalid references.")
     return errors
+
+
+def shape_rule_warnings(inputs):
+    """Daily-shape preferences that cannot be met everywhere. Advisory: never blocking."""
+    rules = inputs.daily_shape
+    if rules is None:
+        return []
+    found = []
+
+    def warn(code, message):
+        found.append(
+            Diagnostic(code=code, message=message, action_path="/admin/institutional-rules")
+        )
+
+    span = rules.max_daily_span_minutes
+    if span is not None:
+        longer = sum(
+            all(max(p.durations) > span for p in o.patterns) for o in inputs.offerings
+        )
+        if longer:
+            warn(
+                "shape_span_too_short",
+                f"{longer} offering(s) need a session longer than the {span}-minute "
+                "daily span preference.",
+            )
+    days = len({w.day for w in inputs.operating_windows})
+    if rules.max_sessions_per_day is not None and days:
+        weekly = defaultdict(int)
+        for o in inputs.offerings:
+            weekly[o.section_id] += min(len(p.durations) for p in o.patterns)
+        crowded = sum(n > rules.max_sessions_per_day * days for n in weekly.values())
+        if crowded:
+            warn(
+                "shape_max_sessions_unreachable",
+                f"{crowded} section(s) have more weekly sessions than the daily maximum "
+                "allows across the operating days.",
+            )
+    return found
 
 
 def placements(inputs, offering, duration):

@@ -345,3 +345,13 @@ def test_an_unrecognised_legacy_period_is_still_preserved(title, data_mode):
     with pytest.raises(ValueError, match="legacy period does not match"):
         apply_seed(repo)
     assert (repo.legacy["title"], repo.legacy["revision"], repo.archive_events) == (title, 4, [])
+
+
+def test_new_constraints_carry_the_commuter_preferences():
+    from services.academic.app.record_rules import default_constraints
+
+    catalog = load_json("packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json")
+    records, _ = build_academic_records("period", catalog)
+    rules = next(r for r in records if r.kind == "constraints")
+    assert rules.daily_shape == default_constraints().daily_shape
+    assert rules.pattern_policy_180 == "flexible"

@@ -1,5 +1,70 @@
 # ClassSync — autonomy status ledger
 
+## 28 November 2026 — Phase C / Slice C1: session resilience and commuter-friendly rules
+
+Branch `main`, base/current HEAD `3edea55`, uncommitted (no commit or push). Approval:
+`APPROVALS.md` 27 November 2026 Phase C entry. No Neon, Firebase, Render, Resend or Gemini
+contact; seed `--apply` not run; no migration. C2 and C3 not started.
+
+**Session and reload.** Re-checking the same verified membership (focus, visibility, pageshow,
+hourly token refresh) is silent, skipped within 60 s of the last success, and unmounts nothing.
+Only a confirmed expired/denied/role/verification answer, sign-out, user change or role change
+revokes. A first check retries retryable failures (network, 502/503/504, timeout) after 1.5 s and
+4 s with a "Waking university services…" label (worst case about 35 s before "unavailable").
+Idempotent institutional and Student reads retry once; mutations never. Background timetable
+refresh keeps the shown data unless the answer is 401/403.
+
+**Behaviour change to note.** Losing the network no longer clears an already verified workspace
+(a session not yet verified still shows offline). Three existing session tests were rewritten for
+the approved behaviour: role re-check, bounded timeout with retries, and offline.
+
+**Rules and polish.** Optional `daily_shape` and `pattern_policy_180` on period constraints;
+`pattern_policy` on subjects and offerings. Unset fields are omitted from payloads and hashes.
+New periods and new seed constraints records start at 2 / 4 / 540 min / flexible. Existing periods
+have no rules until an Administrator saves them at `/admin/institutional-rules`. `polish.py`:
+slot-bitmask local search (single moves, one-session ejection, split/join and relocate with
+repair), 80,000-candidate deterministic bound, 1.0 s safety cap, validated independently.
+
+**Departures from the approved plan.**
+- Polish runs only when a period has daily-shape rules, not whenever soft scoring is skipped.
+  Without rules an earlier build raised one-class section-days on the campus set from 58 to 157.
+- Ejection and compound rebalance moves replace the planned two-session swap.
+- Above 150 candidate sessions CP-SAT gets each offering's first pattern; if that is not
+  feasible the full model is retried. The unrestricted flexible campus model returned `unknown`.
+- Seed defaults are in `seed_campus_data.py`, where the constraints record is built, not in
+  `seed_program_catalog.py`.
+- No separate `revalidating` session flag; silent re-checks emit nothing.
+
+**Campus measurement (247 offerings, disposable PostgreSQL 18, Windows, final code).**
+
+| Measure | Solver | After polish |
+| --- | --- | --- |
+| One-class section-days | 58 | 0 |
+| Section-days longer than 9 h | 50 | 19 |
+| Section-days over 4 classes | 1 | 0 |
+| Longest section day | 14 h | 12.5 h |
+| Instructor late-then-early days | 10 | 3 |
+| Idle gap minutes | 12,660 | 5,280 |
+
+Generation 5.34 s wall including 662 ms polish (80,000 candidates, wall cap not reached). Counts
+differ slightly between fresh seedings (another run: one-class 63 to 0, long days 51 to 17,
+longest 10.5 h). Of the 19 long days, 13 are exactly 10 h: three 180-minute classes with a
+transition buffer on a 30-minute grid cannot fit 9 h. An earlier build measured 4 long days with
+a 10 h limit; not re-measured on the final code. The 9 h preference is NOT fully met.
+
+**Evidence.** `ruff check scripts services packages`, contract `--check`, `npm run lint`,
+`npm run typecheck`, `npm run test:web` (933 passed / 79 files), `npm run build`, bundle budget
+(main entry 99,502 bytes of 101,376; was 98,121), `git diff --check`: passed. Full pytest with
+repo-local `TEMP`/`--basetemp`: 1397 passed (one existing deprecation warning); `.pytest_tmp` removed.
+
+**Open.** No rendered-browser check (real screenshot/focus behaviour, the new rules page, 360 and
+1440 px, 200% zoom) and no screen-reader check. No real Render/Neon cold start. Linux CI,
+PostgreSQL 16 and peak RSS (Linux-only assertion) not measured. Review was self-review only. The
+10 s campus wall assertion once measured 11.42 s locally and passed on rerun, so it may flake on
+a slow runner. **Rollback:** services built before this change reject constraints, subject or
+offering records that carry the new fields, so deploy backend with web and do not roll the backend
+back after rules are saved or a new period is created.
+
 ## 27 November 2026 — Phase B / Slice 4: all CdM degree programs, H1–H15, cross-scope occupancy
 
 Branch `main`, base/current HEAD `f36b0917c3d2a3f81ac2f8e086c088b08ee4ed07`, uncommitted (no commit

@@ -24,6 +24,8 @@ export type AcademicConstraints = {
   shared_scope_verified?: boolean;
   shared_scope_reference?: string | null;
   verification_reference?: string | null;
+  daily_shape?: DailyShapeRules | null;
+  pattern_policy_180?: "single" | "split" | "flexible" | null;
 };
 
 export type AcademicFaculty = {
@@ -62,6 +64,7 @@ export type AcademicOffering = {
   room_ids?: Array<string>;
   weekly_minutes_override?: number | null;
   patterns_override?: Array<SessionPattern> | null;
+  pattern_policy?: "single" | "split" | "flexible" | null;
   required_room_type?: string | null;
   required_equipment?: Array<string>;
   minimum_capacity?: number | null;
@@ -187,6 +190,7 @@ export type AcademicSubject = {
   lec_hours?: number | null;
   lab_hours?: number | null;
   units?: number | null;
+  pattern_policy?: "single" | "split" | "flexible" | null;
 };
 
 export type ActivityType = "academic_instruction" | "computer_lab_instruction" | "bse_science_instruction" | "pahfit" | "sports" | "assembly" | "rotc" | "special_booking";
@@ -222,6 +226,12 @@ export type Coverage = {
   offering_id: string;
   required_minutes: number;
   allocated_minutes: number;
+};
+
+export type DailyShapeRules = {
+  min_sessions_per_active_day?: number | null;
+  max_sessions_per_day?: number | null;
+  max_daily_span_minutes?: number | null;
 };
 
 export type Diagnostic = {
@@ -313,6 +323,7 @@ export type GenerationInput = {
   locked_assignments?: Array<Assignment>;
   previous_assignments?: Array<Assignment>;
   options?: SolverOptions;
+  daily_shape?: DailyShapeRules | null;
 };
 
 export type GenerationResult = {
@@ -367,6 +378,16 @@ export type PeriodCreate = {
   title: string;
   include_cdm_catalog?: boolean;
   calendar?: AcademicCalendar | null;
+};
+
+export type PolishReport = {
+  moves: number;
+  evaluations: number;
+  elapsed_ms: number;
+  truncated: boolean;
+  before: ShapeMetrics;
+  after: ShapeMetrics;
+  unmet: Array<SectionDayIssue>;
 };
 
 export type Program = {
@@ -454,6 +475,7 @@ export type RunMetadata = {
   time_limit_seconds: number;
   objective?: number | null;
   best_bound?: number | null;
+  polish?: PolishReport | null;
 };
 
 export type SaveDraftRequest = {
@@ -472,6 +494,14 @@ export type Section = {
   preferred_days?: Array<number>;
 };
 
+export type SectionDayIssue = {
+  section_id: string;
+  day: number;
+  sessions: number;
+  span_minutes: number;
+  issues: Array<"below_min_sessions" | "over_max_sessions" | "over_span">;
+};
+
 export type SemesterPhase = {
   name: "midterm" | "final";
   start: string;
@@ -482,6 +512,17 @@ export type SessionPattern = {
   id: string;
   durations: Array<number>;
   distinct_days?: boolean;
+};
+
+export type ShapeMetrics = {
+  orphan_section_days: number;
+  short_section_days: number;
+  over_span_section_days: number;
+  over_max_section_days: number;
+  max_span_minutes: number;
+  lectures_in_specialized_rooms: number;
+  faculty_clopenings: number;
+  idle_gap_minutes: number;
 };
 
 export type SolverOptions = {

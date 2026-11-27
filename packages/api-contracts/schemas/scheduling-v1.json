@@ -76,6 +76,57 @@
         "title": "Assignment",
         "type": "object"
       },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
+        "type": "object"
+      },
       "Enrollment": {
         "additionalProperties": false,
         "properties": {
@@ -916,6 +967,17 @@
       },
       "options": {
         "$ref": "#/$defs/SolverOptions"
+      },
+      "daily_shape": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/DailyShapeRules"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
       }
     },
     "required": [
@@ -1064,6 +1126,51 @@
         "title": "Diagnostic",
         "type": "object"
       },
+      "PolishReport": {
+        "additionalProperties": false,
+        "properties": {
+          "moves": {
+            "title": "Moves",
+            "type": "integer"
+          },
+          "evaluations": {
+            "title": "Evaluations",
+            "type": "integer"
+          },
+          "elapsed_ms": {
+            "title": "Elapsed Ms",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "before": {
+            "$ref": "#/$defs/ShapeMetrics"
+          },
+          "after": {
+            "$ref": "#/$defs/ShapeMetrics"
+          },
+          "unmet": {
+            "items": {
+              "$ref": "#/$defs/SectionDayIssue"
+            },
+            "title": "Unmet",
+            "type": "array"
+          }
+        },
+        "required": [
+          "moves",
+          "evaluations",
+          "elapsed_ms",
+          "truncated",
+          "before",
+          "after",
+          "unmet"
+        ],
+        "title": "PolishReport",
+        "type": "object"
+      },
       "RunMetadata": {
         "additionalProperties": false,
         "properties": {
@@ -1111,6 +1218,17 @@
             ],
             "default": null,
             "title": "Best Bound"
+          },
+          "polish": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PolishReport"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -1120,6 +1238,97 @@
           "time_limit_seconds"
         ],
         "title": "RunMetadata",
+        "type": "object"
+      },
+      "SectionDayIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "day": {
+            "title": "Day",
+            "type": "integer"
+          },
+          "sessions": {
+            "title": "Sessions",
+            "type": "integer"
+          },
+          "span_minutes": {
+            "title": "Span Minutes",
+            "type": "integer"
+          },
+          "issues": {
+            "items": {
+              "enum": [
+                "below_min_sessions",
+                "over_max_sessions",
+                "over_span"
+              ],
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          }
+        },
+        "required": [
+          "section_id",
+          "day",
+          "sessions",
+          "span_minutes",
+          "issues"
+        ],
+        "title": "SectionDayIssue",
+        "type": "object"
+      },
+      "ShapeMetrics": {
+        "additionalProperties": false,
+        "properties": {
+          "orphan_section_days": {
+            "title": "Orphan Section Days",
+            "type": "integer"
+          },
+          "short_section_days": {
+            "title": "Short Section Days",
+            "type": "integer"
+          },
+          "over_span_section_days": {
+            "title": "Over Span Section Days",
+            "type": "integer"
+          },
+          "over_max_section_days": {
+            "title": "Over Max Section Days",
+            "type": "integer"
+          },
+          "max_span_minutes": {
+            "title": "Max Span Minutes",
+            "type": "integer"
+          },
+          "lectures_in_specialized_rooms": {
+            "title": "Lectures In Specialized Rooms",
+            "type": "integer"
+          },
+          "faculty_clopenings": {
+            "title": "Faculty Clopenings",
+            "type": "integer"
+          },
+          "idle_gap_minutes": {
+            "title": "Idle Gap Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "orphan_section_days",
+          "short_section_days",
+          "over_span_section_days",
+          "over_max_section_days",
+          "max_span_minutes",
+          "lectures_in_specialized_rooms",
+          "faculty_clopenings",
+          "idle_gap_minutes"
+        ],
+        "title": "ShapeMetrics",
         "type": "object"
       },
       "ValidationResult": {
@@ -1356,6 +1565,57 @@
         "title": "Assignment",
         "type": "object"
       },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
+        "type": "object"
+      },
       "Diagnostic": {
         "additionalProperties": false,
         "properties": {
@@ -1575,6 +1835,17 @@
           },
           "options": {
             "$ref": "#/$defs/SolverOptions"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -2355,6 +2626,57 @@
         "title": "Assignment",
         "type": "object"
       },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
+        "type": "object"
+      },
       "Enrollment": {
         "additionalProperties": false,
         "properties": {
@@ -2523,6 +2845,17 @@
           },
           "options": {
             "$ref": "#/$defs/SolverOptions"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -3476,6 +3809,57 @@
         "title": "Coverage",
         "type": "object"
       },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
+        "type": "object"
+      },
       "Diagnostic": {
         "additionalProperties": false,
         "properties": {
@@ -3695,6 +4079,17 @@
           },
           "options": {
             "$ref": "#/$defs/SolverOptions"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -4025,6 +4420,51 @@
         "title": "Offering",
         "type": "object"
       },
+      "PolishReport": {
+        "additionalProperties": false,
+        "properties": {
+          "moves": {
+            "title": "Moves",
+            "type": "integer"
+          },
+          "evaluations": {
+            "title": "Evaluations",
+            "type": "integer"
+          },
+          "elapsed_ms": {
+            "title": "Elapsed Ms",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "before": {
+            "$ref": "#/$defs/ShapeMetrics"
+          },
+          "after": {
+            "$ref": "#/$defs/ShapeMetrics"
+          },
+          "unmet": {
+            "items": {
+              "$ref": "#/$defs/SectionDayIssue"
+            },
+            "title": "Unmet",
+            "type": "array"
+          }
+        },
+        "required": [
+          "moves",
+          "evaluations",
+          "elapsed_ms",
+          "truncated",
+          "before",
+          "after",
+          "unmet"
+        ],
+        "title": "PolishReport",
+        "type": "object"
+      },
       "Program": {
         "additionalProperties": false,
         "properties": {
@@ -4302,6 +4742,17 @@
             ],
             "default": null,
             "title": "Best Bound"
+          },
+          "polish": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PolishReport"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -4380,6 +4831,48 @@
         "title": "Section",
         "type": "object"
       },
+      "SectionDayIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "day": {
+            "title": "Day",
+            "type": "integer"
+          },
+          "sessions": {
+            "title": "Sessions",
+            "type": "integer"
+          },
+          "span_minutes": {
+            "title": "Span Minutes",
+            "type": "integer"
+          },
+          "issues": {
+            "items": {
+              "enum": [
+                "below_min_sessions",
+                "over_max_sessions",
+                "over_span"
+              ],
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          }
+        },
+        "required": [
+          "section_id",
+          "day",
+          "sessions",
+          "span_minutes",
+          "issues"
+        ],
+        "title": "SectionDayIssue",
+        "type": "object"
+      },
       "SessionPattern": {
         "additionalProperties": false,
         "properties": {
@@ -4408,6 +4901,55 @@
           "durations"
         ],
         "title": "SessionPattern",
+        "type": "object"
+      },
+      "ShapeMetrics": {
+        "additionalProperties": false,
+        "properties": {
+          "orphan_section_days": {
+            "title": "Orphan Section Days",
+            "type": "integer"
+          },
+          "short_section_days": {
+            "title": "Short Section Days",
+            "type": "integer"
+          },
+          "over_span_section_days": {
+            "title": "Over Span Section Days",
+            "type": "integer"
+          },
+          "over_max_section_days": {
+            "title": "Over Max Section Days",
+            "type": "integer"
+          },
+          "max_span_minutes": {
+            "title": "Max Span Minutes",
+            "type": "integer"
+          },
+          "lectures_in_specialized_rooms": {
+            "title": "Lectures In Specialized Rooms",
+            "type": "integer"
+          },
+          "faculty_clopenings": {
+            "title": "Faculty Clopenings",
+            "type": "integer"
+          },
+          "idle_gap_minutes": {
+            "title": "Idle Gap Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "orphan_section_days",
+          "short_section_days",
+          "over_span_section_days",
+          "over_max_section_days",
+          "max_span_minutes",
+          "lectures_in_specialized_rooms",
+          "faculty_clopenings",
+          "idle_gap_minutes"
+        ],
+        "title": "ShapeMetrics",
         "type": "object"
       },
       "SolverOptions": {
@@ -5051,6 +5593,34 @@
             ],
             "default": null,
             "title": "Verification Reference"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "pattern_policy_180": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy 180"
           }
         },
         "title": "AcademicConstraints",
@@ -5295,6 +5865,23 @@
             ],
             "default": null,
             "title": "Patterns Override"
+          },
+          "pattern_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy"
           },
           "required_room_type": {
             "anyOf": [
@@ -6103,6 +6690,23 @@
             ],
             "default": null,
             "title": "Units"
+          },
+          "pattern_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy"
           }
         },
         "required": [
@@ -6264,6 +6868,57 @@
           "reason"
         ],
         "title": "CalendarException",
+        "type": "object"
+      },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
         "type": "object"
       },
       "Enrollment": {
@@ -7083,6 +7738,57 @@
         "title": "CalendarException",
         "type": "object"
       },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
+        "type": "object"
+      },
       "Enrollment": {
         "additionalProperties": false,
         "properties": {
@@ -7251,6 +7957,17 @@
           },
           "options": {
             "$ref": "#/$defs/SolverOptions"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -8676,6 +9393,34 @@
             ],
             "default": null,
             "title": "Verification Reference"
+          },
+          "daily_shape": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DailyShapeRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "pattern_policy_180": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy 180"
           }
         },
         "title": "AcademicConstraints",
@@ -8920,6 +9665,23 @@
             ],
             "default": null,
             "title": "Patterns Override"
+          },
+          "pattern_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy"
           },
           "required_room_type": {
             "anyOf": [
@@ -9678,6 +10440,23 @@
             ],
             "default": null,
             "title": "Units"
+          },
+          "pattern_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single",
+                  "split",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern Policy"
           }
         },
         "required": [
@@ -9760,6 +10539,57 @@
           "subject_id"
         ],
         "title": "Assignment",
+        "type": "object"
+      },
+      "DailyShapeRules": {
+        "additionalProperties": false,
+        "description": "Commuter-friendly section-day preferences. They never make a timetable infeasible.",
+        "properties": {
+          "min_sessions_per_active_day": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Min Sessions Per Active Day"
+          },
+          "max_sessions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Sessions Per Day"
+          },
+          "max_daily_span_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 60,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Daily Span Minutes"
+          }
+        },
+        "title": "DailyShapeRules",
         "type": "object"
       },
       "Enrollment": {

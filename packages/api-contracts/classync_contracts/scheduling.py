@@ -116,6 +116,33 @@ class Room(Contract):
         return [_validated_activity_type(item) for item in value]
 
 
+class DailyShapeRules(Contract):
+    """Commuter-friendly section-day preferences. They never make a timetable infeasible."""
+
+    min_sessions_per_active_day: int | None = Field(default=None, ge=1, le=6)
+    max_sessions_per_day: int | None = Field(default=None, ge=1, le=10)
+    max_daily_span_minutes: int | None = Field(default=None, ge=60, le=1440, multiple_of=30)
+
+    @model_validator(mode="after")
+    def ordered_session_bounds(self):
+        low, high = self.min_sessions_per_active_day, self.max_sessions_per_day
+        if low is not None and high is not None and low > high:
+            raise ValueError("Minimum sessions per day cannot exceed the maximum")
+        return self
+
+
+# single = one 180-minute block; split = two 90-minute sessions; flexible = either.
+PatternPolicy = Literal["single", "split", "flexible"]
+
+
+def omit_none(value: dict, *keys: str) -> dict:
+    """Keep payloads and hashes byte-identical while later optional fields are unset."""
+    for key in keys:
+        if value.get(key) is None:
+            value.pop(key, None)
+    return value
+
+
 class SessionPattern(Contract):
     id: str = Field(min_length=1)
     durations: list[int] = Field(min_length=1, max_length=7)
@@ -241,6 +268,11 @@ class GenerationInput(Contract):
     locked_assignments: list[Assignment] = Field(default_factory=list, max_length=7000)
     previous_assignments: list[Assignment] = Field(default_factory=list, max_length=7000)
     options: SolverOptions = Field(default_factory=SolverOptions)
+    daily_shape: DailyShapeRules | None = None
+
+    @model_serializer(mode="wrap")
+    def omit_absent_shape(self, handler):
+        return omit_none(handler(self), "daily_shape")
 
 
 class Diagnostic(Contract):
@@ -282,6 +314,35 @@ class ReadinessResult(Contract):
     diagnostics: list[Diagnostic]
 
 
+class ShapeMetrics(Contract):
+    orphan_section_days: int
+    short_section_days: int
+    over_span_section_days: int
+    over_max_section_days: int
+    max_span_minutes: int
+    lectures_in_specialized_rooms: int
+    faculty_clopenings: int
+    idle_gap_minutes: int
+
+
+class SectionDayIssue(Contract):
+    section_id: str
+    day: int
+    sessions: int
+    span_minutes: int
+    issues: list[Literal["below_min_sessions", "over_max_sessions", "over_span"]]
+
+
+class PolishReport(Contract):
+    moves: int
+    evaluations: int
+    elapsed_ms: int
+    truncated: bool
+    before: ShapeMetrics
+    after: ShapeMetrics
+    unmet: list[SectionDayIssue]
+
+
 class RunMetadata(Contract):
     solver: str = "OR-Tools CP-SAT"
     solver_version: str
@@ -290,6 +351,11 @@ class RunMetadata(Contract):
     time_limit_seconds: float
     objective: float | None = None
     best_bound: float | None = None
+    polish: PolishReport | None = None
+
+    @model_serializer(mode="wrap")
+    def omit_absent_polish(self, handler):
+        return omit_none(handler(self), "polish")
 
 
 class GenerationResult(Contract):
@@ -372,6 +438,8 @@ class DraftList(Contract):
 def scheduling_input_hash(inputs: GenerationInput):
     """Preserve S1 hashes when optional S2B workload constraints are absent."""
     value = inputs.model_dump(mode="json")
+    if value.get("daily_shape") is None:
+        value.pop("daily_shape", None)
     for teacher in value["teachers"]:
         if not teacher.get("synthetic"):
             teacher.pop("synthetic", None)

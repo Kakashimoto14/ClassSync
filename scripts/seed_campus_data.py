@@ -45,7 +45,7 @@ from pydantic import SecretStr, TypeAdapter  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 from sqlalchemy.engine import make_url  # noqa: E402
 
-from services.academic.app.record_rules import unique_label  # noqa: E402
+from services.academic.app.record_rules import default_constraints, unique_label  # noqa: E402
 
 PERIOD_TITLE = "AY 2026-2027 · 1st Semester"
 LEGACY_PERIOD_ID = "defense-ay-2026-2027-first"
@@ -348,6 +348,8 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
         shared_scope_verified=True,
         shared_scope_reference=REFERENCE,
         enrollments=[],
+        daily_shape=default_constraints().daily_shape,
+        pattern_policy_180=default_constraints().pattern_policy_180,
     )
     offering_by_section = defaultdict(list)
     for offering in offerings:
@@ -683,7 +685,10 @@ def apply_seed(repo) -> tuple[int, int]:
                         written += 1
                         # Refresh revisions after each successful record write.
                         index, _ = _record_indexes(repo.snapshot_in(db, period_id))
-                elif record.kind == "constraints" and _same(previous.record, AcademicConstraints()):
+                elif record.kind == "constraints" and any(
+                    _same(previous.record, untouched)
+                    for untouched in (AcademicConstraints(), default_constraints())
+                ):
                     repo.write_in(
                         db,
                         period_id,

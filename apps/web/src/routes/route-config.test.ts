@@ -56,3 +56,11 @@ describe('role aware route registry', () => {
     expect(mobileNavigationForRole('student')).toHaveLength(4);
   });
 });
+
+describe('connected scheduling rules route', () => {
+  it('is a real Administrator screen rather than a planned placeholder', () => {
+    const route = routeDefinitions.find((item) => item.path === '/admin/institutional-rules');
+    expect(route).toMatchObject({ role: 'administrator', kind: 'scheduling-rules' });
+    expect(route && 'plannedFeature' in route).toBe(false);
+  });
+});

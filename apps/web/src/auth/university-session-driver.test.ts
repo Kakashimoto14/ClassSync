@@ -164,6 +164,27 @@ it('rejects HTML fallback and wrong response UID', async () => {
   });
 });
 
+it.each([502, 503, 504, 0])(
+  'marks a cold-start failure (%s) as retryable and a denial as final',
+  async (status) => {
+    const driver = (await loadUniversitySessionDriver())!;
+    const signal = new AbortController().signal;
+    if (status)
+      request.mockResolvedValueOnce(
+        new Response('<html>waking</html>', { status, headers: { 'content-type': 'text/html' } }),
+      );
+    else request.mockRejectedValueOnce(new TypeError('network'));
+    await expect(driver.lookup(user, undefined, signal)).rejects.toMatchObject({
+      issue: 'unavailable',
+      retryable: true,
+    });
+    request.mockResolvedValueOnce(Response.json({ error: {} }, { status: 403 }));
+    await expect(driver.lookup(user, undefined, signal)).rejects.toMatchObject({
+      issue: 'denied',
+      retryable: false,
+    });
+  },
+);
 it('requires the Gateway auth boundary before showing local credential controls', async () => {
   sdk.dev = true;
   request.mockResolvedValueOnce(

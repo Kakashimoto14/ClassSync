@@ -12,6 +12,7 @@ from pathlib import Path
 from classync_contracts import scheduling
 from classync_contracts.academic import AcademicConstraints, AcademicRecord, AcademicResource
 from classync_contracts.curriculum import PROGRAMS, course, version
+from classync_contracts.scheduling import DailyShapeRules
 from pydantic import TypeAdapter
 
 adapter = TypeAdapter(AcademicRecord)
@@ -346,8 +347,20 @@ def validate_record(record, period_id, lookup, *, allow_cohort_change=False):
             )
 
 
+def default_constraints():
+    """Owner-authorized starting preferences for new periods; not verified CdM policy."""
+    return AcademicConstraints(
+        daily_shape=DailyShapeRules(
+            min_sessions_per_active_day=2,
+            max_sessions_per_day=4,
+            max_daily_span_minutes=540,
+        ),
+        pattern_policy_180="flexible",
+    )
+
+
 def initial_records(include_cdm_catalog):
-    records = [AcademicConstraints()]
+    records = [default_constraints()]
     if include_cdm_catalog:
         programs, rooms = catalog_data()
         records = (

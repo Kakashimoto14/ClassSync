@@ -1,19 +1,26 @@
 import { appMode } from '../config/runtime-config';
 import { env } from './env';
 import { firebaseApp } from './firebase';
+import { retryTransientRead, transientFailure } from './transient';
 import type { UserRole } from '../types/ui';
 
+interface RequestOptions {
+  method?: string;
+  body?: unknown;
+  signal?: AbortSignal;
+  role?: UserRole;
+  timeout?: number;
+}
+
+/** Only reads are retried: a repeated mutation could be applied twice. */
+export function institutionalRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return (options.method ?? 'GET') === 'GET'
+    ? retryTransientRead(() => send<T>(path, options), options.signal)
+    : send<T>(path, options);
+}
+
 /** Same-origin transport only; every service independently checks current membership. */
-export async function institutionalRequest<T>(
-  path: string,
-  options: {
-    method?: string;
-    body?: unknown;
-    signal?: AbortSignal;
-    role?: UserRole;
-    timeout?: number;
-  } = {},
-): Promise<T> {
+async function send<T>(path: string, options: RequestOptions): Promise<T> {
   if (
     appMode !== 'institutional' ||
     !/^(academic|scheduling|timetables|community)\//.test(path) ||
@@ -44,6 +51,7 @@ export async function institutionalRequest<T>(
       { once: true },
     );
   });
+  let sent = false;
   try {
     const { getAuth } = await Promise.race([import('firebase/auth'), aborted]);
     const user = firebaseApp ? getAuth(firebaseApp).currentUser : null;
@@ -52,6 +60,7 @@ export async function institutionalRequest<T>(
     const token = await Promise.race([user.getIdToken(), aborted]);
     if (getAuth(firebaseApp!).currentUser !== user || controller.signal.aborted)
       throw new DOMException('Request cancelled', 'AbortError');
+    sent = true;
     const response = await fetch(`${base.href.replace(/\/$/, '')}/${path}`, {
       method: options.method ?? 'GET',
       signal: controller.signal,
@@ -67,7 +76,9 @@ export async function institutionalRequest<T>(
       ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     });
     if (!response.headers.get('content-type')?.includes('application/json'))
-      throw new Error('The university service is unavailable. Please retry.');
+      throw Object.assign(new Error('The university service is unavailable. Please retry.'), {
+        status: response.status,
+      });
     const payload = await Promise.race([response.json(), aborted]);
     if (getAuth(firebaseApp!).currentUser !== user)
       throw Object.assign(new Error('Session changed.'), { status: 401 });
@@ -85,7 +96,10 @@ export async function institutionalRequest<T>(
   } catch (error) {
     if (options.signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
     if (controller.signal.aborted)
-      throw new Error('The university request timed out. Please retry.');
+      // A stalled sign-in token is not a service cold start; only retry a sent request.
+      throw sent
+        ? transientFailure('The university request timed out. Please retry.')
+        : new Error('The university request timed out. Please retry.');
     throw error;
   } finally {
     clearTimeout(timer);

@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useState } from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -95,4 +95,53 @@ it('does not attach an observer when asynchronous setup finishes after unmount',
   const observe = vi.fn();
   await act(async () => resolve({ observe, lookup: vi.fn(), signOut: vi.fn() }));
   expect(observe).not.toHaveBeenCalled();
+});
+it('keeps the page and cached data across focus, visibility and resize events', async () => {
+  let next!: (identity: UniversityIdentity | null) => void;
+  const driver: UniversitySessionDriver = {
+    observe: (listener) => {
+      next = listener;
+      return () => {};
+    },
+    lookup: vi.fn().mockResolvedValue({
+      uid: 'u',
+      tenant_id: 't',
+      role: 'student',
+      student_id: 's',
+      membership_revision: 1,
+    }),
+    signOut: vi.fn(),
+  };
+  source.load.mockResolvedValue(driver);
+  const queryClient = new QueryClient();
+  let mounts = 0;
+  function Workspace() {
+    const { state } = useUniversitySession();
+    const [mount] = useState(() => ++mounts);
+    return state.status === 'authorized' ? <input aria-label={`draft ${mount}`} /> : <Status />;
+  }
+  render(
+    <QueryClientProvider client={queryClient}>
+      <UniversitySessionProvider>
+        <Workspace />
+      </UniversitySessionProvider>
+    </QueryClientProvider>,
+  );
+  await waitFor(() => expect(source.load).toHaveBeenCalled());
+  await act(async () => next({ uid: 'u', getIdToken: vi.fn() }));
+  const input = screen.getByRole<HTMLInputElement>('textbox');
+  input.value = 'unsaved';
+  queryClient.setQueryData(['private'], 'kept');
+  await act(async () => {
+    window.dispatchEvent(new Event('blur'));
+    window.dispatchEvent(new Event('focus'));
+    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event('pageshow'));
+    document.dispatchEvent(new Event('visibilitychange'));
+    next({ uid: 'u', getIdToken: vi.fn() });
+  });
+  expect(screen.getByRole('textbox')).toBe(input);
+  expect(input.value).toBe('unsaved');
+  expect(queryClient.getQueryData(['private'])).toBe('kept');
+  expect(driver.lookup).toHaveBeenCalledTimes(1);
 });

@@ -1,5 +1,35 @@
 # Requirements -> implementation -> evidence
 
+### 28 November 2026 — Phase C / Slice C1
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Focus, visibility, resize and token refresh never unmount or wipe cache | `university-session.ts`, `UniversitySessionProvider.tsx`; session and provider Vitest | VERIFIED in jsdom; no real-browser check |
+| Cold-start retry before "unavailable" | `university-session-driver.ts`, `transient.ts`; driver and API Vitest | VERIFIED by unit tests; no hosted cold start |
+| Per-period day-shape preferences and 180-minute pattern policy | contracts, `academic_input.resolve_patterns`; `test_commuter_polish.py` | VERIFIED locally |
+| Bounded deterministic commuter polish, at most 1.0 s | `polish.py` (validator re-run after every move in tests); campus runtime test | VERIFIED on Windows; 19 of the campus section-days still exceed 9 h |
+| Administrator rules screen and polish summary | `SchedulingRulesPage.tsx`, `PolishSummary.tsx`; Vitest | VERIFIED by Vitest; no browser check |
+
+### Canonical hard-constraint mapping (owner-confirmed 27 November 2026)
+
+| Code | Constraint |
+| --- | --- |
+| H1 | Room overlap |
+| H2 | Instructor overlap |
+| H3 | Section overlap |
+| H4 | Student (cross-section enrollment) overlap |
+| H5 | Eligibility, including excluded-space locks: the 12 excluded campus spaces are never eligible |
+| H6 | Room type, capacity, equipment, program and activity requirements |
+| H7 | Operating hours |
+| H8 | Instructor availability |
+| H9 | Room availability and dated restrictions |
+| H10 | Instructor subject readiness (eligibility for the subject) |
+| H11 | Instructor weekly and daily workload |
+| H12 | Maximum continuous teaching |
+| H13 | Transition buffer |
+| H14 | Locked assignments |
+| H15 | Weekly minutes, permitted pattern and distinct days |
+
 ### 27 November 2026 — Phase B / Slice 4
 
 | Requirement | Implementation / evidence | Current status |
