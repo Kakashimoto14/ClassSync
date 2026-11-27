@@ -26,6 +26,8 @@ class ConflictPrompt(BaseModel):
 class ConflictSuggestion(BaseModel):
     assignment: Assignment
     reason: str = Field(min_length=1, max_length=240)
+    # A two-step repair also moves one flexible lecture; apply both or neither.
+    also_moves: Assignment | None = None
 
 
 class ConflictAdvice(BaseModel):

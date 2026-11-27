@@ -158,6 +158,7 @@ def dated_occurrences(inputs, assignments, calendar, start, end):
                 ],
                 "max_daily": teacher.max_daily_minutes,
                 "max_weekly": teacher.max_weekly_minutes,
+                "max_continuous": teacher.max_continuous_minutes,
             }
         )
     return events

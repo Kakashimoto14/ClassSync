@@ -258,18 +258,19 @@ def test_apply_reuses_prepopulated_catalog_ids_and_is_idempotent():
 
     records = [record for record, _ in repo.records.values()]
     programs = {record.id for record in records if record.kind == "programs"}
-    assert sum(record.kind == "offerings" for record in records) == 54
+    # Phase B: BSIT's 54 offerings plus 193 for the seven other degree programs.
+    assert sum(record.kind == "offerings" for record in records) == 247
     assert first_written > 0
     assert second_written == 0
-    assert first_students == 96
+    assert first_students == 432
     assert second_students == 0
     seeded_faculty = {record.id for record in records if record.kind == "faculty"}
-    assert len(seeded_faculty) == 12
+    assert len(seeded_faculty) == 57
     # Every seeded faculty record gets exactly one identity, once, linked to a person row.
     assert set(repo.faculty) == seeded_faculty
-    assert repo.faculty_inserts == 12  # the rerun inserted none
+    assert repo.faculty_inserts == 57  # the rerun inserted none
     assert set(repo.faculty.values()) <= repo.people
-    assert len(repo.people) == 96 + 12
+    assert len(repo.people) == 432 + 57
     assert all(
         set(record.program_ids) <= programs
         for record in records
@@ -327,7 +328,7 @@ def test_reapplying_after_the_legacy_period_was_archived_is_a_clean_no_op():
     repo.faculty.clear()
     repo.faculty_inserts = 0
     assert apply_seed(repo) == (0, 0)
-    assert set(repo.faculty) == expected and repo.faculty_inserts == 12
+    assert set(repo.faculty) == expected and repo.faculty_inserts == 57
     assert (repo.legacy["revision"], repo.archive_events) == (5, [5])
 
 

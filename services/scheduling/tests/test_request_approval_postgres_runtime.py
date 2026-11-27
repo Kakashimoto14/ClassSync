@@ -259,7 +259,8 @@ def test_teacher_room_options_and_slot_occupancy(world, api):
     assert len(excluded_space_ids()) == 12 and not set(states) & excluded_space_ids()
     assert states[world.mine.room_id] == states[world.occupied_room] == "occupied"
     assert states[world.free_room] == "free"
-    assert slot["restrictions_checked"] is False
+    # 0028: Teachers see reservations as room ids, so restrictions are now checked.
+    assert slot["restrictions_checked"] is True
 
 
 def test_teacher_request_creation_succeeds_or_is_refused(world, api):

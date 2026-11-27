@@ -5,6 +5,7 @@ import type {
   GenerationInput,
   GenerationResult,
 } from '../../../../packages/shared-types/src/scheduling';
+import { INSTITUTES, instituteCode } from '../lib/program-scope';
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const time = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
@@ -17,6 +18,7 @@ export function SchedulingTimetable({
 }) {
   const [grouping, setGrouping] = useState('day');
   const [filters, setFilters] = useState({
+    institute: '',
     program: '',
     section: '',
     teacher: '',
@@ -25,9 +27,11 @@ export function SchedulingTimetable({
   });
   const sections = input.sections ?? [];
   const offerings = input.offerings ?? [];
+  const programInstitute = new Map((input.programs ?? []).map((p) => [p.id, instituteCode(p.institute)]));
   const filtered = (result?.assignments ?? []).filter((a) => {
     const section = sections.find((s) => s.id === a.section_id);
     return (
+      (!filters.institute || programInstitute.get(section?.program_id ?? '') === filters.institute) &&
       (!filters.program || section?.program_id === filters.program) &&
       (!filters.section || a.section_id === filters.section) &&
       (!filters.teacher || a.teacher_id === filters.teacher) &&
@@ -38,11 +42,14 @@ export function SchedulingTimetable({
   return (
     <>
       <details className="ux-timetable-filters">
-        <summary>Filter timetable · Section, teacher, room and day</summary>
+        <summary>Filter timetable · Institute, program, section, teacher, room and day</summary>
         <div className="scheduler-filters" aria-label="Timetable filters">
           {(
             [
-              ['program', 'Program', (input.programs ?? []).map((p) => [p.id, p.acronym])],
+              ['institute', 'Institute', INSTITUTES.map((code) => [code, code])],
+              ['program', 'Program', (input.programs ?? [])
+                .filter((p) => !filters.institute || programInstitute.get(p.id) === filters.institute)
+                .map((p) => [p.id, p.acronym])],
               ['section', 'Section', sections.map((s) => [s.id, sectionLabel(s, input)])],
               ['teacher', 'Teacher', (input.teachers ?? []).map((t) => [t.id, t.name])],
               ['room', 'Room', (input.rooms ?? []).map((r) => [r.id, r.name])],

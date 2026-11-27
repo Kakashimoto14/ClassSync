@@ -27,6 +27,31 @@ STATUSES = {
 }
 
 
+FEASIBILITY_SHARE = 0.6
+# Above this many candidate sessions the soft phase cannot improve on the feasible timetable
+# inside the budget: measured on the 247-offering campus dataset, loading the soft model alone
+# took about 4 s and returned the phase-1 timetable unchanged at every budget tried.
+SOFT_PHASE_SESSION_LIMIT = 150
+# Wall-clock ceiling as a multiple of the budget. Search is bounded by CP-SAT deterministic
+# time, so one input yields the same timetable on any machine unless this ceiling is hit.
+WALL_CLOCK_CEILING = 3
+
+
+def configure(solver, inputs, deterministic_seconds, started):
+    elapsed = perf_counter() - started
+    solver.parameters.max_deterministic_time = max(0.000001, deterministic_seconds)
+    solver.parameters.max_time_in_seconds = max(
+        0.000001, inputs.options.time_limit_seconds * WALL_CLOCK_CEILING - elapsed
+    )
+    solver.parameters.random_seed = inputs.options.seed
+    solver.parameters.num_search_workers = 1
+    # Timetabling here is propagation-driven: LP relaxations and probing cost seconds of wall
+    # time on the full campus model for no search benefit. Results are validated either way.
+    solver.parameters.linearization_level = 0
+    solver.parameters.cp_model_probing_level = 0
+    solver.parameters.max_presolve_iterations = 1
+
+
 def generate_week(inputs: GenerationInput):
     started = perf_counter()
     digest = scheduling_input_hash(inputs)
@@ -77,16 +102,17 @@ def generate_week(inputs: GenerationInput):
         result.solver_status = "invalid_model"
         result.diagnostics = [Diagnostic(code="invalid_model", message=invalid)]
         return finish()
+    budget = inputs.options.time_limit_seconds
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = inputs.options.time_limit_seconds
-    solver.parameters.random_seed = inputs.options.seed
-    solver.parameters.num_search_workers = 1
+    configure(solver, inputs, budget * FEASIBILITY_SHARE, started)
     # Find a complete feasible incumbent before optimizing expensive soft proxies.
     # Both phases use CP-SAT. A satisfaction proof is never labelled objective-optimal.
-    solver.parameters.max_time_in_seconds = inputs.options.time_limit_seconds * 0.6
     status = solver.solve(model)
     optimized = False
-    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+    soft_skipped = len(sessions) > SOFT_PHASE_SESSION_LIMIT
+    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE) and soft_skipped:
+        status = cp_model.FEASIBLE
+    elif status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         incumbent = solver
         values = [
             incumbent.value(model.get_int_var_from_proto_index(i))
@@ -95,11 +121,8 @@ def generate_week(inputs: GenerationInput):
         add_objectives(model, sessions, inputs)
         for i, value in enumerate(values):
             model.add_hint(model.get_int_var_from_proto_index(i), value)
-        remaining = inputs.options.time_limit_seconds - incumbent.wall_time
         optimizing = cp_model.CpSolver()
-        optimizing.parameters.max_time_in_seconds = max(0.000001, remaining)
-        optimizing.parameters.random_seed = inputs.options.seed
-        optimizing.parameters.num_search_workers = 1
+        configure(optimizing, inputs, budget * (1 - FEASIBILITY_SHARE), started)
         optimizing.parameters.cp_model_presolve = False
         optimized_status = optimizing.solve(model)
         if optimized_status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
@@ -185,8 +208,14 @@ def generate_week(inputs: GenerationInput):
                 code="optimization_limit",
                 message=(
                     "The complete feasible timetable was independently validated. "
-                    "Soft optimization did not establish a scored incumbent before its limit; "
-                    "no optimum is claimed."
+                    + (
+                        f"Soft preferences were not scored: {len(sessions)} candidate sessions "
+                        f"exceed the in-budget limit of {SOFT_PHASE_SESSION_LIMIT}. "
+                        if soft_skipped
+                        else "Soft optimization did not establish a scored incumbent before "
+                        "its limit; "
+                    )
+                    + "No optimum is claimed."
                 ),
             )
         )

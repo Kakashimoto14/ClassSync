@@ -84,6 +84,8 @@ class Teacher(Contract):
     preferred_days: list[int] = Field(default_factory=list)
     max_weekly_minutes: int | None = Field(default=None, ge=0, le=10080, multiple_of=30)
     max_daily_minutes: int | None = Field(default=None, ge=0, le=1440, multiple_of=30)
+    # Longest uninterrupted teaching block; a break of at least 30 minutes must follow it.
+    max_continuous_minutes: int | None = Field(default=None, ge=30, le=1440, multiple_of=30)
 
 
 class Room(Contract):
@@ -206,6 +208,13 @@ class ObjectiveWeights(Contract):
     building_changes: int = Field(default=2, ge=0, le=100)
     disruption: int = Field(default=5, ge=0, le=100)
     room_balance: int = Field(default=1, ge=0, le=100)
+    specialized_rooms: int = Field(default=3, ge=0, le=100)
+    shift_compactness: int = Field(default=1, ge=0, le=100)
+    faculty_rest: int = Field(default=2, ge=0, le=100)
+
+
+# Weights added after S1; omitted from the input hash while they hold their defaults.
+LATER_WEIGHT_DEFAULTS = {"specialized_rooms": 3, "shift_compactness": 1, "faculty_rest": 2}
 
 
 class SolverOptions(Contract):
@@ -239,6 +248,15 @@ class Diagnostic(Contract):
     message: str
     offering_id: str | None = None
     assignment_ids: list[str] = Field(default_factory=list)
+    # Administrator setup screen that resolves the diagnostic, e.g. "/admin/teachers".
+    action_path: str | None = Field(default=None, pattern=r"^/admin(/[a-z-]+)+$")
+
+    @model_serializer(mode="wrap")
+    def omit_absent_action(self, handler):
+        value = handler(self)
+        if value.get("action_path") is None:
+            value.pop("action_path", None)
+        return value
 
 
 class Coverage(Contract):
@@ -357,9 +375,13 @@ def scheduling_input_hash(inputs: GenerationInput):
     for teacher in value["teachers"]:
         if not teacher.get("synthetic"):
             teacher.pop("synthetic", None)
-        for key in ("max_weekly_minutes", "max_daily_minutes"):
+        for key in ("max_weekly_minutes", "max_daily_minutes", "max_continuous_minutes"):
             if teacher.get(key) is None:
                 teacher.pop(key, None)
+    weights = value["options"]["weights"]
+    for key, default in LATER_WEIGHT_DEFAULTS.items():
+        if weights.get(key) == default:
+            weights.pop(key, None)
     for enrollment in value["enrollments"]:
         for key in ("entry_cohort_year", "curriculum_version_id"):
             if enrollment.get(key) is None:

@@ -81,6 +81,7 @@ jobs:
       - run: npm run test:security
       - run: npm run test:web
       - run: npm run build
+      - run: node scripts/check_bundle_budget.mjs
       - run: npm run test:artifacts
       - name: Build the read-only public presentation without cloud credentials
         run: npm run build:presentation

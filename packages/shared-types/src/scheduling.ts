@@ -35,6 +35,7 @@ export type AcademicFaculty = {
   preferred_days?: Array<number>;
   max_weekly_minutes?: number | null;
   max_daily_minutes?: number | null;
+  max_continuous_minutes?: number | null;
   kind?: "faculty";
   active?: boolean;
   subject_ids?: Array<string>;
@@ -228,6 +229,7 @@ export type Diagnostic = {
   message: string;
   offering_id?: string | null;
   assignment_ids?: Array<string>;
+  action_path?: string | null;
 };
 
 export type DraftDetail = {
@@ -339,6 +341,9 @@ export type ObjectiveWeights = {
   building_changes?: number;
   disruption?: number;
   room_balance?: number;
+  specialized_rooms?: number;
+  shift_compactness?: number;
+  faculty_rest?: number;
 };
 
 export type Offering = {
@@ -389,6 +394,7 @@ export type ReadinessIssue = {
   code: string;
   message: string;
   record_id?: string | null;
+  action_path?: string | null;
 };
 
 export type ReadinessResult = {
@@ -493,6 +499,7 @@ export type Teacher = {
   preferred_days?: Array<number>;
   max_weekly_minutes?: number | null;
   max_daily_minutes?: number | null;
+  max_continuous_minutes?: number | null;
 };
 
 export type ValidationInput = {

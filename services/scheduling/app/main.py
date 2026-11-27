@@ -38,7 +38,14 @@ from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from .academic_input import academic_readiness
-from .advisor import Advice, ConflictAdvice, ConflictPrompt, HealthPrompt, _advise
+from .advisor import (
+    Advice,
+    ConflictAdvice,
+    ConflictPrompt,
+    ConflictSuggestion,
+    HealthPrompt,
+    _advise,
+)
 from .authorization import configured_scheduling
 from .catalog import catalogs, synthetic_scenario
 from .classroom_requests import router as classroom_requests_router
@@ -47,7 +54,10 @@ from .engine import generate_week
 from .occurrences import occurrences
 from .provider import institutional_repository
 from .publication_api import router as publication_router
+from .publication_api import term_restrictions
 from .readiness import readiness
+from .repair import EVALUATION_LIMIT, Repair
+from .restriction_windows import with_room_restrictions
 from .validation import validate_timetable
 
 
@@ -291,6 +301,39 @@ def get_draft(draft_id: str, request: Request):
     return connected_repository(request, owner).get(draft_id)
 
 
+def deterministic_repair(inputs, assignments, target, context):
+    """Validated one-move or two-step options found without the AI advisor."""
+    options = Repair(inputs, assignments).suggest(target)
+    if not options:
+        return ConflictAdvice(
+            available=False,
+            message=(
+                f"{context} No conflict-free one- or two-step repair was found within "
+                f"{EVALUATION_LIMIT} checks. Adjust the academic constraints and validate again."
+            ),
+        )
+    subjects = {o.id: o.subject_name for o in inputs.offerings}
+    suggestions = []
+    for option in options:
+        moved = option[target.id]
+        other = next((value for key, value in option.items() if key != target.id), None)
+        reason = (
+            f"Validated two-step repair: also moves {subjects.get(other.offering_id, 'a lecture')} "
+            f"to day {other.day + 1}, {other.start // 60:02d}:{other.start % 60:02d}."
+            if other
+            else "Validated move with no hard conflicts."
+        )
+        suggestions.append(ConflictSuggestion(assignment=moved, reason=reason, also_moves=other))
+    return ConflictAdvice(
+        available=True,
+        message=(
+            f"{context} Deterministic repair options; each passed full validation. "
+            "Apply creates a separately validated draft."
+        ),
+        suggestions=suggestions,
+    )
+
+
 @app.post("/api/v1/scheduling/drafts/{draft_id}/advisor/conflict", response_model=ConflictAdvice)
 async def conflict_advice(draft_id: str, body: ConflictPrompt, request: Request):
     _, owner = authorize(request, False)
@@ -299,17 +342,16 @@ async def conflict_advice(draft_id: str, body: ConflictPrompt, request: Request)
         raise HTTPException(403, "Institutional schedule draft required")
     inputs = draft.input_snapshot
     assignments = draft.generation_result.assignments
-    if len(assignments) > 120:
-        return ConflictAdvice(
-            available=False,
-            message=(
-                "AI conflict advice is limited to drafts with at most 120 assignments. "
-                "The complete deterministic validation and editing workflow remains available."
-            ),
-        )
     target = next((item for item in assignments if item.id == body.assignment_id), None)
     if target is None:
         raise HTTPException(404, "Assignment is not part of this draft")
+    if len(assignments) > 120:
+        return deterministic_repair(
+            inputs,
+            assignments,
+            target,
+            "AI ranking is limited to drafts with at most 120 assignments.",
+        )
     offering = next((item for item in inputs.offerings if item.id == target.offering_id), None)
     if offering is None:
         raise HTTPException(409, "Assignment offering is unavailable")
@@ -370,13 +412,7 @@ async def conflict_advice(draft_id: str, body: ConflictPrompt, request: Request)
         "alternatives": alternatives,
     }
     if not alternatives:
-        return ConflictAdvice(
-            available=False,
-            message=(
-                "No conflict-free alternatives were found by the deterministic validator. "
-                "Adjust the academic constraints and validate again."
-            ),
-        )
+        return deterministic_repair(inputs, assignments, target, "No single move was found.")
     result = await _advise(
         settings, prompt, shape="conflict", option_assignments=option_assignments
     )
@@ -531,7 +567,13 @@ def generate_academic(period_id, body, request, sandbox):
         raise HTTPException(
             422, {"code": "academic_not_ready", "issues": [i.model_dump() for i in checked.issues]}
         )
-    return execute(checked.inputs, scope, owner, storage=storage)
+    inputs = checked.inputs
+    if not sandbox:
+        # Dated restrictions would block publication of any weekly placement they touch.
+        inputs = with_room_restrictions(
+            inputs, snapshot.period.calendar, term_restrictions(request)
+        )
+    return execute(inputs, scope, owner, storage=storage)
 
 
 @app.post(

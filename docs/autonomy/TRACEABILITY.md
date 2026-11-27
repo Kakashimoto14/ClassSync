@@ -1,5 +1,20 @@
 # Requirements -> implementation -> evidence
 
+### 27 November 2026 — Phase B / Slice 4
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| H12 max continuous teaching | `max_continuous_minutes`; `constraint_model.add_continuous_limit`, `validation.teaching_blocks`, `PublicationRules.continuous_teaching`; `test_phase_b_constraints.py` | VERIFIED locally |
+| H9 dated restrictions in generation | `restriction_windows.with_room_restrictions` in Administrator generation | VERIFIED by unit tests; generation route with stored restrictions IMPLEMENTED-UNVERIFIED |
+| H13/H14 on Teacher requests | buffer padding in occupancy; `locked_warnings` in preflight | VERIFIED locally (unit + PostgreSQL 18) |
+| Pre-flight capacity audit with setup links | `readiness.capacity_audit`, `action_path`, `readiness-navigation.ts` | VERIFIED locally |
+| Deterministic campus solve in budget | `engine.configure`, exact model reductions; `test_seed_all_programs_postgres_runtime.py` | VERIFIED on Windows (4.89 s); Linux CI and RSS unverified |
+| Soft rules | `objectives.py` terms | VERIFIED on small inputs; NOT applied to the full campus (soft phase skipped above 150 sessions) |
+| Bounded two-step repair | `repair.Repair`, `main.deterministic_repair` | VERIFIED by unit test |
+| All seven other degree programs seeded; TCP row only | `seed_program_catalog.py`; `test_seed_program_catalog.py`; PostgreSQL idempotency and edit preservation | VERIFIED locally; not applied to Neon |
+| Institute/Program filters | `program-scope.ts`; setup tabs, draft and published timetables | Setup tabs VERIFIED by Vitest; timetables typecheck only; no browser check |
+| Cross-scope room occupancy without leakage | Migration `0028`; `room_occupancy.occupied_rooms`; `test_room_occupancy_postgres_runtime.py` | VERIFIED on disposable PostgreSQL 18; NOT applied to Neon |
+
 ### 26 November 2026 — Request approval on PostgreSQL
 
 | Requirement | Implementation / evidence | Current status |

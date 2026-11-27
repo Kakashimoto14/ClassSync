@@ -505,6 +505,27 @@ def availability(request: Request, room_id: str, start: datetime, end: datetime)
     return availability_for(request, False, room_id, start, end)
 
 
+def term_restrictions(request):
+    """Stored institutional room restrictions for the generation path (Administrator only)."""
+    settings = settings_only()
+    claims = require_administrator(request, settings)
+    if settings.scheduling_database_url is not None:
+        _, repo = scoped_repo(request, claims)
+        try:
+            return repo.restriction_list("institutional")
+        except DraftError as error:
+            raise HTTPException(error.status, str(error)) from error
+    _, repo = settings_and_repo()
+    with repo.drafts.connection() as db:
+        return [
+            json.loads(row[0])
+            for row in db.execute(
+                "SELECT payload FROM publication_room_restrictions WHERE tenant=? AND dataset=?",
+                (claims.get("tenant_id"), "institutional"),
+            )
+        ]
+
+
 @router.put("/restrictions/{restriction_id}")
 def save_restriction(restriction_id: str, body: RoomRestriction, request: Request):
     settings = settings_only()

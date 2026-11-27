@@ -3,7 +3,7 @@
 from typing import Annotated, Literal
 from uuid import uuid4
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_serializer, model_validator
 
 from .calendar import AcademicCalendar
 from .email_address import normalize_email
@@ -278,6 +278,15 @@ class ReadinessIssue(Contract):
     code: str
     message: str
     record_id: str | None = None
+    # Administrator setup screen that resolves the issue, e.g. "/admin/teachers".
+    action_path: str | None = Field(default=None, pattern=r"^/admin(/[a-z-]+)+$")
+
+    @model_serializer(mode="wrap")
+    def omit_absent_action(self, handler):
+        value = handler(self)
+        if value.get("action_path") is None:
+            value.pop("action_path", None)
+        return value
 
 
 class AcademicReadiness(Contract):

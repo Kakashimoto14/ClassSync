@@ -257,7 +257,7 @@ def options_publication(occupied):
         head=lambda *_: 1,
         project=lambda *_: {"occurrences": [event]},
         decode=lambda *_: {"draft": SimpleNamespace(input_snapshot=source)},
-        occupancy_in=lambda *_, **__: (occupied, set()),
+        member_occupancy=lambda *_, **__: (occupied, set()),
     )
 
 
@@ -386,18 +386,33 @@ def test_storage_failures_are_not_reported_as_conflicts(monkeypatch):
     assert error.value.status == 503
 
 
-def preflight_requests(monkeypatch, row, *, check=None, report=None):
+def preflight_requests(monkeypatch, row, *, check=None, report=None, locked=()):
     @contextmanager
     def session(**_):
         yield Mock()
 
+    snapshot = SimpleNamespace(locked_assignments=[SimpleNamespace(id=i) for i in locked])
     publication = SimpleNamespace(
-        session=session, publish_in=lambda *_, **__: report or {"occurrences": 10}
+        session=session,
+        publish_in=lambda *_, **__: report or {"occurrences": 10},
+        keys={"tenant": "tenant"},
+        rows=lambda *_: [{"id": "v1", "revision": 1}],
+        decode=lambda *_: {"draft": SimpleNamespace(input_snapshot=snapshot)},
     )
     requests = Requests(publication)
     monkeypatch.setattr(requests, "request_row", lambda *_, **__: row)
     monkeypatch.setattr(requests, "check_candidate", check or (lambda *_: "command"))
     return requests
+
+
+def test_preflight_warns_when_a_locked_session_would_move(monkeypatch):
+    row = request_row()
+    assignment = row["occurrence_id"].rsplit(":", 1)[0]
+    clear = preflight_requests(monkeypatch, row).preflight(uuid4())
+    assert clear["state"] == "clear" and clear["warnings"] == []
+    locked = preflight_requests(monkeypatch, row, locked=[assignment]).preflight(uuid4())
+    assert locked["state"] == "clear"
+    assert [w["code"] for w in locked["warnings"]] == ["locked_assignment"]
 
 
 def test_preflight_reports_clear_conflict_stale_and_decided(monkeypatch):
@@ -533,6 +548,12 @@ def slot_repo(role="student"):
         first = schedulable_spaces()[0].id
         return {first}, set()
 
+    def member_occupancy(db, dataset, begin, finish):
+        # Non-Administrators read tenant-wide room-only occupancy (migration 0028).
+        calls["member"] = dataset
+        first = schedulable_spaces()[0].id
+        return {first}, set()
+
     repo = SimpleNamespace(
         keys={"tenant": "tenant"},
         session=session,
@@ -540,6 +561,7 @@ def slot_repo(role="student"):
         rows=lambda *_: [{"id": "v1", "revision": 1}],
         decode=lambda *_: value,
         occupancy_in=occupancy_in,
+        member_occupancy=member_occupancy,
     )
     return repo, calls
 
@@ -558,7 +580,9 @@ def test_slot_lists_41_rooms_with_occupancy_only_for_an_enrolled_student():
     assert {room["occupancy"] for room in result["rooms"][1:]} == {"free"}
     assert not {room["id"] for room in result["rooms"]} & excluded_space_ids()
     assert calls["session"] == {"role": "student", "record_id": "student-1"}
-    assert calls["restrictions"] is False and result["restrictions_checked"] is False
+    # Students see reservations too, as room ids only; never the restriction details.
+    assert "restrictions" not in calls and calls["member"] == "institutional"
+    assert result["restrictions_checked"] is True
 
 
 def test_slot_denies_unenrolled_students():

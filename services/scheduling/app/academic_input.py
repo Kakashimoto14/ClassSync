@@ -6,7 +6,10 @@ from classync_contracts.academic import AcademicReadiness, AcademicSnapshot, Rea
 from classync_contracts.scheduling import GenerationInput, Offering, Program, Room, Section, Teacher
 from pydantic import ValidationError
 
+from .catalog import excluded_space_ids
 from .readiness import infeasibility_diagnostics, readiness
+
+DAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
 def solver_fields(record, model):
@@ -43,9 +46,15 @@ def academic_readiness(snapshot: AcademicSnapshot):
     rules = next(iter(by_kind["constraints"].values()), None)
     issues = []
 
-    def issue(code, message, identity=None, severity="blocking"):
+    def issue(code, message, identity=None, severity="blocking", action_path=None):
         issues.append(
-            ReadinessIssue(code=code, message=message, record_id=identity, severity=severity)
+            ReadinessIssue(
+                code=code,
+                message=message,
+                record_id=identity,
+                severity=severity,
+                action_path=action_path,
+            )
         )
 
     if not active_sections:
@@ -241,6 +250,14 @@ def academic_readiness(snapshot: AcademicSnapshot):
                 f"{label}: select eligible classroom resources.",
                 offering.id,
             )
+        if excluded := sorted(set(offering.room_ids) & excluded_space_ids()):
+            issue(
+                "excluded_space_selected",
+                f"{label}: remove excluded campus spaces ({', '.join(excluded)}); "
+                "they are never schedulable.",
+                offering.id,
+                action_path="/admin/offerings",
+            )
         if any(
             identity not in rooms or not rooms[identity].active for identity in offering.room_ids
         ):
@@ -354,6 +371,21 @@ def academic_readiness(snapshot: AcademicSnapshot):
             )
         except ValidationError as error:
             issue("session_requirement", f"{label}: {error.errors()[0]['msg']}", offering.id)
+    calendar = snapshot.period.calendar
+    if rules and calendar and (
+        outside := sorted(
+            {w.day for w in rules.operating_windows} - set(calendar.instructional_days)
+        )
+    ):
+        issue(
+            "operating_days_outside_calendar",
+            "Operating windows on "
+            + ", ".join(DAY_NAMES[day] for day in outside)
+            + " are ignored because the academic calendar does not list them as "
+            "instructional days.",
+            severity="warning",
+            action_path="/admin/academic",
+        )
     if rules and not rules.all_intended_offerings_supplied:
         issue(
             "scope_not_complete",
@@ -418,7 +450,12 @@ def academic_readiness(snapshot: AcademicSnapshot):
                 message = f"{label}: {diagnostic.message}" if label else diagnostic.message
                 for identity, section_label in section_labels.items():
                     message = message.replace(f"Section {identity} ", f"Section {section_label} ")
-                issue(diagnostic.code, message, diagnostic.offering_id)
+                issue(
+                    diagnostic.code,
+                    message,
+                    diagnostic.offering_id,
+                    action_path=diagnostic.action_path,
+                )
 
             for diagnostic in readiness(inputs):
                 report(diagnostic)

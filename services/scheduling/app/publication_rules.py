@@ -201,6 +201,7 @@ class PublicationRules:
                         "publication_workload",
                         "An effective-dated revision exceeds the teacher workload limit.",
                     )
+        self.continuous_teaching(grouped)
         for (kind, _), items in grouped.items():
             active = []
             for event in sorted(items, key=lambda e: e["starts_at"]):
@@ -220,6 +221,35 @@ class PublicationRules:
                         f"{kind.title()} conflict between {active[0]['id']} and {event['id']}.",
                     )
                 active.append(event)
+
+    @staticmethod
+    def continuous_teaching(grouped):
+        """Dated equivalent of the validator's continuous-teaching block rule."""
+        from .validation import REST_BREAK_MINUTES
+
+        for (kind, _), items in grouped.items():
+            limits = [e["max_continuous"] for e in items if e.get("max_continuous") is not None]
+            if kind != "teacher" or not limits:
+                continue
+            limit, block, end = min(limits), 0, None
+            for event in sorted(items, key=lambda e: e["starts_at"]):
+                begin = datetime.fromisoformat(event["starts_at"])
+                finish = datetime.fromisoformat(event["ends_at"])
+                minutes = int((finish - begin).total_seconds() // 60)
+                near = (
+                    end is not None
+                    and begin.date() == end.date()
+                    and begin - end < timedelta(minutes=REST_BREAK_MINUTES)
+                )
+                block = block + minutes if near else minutes
+                end = finish
+                if block > limit:
+                    raise DraftError(
+                        422,
+                        "publication_workload",
+                        "An effective-dated revision exceeds the teacher continuous "
+                        "teaching limit.",
+                    )
 
     def summary(self, row, db):
         payload = self.decode(row)
@@ -305,6 +335,7 @@ class PublicationRules:
             e.pop("buffer", None)
             e.pop("max_daily", None)
             e.pop("max_weekly", None)
+            e.pop("max_continuous", None)
             e.pop("students", None)
         calendar = latest["calendar"].model_dump(mode="json")
         calendar["published_version"] = rows[-1]["id"]

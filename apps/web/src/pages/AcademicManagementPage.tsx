@@ -25,6 +25,7 @@ import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicPeriodSetup } from './AcademicPeriodSetup';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { provisionalCdmRooms } from '../data/cdm-room-inventory';
+import { INSTITUTES, programScope, type ScopedRecord } from '../lib/program-scope';
 const schedulingSandboxEnabled = appMode !== 'presentation';
 
 export function AcademicManagementPage({
@@ -75,6 +76,8 @@ function ManagementContent({
   const [recordSearch, setRecordSearch] = useState('');
   const [yearFilter, setYearFilter] = useState<'all' | '1' | '2' | '3' | '4'>('all');
   const [sectionFilter, setSectionFilter] = useState('all');
+  const [instituteFilter, setInstituteFilter] = useState('all');
+  const [programFilter, setProgramFilter] = useState('all');
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<string | null>(null);
   const [editingKind, setEditingKind] = useState<AcademicKind>(kind);
@@ -190,9 +193,13 @@ function ManagementContent({
   const sections = (snapshot?.records ?? []).flatMap((entry) =>
     entry.record.kind === 'sections' ? [entry.record as AcademicRecord] : [],
   );
+  const scope = programScope((snapshot?.records ?? []).map((entry) => entry.record as unknown as ScopedRecord));
+  const scopedKinds = ['subjects', 'sections', 'faculty', 'offerings'];
+  const programChoices = scope.programs.filter((p) => instituteFilter === 'all' || p.institute === instituteFilter);
   const matching = snapshot
     ? all.filter((e) => {
         const record = e.record;
+        if (scopedKinds.includes(kind) && !scope.matches(record as unknown as ScopedRecord, instituteFilter, programFilter)) return false;
         const inactive = 'active' in record && record.active === false;
         if (recordFilter !== 'all' && (recordFilter === 'inactive' ? !inactive : inactive)) return false;
         const searchText = `${academicLabel(record as Parameters<typeof academicLabel>[0], snapshot)} ${JSON.stringify(record)}`.toLowerCase();
@@ -527,6 +534,22 @@ function ManagementContent({
                   Search records
                   <input type="search" value={recordSearch} placeholder={`Search ${current.label.toLowerCase()}`} onChange={(e) => { setRecordSearch(e.target.value); setPage(0); }} />
                 </label>
+                {scopedKinds.includes(kind) && <>
+                  <label>
+                    Institute
+                    <select value={instituteFilter} onChange={(e) => { setInstituteFilter(e.target.value); setProgramFilter('all'); setPage(0); }}>
+                      <option value="all">All institutes</option>
+                      {INSTITUTES.map((code) => <option key={code} value={code}>{code}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Program
+                    <select value={programFilter} onChange={(e) => { setProgramFilter(e.target.value); setPage(0); }}>
+                      <option value="all">All programs</option>
+                      {programChoices.map((p) => <option key={p.id} value={p.id}>{p.acronym}</option>)}
+                    </select>
+                  </label>
+                </>}
                 {['subjects', 'sections', 'offerings'].includes(kind) && (
                   <label>
                     Year level

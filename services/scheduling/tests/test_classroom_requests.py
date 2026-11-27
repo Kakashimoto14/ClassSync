@@ -123,7 +123,7 @@ def test_request_options_respect_the_offerings_approved_room_list(monkeypatch):
         head=lambda *_: 2,
         project=lambda *_: {"occurrences": [event]},
         decode=lambda *_: {"draft": SimpleNamespace(input_snapshot=source)},
-        occupancy_in=lambda *_, **__: (set(), set()),
+        member_occupancy=lambda *_, **__: (set(), set()),
     )
     event.update(starts_at="2026-11-09T08:00:00+08:00", ends_at="2026-11-09T09:00:00+08:00")
     monkeypatch.setattr(module, "eligible_room", lambda *_: True)

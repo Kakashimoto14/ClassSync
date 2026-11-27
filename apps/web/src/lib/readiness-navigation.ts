@@ -70,11 +70,17 @@ const issueRoutes: Record<string, { label: string; path: string }> = {
   insufficient_distinct_days: { label: 'Review teaching days', path: routes.constraints },
   no_legal_placement: { label: 'Review teaching windows', path: routes.constraints },
   no_eligible_room: { label: 'Review room requirements', path: routes.offerings },
+  room_pool_capacity: { label: 'Add or widen room windows', path: routes.resources },
+  faculty_pool_capacity: { label: 'Review faculty capacity', path: routes.faculty },
+  section_time_capacity: { label: 'Review section load', path: routes.sections },
+  excluded_space_selected: { label: 'Remove excluded spaces', path: routes.offerings },
+  operating_days_outside_calendar: { label: 'Review calendar days', path: routes.academic },
 };
 
 export function readinessActionForIssue(issue: ReadinessIssue, periodId: string): ReadinessAction {
   const match = issueRoutes[issue.code];
-  const path = match?.path ?? routes.readiness;
+  // The server names the exact setup screen for capacity bottlenecks; prefer it when present.
+  const path = issue.action_path ?? match?.path ?? routes.readiness;
   const label = match?.label ?? 'Review scheduling readiness';
   const params = new URLSearchParams({ period: periodId });
   const anchor = path === routes.readiness ? '#readiness-issues' : '';

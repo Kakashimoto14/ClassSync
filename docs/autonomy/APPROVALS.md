@@ -366,3 +366,26 @@ Scope on top of the uncommitted Phase A tree: (1) a disposable local PostgreSQL 
 Teacher classroom-request and Administrator approval/rejection workflow, fixing real defects it
 exposes (minimal forward-only migration only if strictly needed); (2) keep that and the roster
 PostgreSQL test compatible with the GitHub Actions `python` job; (3) run and report verification.
+
+## 27 November 2026 — Phase B / Slice 4: all CdM programs, H1–H15 enforcement and cross-scope room occupancy
+
+Owner instruction, quoted: "Phase B plan approved for local code, migration `0028_room_occupancy_projection`, tests, and docs only — do NOT commit, push, deploy, run `--apply`, or contact live Neon, Firebase, Render, Resend, or Gemini."
+Scope: (1) H1–H15 enforcement fixes including an optional `max_continuous_minutes` faculty cap,
+the PE/NSTP seed classifier, a pre-flight `capacity_audit` with `action_path` setup links, new soft
+objective terms, a deterministic CP-SAT budget and a bounded two-step repair in conflict advice;
+(2) forward-only migration `0028_room_occupancy_projection` exposing tenant-wide room/time
+occupancy without class, section or teacher details, with real-PostgreSQL leakage tests;
+(3) seed expansion and Institute/Program filters with a main-entry bundle budget gate.
+Owner decisions, quoted: "Q1 (TCP): Approved — keep TCP as program-row only (no invented subjects;
+Administrator-configurable in the UI)." "Q2 (Lab subjects): Approved — keep the current
+whole-offering convention so existing BSIT offerings stay idempotent." "Assumptions approved:
+Extending owner-authorized defense defaults to the other 7 CDM degree programs with the same
+`REFERENCE` provenance string, placing BEEd/BECED/BSE lab hours in lecture rooms where no
+specialized room type exists, and setting owner-authorized defaults of `240` min
+continuous-teaching cap and ~25% part-time faculty windows."
+These defaults are owner-authorized defense data, not Registrar/Facilities-verified CdM policy, and
+must not provision actual student accounts. The 25 November BSIT dataset rules continue to apply:
+only the 41 schedulable rooms may be activated, and the assistant may not run `--apply`. Guardrails:
+CI wall-clock assertion for the seeded generation at most 10 s with the actual duration logged,
+peak RSS under 400 MB on Linux, and the main entry chunk at most 101,376 bytes. No commit is
+authorized.

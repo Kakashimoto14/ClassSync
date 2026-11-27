@@ -24,6 +24,22 @@ def same_placement(a, b):
     )
 
 
+# Sessions separated by less than this gap form one continuous teaching block.
+REST_BREAK_MINUTES = 60
+
+
+def teaching_blocks(sessions):
+    """Group one instructor's sessions into same-day blocks joined by gaps under the break."""
+    blocks = []
+    for a in sorted(sessions, key=lambda a: (a.day, a.start)):
+        last = blocks[-1][-1] if blocks else None
+        if last and last.day == a.day and a.start - last.end < REST_BREAK_MINUTES:
+            blocks[-1].append(a)
+        else:
+            blocks.append([a])
+    return blocks
+
+
 def validate_timetable(inputs: GenerationInput, assignments, *, partial=False):
     errors = list(readiness(inputs))
     offerings = {o.id: o for o in inputs.offerings}
@@ -125,6 +141,15 @@ def validate_timetable(inputs: GenerationInput, assignments, *, partial=False):
                         "teacher_daily_workload",
                         "Instructor exceeds the supplied daily workload limit.",
                         [a.id for a in daily],
+                    )
+        if teacher.max_continuous_minutes is not None:
+            for block in teaching_blocks(taught):
+                if sum(a.end - a.start for a in block) > teacher.max_continuous_minutes:
+                    issue(
+                        "teacher_continuous_teaching",
+                        "Instructor exceeds the supplied continuous teaching limit "
+                        f"without a {REST_BREAK_MINUTES}-minute break.",
+                        [a.id for a in block],
                     )
     for a, b in combinations(assignments, 2):
         a_start, a_end = a.day * 1440 + a.start, a.day * 1440 + a.end

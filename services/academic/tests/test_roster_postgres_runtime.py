@@ -114,7 +114,7 @@ def test_runtime_role_neither_owns_the_tables_nor_bypasses_row_security(database
 
 
 def test_seed_is_idempotent_on_postgresql(database):
-    assert database.first_seed[1] == 96
+    assert database.first_seed[1] == 432  # Phase B: all seven extra programs
     assert database.second_seed == (0, 0)
 
 

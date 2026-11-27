@@ -170,6 +170,27 @@
             "minimum": 0,
             "title": "Room Balance",
             "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
+            "type": "integer"
           }
         },
         "title": "ObjectiveWeights",
@@ -722,6 +743,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           }
         },
         "required": [
@@ -1006,6 +1042,19 @@
             },
             "title": "Assignment Ids",
             "type": "array"
+          },
+          "action_path": {
+            "anyOf": [
+              {
+                "pattern": "^/admin(/[a-z-]+)+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Path"
           }
         },
         "required": [
@@ -1336,6 +1385,19 @@
             },
             "title": "Assignment Ids",
             "type": "array"
+          },
+          "action_path": {
+            "anyOf": [
+              {
+                "pattern": "^/admin(/[a-z-]+)+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Path"
           }
         },
         "required": [
@@ -1566,6 +1628,27 @@
             "maximum": 100,
             "minimum": 0,
             "title": "Room Balance",
+            "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
             "type": "integer"
           }
         },
@@ -2119,6 +2202,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           }
         },
         "required": [
@@ -2479,6 +2577,27 @@
             "minimum": 0,
             "title": "Room Balance",
             "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
+            "type": "integer"
           }
         },
         "title": "ObjectiveWeights",
@@ -3031,6 +3150,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           }
         },
         "required": [
@@ -3148,6 +3282,19 @@
             },
             "title": "Assignment Ids",
             "type": "array"
+          },
+          "action_path": {
+            "anyOf": [
+              {
+                "pattern": "^/admin(/[a-z-]+)+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Path"
           }
         },
         "required": [
@@ -3358,6 +3505,19 @@
             },
             "title": "Assignment Ids",
             "type": "array"
+          },
+          "action_path": {
+            "anyOf": [
+              {
+                "pattern": "^/admin(/[a-z-]+)+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Path"
           }
         },
         "required": [
@@ -3710,6 +3870,27 @@
             "maximum": 100,
             "minimum": 0,
             "title": "Room Balance",
+            "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
             "type": "integer"
           }
         },
@@ -4321,6 +4502,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           }
         },
         "required": [
@@ -4928,6 +5124,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           },
           "kind": {
             "const": "faculty",
@@ -6148,6 +6359,27 @@
             "maximum": 100,
             "minimum": 0,
             "title": "Room Balance",
+            "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
             "type": "integer"
           }
         },
@@ -7073,6 +7305,27 @@
             "minimum": 0,
             "title": "Room Balance",
             "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
+            "type": "integer"
           }
         },
         "title": "ObjectiveWeights",
@@ -7299,6 +7552,19 @@
             ],
             "default": null,
             "title": "Record Id"
+          },
+          "action_path": {
+            "anyOf": [
+              {
+                "pattern": "^/admin(/[a-z-]+)+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action Path"
           }
         },
         "required": [
@@ -7695,6 +7961,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           }
         },
         "required": [
@@ -8468,6 +8749,21 @@
             ],
             "default": null,
             "title": "Max Daily Minutes"
+          },
+          "max_continuous_minutes": {
+            "anyOf": [
+              {
+                "maximum": 1440,
+                "minimum": 30,
+                "multipleOf": 30,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Continuous Minutes"
           },
           "kind": {
             "const": "faculty",
@@ -9559,6 +9855,27 @@
             "maximum": 100,
             "minimum": 0,
             "title": "Room Balance",
+            "type": "integer"
+          },
+          "specialized_rooms": {
+            "default": 3,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Specialized Rooms",
+            "type": "integer"
+          },
+          "shift_compactness": {
+            "default": 1,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Shift Compactness",
+            "type": "integer"
+          },
+          "faculty_rest": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Faculty Rest",
             "type": "integer"
           }
         },

@@ -33,6 +33,7 @@ from .draft_rules import DraftError, digest, encode, now
 from .occurrences import ZONE
 from .postgres_draft_repository import PostgresDraftRepository
 from .publication_rules import PublicationRules
+from .room_occupancy import occupied_rooms
 
 
 def viewer_record(viewer):
@@ -420,12 +421,15 @@ class PostgresPublicationRepository(PublicationRules):
         if (finish - timedelta(microseconds=1)).astimezone(ZONE).date() != day:
             raise DraftError(422, "availability_range", "Choose a time range within one day.")
         rows = self.rows(db, self.keys["tenant"], dataset)
-        occupied = {
-            event["room"]["id"]
-            for event in self.expanded(rows, day, day)
-            if datetime.fromisoformat(event["starts_at"]) < finish
-            and begin < datetime.fromisoformat(event["ends_at"])
-        }
+        # A session's transition buffer also keeps its room from the adjacent slot.
+        occupied = set()
+        for event in self.expanded(rows, day, day):
+            pad = timedelta(minutes=event.get("buffer", 0))
+            if (
+                datetime.fromisoformat(event["starts_at"]) - pad < finish
+                and begin < datetime.fromisoformat(event["ends_at"]) + pad
+            ):
+                occupied.add(event["room"]["id"])
         restricted = set()
         if restrictions:
             stored = db.execute(text("""
@@ -440,6 +444,31 @@ class PostgresPublicationRepository(PublicationRules):
                 ):
                     restricted.add(value["room_id"])
         return occupied, restricted
+
+    def member_occupancy(self, db, dataset, begin, finish):
+        """Tenant-wide occupied and restricted rooms for any member (room ids only).
+
+        Uses the 0028 projection functions, so a Teacher or Student also sees rooms booked by
+        publications they are not part of, without reading those publications.
+        """
+        if begin.tzinfo is None or finish.tzinfo is None or not begin < finish:
+            raise DraftError(422, "availability_range", "Choose an increasing time range.")
+        if (finish - timedelta(microseconds=1)).astimezone(ZONE).date() != begin.astimezone(
+            ZONE
+        ).date():
+            raise DraftError(422, "availability_range", "Choose a time range within one day.")
+        rows = db.execute(
+            text("SELECT * FROM classsync_scheduling.room_occupancy_versions(:dataset,:day)"),
+            {"dataset": dataset, "day": begin.astimezone(ZONE).date()},
+        ).mappings().all()
+        restricted = set(db.scalars(
+            text("""
+            SELECT room_id FROM classsync_scheduling.room_restriction_windows(:dataset)
+            WHERE starts_at<:finish AND :begin<ends_at
+        """),
+            {"dataset": dataset, "begin": begin, "finish": finish},
+        ).all())
+        return occupied_rooms(rows, begin, finish), restricted
 
     def room_slot(self, period, day, start, end, viewer):
         """Occupancy of every catalog-schedulable space in one slot; room metadata only."""
@@ -471,13 +500,12 @@ class PostgresPublicationRepository(PublicationRules):
                     422, "availability_hours", "Choose a time within campus operating hours."
                 )
             midnight = datetime.combine(day, time(), ZONE)
-            checked = role == "administrator"
-            occupied, restricted = self.occupancy_in(
-                db,
-                "institutional",
-                midnight + timedelta(minutes=start),
-                midnight + timedelta(minutes=end),
-                restrictions=checked,
+            begin, finish = (midnight + timedelta(minutes=m) for m in (start, end))
+            checked = True
+            occupied, restricted = (
+                self.occupancy_in(db, "institutional", begin, finish, restrictions=True)
+                if role == "administrator"
+                else self.member_occupancy(db, "institutional", begin, finish)
             )
             return {
                 "date": day.isoformat(),
@@ -729,6 +757,18 @@ class PostgresPublicationRepository(PublicationRules):
                 "A competing change updated this published scope.",
             )
         return self.receipt(self.record(created), db)
+
+    def restriction_list(self, dataset):
+        """Administrator read of every stored restriction, checksum-verified."""
+        with self.session() as db:
+            rows = db.execute(
+                text("""
+                SELECT payload,checksum FROM classsync_scheduling.room_restrictions
+                WHERE tenant_id=:tenant AND dataset=:dataset ORDER BY id
+            """),
+                self.params(dataset),
+            ).mappings()
+            return [self.restriction_value(row) for row in rows]
 
     def put_restriction(self, body):
         body = self.typed(body, RoomRestriction)

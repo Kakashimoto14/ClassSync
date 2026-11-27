@@ -112,12 +112,13 @@ class Requests:
             and eligible_room(room, offering, section.program_id)
             and room.id != event["room"]["id"]
         ]
-        occupied, _ = p.occupancy_in(
+        # Tenant-wide occupancy (0028): rooms booked by publications this Teacher is not
+        # part of, and reservations/restrictions, are visible as room ids only.
+        occupied, restricted = p.member_occupancy(
             db,
             "institutional",
             datetime.fromisoformat(event["starts_at"]),
             datetime.fromisoformat(event["ends_at"]),
-            restrictions=False,
         )
         rooms = [
             {
@@ -126,7 +127,11 @@ class Requests:
                 "building": room.building,
                 "floor": room.floor,
                 "capacity": room.capacity if room.capacity_verified else None,
-                "occupancy": "occupied" if room.id in occupied else "available",
+                "occupancy": "restricted"
+                if room.id in restricted
+                else "occupied"
+                if room.id in occupied
+                else "available",
             }
             for room in candidates
         ]
@@ -135,8 +140,8 @@ class Requests:
             "class": event,
             "rooms": rooms,
             "availability_note": (
-                "Occupancy reflects the published timetable for this class time. "
-                "Reservations and all hard constraints are re-checked at approval."
+                "Occupancy reflects every published timetable and room reservation for this "
+                "class time. All hard constraints are re-checked at approval."
             ),
         }
 
@@ -192,6 +197,10 @@ class Requests:
                     raise HTTPException(422, "This space is excluded from class scheduling")
                 raise HTTPException(
                     422, "Choose an eligible room from this published academic scope"
+                )
+            if room["occupancy"] == "restricted":
+                raise HTTPException(
+                    409, "That room is reserved or restricted at this class time. Choose another."
                 )
             if room["occupancy"] != "available":
                 raise HTTPException(
@@ -373,16 +382,38 @@ class Requests:
             row = self.request_row(db, request_id, lock=False)
             if row["status"] != "pending":
                 return {"state": "decided", "status": row["status"], "reasons": []}
+            warnings = self.locked_warnings(db, row)
             try:
                 command = self.check_candidate(db, row)
                 report = p.publish_in(db, command, commit=False)
             except StaleRequest as error:
-                return {"state": "stale", "reasons": [str(error)]}
+                return {"state": "stale", "reasons": [str(error)], "warnings": warnings}
             except DraftError as error:
                 if error.status >= 500:
                     raise
-                return {"state": "conflict", "code": error.code, "reasons": [str(error)]}
-            return {"state": "clear", "reasons": [], "review": report}
+                return {
+                    "state": "conflict",
+                    "code": error.code,
+                    "reasons": [str(error)],
+                    "warnings": warnings,
+                }
+            return {"state": "clear", "reasons": [], "review": report, "warnings": warnings}
+
+    def locked_warnings(self, db, row):
+        """An Administrator-pinned session may still get a one-date room swap, knowingly."""
+        p = self.publication
+        rows = p.rows(db, p.keys["tenant"], "institutional", row["period_id"])
+        if not rows:
+            return []
+        assignment = row["occurrence_id"].rsplit(":", 1)[0]
+        locked = p.decode(rows[-1])["draft"].input_snapshot.locked_assignments
+        if any(item.id == assignment for item in locked):
+            return [{
+                "code": "locked_assignment",
+                "message": "This class is a locked session. Approving changes its room on "
+                "this date only; regeneration keeps the locked placement.",
+            }]
+        return []
 
     def transition(self, db, request_id, status, note, version):
         p = self.publication

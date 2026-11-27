@@ -427,7 +427,7 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
   const [busy, setBusy] = useState(false);
   const [advice, setAdvice] = useState<{
     message: string;
-    suggestions: Array<string | { assignment: Assignment; reason: string }>;
+    suggestions: Array<string | { assignment: Assignment; reason: string; also_moves?: Assignment | null }>;
   } | null>(null);
   const [error, setError] = useState('');
   const [targetId, setTargetId] = useState(draft.generation_result.assignments[0]?.id ?? '');
@@ -450,14 +450,14 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
       setBusy(false);
     }
   }
-  async function apply(assignment: Assignment) {
+  async function apply(assignment: Assignment, alsoMoves?: Assignment | null) {
     if (busy) return;
     setBusy(true);
     setError('');
     try {
-      const assignments = draft.generation_result.assignments.map((item) =>
-        item.id === assignment.id ? assignment : item,
-      );
+      // A two-step repair moves both sessions together; the server revalidates the whole draft.
+      const moves = new Map([assignment, ...(alsoMoves ? [alsoMoves] : [])].map((item) => [item.id, item]));
+      const assignments = draft.generation_result.assignments.map((item) => moves.get(item.id) ?? item);
       const value = await saveDraftRevision(draft.id, {
         assignments,
         title: `${draft.title} · revised`,
@@ -485,7 +485,7 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
       </div>
       {error && <p role="alert">{error}</p>}
       {advice && <div role="status"><p>{advice.message}</p><ul>{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
-        {typeof item === 'string' ? item : <>{item.reason} · Day {item.assignment.day + 1}, {String(Math.floor(item.assignment.start / 60)).padStart(2, '0')}:{String(item.assignment.start % 60).padStart(2, '0')} · {draft.input_snapshot.rooms?.find((room) => room.id === item.assignment.room_id)?.name}<Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment)}>Apply as validated revision</Button></>}
+        {typeof item === 'string' ? item : <>{item.reason} · Day {item.assignment.day + 1}, {String(Math.floor(item.assignment.start / 60)).padStart(2, '0')}:{String(item.assignment.start % 60).padStart(2, '0')} · {draft.input_snapshot.rooms?.find((room) => room.id === item.assignment.room_id)?.name}<Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment, item.also_moves)}>Apply as validated revision</Button></>}
       </li>)}</ul></div>}
     </section>
   );

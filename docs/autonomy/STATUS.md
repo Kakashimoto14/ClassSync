@@ -1,5 +1,57 @@
 # ClassSync — autonomy status ledger
 
+## 27 November 2026 — Phase B / Slice 4: all CdM degree programs, H1–H15, cross-scope occupancy
+
+Branch `main`, base/current HEAD `f36b0917c3d2a3f81ac2f8e086c088b08ee4ed07`, uncommitted (no commit
+or push). Approval: `APPROVALS.md` 27 November 2026 Phase B entry. No Neon, Firebase, Render, Resend
+or Gemini contact; seed `--apply` not run.
+
+**Hard constraints.** New optional `max_continuous_minutes` (sessions less than 60 minutes apart
+form one block): solver (exact for blocks up to three sessions), validator
+(`teacher_continuous_teaching`) and dated publication check. Dated room restrictions become weekly
+`blocked` windows for Administrator generation (`restriction_windows.py`). Request options and room
+slots pad occupancy by the transition buffer (H13). Request preflight warns on locked sessions (H14).
+Pre-flight adds `capacity_audit` (room pools, faculty pools, section time, buffer-aware) with
+`action_path` setup links, `excluded_space_selected` and `operating_days_outside_calendar`.
+H10 is unchanged: academic readiness already blocks ineligible faculty (the validator snapshot has no
+subject list).
+
+**Solver.** Deterministic time limits with a 3x wall ceiling; LP relaxation and probing off;
+cartesian placement tables become domains; redundant student and week-wrap no-overlap groups removed
+(all exact). Soft terms: specialized rooms, shift compactness, faculty "clopening". The soft phase is
+skipped above 150 candidate sessions: on the full campus it took about 4 s to load and never improved
+the phase-1 timetable, so the seeded campus timetable is feasible but soft preferences are NOT scored
+(reported as `optimization_limit`). Bounded repair (`repair.py`): one move or a two-step swap with a
+flexible lecture, at most 200 checks, each option fully validated.
+
+**Seed.** `seed_program_catalog.py` adds BSCPE, BSEd-SCI, BEEd-GEN, BEEd-ECED, BTLEd-ICT, BSBA-HRM and
+BSE (4 sections each); BSIT output unchanged; TCP keeps its catalog row only. Totals: 36 sections,
+247 offerings, 225 subjects, 57 faculty (45 new, 10 part-time, every new member at most 75% of cap),
+432 roster rows. PE/NSTP classifier uses title and code (the source misspells "Compentency").
+Re-runs add enrollments only for students created in that run; existing records are never
+overwritten. Dry run prints drift advisories (BSIT PE offerings still require lecture rooms).
+
+**Migration `0028_room_occupancy_projection`.** Owner-only SELECT policies plus two SECURITY DEFINER
+functions returning room/time facts only, for an active member's own tenant, filtered to versions
+covering the requested day, with a per-tenant rank. Teacher and Student room slots and request
+options use them, so rooms booked by publications they are not in, and reservations, now show.
+Independent subagent review found no cross-tenant leak; its date-filter, exception-ordering and
+sequence-exposure findings were fixed. Not applied to Neon.
+
+**Evidence (Windows, PostgreSQL 18).**
+- `pytest --basetemp=.pytest_tmp/run` with `TEMP`/`TMP` in `.pytest_tmp`: 1370 passed, 0 skipped.
+- New real-PostgreSQL tests: `test_room_occupancy_postgres_runtime.py` (4),
+  `test_seed_all_programs_postgres_runtime.py` (2; campus generation 247 offerings, 252 sessions,
+  4.89 s wall, identical on re-run). RSS assertion runs on Linux only; not measured here.
+- `ruff check scripts services packages`, contract `--check`, `npm run lint`, `npm run typecheck`,
+  `npm run test:web` (916 passed), `npm run build`, `node scripts/check_bundle_budget.mjs`
+  (main entry 98,121 bytes of 101,376), `git diff --check`: all passed.
+
+**Open.** Not run on Linux CI or PostgreSQL 16. No rendered-browser check of the new filters
+(360/1440 px) and no screen-reader check. No Vitest for the published-timetable filters
+(typecheck only). Hosted runtime grants not inspected; `0027` and `0028` not applied to Neon.
+Continuous-teaching blocks of four or more sessions rely on post-solve validation.
+
 ## 26 November 2026 21:21 +0800 — Request-approval PostgreSQL runtime and Linux CI
 
 Branch `main`, base/current HEAD `93f18eeb8b72df48b172eb71527a2de42ba22aea` plus the uncommitted

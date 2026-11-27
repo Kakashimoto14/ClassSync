@@ -22,6 +22,12 @@ import {
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { periodLabel, shouldAnnounceConnectionLoss } from '../lib/workspace-context';
 import type { UserRole } from '../types/ui';
+import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
+import { INSTITUTES, instituteCode } from '../lib/program-scope';
+
+const catalogInstitutes = new Map(
+  suppliedAcademicProgramCatalog.map((program) => [program.id, instituteCode(program.institute)]),
+);
 
 export function RoleScheduleWorkspace({
   role,
@@ -31,7 +37,21 @@ export function RoleScheduleWorkspace({
   dashboard?: boolean;
 }) {
   const w = useScheduleWorkspace(role, dashboard);
-  const { context, change, data, records, date, loading, error } = w;
+  const { context, change, data, records: allRecords, date, loading, error } = w;
+  // Administrator-only Institute/Program view filters; Teachers and Students see their own scope.
+  const [institute, setInstitute] = useState('all');
+  const [program, setProgram] = useState('all');
+  const sectionPrograms = new Map((data?.sections ?? []).map((s) => [s.id, s.program_id]));
+  const programIds = [...new Set(sectionPrograms.values())]
+    .filter((id) => institute === 'all' || catalogInstitutes.get(id) === institute)
+    .sort();
+  const records = role === 'administrator' && (institute !== 'all' || program !== 'all')
+    ? allRecords.filter((o) => {
+        const owner = sectionPrograms.get(o.section.id) ?? '';
+        return (program === 'all' || owner === program)
+          && (institute === 'all' || catalogInstitutes.get(owner) === institute);
+      })
+    : allRecords;
   const [expanded, setExpanded] = useState(false);
   const view = context.view ?? 'week';
   const isPresentation = context.mode === 'presentation';
@@ -120,6 +140,24 @@ export function RoleScheduleWorkspace({
         <details className="ux-context-settings" ref={settings}>
           <summary>Change context</summary>
           <div className="ux-context-controls">
+            {role === 'administrator' && (data?.sections.length ?? 0) > 0 && (
+              <>
+                <label>
+                  Institute
+                  <select value={institute} onChange={(e) => { setInstitute(e.target.value); setProgram('all'); }}>
+                    <option value="all">All institutes</option>
+                    {INSTITUTES.map((code) => <option key={code} value={code}>{code}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Program
+                  <select value={program} onChange={(e) => setProgram(e.target.value)}>
+                    <option value="all">All programs</option>
+                    {programIds.map((id) => <option key={id} value={id}>{id.toUpperCase()}</option>)}
+                  </select>
+                </label>
+              </>
+            )}
             {context.mode !== 'review' && (
               <label>
                 Academic period

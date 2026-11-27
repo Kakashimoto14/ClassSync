@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -58,6 +59,7 @@ def stable_uuid(kind: str, identity: str) -> str:
 
 PERIOD_ID = stable_uuid("period", "ay-2026-2027-first")
 REFERENCE = "Owner-authorized ClassSync defense dataset · administrator editable"
+PE_TITLE = re.compile(r"physical activit|path ?fit|pahfit|physical education")
 adapter = TypeAdapter(AcademicResource)
 
 
@@ -416,6 +418,47 @@ def build_academic_records(period_id: str, room_catalog: list[dict]) -> list:
     return [program, *subjects, *sections, *faculty, *rooms, *offerings, constraints], students
 
 
+def build_defense_records(period_id: str, room_catalog: list[dict]) -> tuple[list, list]:
+    """BSIT (unchanged) plus the seven other CdM degree programs, constraints last."""
+    from scripts.seed_program_catalog import build_program_records
+
+    records, students = build_academic_records(period_id, room_catalog)
+    constraints = records[-1]
+    rooms = [r for r in records if r.kind == "resources"]
+    extra, extra_students = build_program_records(period_id, rooms, stable_uuid, REFERENCE)
+    constraints = constraints.model_copy(
+        update={
+            "enrollments": [
+                *constraints.enrollments,
+                *(student["enrollment"] for student in extra_students),
+            ]
+        }
+    )
+    return [*records[:-1], *extra, constraints], [*students, *extra_students]
+
+
+def drift_advisories(snapshot) -> list[str]:
+    """Existing records that differ from current seed defaults; never overwritten."""
+    if snapshot is None:
+        return []
+    subjects = {e.record.id: e.record for e in snapshot.records if e.record.kind == "subjects"}
+    notes = []
+    for entry in snapshot.records:
+        record = entry.record
+        subject = subjects.get(getattr(record, "subject_id", None))
+        if (
+            record.kind == "offerings"
+            and subject
+            and record.required_room_type != "athletic_space"
+            and PE_TITLE.search(subject.name.lower())
+        ):
+            notes.append(
+                f"{subject.code}: PE offering still requires {record.required_room_type}; "
+                "edit it in Subject Offerings to use the Court or Oval."
+            )
+    return notes
+
+
 def _same(a, b) -> bool:
     return json.dumps(a.model_dump(mode="json"), sort_keys=True) == json.dumps(
         b.model_dump(mode="json"), sort_keys=True
@@ -593,8 +636,21 @@ def apply_seed(repo) -> tuple[int, int]:
                 "Existing period dates differ; review/edit them in Admin before seeding"
             )
         catalog = load_json("packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json")
-        records, students = build_academic_records(period_id, catalog)
+        records, students = build_defense_records(period_id, catalog)
         records, remapped_ids = _reconcile_seed_records(records, snapshot)
+        # Students whose identity row this run creates; only their enrollments may be added
+        # to existing constraints, so later Administrator removals are never undone.
+        new_students = {
+            student["id"]
+            for student in students
+            if not db.scalar(
+                text(
+                    "SELECT 1 FROM classsync_identity.students "
+                    "WHERE tenant_id=:tenant AND id=:student"
+                ),
+                {**repo.keys, "student": student["id"]},
+            )
+        }
         students = [
             {
                 **student,
@@ -635,6 +691,24 @@ def apply_seed(repo) -> tuple[int, int]:
                     )
                     written += 1
                     index, _ = _record_indexes(repo.snapshot_in(db, period_id))
+                elif record.kind == "constraints":
+                    present = {e.student_id for e in previous.record.enrollments}
+                    added = [
+                        e
+                        for e in record.enrollments
+                        if e.student_id in new_students and e.student_id not in present
+                    ]
+                    if added:
+                        merged = previous.record.model_copy(
+                            update={"enrollments": [*previous.record.enrollments, *added]}
+                        )
+                        repo.write_in(
+                            db,
+                            period_id,
+                            RecordWrite(expected_revision=previous.revision, record=merged),
+                        )
+                        written += 1
+                        index, _ = _record_indexes(repo.snapshot_in(db, period_id))
                 elif not _same(previous.record, record) and record.kind != "resources":
                     # Existing records belong to the administrator; never overwrite edits.
                     continue
@@ -838,13 +912,17 @@ def main(argv=None) -> int:
             catalog = load_json(
                 "packages/api-contracts/classync_contracts/catalogs/cdm-spaces.json"
             )
-            planned, students = build_academic_records(
+            planned, students = build_defense_records(
                 current.period.id if current else PERIOD_ID, catalog
             )
+            programs = sorted({r.acronym for r in planned if r.kind == "programs"})
             print(
                 f"Target: {PERIOD_TITLE}; defense; 41 schedulable rooms; "
-                f"12 excluded; {len(planned)} records; {len(students)} roster rows"
+                f"12 excluded; {len(planned)} records; {len(students)} roster rows; "
+                f"programs {', '.join(programs)} (TCP keeps its catalog row only)"
             )
+            for note in drift_advisories(current):
+                print(f"Advisory (not changed): {note}")
             print(
                 "Curriculum source is an unreviewed extraction. Defense defaults are "
                 "owner-authorized and administrator-editable."

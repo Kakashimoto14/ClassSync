@@ -129,9 +129,14 @@ def test_legacy_saved_input_hash_remains_valid_with_new_optional_fields():
     ]
     for teacher in legacy["teachers"]:
         teacher.pop("synthetic")
-        for key in ("max_weekly_minutes", "max_daily_minutes"):
+        for key in ("max_weekly_minutes", "max_daily_minutes", "max_continuous_minutes"):
             if teacher[key] is None:
                 teacher.pop(key)
+    # Phase B weights are absent from a legacy snapshot and load at their defaults.
+    from classync_contracts.scheduling import LATER_WEIGHT_DEFAULTS
+
+    for key in LATER_WEIGHT_DEFAULTS:
+        legacy["options"]["weights"].pop(key)
     expected = hashlib.sha256(
         json.dumps(legacy, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()

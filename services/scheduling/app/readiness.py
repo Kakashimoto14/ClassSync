@@ -172,6 +172,115 @@ def placements(inputs, offering, duration):
     return sorted(found)
 
 
+def slot_runs(slots):
+    """Contiguous (day, length) runs of a set of 30-minute (day, minute) slots."""
+    runs = []
+    for day, minute in sorted(slots):
+        if runs and runs[-1][0] == day and runs[-1][2] == minute:
+            runs[-1][1] += 30
+            runs[-1][2] = minute + 30
+        else:
+            runs.append([day, 30, minute + 30])
+    return [(day, length) for day, length, _ in runs]
+
+
+def capacity_audit(inputs):
+    """Necessary room, faculty and section time bounds with the setup screen that fixes each.
+
+    Each session also reserves the transition buffer, rounded up to the 30-minute grid. A run of
+    free time of length W fits sessions whose durations plus buffers total at most W + buffer.
+    These are proven bounds only: passing them does not guarantee a timetable exists.
+    """
+    buffer = -(-inputs.transition_buffer_minutes // 30) * 30
+    operating = {
+        (w.day, minute) for w in inputs.operating_windows for minute in range(w.start, w.end, 30)
+    }
+
+    def free(windows, blocked=()):
+        slots = {(w.day, m) for w in windows for m in range(w.start, w.end, 30)} & operating
+        slots -= {(w.day, m) for w in blocked for m in range(w.start, w.end, 30)}
+        return sum(length + buffer for _, length in slot_runs(slots))
+
+    def demand(offering):
+        return min(sum(d + buffer for d in p.durations) for p in offering.patterns)
+
+    sections = {s.id: s for s in inputs.sections}
+    rooms = {r.id: r for r in inputs.rooms}
+    teachers = {t.id: t for t in inputs.teachers}
+    room_supply = {r.id: free(r.availability, r.blocked) for r in inputs.rooms}
+    teacher_supply = {t.id: free(t.availability, t.unavailable) for t in inputs.teachers}
+    room_groups = {}
+    for o in inputs.offerings:
+        section = sections.get(o.section_id)
+        room_groups[o.id] = frozenset(
+            rid
+            for rid in o.eligible_room_ids
+            if rid in rooms and section and eligible_room(rooms[rid], o, section.program_id)
+        )
+    teacher_groups = {
+        o.id: frozenset(t for t in o.eligible_teacher_ids if t in teachers)
+        for o in inputs.offerings
+    }
+    messages = []
+
+    def check(groups, supply, code, noun, action):
+        for pool in sorted(set(groups.values()), key=sorted):
+            if not pool:
+                continue
+            needed = sum(demand(o) for o in inputs.offerings if groups[o.id] <= pool)
+            available = sum(supply[i] for i in pool)
+            if needed > available:
+                names = ", ".join(sorted(pool)[:4]) + (" and others" if len(pool) > 4 else "")
+                messages.append(
+                    Diagnostic(
+                        code=code,
+                        action_path=action,
+                        message=(
+                            f"Offerings limited to {noun} {names} need {needed} minutes a week "
+                            f"including transition buffers; those {noun} have only {available}. "
+                            f"Add eligible {noun} or widen their windows."
+                        ),
+                    )
+                )
+
+    check(room_groups, room_supply, "room_pool_capacity", "rooms", "/admin/academic/resources")
+    check(teacher_groups, teacher_supply, "faculty_pool_capacity", "instructors", "/admin/teachers")
+    for teacher in inputs.teachers:
+        if teacher.max_weekly_minutes is None:
+            continue
+        needed = sum(
+            min(sum(p.durations) for p in o.patterns)
+            for o in inputs.offerings
+            if teacher_groups[o.id] == {teacher.id}
+        )
+        if needed > teacher.max_weekly_minutes:
+            messages.append(
+                Diagnostic(
+                    code="faculty_pool_capacity",
+                    action_path="/admin/teachers",
+                    message=(
+                        f"{teacher.name} is the only eligible instructor for {needed} weekly "
+                        f"minutes; the workload limit is {teacher.max_weekly_minutes}."
+                    ),
+                )
+            )
+    week = free(inputs.operating_windows)
+    for section in inputs.sections:
+        needed = sum(demand(o) for o in inputs.offerings if o.section_id == section.id)
+        if needed > week:
+            messages.append(
+                Diagnostic(
+                    code="section_time_capacity",
+                    action_path="/admin/sections",
+                    message=(
+                        f"Section {section.id} needs {needed} minutes a week including "
+                        f"transition buffers; the operating week allows {week}."
+                    ),
+                )
+            )
+    return messages
+
+
 def infeasibility_diagnostics(inputs):
     """Proven necessary-bound failures, not a claim to a minimal unsat core."""
     slots = {
@@ -215,4 +324,4 @@ def infeasibility_diagnostics(inputs):
                     "restrictions and allowed weekly hours.",
                 )
             )
-    return messages
+    return messages + capacity_audit(inputs)

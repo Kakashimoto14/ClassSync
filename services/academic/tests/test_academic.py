@@ -398,6 +398,13 @@ def test_workload_is_hard_and_old_hash_remains_compatible():
         teacher.pop("max_daily_minutes")
         # This is the historical wire shape, before the optional provenance field.
         teacher.pop("synthetic")
+        teacher.pop("max_continuous_minutes")  # Phase B optional cap, absent historically
+    # Phase B weights were absent historically; an old snapshot loads them at their defaults.
+    from classync_contracts.scheduling import LATER_WEIGHT_DEFAULTS
+
+    for key, default in LATER_WEIGHT_DEFAULTS.items():
+        baseline["options"]["weights"].pop(key)
+        setattr(inputs.options.weights, key, default)
     import hashlib
 
     old_hash = hashlib.sha256(
