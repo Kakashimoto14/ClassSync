@@ -16,6 +16,16 @@ import { PasswordStrengthChecklist } from './PasswordStrengthChecklist';
 import { passwordStrengthComplete } from './password-strength';
 import { cooldownRemaining, retryAfterFrom, startCooldown } from './cooldown';
 import { formatStudentNumber } from './student-number';
+import { PasswordInput } from './PasswordInput';
+
+const STEPS = ['Email', 'Student record', 'Password'];
+
+/** Server messages are already sanitised; network and provider failures get mapped copy. */
+function friendly(error: unknown) {
+  return error instanceof Error && !('code' in error) && error.name !== 'TypeError'
+    ? error.message
+    : accountError(error);
+}
 
 export function AccountOnboardingPanel({ entryRole }: { entryRole?: 'student' | 'teacher' } = {}) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
@@ -75,6 +85,12 @@ function PendingAccount({
     cooldownRemaining('student-code', profile.email),
   );
   const digitRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const passwordField = useRef<HTMLInputElement>(null);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  useEffect(() => {
+    if (step === 'code') digitRefs.current[0]?.focus();
+    if (step === 'password') passwordField.current?.focus();
+  }, [step]);
   const [busy, setBusy] = useState(false);
   const signedIn = ['denied', 'verification-required'].includes(session.state.status);
   useEffect(() => {
@@ -106,27 +122,27 @@ function PendingAccount({
     };
   }, [signedIn, profile.uid]);
   if (!signedIn) return null;
-  const action = async (work: () => Promise<unknown>, success: string) => {
+  const action = async (
+    work: () => Promise<unknown>,
+    success: string | ((next: OnboardingStatus) => string),
+  ) => {
     if (busy) return;
     setBusy(true);
     setMessage('');
     try {
       await work();
-      setStatus(
-        await accountRequest<OnboardingStatus>(
-          'onboarding',
-          'GET',
-          undefined,
-          undefined,
-          profile.uid,
-        ),
+      const next = await accountRequest<OnboardingStatus>(
+        'onboarding',
+        'GET',
+        undefined,
+        undefined,
+        profile.uid,
       );
-      setMessage(success);
+      setStatus(next);
+      setMessage(typeof success === 'string' ? success : success(next));
       session.refresh();
     } catch (error) {
-      setMessage(
-        error instanceof Error && !('code' in error) ? error.message : accountError(error),
-      );
+      setMessage(friendly(error));
     } finally {
       setBusy(false);
     }
@@ -175,7 +191,7 @@ function PendingAccount({
     } catch (error) {
       const retryAfter = retryAfterFrom(error);
       if (retryAfter) setCodeResendSeconds(startCooldown('student-code', profile.email, retryAfter));
-      setMessage(error instanceof Error ? error.message : accountError(error));
+      setMessage(friendly(error));
     } finally {
       setTurnstileToken('');
       setTurnstileRevision((revision) => revision + 1);
@@ -210,7 +226,7 @@ function PendingAccount({
       setCode('');
       setMessage('Student record verified. Create a private password for future sign-ins.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : accountError(error));
+      setMessage(friendly(error));
     } finally {
       setTurnstileToken('');
       setTurnstileRevision((revision) => revision + 1);
@@ -248,16 +264,31 @@ function PendingAccount({
       setMessage('Your student record and portal password are ready.');
       session.refresh();
     } catch (error) {
-      setMessage(error instanceof Error && !('code' in error) ? error.message : accountError(error));
+      setMessage(friendly(error));
     } finally {
       setTurnstileToken('');
       setTurnstileRevision((revision) => revision + 1);
       setBusy(false);
     }
   };
+  const currentStep = !status?.email_verified ? 0 : step === 'password' ? 2 : 1;
   return (
     <section className="account-onboarding" aria-label="Set up university access" aria-busy={busy}>
       <h3>{entryRole === 'teacher' ? 'Activate your invitation' : 'Set up your account'}</h3>
+      {entryRole !== 'teacher' && status && !status.membership_state && (
+        <ol className="account-onboarding__steps" aria-label="Account setup steps">
+          {STEPS.map((label, index) => (
+            <li
+              key={label}
+              aria-current={index === currentStep ? 'step' : undefined}
+              data-state={index < currentStep ? 'done' : index === currentStep ? 'current' : 'next'}
+            >
+              {label}
+              {index < currentStep && <span className="visually-hidden"> (complete)</span>}
+            </li>
+          ))}
+        </ol>
+      )}
       <p role="status">
         {message ||
           (status?.status === 'pending'
@@ -276,43 +307,45 @@ function PendingAccount({
         </Button>
       ) : !status.email_verified ? (
         <>
-          <p>Verify your email using the link in your inbox, then check again.</p>
-          <Button
-            disabled={busy || verificationResendSeconds > 0}
-            onClick={() =>
-              void action(
-                requestVerificationEmail,
-                'Verification email requested. Check your inbox.',
-              )
-            }
-          >
-            {verificationResendSeconds > 0
-              ? `Resend verification email in ${verificationResendSeconds}s`
-              : 'Resend verification email'}
-          </Button>
-          <Button
-            disabled={busy}
-            variant="secondary"
-            onClick={() =>
-              void action(() => refreshVerifiedAccount(profile.uid), 'Email status refreshed.')
-            }
-          >
-            I verified my email
-          </Button>
+          <p>
+            Open the verification link we sent to <strong>{profile.email}</strong>, then come back
+            here.
+          </p>
+          <div className="account-onboarding__actions">
+            <Button
+              disabled={busy}
+              onClick={() =>
+                void action(
+                  () => refreshVerifiedAccount(profile.uid),
+                  (next) =>
+                    next.email_verified
+                      ? 'Email verified.'
+                      : 'Your email is not verified yet. Open the link in your inbox, then try again.',
+                )
+              }
+            >
+              I&rsquo;ve verified — Continue
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={busy || verificationResendSeconds > 0}
+              onClick={() =>
+                void action(
+                  requestVerificationEmail,
+                  'Verification email requested. Check your inbox.',
+                )
+              }
+            >
+              {verificationResendSeconds > 0
+                ? `Resend verification email in ${verificationResendSeconds}s`
+                : 'Resend verification email'}
+            </Button>
+          </div>
         </>
       ) : (
         <>
           {entryRole !== 'teacher' && !status.membership_state && (
             step === 'student' ? <>
-              {status.verification_mode === 'cor_or_roster' && <>
-                <div className="account-onboarding__steps" aria-label="Account setup steps">
-                  <strong>Step 1 · Email verified</strong>
-                  <span aria-current="step">Step 2 of 2 · Confirm Registration Form</span>
-                </div>
-                <Link className="button" to="/student/registration-scanner">Scan Registration Form (COR)</Link>
-              </>}
-              <details open={status.verification_mode === 'strict_roster' || undefined}>
-              <summary>Enter Student Number manually</summary>
               <form noValidate onSubmit={requestCode}>
               <h4>Verify your student record</h4>
               <label htmlFor="claim-registered-email">Email address</label>
@@ -325,7 +358,8 @@ function PendingAccount({
                 autoComplete="email"
               />
               <p className="entrance-hint">
-                Your verified email is checked against the student record when one is available.
+                This is your sign-in email, so it cannot be changed here. It is checked against the
+                student record when one is available.
               </p>
               <label htmlFor="claim-student-id">Student number</label>
               <input
@@ -359,7 +393,11 @@ function PendingAccount({
                   : 'Send verification code'}
               </Button>
               </form>
-              </details>
+              {status.verification_mode === 'cor_or_roster' && (
+                <Link className="button button--secondary" to="/student/registration-scanner">
+                  Scan Registration Form (COR)
+                </Link>
+              )}
             </> : step === 'code' && challenge ? <form noValidate onSubmit={verifyCode} className="account-onboarding__otp">
               <h4>Verify your sign-in</h4>
               <p>Enter the 6-digit code sent to {challenge.masked_email}. It expires in 5 minutes and can be used once.</p>
@@ -416,11 +454,12 @@ function PendingAccount({
               <h4>Create your portal password</h4>
               <p>Student Number <strong>{studentId}</strong></p>
               <label htmlFor="student-new-password">New Password</label>
-              <input id="student-new-password" type="password" autoComplete="new-password"
+              <PasswordInput id="student-new-password" ref={passwordField} visible={passwordVisible}
+                onToggle={() => setPasswordVisible(!passwordVisible)} autoComplete="new-password"
                 minLength={12} maxLength={128} required disabled={busy} value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)} />
               <label htmlFor="student-confirm-password">Confirm Password</label>
-              <input id="student-confirm-password" type="password" autoComplete="new-password"
+              <PasswordInput id="student-confirm-password" visible={passwordVisible} autoComplete="new-password"
                 minLength={12} maxLength={128} required disabled={busy} value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)} />
               <PasswordStrengthChecklist password={newPassword} confirmPassword={confirmPassword} />
@@ -472,7 +511,7 @@ function PendingAccount({
           )}
           <Button
             disabled={busy}
-            variant="secondary"
+            variant="ghost"
             onClick={() =>
               void action(() => refreshVerifiedAccount(profile.uid), 'Account status refreshed.')
             }

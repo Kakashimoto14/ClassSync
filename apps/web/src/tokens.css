@@ -1,0 +1,169 @@
+/* ClassSync institutional tokens (.claude/skills/classsync-unslop-design). Imported first.
+   Pages consume semantic names, so an appearance mode only needs to override this block. */
+:root {
+  color-scheme: light;
+
+  --surface-canvas: #f7f7f9;
+  --surface-primary: #ffffff;
+  --surface-subtle: #f1f3f6;
+  --border-subtle: #e5e7eb;
+  --border-strong: #cbd5e1;
+  /* Inputs and outlined buttons need 3:1 against white (WCAG 1.4.11). */
+  --border-control: #8a94a6;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 5%), 0 1px 1px rgb(15 23 42 / 3%);
+  --shadow-elevated: 0 8px 24px rgb(15 23 42 / 8%);
+  --scrim: rgb(15 23 42 / 55%);
+
+  --brand-crimson: #991b2e;
+  --brand-crimson-hover: #7f1525;
+  --brand-crimson-soft: #fdf2f4;
+  --on-brand: #ffffff;
+
+  --ink-primary: #0f172a;
+  --ink-secondary: #334155;
+  /* Muted ink is for text on the white surface; use secondary ink on tinted wells. */
+  --ink-muted: #64748b;
+
+  /* Session types: 3px accent plus soft tint. */
+  --session-lecture: #334155;
+  --session-lecture-soft: #f8fafc;
+  --session-computer-lab: #2563eb;
+  --session-computer-lab-soft: #eff6ff;
+  --session-science-lab: #0d9488;
+  --session-science-lab-soft: #f0fdfa;
+  --session-athletic: #d97706;
+  --session-athletic-soft: #fffbeb;
+
+  /* Status: the accent draws bars and icons, the ink variant carries text (4.5:1). */
+  --status-success: #059669;
+  --status-success-ink: #046c4e;
+  --status-success-soft: #ecfdf5;
+  --status-success-border: #a7f3d0;
+  --status-warning: #d97706;
+  --status-warning-ink: #92500a;
+  --status-warning-soft: #fffbeb;
+  --status-warning-border: #fde68a;
+  --status-danger: #dc2626;
+  --status-danger-ink: #b91c1c;
+  --status-danger-hover: #991b1b;
+  --status-danger-soft: #fef2f2;
+  --status-danger-border: #fecaca;
+  --status-info: #2563eb;
+  --status-info-ink: #1d4ed8;
+  --status-info-soft: #eff6ff;
+  --status-info-border: #bfdbfe;
+
+  /* Geometry */
+  --control-h: 36px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  /* Solid outline colour for keyboard focus, plus the soft brand halo on controls. */
+  --focus-ring: #991b2e;
+  --focus-shadow: 0 0 0 3px rgb(153 27 46 / 16%);
+  --sidebar-width: 240px;
+  --header-height: 56px;
+  --bottom-nav-height: 64px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --control-h: 44px;
+  }
+}
+
+/* Times, identifiers, counts and metrics line up and never split mid-value. */
+time,
+.numeric,
+[data-numeric],
+.status,
+.table,
+.breadcrumbs,
+.workspace-chip {
+  font-variant-numeric: tabular-nums;
+}
+time,
+.numeric,
+[data-numeric],
+.status,
+.workspace-chip {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+time,
+[data-numeric],
+.workspace-chip {
+  white-space: nowrap;
+}
+
+/* One select treatment. The :not() pair outranks component `background` shorthands. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  text-overflow: ellipsis;
+}
+
+/* Page rhythm: header, one command bar, one primary view. */
+.page-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.page-header > :first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.command-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: var(--radius-card);
+  background: var(--surface-subtle);
+}
+.command-bar > input,
+.command-bar > select {
+  width: auto;
+  flex: 1 1 160px;
+}
+
+/* Hairline table on the single elevated surface. */
+.table {
+  width: 100%;
+  /* Override the legacy 620px minimum, which assumes a scrolling wrapper. */
+  min-width: 0;
+  border-collapse: collapse;
+  background: var(--surface-primary);
+  font-size: 0.875rem;
+  text-align: left;
+}
+.table th {
+  background: var(--surface-subtle);
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-wrap: normal;
+  vertical-align: top;
+}
+.table [data-numeric] {
+  text-align: right;
+}

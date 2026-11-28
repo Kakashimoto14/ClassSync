@@ -120,42 +120,6 @@
 .request-history[open] summary {
   margin-bottom: 8px;
 }
-.brand-shell .mobile-brand {
-  min-height: var(--target-min);
-}
-.brand-shell .preview-indicator summary {
-  gap: 6px;
-  border-radius: var(--radius);
-  padding-inline: 4px;
-}
-.brand-shell .preview-indicator[open] summary {
-  color: var(--primary);
-  background: var(--primary-soft);
-}
-.brand-shell .preview-indicator .preview-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  width: min(300px, calc(100vw - 32px));
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-overlay);
-  z-index: 20;
-}
-.brand-shell .preview-indicator .preview-menu p {
-  position: static;
-  padding: 0;
-  width: auto;
-  border: 0;
-  box-shadow: none;
-  font-size: 0.875rem;
-}
-.brand-shell .preview-menu .text-action {
-  min-height: var(--target-min);
-  margin-top: 8px;
-}
 .auth-entrance .auth-brand .auth-brand-copy {
   display: none;
 }

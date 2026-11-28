@@ -78,7 +78,7 @@ it('shows the CdM campus access login and a non-production verification widget',
   entrance();
   expect(screen.getByRole('heading', { name: 'Welcome to ClassSync' })).toBeInTheDocument();
   expect(screen.getByText('CAMPUS ACCESS')).toBeInTheDocument();
-  expect(screen.getAllByText('Signing in for the first time?')).toHaveLength(2);
+  expect(screen.getAllByText('Signing in for the first time?')).toHaveLength(1);
   expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Complete human verification' })).toBeInTheDocument();
   expect(screen.queryByText(/sample agenda/i)).not.toBeInTheDocument();
@@ -177,7 +177,8 @@ it('removes the inserted separator when a typed student-number prefix becomes an
 it('validates confirmation before student account creation and submits no role', async () => {
   entrance();
   fireEvent.click(screen.getAllByRole('link', { name: 'Create account' })[0]);
-  expect(screen.getByRole('heading', { name: 'Create your account' })).toHaveFocus();
+  expect(screen.getByRole('heading', { name: 'Create your account' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Email address')).toHaveFocus();
   expect(screen.getByRole('button', { name: 'Create account' })).toBeEnabled();
   fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
   expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();

@@ -32,7 +32,7 @@
   color: #656879;
 }
 .student-rooms-search:focus-within {
-  outline: 2px solid #8a2b45;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 .student-rooms-search input {
@@ -73,7 +73,7 @@
 }
 .student-room-categories button[aria-pressed='true'] {
   background: #f3d6df;
-  color: #7a2540;
+  color: var(--primary-hover);
   border-color: #ebbdcd;
 }
 .student-room-categories button:hover {
@@ -110,8 +110,8 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #f8e9ed;
-  color: #8a2b45;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 .student-room-card h2 {
   font-size: 18px;
@@ -161,7 +161,7 @@
   margin-top: 14px;
   border-top: 1px solid #f0ecee;
   padding-top: 10px;
-  color: #8a2b45;
+  color: var(--primary);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -183,7 +183,7 @@
   max-width: 650px;
 }
 .student-rooms-state > svg {
-  color: #8a2b45;
+  color: var(--primary);
   margin-bottom: 12px;
 }
 .student-rooms-state h2 {
@@ -201,7 +201,7 @@
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  color: #7a2540;
+  color: var(--primary-hover);
   font-size: 14px;
   margin-bottom: 12px;
 }
@@ -246,7 +246,7 @@
   position: absolute;
   right: 0;
   top: 19px;
-  color: #8a2b45;
+  color: var(--primary);
 }
 .student-room-card details,
 .student-room-preview {
@@ -264,7 +264,7 @@
   display: block;
   width: fit-content;
   padding: 12px 0;
-  color: #7a2540;
+  color: var(--primary-hover);
 }
 @media (max-width: 1100px) {
   .student-rooms-grid {

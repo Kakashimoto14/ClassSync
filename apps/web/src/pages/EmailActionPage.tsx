@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { PasswordStrengthChecklist } from '../auth/PasswordStrengthChecklist';
+import { PasswordInput } from '../auth/PasswordInput';
 import { passwordStrengthComplete } from '../auth/password-strength';
 import { applyEmailVerificationCode, completePasswordReset, verifyPasswordResetCode } from '../auth/account-actions';
 import { useUniversitySession } from '../auth/university-session-context';
@@ -22,6 +23,11 @@ export function EmailActionPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const started = useRef(false);
+  const [visible, setVisible] = useState(false);
+  const passwordField = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (state === 'reset-ready') passwordField.current?.focus();
+  }, [state]);
 
   useEffect(() => {
     if (started.current) return;
@@ -50,8 +56,8 @@ export function EmailActionPage() {
       setPassword('');
       setConfirmPassword('');
       setState('complete');
-    } catch (failure) {
-      setError(failure instanceof Error ? failure.message : 'The password could not be changed.');
+    } catch {
+      setError('The password could not be changed. Request a new reset link and try again.');
     } finally {
       setBusy(false);
     }
@@ -74,13 +80,14 @@ export function EmailActionPage() {
           <form onSubmit={submit} noValidate>
             <p>Choose a new password for your ClassSync account.</p>
             <label htmlFor="action-new-password">New password</label>
-            <input id="action-new-password" type="password" autoComplete="new-password" minLength={12}
+            <PasswordInput id="action-new-password" ref={passwordField} visible={visible}
+              onToggle={() => setVisible(!visible)} autoComplete="new-password" minLength={12}
               value={password} disabled={busy} onChange={(event) => setPassword(event.target.value)} />
             <label htmlFor="action-confirm-password">Confirm password</label>
-            <input id="action-confirm-password" type="password" autoComplete="new-password" minLength={12}
+            <PasswordInput id="action-confirm-password" visible={visible} autoComplete="new-password" minLength={12}
               value={confirmPassword} disabled={busy} onChange={(event) => setConfirmPassword(event.target.value)} />
             <PasswordStrengthChecklist password={password} confirmPassword={confirmPassword} />
-            {error && <p role="alert">{error}</p>}
+            {error && <p className="entrance-error" role="alert">{error}</p>}
             <Button type="submit" loading={busy} disabled={busy || !passwordStrengthComplete(password, confirmPassword)}>
               {busy ? 'Saving…' : 'Save new password'}
             </Button>

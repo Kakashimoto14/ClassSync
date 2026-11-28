@@ -1,432 +1,39 @@
+/* Sign-in, sign-up, verification and onboarding. Colours and geometry come from tokens.css. */
 .connected-entrance {
-  --entry-navy: #142b45;
-  --entry-muted: #46596f;
-  --entry-red: #a8273a;
-  --entry-line: #d6e0eb;
-  --entry-border: #8392a5;
-  --entry-surface: #fff;
-  --entry-focus: #205c9b;
+  box-sizing: border-box;
   display: grid;
-  place-items: center;
+  align-items: center;
+  justify-items: center;
   min-height: 100svh;
-  padding: clamp(1rem, 4vw, 3rem);
-  color: var(--entry-navy);
-  background: #eff2f6;
-  font-family: Inter, system-ui, sans-serif;
-  color-scheme: light;
+  padding: 16px;
+  background: var(--surface-canvas);
+  color: var(--ink-primary);
+}
+.connected-entrance *,
+.connected-entrance *::before,
+.connected-entrance *::after {
+  box-sizing: border-box;
 }
 .connected-entrance__frame {
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
-  width: min(1060px, 100%);
-  overflow: hidden;
-  border: 1px solid #d3dde8;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow:
-    0 18px 48px #142b450d,
-    0 2px 5px #142b4508;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(420px, 100%);
 }
 .connected-entrance__access {
-  grid-column: 2;
   min-width: 0;
-  padding: clamp(1.4rem, 3.2vw, 3rem);
+  padding: 24px 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
+  animation: entrance-reveal 180ms ease-out;
 }
-.connected-entrance__eyebrow {
-  margin: 0 0 0.45rem;
-  color: var(--entry-red);
-  font-size: 0.7rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+.entrance-showcase {
+  display: none;
 }
-.connected-entrance__header {
-  margin-bottom: 1.8rem;
-}
-.connected-entrance__header > a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-.connected-entrance__header .classsync-logo picture {
-  width: clamp(11rem, 16vw, 13rem);
-}
-.connected-entrance__preview {
-  margin: 0.65rem 0 0;
-  color: var(--entry-muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-.connected-entrance__access h1 {
-  margin: 0;
-  color: var(--entry-navy);
-  font-size: clamp(1.85rem, 2.8vw, 2.35rem);
-  letter-spacing: -0.045em;
-  font-weight: 740;
-  line-height: 1.13;
-  outline: none;
-}
-.connected-entrance__intro {
-  margin: 0.5rem 0 1.4rem;
-  color: var(--entry-muted);
-  font-size: 0.94rem;
-  line-height: 1.55;
-}
-.connected-entrance__story {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  padding: clamp(1.5rem, 3vw, 2.65rem);
-  background: #e6eef6;
-}
-.connected-entrance__story h2 {
-  margin: 0;
-  color: var(--entry-navy);
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.045em;
-  font-weight: 750;
-}
-.connected-entrance__story h2 > span {
-  color: var(--entry-red);
-}
-.connected-entrance__story > p {
-  margin: 0.75rem 0 1.75rem;
-  color: var(--entry-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  max-width: 31ch;
-}
-.entrance-preview {
-  margin: 0;
-  padding: 1.15rem;
-  border: 1px solid #fff;
-  border-radius: 13px;
-  background: #ffffffdc;
-  box-shadow: 0 8px 18px #142b4508;
-  animation: entrance-reveal 200ms ease-out both;
-}
-.entrance-preview figcaption {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding-bottom: 0.9rem;
-}
-.entrance-preview figcaption strong {
-  color: var(--entry-navy);
-  font-size: 1rem;
-}
-.entrance-preview small {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--entry-muted);
-  font-size: 0.76rem;
-  line-height: 1.5;
-}
-.entrance-preview__icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  color: var(--entry-red);
-  background: #f6e9ed;
-  border-radius: 9px;
-}
-.entrance-preview__week {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.35rem;
-  padding: 0.7rem 0;
-  border-block: 1px solid var(--entry-line);
-  color: var(--entry-muted);
-  font-size: 0.72rem;
-  text-align: center;
-}
-.entrance-preview__week span {
-  padding: 0.3rem 0.15rem;
-}
-.entrance-preview__day {
-  color: #fff;
-  background: var(--entry-navy);
-  border-radius: 5px;
-}
-.entrance-preview__agenda {
-  margin: 1.2rem 0;
-  padding: 0;
-  list-style: none;
-}
-.entrance-preview__agenda li {
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 0.6rem;
-  position: relative;
-  padding: 0.2rem 0 0.9rem;
-}
-.entrance-preview__agenda li + li {
-  padding-bottom: 0;
-}
-.entrance-preview__agenda time {
-  color: var(--entry-navy);
-  font-size: 0.82rem;
-  font-weight: 720;
-}
-.entrance-preview__agenda li > div {
-  padding-inline-start: 0.7rem;
-  border-left: 2px solid #b8c9dc;
-}
-.entrance-preview__agenda li:first-child > div {
-  border-left-color: var(--entry-red);
-}
-.entrance-preview__agenda strong {
-  display: block;
-  color: var(--entry-navy);
-  font-size: 0.83rem;
-  font-weight: 680;
-  line-height: 1.45;
-}
-.entrance-preview__next {
-  padding: 0.18rem 0.35rem;
-  border-radius: 4px;
-  background: #e8edf5;
-  color: var(--entry-navy);
-  font-size: 0.65rem;
-  font-weight: 650;
-}
-.entrance-preview__update {
-  display: flex;
-  align-items: start;
-  gap: 0.55rem;
-  padding: 0.7rem;
-  border-radius: 8px;
-  background: #eaf1f9;
-  font-size: 0.78rem;
-}
-.entrance-preview__update > svg {
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-}
-.entrance-preview__update small {
-  font-size: 0.73rem;
-}
-.entrance-availability {
-  display: flex;
-  gap: 0.6rem;
-  margin: 1.2rem 0;
-  padding: 0.8rem 0;
-  border-block: 1px solid var(--entry-line);
-  color: var(--entry-muted);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-.entrance-availability svg {
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-}
-.entrance-availability strong {
-  color: var(--entry-navy);
-  font-weight: 650;
-}
-.entrance-availability p {
-  margin: 0.2rem 0 0;
-}
-.connected-entrance__sample {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  margin-top: 0.6rem;
-  color: var(--entry-muted);
-  font-size: 0.8rem;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-.connected-entrance__form,
-.connected-entrance .account-onboarding form {
-  display: grid;
-  gap: 0.95rem;
-}
-
-.connected-entrance__form .auth-field {
-  display: grid;
-  gap: 0.38rem;
-}
-
-.connected-entrance label {
-  color: var(--entry-navy);
-  font-size: 0.89rem;
-  font-weight: 680;
-}
-
-.connected-entrance input:not([type='checkbox']) {
-  width: 100%;
-  min-width: 0;
-  min-height: 48px;
-  padding: 0.62rem 0.74rem;
-  border: 1px solid var(--entry-border);
-  border-radius: 8px;
-  background: var(--entry-surface);
-  color: var(--entry-navy);
-  font: inherit;
-  transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.connected-entrance input[aria-invalid='true'] {
-  border-color: var(--entry-red);
-}
-
-.entrance-password {
-  position: relative;
-}
-
-.connected-entrance .entrance-password input:not([type='checkbox']) {
-  padding-inline-end: 3.1rem;
-}
-
-.entrance-password button {
-  position: absolute;
-  inset-block: 2px;
-  inset-inline-end: 2px;
-  display: grid;
-  width: 44px;
-  place-items: center;
-  color: var(--entry-muted);
-  background: transparent;
-  border: 0;
-  border-radius: 7px;
-  cursor: pointer;
-}
-
-.connected-entrance .button {
-  min-height: 44px;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 120ms ease;
-}
-
-.connected-entrance .button:not(.button--secondary):not(.button--ghost) {
-  color: #fff;
-  border-color: var(--entry-navy);
-  background: var(--entry-navy);
-}
-
-.connected-entrance .button:not(.button--secondary):not(.button--ghost):hover:not(:disabled) {
-  background: #204267;
-}
-
-.connected-entrance .button:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.connected-entrance__form > .button {
-  width: 100%;
-  min-height: 48px;
-}
-
-.connected-entrance__recovery,
-.connected-entrance__secondary a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--entry-red);
-  font-size: 0.9rem;
-  font-weight: 670;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.connected-entrance__recovery {
-  justify-self: end;
-  margin-top: -0.3rem;
-}
-
-.connected-entrance__secondary {
-  margin-top: 1rem;
-  padding-top: 0.55rem;
-  color: var(--entry-muted);
-  text-align: center;
-  font-size: 0.9rem;
-  border-top: 1px solid var(--entry-line);
-}
-
-.connected-entrance :is(a, button, input, summary):focus-visible {
-  outline: 2px solid var(--entry-focus);
-  outline-offset: 3px;
-}
-.account-onboarding__otp-digits {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.45rem;
-  max-width: 350px;
-}
-.connected-entrance .account-onboarding__otp-digits input {
-  min-width: 0;
-  min-height: 52px;
-  padding-inline: 0.25rem;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-.account-onboarding__otp-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.account-onboarding__otp { animation: entrance-reveal 180ms ease-out both; }
-.account-onboarding__otp-actions .button { width: auto; }
-
-.entrance-error,
-.entrance-hint,
-.entrance-notice {
-  margin: 0;
-  color: var(--entry-muted);
-  font-size: 0.85rem;
-  line-height: 1.45;
-}
-
-.entrance-error {
-  color: var(--entry-red);
-}
-
-.entrance-notice {
-  padding: 0.7rem;
-  border-radius: 7px;
-  background: #edf5fc;
-}
-
-.connected-entrance .university-session,
-.connected-entrance .account-onboarding,
-.connected-entrance .connected-entrance__access > .alert,
-.connected-entrance [aria-label='University account management'] {
-  margin-top: 1rem;
-}
-
-.connected-entrance .university-session__roles,
-.connected-entrance .university-session__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0.7rem 0;
-}
-
-.connected-entrance .account-onboarding > * + *,
-.connected-entrance [aria-label='University account management'] > * + * {
-  margin-top: 0.7rem;
-}
-
-.connected-entrance .account-onboarding dd {
-  margin: 0 0 0.45rem;
-  overflow-wrap: anywhere;
-}
-
 @keyframes entrance-reveal {
   from {
-    opacity: 0;
+    opacity: 0.6;
     transform: translateY(4px);
   }
   to {
@@ -434,462 +41,376 @@
     transform: translateY(0);
   }
 }
-@media (max-width: 900px) {
-  .connected-entrance__access {
-    padding: 1.5rem;
-  }
-  .connected-entrance__story {
-    padding: 1.5rem;
-  }
-  .entrance-preview__week {
-    display: none;
-  }
-}
-@media (max-width: 700px) {
+@media (min-width: 960px) {
   .connected-entrance {
-    padding: 0.85rem;
-    align-items: start;
+    padding: 32px;
   }
   .connected-entrance__frame {
-    width: min(480px, 100%);
-    grid-template-columns: minmax(0, 1fr);
-    border-radius: 15px;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    align-items: center;
+    column-gap: clamp(40px, 6vw, 80px);
+    width: min(1120px, 100%);
   }
   .connected-entrance__access {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 28px 32px;
+    box-shadow: var(--shadow-elevated);
+  }
+  .entrance-showcase {
+    display: block;
     grid-column: 1;
     grid-row: 1;
-    padding: 1.35rem;
-  }
-  .connected-entrance__story {
-    grid-column: 1;
-    grid-row: 2;
-    padding: 1.35rem;
-  }
-  .connected-entrance__story > p {
-    margin-bottom: 1rem;
-  }
-  .connected-entrance__story h2 {
-    font-size: 1.65rem;
-  }
-  .connected-entrance__header {
-    margin-bottom: 1.25rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .connected-entrance *,
-  .connected-entrance *::before,
-  .connected-entrance *::after {
-    animation: none !important;
-    transition: none !important;
+    min-width: 0;
   }
 }
 
-/* CdM institutional entrance: restrained campus brand, clear access hierarchy. */
-.connected-entrance {
-  --entry-navy: #29252a;
-  --entry-muted: #68616a;
-  --entry-red: #872e49;
-  --entry-line: #e7dfe2;
-  --entry-border: #c8bcc1;
-  --entry-focus: #872e49;
-  background: #f5f1f2;
+.connected-entrance__header {
+  margin-bottom: 16px;
 }
-.connected-entrance__access {
-  padding: clamp(1.5rem, 3.2vw, 3.25rem);
-  animation: entrance-reveal 220ms ease-out both;
+.connected-entrance__header > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-h);
 }
-.connected-entrance__story {
-  grid-column: 2;
-  grid-row: 1;
-  color: #fff;
-  background: linear-gradient(155deg, #76243e 0%, #4b1d31 100%);
-  animation: entrance-reveal 260ms ease-out both;
+.connected-entrance__header .classsync-logo picture {
+  width: 160px;
 }
-.connected-entrance__story h2,
-.connected-entrance__story > p { color: #fff; }
-.connected-entrance__story h2 > span { color: #e6c56f; }
-.connected-entrance__portal-brand {
-  display: grid;
-  gap: 1rem;
-  margin-bottom: clamp(2.5rem, 9vh, 6rem);
+.connected-entrance__preview {
+  margin-top: 8px;
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
 }
-.connected-entrance__portal-brand .classsync-logo picture { width: min(14rem, 100%); }
-.connected-entrance__portal-brand > span,
-.connected-entrance__service-label {
-  color: #f0d98e;
-  font-size: 0.68rem;
+.connected-entrance__eyebrow {
+  margin-bottom: 4px;
+  color: var(--brand-crimson);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.connected-entrance__access h1 {
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
-.connected-entrance__features {
+.connected-entrance__access h1:focus {
+  outline: none;
+}
+.connected-entrance__intro {
+  margin: 6px 0 16px;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+}
+
+/* Segmented sign in / create account */
+.auth-switch {
   display: grid;
-  gap: 1rem;
-  padding: 0;
-  margin: 2rem 0 3rem;
-  list-style: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 3px;
+  border-radius: calc(var(--radius-control) + 3px);
+  background: var(--surface-subtle);
 }
-.connected-entrance__features li {
+.auth-switch a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-h);
+  border-radius: var(--radius-control);
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-switch a[aria-current='page'] {
+  background: var(--surface-primary);
+  color: var(--ink-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.connected-entrance__form,
+.connected-entrance .account-onboarding form,
+.connected-entrance .email-action-card form {
   display: grid;
-  grid-template-columns: 1.4rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.8rem;
-  color: #fff;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  gap: 12px;
 }
-.connected-entrance__features svg { color: #e6c56f; }
-.connected-entrance__form { gap: 0.75rem; }
+.auth-field {
+  display: grid;
+  gap: 4px;
+}
+.connected-entrance label {
+  color: var(--ink-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.connected-entrance input:not([type='checkbox']) {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-h);
+}
+.connected-entrance input::placeholder {
+  font-size: 0.875rem;
+}
+.connected-entrance input[readonly] {
+  background: var(--surface-subtle);
+  color: var(--ink-secondary);
+}
+.connected-entrance input:focus-visible {
+  border-color: var(--brand-crimson);
+}
+.connected-entrance input[aria-invalid='true'] {
+  border-color: var(--status-danger);
+}
+.entrance-password {
+  position: relative;
+}
+.connected-entrance .entrance-password input:not([type='checkbox']) {
+  padding-right: 48px;
+}
+.entrance-password button {
+  position: absolute;
+  inset-block: 1px;
+  right: 1px;
+  display: grid;
+  place-items: center;
+  width: var(--control-h);
+  border: 0;
+  border-radius: calc(var(--radius-control) - 1px);
+  background: transparent;
+  color: var(--ink-secondary);
+}
+.entrance-password button:hover:not(:disabled) {
+  background: var(--surface-subtle);
+}
+.connected-entrance__password-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.connected-entrance__recovery,
+.connected-entrance__secondary a,
+.email-action-card a:not(.button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--brand-crimson);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.connected-entrance__form > .button,
+.connected-entrance__first-time > .button,
+.connected-entrance .email-action-card form > .button {
+  width: 100%;
+}
 .connected-entrance__first-time {
   display: grid;
-  justify-items: stretch;
-  gap: 0.55rem;
-  margin-top: 0.7rem;
-  text-align: center;
+  gap: 8px;
+  margin-top: 12px;
 }
 .connected-entrance__divider {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  color: var(--entry-muted);
-  font-size: 0.78rem;
+  gap: 12px;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
 }
 .connected-entrance__divider::before,
 .connected-entrance__divider::after {
-  height: 1px;
-  flex: 1;
   content: '';
-  background: var(--entry-line);
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
 }
-.connected-entrance__first-time .button { width: 100%; }
-.connected-entrance__first-time .entrance-hint { margin-top: -0.25rem; }
+.google-mark {
+  flex: 0 0 18px;
+}
 .connected-entrance__callout {
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--entry-line);
-  border-radius: 10px;
-  background: #fbf8f9;
-  color: var(--entry-navy);
-  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-subtle);
+  font-size: 0.75rem;
 }
-.connected-entrance__callout strong { font-size: 0.84rem; }
-.connected-entrance__callout p,
+.connected-entrance__callout p {
+  margin-top: 2px;
+  color: var(--ink-secondary);
+}
 .connected-entrance__help {
-  margin: 0.35rem 0 0;
-  color: var(--entry-muted);
-  font-size: 0.76rem;
-  line-height: 1.5;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  text-align: center;
 }
-.connected-entrance__help { text-align: center; }
-.turnstile-field {
-  display: grid;
-  gap: 0.35rem;
-  min-height: 76px;
-  align-content: start;
-}
-.turnstile-field__widget { min-height: 60px; }
-.connected-entrance .button:not(.button--secondary):not(.button--ghost) {
-  border-color: var(--entry-red);
-  background: var(--entry-red);
-}
-.connected-entrance .button:not(.button--secondary):not(.button--ghost):hover:not(:disabled) {
-  background: #6f253c;
-}
-.connected-entrance :is(a, button, input, summary):focus-visible {
-  outline-color: #872e49;
-  box-shadow: 0 0 0 3px #f3dfe6;
+.connected-entrance__secondary {
+  margin-top: 12px;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  text-align: center;
 }
 
-/* Production sign-in: calm, high-contrast campus workspace. */
-.connected-entrance {
-  --entry-navy: #0f172a;
-  --entry-muted: #475569;
-  --entry-red: #7a2840;
-  --entry-line: #e2e8f0;
-  --entry-border: #cbd5e1;
-  display: grid;
-  place-items: center;
-  min-height: 100svh;
-  padding: 16px;
-  color: var(--entry-navy);
-  background-color: #f5f7fa;
-  background-image: radial-gradient(#94a3b8 0.65px, transparent 0.65px);
-  background-position: 0 0;
-  background-size: 18px 18px;
-}
-.connected-entrance__frame {
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-  width: min(1160px, 100%);
-  max-height: calc(100svh - 32px);
-  min-height: min(680px, calc(100svh - 32px));
-  border-color: #e2e8f0;
-  border-radius: 18px;
-  box-shadow: 0 24px 64px rgb(15 23 42 / 9%), 0 2px 8px rgb(15 23 42 / 4%);
-}
-.connected-entrance__access {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 0;
-  overflow-y: auto;
-  padding: clamp(1.35rem, 2.65vw, 2.55rem);
-  scrollbar-width: thin;
-  scrollbar-color: rgb(135 46 73 / 20%) transparent;
-  animation: none;
-}
-.connected-entrance__header {
-  margin-bottom: clamp(0.85rem, 2vh, 1.4rem);
-}
-.connected-entrance__header .classsync-logo picture {
-  width: clamp(10.5rem, 17vw, 13rem);
-}
-.connected-entrance__eyebrow {
-  width: fit-content;
-  margin-bottom: 0.45rem;
-  padding: 0.34rem 0.62rem;
-  border: 1px solid #f0dce3;
-  border-radius: 999px;
-  background: #fbf3f6;
-  color: #7a2840;
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
-}
-.connected-entrance__access h1 {
-  font-size: clamp(1.7rem, 2.45vw, 2.12rem);
-  line-height: 1.1;
-}
-.connected-entrance__intro {
-  max-width: 44ch;
-  margin: 0.42rem 0 0.9rem;
-  font-size: 0.86rem;
+/* Feedback */
+.entrance-error,
+.entrance-hint,
+.entrance-notice {
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
-.connected-entrance__form { gap: 0.55rem; }
-.connected-entrance label { font-size: 0.82rem; }
-.connected-entrance input:not([type='checkbox']) {
-  min-height: 44px;
-  border-color: #e2e8f0;
-  border-radius: 9px;
+.entrance-error {
+  color: var(--status-danger-ink);
 }
-.connected-entrance input:not([type='checkbox']):focus-visible {
-  border-color: #872e49;
-  outline: none;
-  box-shadow: 0 0 0 3px rgb(135 46 73 / 13%);
+.entrance-notice {
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  background: var(--status-info-soft);
 }
-.connected-entrance .button:not(.button--secondary):not(.button--ghost) {
-  border-color: #7a2840;
-  background: #7a2840;
-}
-.connected-entrance .button:not(.button--secondary):not(.button--ghost):hover:not(:disabled) {
-  border-color: #641f34;
-  background: #641f34;
-}
-.connected-entrance__form > .button { min-height: 46px; }
-.connected-entrance__first-time {
-  gap: 0.35rem;
-  margin-top: 0.5rem;
-}
-.connected-entrance__first-time .button { min-height: 42px; }
-.connected-entrance__callout {
-  padding: 0.65rem 0.78rem;
-  border-color: #e2e8f0;
-  background: #f8fafc;
-}
-.connected-entrance__callout p,
-.connected-entrance__help { font-size: 0.72rem; }
-.connected-entrance__help { margin-top: 0.15rem; }
-.connected-entrance__secondary { margin-top: 0.45rem; padding-top: 0.35rem; font-size: 0.8rem; }
-.connected-entrance__story {
-  position: relative;
-  overflow: hidden;
-  justify-content: center;
-  padding: clamp(1.6rem, 3.2vw, 3.2rem);
-  border-left: 1px solid #e8e4ec;
-  color: #0f172a;
-  background:
-    radial-gradient(ellipse at 8% 12%, rgb(135 46 73 / 8%), transparent 42%),
-    radial-gradient(ellipse at 92% 88%, rgb(71 85 105 / 7%), transparent 38%),
-    linear-gradient(155deg, #fdf8fa 0%, #f4f1f6 52%, #edf2f7 100%);
-  animation: none;
-}
-.connected-entrance__portal-brand { gap: 0.8rem; margin-bottom: clamp(1.4rem, 5vh, 3rem); }
-.connected-entrance__portal-brand .classsync-logo picture { width: min(13rem, 100%); }
-.connected-entrance__portal-brand > span,
-.connected-entrance__service-label { color: #64748b; font-size: 0.63rem; }
-.connected-entrance__story h2 { color: #0f172a; font-size: clamp(1.9rem, 3vw, 2.55rem); }
-.connected-entrance__story h2 > span { color: #872e49; }
-.connected-entrance__story > p { margin: 0.7rem 0 1.2rem; color: #475569; font-size: 0.9rem; }
-.connected-entrance__features.entrance-preview-card {
-  gap: 0.2rem;
-  margin: 0 0 1.2rem;
-  padding: 0.55rem;
-  border: 1px solid rgb(226 232 240 / 92%);
-  border-radius: 14px;
-  background: rgb(255 255 255 / 85%);
-  box-shadow: 0 12px 32px rgb(15 23 42 / 6%);
-  backdrop-filter: blur(8px);
-}
-.entrance-preview-card li {
-  grid-template-columns: 2.3rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.52rem;
-  border-radius: 10px;
-  color: #0f172a;
-  font-size: 0.8rem;
-}
-.entrance-preview-card__icon {
-  display: grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 10px;
-  background: #f8ebf0;
-  color: #872e49;
-}
-.entrance-preview-card li strong { display: block; font-size: 0.8rem; font-weight: 680; }
-.entrance-preview-card li small { display: block; margin-top: 0.15rem; color: #64748b; font-size: 0.7rem; }
-.connected-entrance__service-label { margin-top: 0.15rem; }
-@media (max-height: 800px) and (min-width: 701px) {
-  .connected-entrance__frame { min-height: 0; }
-  .connected-entrance__access { padding-block: 1.15rem; }
-  .connected-entrance__header { margin-bottom: 0.7rem; }
-  .connected-entrance__story { padding-block: 1.4rem; }
-  .connected-entrance__portal-brand { margin-bottom: 1rem; }
-  .connected-entrance__features.entrance-preview-card { margin-bottom: 0.7rem; }
-}
-@media (max-width: 700px) {
-  .connected-entrance { min-height: 100svh; padding: 0.75rem; }
-  .connected-entrance__frame { max-height: none; min-height: 0; }
-  .connected-entrance__access { grid-column: 1; grid-row: 1; }
-  .connected-entrance__story { grid-column: 1; grid-row: 2; }
-  .connected-entrance__portal-brand { margin-bottom: 1.5rem; }
-  .connected-entrance__service-label { display: block; }
-}
-
-/* Shared auth states and forms; appended after entrance rules to preserve the original cascade. */
-/* ═══════════════════════════════════════════════════════════════
-   ClassSync — Auth Pages
-   Login, sign-in, forbidden, system states.
-   ═══════════════════════════════════════════════════════════════ */
-
-.auth-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--canvas);
-}
-
-.auth-brand {
-  background: linear-gradient(155deg, #fdf8fa 0%, #f4f1f6 52%, #edf2f7 100%);
-  border-inline-end: 1px solid #e8e4ec;
-  color: #0f172a;
+.connected-entrance__alert {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--status-danger-border);
+  border-radius: var(--radius-control);
+  background: var(--status-danger-soft);
+  color: var(--status-danger-ink);
+  font-size: 0.8125rem;
 }
-
-/* Decorative gradient orb */
-.auth-brand::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(135, 46, 73, 0.08), transparent 70%);
-  top: -200px;
-  right: -200px;
-  pointer-events: none;
+.connected-entrance__alert svg {
+  margin-top: 1px;
 }
-
-.auth-brand .eyebrow,
-.auth-brand-copy > p:last-child {
-  color: #475569;
+.connected-entrance__connecting {
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
 }
-.auth-brand .eyebrow {
-  color: #872e49;
+.entrance-availability {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
 }
-
-.auth-brand-copy {
-  display: none;
-  gap: 16px;
+.entrance-availability svg {
+  margin-top: 2px;
 }
-.auth-brand h2 {
-  font-size: clamp(1.75rem, 3vw, 2.75rem);
-  max-width: 20ch;
-  color: #0f172a;
+.password-strength-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.25;
 }
-.auth-brand .classsync-logo__tagline {
+.password-strength-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--ink-secondary);
+}
+.password-strength-checklist li[data-complete='true'] {
+  color: var(--status-success-ink);
+}
+.turnstile-field {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+}
+.turnstile-field__widget {
+  min-height: 65px;
+  max-width: 100%;
+}
+.connected-entrance .turnstile-field--unavailable {
   display: none;
 }
-.auth-brand .classsync-logo__name {
-  font-size: 1.5rem;
-}
 
-.auth-field {
+/* Verification and onboarding */
+.connected-entrance .university-session,
+.connected-entrance .account-onboarding,
+.connected-entrance [aria-label='University account management'] {
   display: grid;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 16px;
 }
-
-.auth-main {
+.connected-entrance .university-session__roles,
+.connected-entrance .university-session__actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-}
-
-.auth-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  max-width: 480px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-  animation: fade-in-up var(--duration-slow) var(--ease-out);
-}
-.auth-card__title {
-  display: grid;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 24px;
+  margin: 0;
 }
-.auth-card__title > p:last-child {
-  color: var(--ink-soft);
+.connected-entrance .university-session .alert {
+  margin: 0;
 }
-.auth-card form {
+.account-onboarding__steps {
   display: grid;
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
 }
-
-.password-field button {
+.account-onboarding__steps li {
+  padding-top: 6px;
+  border-top: 3px solid var(--border-subtle);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  counter-increment: step;
+}
+.account-onboarding__steps li::before {
+  content: counter(step) '. ';
+}
+.account-onboarding__steps li[data-state='done'] {
+  border-color: var(--status-success);
+  color: var(--status-success-ink);
+}
+.account-onboarding__steps li[data-state='current'] {
+  border-color: var(--brand-crimson);
+  color: var(--ink-primary);
+}
+.account-onboarding__actions,
+.account-onboarding__otp-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 0;
-  color: var(--ink-soft);
-  min-height: 44px;
-  min-width: 44px;
-  border-radius: var(--radius);
-  transition: color var(--duration-fast) var(--ease-in-out);
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.password-field button:hover {
-  color: var(--primary);
+.account-onboarding__otp-digits {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.connected-entrance .account-onboarding__otp-digits input {
+  min-height: 48px;
+  padding-inline: 4px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.connected-entrance .account-onboarding dd {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
 }
 
-.auth-demo-access {
+/* Email action links share the access card, so they add no surface of their own. */
+.email-action-card {
   display: grid;
-  gap: 8px;
-  border-top: 1px solid var(--line);
-  margin-top: 24px;
-  padding-top: 24px;
+  gap: 12px;
 }
-.auth-demo-access p {
-  color: var(--ink-soft);
+.email-action-card p {
+  color: var(--ink-secondary);
   font-size: 0.875rem;
 }
 
-/* ── System State Pages ──────────────────────────────────────── */
+/* Shared system states (route guard) and the development role preview. */
 .system-state-page {
   display: flex;
   align-items: center;
@@ -897,7 +418,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   padding: 24px 16px;
-  background: var(--canvas);
+  background: var(--surface-canvas);
 }
 .system-state {
   display: flex;
@@ -905,22 +426,19 @@
   align-items: center;
   gap: 16px;
   max-width: 480px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
-  padding: 48px 32px;
+  padding: 40px 32px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
   text-align: center;
-  box-shadow: var(--shadow-lg);
-  animation: fade-in-up var(--duration-normal) var(--ease-out);
 }
 .system-state > svg {
-  color: var(--primary);
+  color: var(--brand-crimson);
 }
 .system-state > p:not(.eyebrow) {
-  color: var(--ink-soft);
+  color: var(--ink-secondary);
 }
-
-/* ── Role Preview ────────────────────────────────────────────── */
 .role-preview-card {
   display: grid;
   gap: 16px;
@@ -929,578 +447,4 @@
 .demo-role-options {
   display: grid;
   gap: 8px;
-}
-
-/* ── Desktop Auth Split ──────────────────────────────────────── */
-@media (min-width: 1024px) {
-  .auth-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-  .auth-brand {
-    padding: 48px;
-    justify-content: center;
-    gap: 64px;
-  }
-  .auth-brand-copy {
-    display: grid;
-  }
-  .auth-brand .classsync-logo__tagline {
-    display: block;
-  }
-  .auth-brand .classsync-logo__name {
-    font-size: 2rem;
-  }
-  .auth-main {
-    padding: 32px;
-  }
-}
-
-/* Institutional login uses one mobile-first grid across all device classes. */
-.connected-entrance {
-  box-sizing: border-box;
-  min-height: 100dvh;
-  padding: 16px 24px;
-}
-
-.connected-entrance *,
-.connected-entrance *::before,
-.connected-entrance *::after {
-  box-sizing: border-box;
-}
-
-.connected-entrance__frame {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto;
-  width: min(440px, 100%);
-  max-width: 440px;
-  max-height: none;
-  min-height: 0;
-  margin-inline: auto;
-}
-
-.connected-entrance__access,
-.connected-entrance__form,
-.connected-entrance .auth-field,
-.connected-entrance input:not([type='checkbox']),
-.connected-entrance .button {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.connected-entrance__access {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 22px 20px;
-  overflow: visible;
-}
-
-.connected-entrance__story {
-  display: none;
-}
-
-.connected-entrance__header {
-  margin-bottom: 14px;
-}
-
-.connected-entrance__header .classsync-logo picture {
-  width: 10.5rem;
-}
-
-.connected-entrance__eyebrow-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 2px;
-}
-
-.connected-entrance__eyebrow-row .connected-entrance__eyebrow {
-  margin: 0;
-}
-
-.connected-entrance__signup-link {
-  flex: 0 0 auto;
-  color: #7a2840;
-  font-size: 0.75rem;
-  font-weight: 650;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.connected-entrance__signup-link:hover {
-  color: #641f34;
-  text-decoration: underline;
-}
-
-.connected-entrance__desktop-footer {
-  display: none;
-}
-
-.connected-entrance__alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #fecdd3;
-  border-radius: 8px;
-  background: #fff1f2;
-  color: #9f1239;
-  font-size: 0.8rem;
-  line-height: 1.4;
-}
-
-.connected-entrance__alert svg {
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-
-.connected-entrance__connecting {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 0.8rem;
-}
-
-.connected-entrance__intro {
-  margin-bottom: 12px;
-}
-
-.connected-entrance__form {
-  gap: 12px;
-}
-
-.connected-entrance input:not([type='checkbox']) {
-  height: 40px;
-  min-height: 40px;
-}
-
-.connected-entrance__form > .button,
-.connected-entrance__first-time .button {
-  height: 42px;
-  min-height: 42px;
-}
-
-.connected-entrance__first-time {
-  gap: 7px;
-  margin-top: 8px;
-}
-
-.connected-entrance__callout {
-  padding: 10px 12px;
-}
-
-.connected-entrance__callout strong {
-  font-size: 12px;
-}
-
-.connected-entrance__callout p {
-  margin-top: 3px;
-  font-size: 11px;
-  line-height: 1.3;
-}
-
-.connected-entrance__password-label-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.connected-entrance__recovery--desktop {
-  display: none;
-}
-
-.connected-entrance__recovery--mobile {
-  display: inline-flex;
-  justify-self: end;
-}
-
-.connected-entrance__password-label-row .connected-entrance__recovery {
-  position: static;
-  flex: 0 0 auto;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.password-strength-checklist {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px 10px;
-  margin: 0;
-  padding: 2px 0;
-  list-style: none;
-  color: var(--ink-soft);
-  font-size: 0.72rem;
-  line-height: 1.2;
-}
-
-.password-strength-checklist li {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  color: #dc2626;
-  transition: color 160ms ease;
-}
-
-.password-strength-checklist li[data-complete='true'] {
-  color: #16a34a;
-}
-
-.password-strength-checklist svg {
-  flex: 0 0 auto;
-}
-
-.password-strength-checklist span {
-  min-width: 0;
-}
-
-.connected-entrance__secondary {
-  margin-top: 10px;
-  padding-top: 0;
-}
-
-.connected-entrance .entrance-availability {
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 4px;
-  padding: 2px 0;
-  font-size: 10px;
-  line-height: 1.2;
-}
-
-.connected-entrance .entrance-availability span {
-  flex: 1;
-  min-width: 0;
-}
-
-.connected-entrance .entrance-availability .button {
-  width: auto;
-  min-height: 26px;
-  height: 26px;
-  padding: 0 10px;
-}
-
-.connected-entrance .turnstile-field--unavailable {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .connected-entrance {
-    padding: 8px 16px;
-  }
-
-  .connected-entrance__access {
-    padding-block: 12px;
-  }
-
-  .connected-entrance__header {
-    margin-bottom: 2px;
-  }
-
-  .connected-entrance__intro {
-    margin-top: 5px;
-    margin-bottom: 8px;
-    font-size: 0.82rem;
-  }
-
-  .connected-entrance__form {
-    gap: 8px;
-  }
-
-  .connected-entrance .auth-field {
-    gap: 5px;
-  }
-
-  .connected-entrance__first-time {
-    gap: 4px;
-    margin-top: 6px;
-  }
-
-  .connected-entrance__callout {
-    padding-block: 7px;
-  }
-
-  .connected-entrance__callout p {
-    font-size: 11px;
-    line-height: 1.35;
-  }
-
-  .connected-entrance__help {
-    font-size: 11px;
-  }
-
-  .connected-entrance__secondary {
-    margin-top: 5px;
-  }
-
-  .connected-entrance__secondary a {
-    line-height: 1.2;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 959px) {
-  .connected-entrance__frame {
-    width: min(480px, 100%);
-    max-width: 480px;
-  }
-
-  .connected-entrance__access {
-    padding: 28px 32px;
-  }
-}
-
-@media (min-width: 960px) {
-  .connected-entrance {
-    place-items: center;
-    padding: 12px 20px;
-  }
-
-  .connected-entrance__frame {
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-    grid-template-rows: minmax(0, 1fr);
-    width: min(980px, 100%);
-    max-width: 980px;
-    height: auto;
-    min-height: 540px;
-    max-height: min(600px, calc(100dvh - 24px));
-    overflow: hidden;
-    border-radius: 20px;
-  }
-
-  .connected-entrance__access {
-    grid-column: 1;
-    grid-row: 1;
-    min-height: 0;
-    padding: 20px 28px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
-  .connected-entrance__story {
-    display: flex;
-    grid-column: 2;
-    grid-row: 1;
-    min-height: 0;
-    gap: 16px;
-    padding: 20px 28px;
-    overflow: hidden;
-  }
-
-  .connected-entrance__portal-brand {
-    margin-bottom: 0;
-  }
-
-  .connected-entrance .auth-field {
-    gap: 4px;
-  }
-
-  .connected-entrance__story h2 {
-    font-size: clamp(1.5rem, 2.2vw, 2rem);
-    line-height: 1.15;
-  }
-
-  .connected-entrance__story > p {
-    margin: 0;
-    font-size: 0.875rem;
-  }
-
-  .connected-entrance__features.entrance-preview-card {
-    gap: 10px;
-    margin: 0;
-    padding: 12px 14px;
-  }
-
-  .connected-entrance__service-label {
-    margin: 0;
-  }
-
-  .connected-entrance__header {
-    margin-bottom: 8px;
-  }
-
-  .connected-entrance__form {
-    gap: 10px;
-  }
-
-  .connected-entrance input:not([type='checkbox']) {
-    height: 38px;
-    min-height: 38px;
-  }
-
-  .connected-entrance__form > .button,
-  .connected-entrance__first-time .button {
-    height: 40px;
-    min-height: 40px;
-  }
-
-  .connected-entrance__header .classsync-logo picture {
-    width: 9.5rem;
-  }
-
-  .connected-entrance__intro {
-    max-width: none;
-    margin-bottom: 10px;
-  }
-
-  .connected-entrance__first-time {
-    gap: 4px;
-    margin-top: 2px;
-  }
-
-  .connected-entrance__help {
-    margin-top: 0;
-  }
-
-  .connected-entrance__recovery--desktop {
-    display: inline-flex;
-  }
-
-  .connected-entrance__recovery--mobile {
-    display: none;
-  }
-
-  .connected-entrance__callout--mobile {
-    display: none;
-  }
-
-  .connected-entrance__story-callout {
-    display: block;
-    width: 100%;
-    margin-top: 0;
-    padding: 10px 12px;
-  }
-
-  .connected-entrance__story-callout p {
-    margin-top: 3px;
-    font-size: 11px;
-  }
-
-  .connected-entrance__signup-link--mobile,
-  .connected-entrance__first-time .connected-entrance__help {
-    display: none;
-  }
-
-  .connected-entrance__desktop-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-    color: var(--ink-soft);
-    font-size: 0.72rem;
-    line-height: 1.3;
-  }
-
-  .connected-entrance__desktop-footer a {
-    color: var(--primary);
-    font-weight: 650;
-    text-decoration: none;
-  }
-
-  .connected-entrance__desktop-footer a:hover {
-    text-decoration: underline;
-  }
-
-.connected-entrance__first-time .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.google-mark {
-  flex: 0 0 18px;
-}
-
-  .connected-entrance .turnstile-field {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    min-height: 0;
-    padding: 6px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #f8fafc;
-  }
-
-  .connected-entrance .turnstile-field__widget {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    min-height: 0;
-  }
-}
-
-@media (min-width: 960px) and (max-height: 760px) {
-  .connected-entrance__access,
-  .connected-entrance__story {
-    padding: 16px 24px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .connected-entrance *,
-  .connected-entrance *::before,
-  .connected-entrance *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-.email-action-card {
-  width: min(100%, 500px);
-  margin-inline: auto;
-  padding: clamp(22px, 4vw, 36px);
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 20px 54px rgb(31 41 55 / 8%);
-}
-
-.email-action-card h1 {
-  margin: 0 0 10px;
-  color: #17212f;
-  font-size: clamp(1.4rem, 3vw, 1.8rem);
-  line-height: 1.2;
-}
-
-.email-action-card p {
-  color: #526079;
-  line-height: 1.55;
-}
-
-.email-action-card form {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.email-action-card input {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid #d8dce5;
-  border-radius: 10px;
-  color: #17212f;
-  font: inherit;
-}
-
-.email-action-card input:focus-visible {
-  outline: 3px solid rgb(135 46 73 / 22%);
-  border-color: #872e49;
-}
-
-.email-action-card a:not(.button) {
-  color: #872e49;
-  font-weight: 650;
 }

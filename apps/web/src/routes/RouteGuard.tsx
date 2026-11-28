@@ -11,7 +11,7 @@ import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import type { ReactNode } from 'react';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
-import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
+import { ClassSyncPageLoader, ClassSyncPageSkeleton } from '../components/loading/ClassSyncLoading';
 
 const OperationsPreviewPage = lazy(() =>
   import('../pages/OperationsPreviewPage').then((module) => ({ default: module.OperationsPreviewPage })),
@@ -79,7 +79,8 @@ const SchedulingRulesPage = lazy(() =>
 );
 
 function RouteLoading() {
-  return <ClassSyncPageLoader label="Loading your workspace…" />;
+  const { pathname } = useLocation();
+  return <ClassSyncPageSkeleton path={pathname} label="Loading your workspace" />;
 }
 
 function LazyPage({ children }: { children: ReactNode }) {

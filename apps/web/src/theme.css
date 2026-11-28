@@ -1,4 +1,5 @@
-/* Soft Rouge Mobile. Self-hosted Inter; no runtime font service. */
+/* Legacy variable names mapped onto tokens.css so pages not yet migrated inherit the palette.
+   Self-hosted Inter; no runtime font service. */
 @font-face {
   font-family: Inter;
   src: url('/fonts/InterVariable.woff2') format('woff2');
@@ -7,61 +8,55 @@
   font-display: swap;
 }
 :root {
-  --brand-midnight: #34141f;
-  --brand-rouge: #872e49;
-  --brand-rose: #f8ebf0;
-  --canvas: #f7f8fa;
-  --ink: #20242c;
-  --ink-soft: #667085;
-  --ink-on-tint: #596273;
-  --surface: #ffffff;
-  --surface-strong: #f0f1f4;
-  --line: #e9e9ed;
-  --control-border: #858997;
-  --primary: var(--brand-rouge);
-  --primary-hover: #6f2039;
-  --primary-soft: var(--brand-rose);
-  --success: #16734b;
-  --success-soft: #eaf6ef;
-  --success-border: #9bc7ad;
-  --warning: #9a630a;
-  --warning-soft: #fff5df;
-  --warning-border: #d9bd83;
-  --danger: #b42318;
-  --danger-hover: #8e1b12;
-  --danger-soft: #fff0ee;
-  --danger-border: #e8aba4;
-  --info: #295c91;
-  --info-soft: #edf4fc;
-  --info-border: #a7bfd9;
-  --focus-ring: #295c91;
-  --focus-on-dark: #f0c9d5;
-  --nav-text: #f9edf1;
-  --nav-muted: #d7b9c3;
-  --nav-hover: #512435;
-  --nav-divider: #704050;
+  --brand-midnight: var(--ink-primary);
+  --brand-rouge: var(--brand-crimson);
+  --brand-rose: var(--brand-crimson-soft);
+  --canvas: var(--surface-canvas);
+  --ink: var(--ink-primary);
+  /* Used as body text on tinted wells too, so it stays darker than --ink-muted. */
+  --ink-soft: color-mix(in srgb, var(--ink-muted), var(--ink-secondary) 50%);
+  --ink-on-tint: var(--ink-secondary);
+  --surface: var(--surface-primary);
+  --surface-strong: var(--surface-subtle);
+  --line: var(--border-subtle);
+  --control-border: var(--border-control);
+  --primary: var(--brand-crimson);
+  --primary-hover: var(--brand-crimson-hover);
+  --primary-soft: var(--brand-crimson-soft);
+  --success: var(--status-success-ink);
+  --success-soft: var(--status-success-soft);
+  --success-border: var(--status-success-border);
+  --warning: var(--status-warning-ink);
+  --warning-soft: var(--status-warning-soft);
+  --warning-border: var(--status-warning-border);
+  --danger: var(--status-danger-ink);
+  --danger-hover: var(--status-danger-hover);
+  --danger-soft: var(--status-danger-soft);
+  --danger-border: var(--status-danger-border);
+  --info: var(--status-info-ink);
+  --info-soft: var(--status-info-soft);
+  --info-border: var(--status-info-border);
+  --focus-on-dark: var(--brand-crimson-soft);
+  --nav-text: var(--ink-primary);
+  --nav-muted: var(--ink-muted);
+  --nav-hover: var(--surface-subtle);
+  --nav-divider: var(--border-subtle);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 16px;
   --space-4: 24px;
   --space-5: 32px;
   --space-6: 48px;
-  --radius: 10px;
-  --radius-lg: 12px;
-  --sidebar-width: 256px;
-  --header-height: 64px;
-  --bottom-nav-height: 72px;
-  --control-height: 48px;
-  --shadow-overlay: 0 16px 48px rgb(28 36 48 / 18%);
-  /* Semantic refinements: future appearance modes can override these values. */
+  --radius: var(--radius-control);
+  --radius-lg: var(--radius-card);
+  --control-height: var(--control-h);
+  --shadow-overlay: var(--shadow-elevated);
   --surface-featured: var(--primary-soft);
-  --surface-subtle: var(--canvas);
-  --text-on-action: #ffffff;
+  --text-on-action: var(--on-brand);
   --border-emphasis: var(--primary);
-  --shadow-card: 0 1px 3px rgb(32 36 44 / 5%);
-  --target-min: 44px;
+  --target-min: var(--control-h);
   --space-compact: 12px;
-  --radius-featured: 16px;
+  --radius-featured: var(--radius-card);
   font-family:
     Inter,
     ui-sans-serif,

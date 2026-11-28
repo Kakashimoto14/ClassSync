@@ -1,7 +1,6 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { AlertCircle, CalendarDays, CircleAlert, DoorOpen, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FocusEvent, type FormEvent, type ReactNode } from 'react';
+import { AlertCircle, CircleAlert } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { MotionConfig, motion } from 'motion/react';
 import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
 import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 import { Button } from '../components/ui/Button';
@@ -26,6 +25,7 @@ import { formatLoginIdentifier, isValidAccountEmail, normalizeAccountEmail } fro
 import { cooldownRemaining, retryAfterFrom, startCooldown } from '../auth/cooldown';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
+import { PasswordInput } from '../auth/PasswordInput';
 import { devServer } from '../config/runtime-config';
 import './institutional-entrance.css';
 
@@ -34,6 +34,10 @@ const AccountOnboardingPanel = lazy(() =>
 );
 const AccountAdministrationPanel = lazy(() =>
   import('../auth/AccountAdministrationPanel').then((module) => ({ default: module.AccountAdministrationPanel })),
+);
+
+const EntranceShowcase = lazy(() =>
+  import('./EntranceShowcase').then((module) => ({ default: module.EntranceShowcase })),
 );
 
 // Only sign-up and password reset show the checklist.
@@ -47,57 +51,13 @@ const onboardingPath = '/auth/student-onboarding';
 const accountPath = '/auth/account';
 const STUDENT_ID_PATTERN = /^[0-9]{2}-[0-9]{5}$/;
 
-function ProductPreview({ showLoginHint }: { showLoginHint: boolean }) {
-  return (
-    <motion.aside
-      className="connected-entrance__story"
-      aria-label="ClassSync campus services"
-      variants={entranceItem}
-    >
-      <div className="connected-entrance__portal-brand">
-        <span>COLEGIO DE MONTALBAN · CLASSSYNC PORTAL</span>
-      </div>
-      <h2>
-        Smarter schedules.<br />Better campus days<span>.</span>
-      </h2>
-      <p>Academic and scheduling services for the Colegio de Montalban community.</p>
-      <ul className="connected-entrance__features entrance-preview-card">
-        <li><span className="entrance-preview-card__icon"><CalendarDays size={19} aria-hidden="true" /></span><span><strong>Live Class Schedules</strong><small>Class times and room assignments</small></span></li>
-        <li><span className="entrance-preview-card__icon"><DoorOpen size={19} aria-hidden="true" /></span><span><strong>Campus Room Availability</strong><small>Buildings and learning spaces</small></span></li>
-        <li><span className="entrance-preview-card__icon"><ShieldCheck size={19} aria-hidden="true" /></span><span><strong>Instant Schedule Alerts</strong><small>Official changes and updates</small></span></li>
-      </ul>
-      {showLoginHint && (
-        <aside className="connected-entrance__callout connected-entrance__story-callout">
-          <strong>Signing in for the first time?</strong>
-          <p>Use a Google account you can access, verify your email, then set a password.</p>
-        </aside>
-      )}
-    </motion.aside>
-  );
-}
-
-const entranceItem = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' as const } },
-};
-
-const entranceFrame = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
-};
-
-export function EntranceLayout({ children, showLoginHint = false }: { children: ReactNode; showLoginHint?: boolean }) {
+export function EntranceLayout({ children }: { children: ReactNode }) {
   const synthetic = devServer && import.meta.env.VITE_CLASSSYNC_SYNTHETIC_PREVIEW === 'true';
   return (
-    <MotionConfig reducedMotion="user">
-    <motion.main
-      className="connected-entrance"
-      initial="hidden"
-      animate="visible"
-      variants={entranceFrame}
-    >
-      <motion.div className="connected-entrance__frame" variants={entranceFrame}>
-        <motion.section className="connected-entrance__access" aria-label="ClassSync account access" variants={entranceItem}>
+    <main className="connected-entrance">
+      <div className="connected-entrance__frame">
+        {/* The form comes first in the document; the grid places the showcase on the left. */}
+        <section className="connected-entrance__access" aria-label="ClassSync account access">
           <header className="connected-entrance__header">
             <Link to="/" aria-label="ClassSync home">
               <ClassSyncLogo size="medium" decorative />
@@ -109,11 +69,12 @@ export function EntranceLayout({ children, showLoginHint = false }: { children: 
             )}
           </header>
           {children}
-        </motion.section>
-        <ProductPreview showLoginHint={showLoginHint} />
-      </motion.div>
-    </motion.main>
-    </MotionConfig>
+        </section>
+        <Suspense fallback={<div className="entrance-showcase" aria-hidden="true" />}>
+          <EntranceShowcase />
+        </Suspense>
+      </div>
+    </main>
   );
 }
 
@@ -204,19 +165,17 @@ export function InstitutionalEntrance() {
             : formTitle;
 
   return (
-    <EntranceLayout showLoginHint={canSignIn && mode === 'login' && !invited}>
+    <EntranceLayout>
       {canSignIn ? (
-        <>
-          <CredentialsForm
-            key={mode}
-            mode={mode}
-            title={formTitle}
-            search={search}
-            invited={invited}
-            serviceAvailable={available}
-            resetCode={resetCode}
-          />
-        </>
+        // Deliberately unkeyed: switching between sign-in and sign-up keeps what was typed.
+        <CredentialsForm
+          mode={mode}
+          title={formTitle}
+          search={search}
+          invited={invited}
+          serviceAvailable={available}
+          resetCode={resetCode}
+        />
       ) : (
         <>
           <h1 ref={statusHeading} tabIndex={-1}>
@@ -306,10 +265,26 @@ function CredentialsForm({
   const [resetCodeChecking, setResetCodeChecking] = useState(resetting);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const session = useUniversitySession();
+  const switchable = (mode === 'login' || signup) && !invited;
+
+  const [shownMode, setShownMode] = useState(mode);
+  if (shownMode !== mode) {
+    // Typed values survive a mode change; feedback and one-use state do not.
+    setShownMode(mode);
+    setErrors({});
+    setError('');
+    setNotice('');
+    setVisible(false);
+    if (signup || resetting) setTurnstileToken('');
+    if (resetting || shownMode === 'reset') {
+      setPassword('');
+      setConfirmation('');
+    }
+  }
 
   useEffect(() => {
-    heading.current?.focus();
-  }, []);
+    (mode === 'reset' ? passwordField : emailField).current?.focus();
+  }, [mode]);
 
   useEffect(() => {
     setCooldownSeconds(recovery ? cooldownRemaining('password-reset', normalizedEmail) : 0);
@@ -356,6 +331,27 @@ function CredentialsForm({
     ).finally(() => { if (active) setResetCodeChecking(false); });
     return () => { active = false; };
   }, [resetCode, resetting]);
+
+  function emailProblem(): string | undefined {
+    if (signup || recovery)
+      return isValidAccountEmail(email) ? undefined : 'Enter a valid email address.';
+    if (STUDENT_ID_PATTERN.test(email.trim())) return undefined;
+    return validateLogin(normalizedEmail, 'unchecked').email;
+  }
+
+  // Check a filled field as the person leaves it. Skip when they are heading to a button
+  // or link, so a new message never moves the thing they are about to press.
+  function validateOnBlur(event: FocusEvent, field: 'email' | 'confirmation') {
+    const next = event.relatedTarget;
+    if (next instanceof HTMLButtonElement || next instanceof HTMLAnchorElement) return;
+    if (field === 'email' && email.trim())
+      setErrors((current) => ({ ...current, email: emailProblem() }));
+    if (field === 'confirmation' && confirmation)
+      setErrors((current) => ({
+        ...current,
+        confirmation: confirmation === password ? undefined : 'Enter the same password again.',
+      }));
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -416,6 +412,8 @@ function CredentialsForm({
       setError(
         failure instanceof Error && failure.name === 'RateLimitError'
           ? failure.message
+          : resetting
+          ? 'The password could not be changed. Request a new reset link and try again.'
           : mode === 'login' && studentNumberLogin
           ? 'Invalid student number or password.'
           : mode === 'login'
@@ -462,18 +460,13 @@ function CredentialsForm({
     }
   }
 
+  const holdWhileBusy = (event: { preventDefault: () => void }) => {
+    if (busy) event.preventDefault();
+  };
+
   return (
     <>
-      {mode === 'login' && (
-        <div className="connected-entrance__eyebrow-row">
-          <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>
-          {!invited && (
-              <Link to="/auth/signup" className="connected-entrance__signup-link connected-entrance__signup-link--mobile">
-              Create account
-            </Link>
-          )}
-        </div>
-      )}
+      {mode === 'login' && <p className="connected-entrance__eyebrow">CAMPUS ACCESS</p>}
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -484,8 +477,30 @@ function CredentialsForm({
             ? 'Create your account with an email you can access, then verify it.'
             : invited
               ? 'Sign in with the account your university provided for this invitation.'
-              : 'Use your student number, email, or Google account.'}
+              : resetting
+                ? 'Choose a password you have not used before.'
+                : 'Use your student number, email, or Google account.'}
       </p>
+      {switchable && (
+        <nav className="auth-switch" aria-label="Sign in or create an account">
+          <Link
+            to={{ pathname: '/auth/login', search }}
+            aria-current={mode === 'login' ? 'page' : undefined}
+            aria-disabled={busy || undefined}
+            onClick={holdWhileBusy}
+          >
+            Sign in
+          </Link>
+          <Link
+            to={{ pathname: '/auth/signup', search }}
+            aria-current={signup ? 'page' : undefined}
+            aria-disabled={busy || undefined}
+            onClick={holdWhileBusy}
+          >
+            Create account
+          </Link>
+        </nav>
+      )}
       <form className="connected-entrance__form" noValidate onSubmit={submit} aria-busy={busy}>
         {!resetting && <div className="auth-field">
           <label htmlFor="entrance-email">
@@ -507,6 +522,7 @@ function CredentialsForm({
             value={email}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'entrance-email-error' : undefined}
+            onBlur={(event) => validateOnBlur(event, 'email')}
             onChange={(event) => {
               setEmail(mode === 'login'
                 ? formatLoginIdentifier(event.target.value, email)
@@ -522,50 +538,36 @@ function CredentialsForm({
         </div>}
         {!recovery && (
           <div className="auth-field">
-            {mode === 'login' ? (
-              <div className="connected-entrance__password-label-row">
-                <label htmlFor="entrance-password">Password</label>
-                <Link className="connected-entrance__recovery connected-entrance__recovery--desktop" to={{ pathname: '/auth/forgot-password', search }}>
+            <div className="connected-entrance__password-label-row">
+              <label htmlFor="entrance-password">{resetting ? 'New password' : 'Password'}</label>
+              {mode === 'login' && (
+                <Link className="connected-entrance__recovery" to={{ pathname: '/auth/forgot-password', search }}>
                   Forgot password?
                 </Link>
-              </div>
-            ) : <label htmlFor="entrance-password">{resetting ? 'New password' : 'Password'}</label>}
-            <div className="entrance-password">
-              <input
-                id="entrance-password"
-                ref={passwordField}
-                type={visible ? 'text' : 'password'}
-                autoComplete={signup || resetting ? 'new-password' : 'current-password'}
-                minLength={signup || resetting ? 12 : undefined}
-                maxLength={signup || resetting ? 128 : undefined}
-                required
-                disabled={busy}
-                value={password}
-                aria-invalid={!!errors.password}
-                aria-describedby={
-                  [(signup || resetting) && 'entrance-password-hint', errors.password && 'entrance-password-error']
-                    .filter(Boolean)
-                    .join(' ') || undefined
-                }
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                  setErrors({ ...errors, password: undefined });
-                }}
-              />
-              <button
-                type="button"
-                aria-label="Show password"
-                aria-pressed={visible}
-                disabled={busy}
-                onClick={() => setVisible(!visible)}
-              >
-                {visible ? (
-                  <EyeOff size={19} aria-hidden="true" />
-                ) : (
-                  <Eye size={19} aria-hidden="true" />
-                )}
-              </button>
+              )}
             </div>
+            <PasswordInput
+              id="entrance-password"
+              ref={passwordField}
+              visible={visible}
+              onToggle={() => setVisible(!visible)}
+              autoComplete={signup || resetting ? 'new-password' : 'current-password'}
+              minLength={signup || resetting ? 12 : undefined}
+              maxLength={signup || resetting ? 128 : undefined}
+              required
+              disabled={busy}
+              value={password}
+              aria-invalid={!!errors.password}
+              aria-describedby={
+                [(signup || resetting) && 'entrance-password-hint', errors.password && 'entrance-password-error']
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setErrors({ ...errors, password: undefined });
+              }}
+            />
             {(signup || resetting) && (
               <p id="entrance-password-hint" className="entrance-hint">
                 Use the checklist to create a strong password.
@@ -578,18 +580,14 @@ function CredentialsForm({
             )}
           </div>
         )}
-        {mode === 'login' && (
-          <Link className="connected-entrance__recovery connected-entrance__recovery--mobile" to={{ pathname: '/auth/forgot-password', search }}>
-            Forgot password?
-          </Link>
-        )}
         {(signup || resetting) && (
           <div className="auth-field">
             <label htmlFor="entrance-confirm">Confirm password</label>
-            <input
+            <PasswordInput
               id="entrance-confirm"
               ref={confirmationField}
-              type={visible ? 'text' : 'password'}
+              visible={visible}
+              onBlur={(event) => validateOnBlur(event, 'confirmation')}
               autoComplete="new-password"
               minLength={12}
               maxLength={128}
@@ -654,7 +652,7 @@ function CredentialsForm({
             <GoogleMark />
             Continue with Google
           </Button>
-          <aside className="connected-entrance__callout connected-entrance__callout--mobile">
+          <aside className="connected-entrance__callout">
             <strong>Signing in for the first time?</strong>
             <p>Use a Google account you can access, verify your email, then set a password.</p>
           </aside>
@@ -668,13 +666,7 @@ function CredentialsForm({
           </p>
         </div>
       )}
-      {mode === 'login' && !invited && (
-        <div className="connected-entrance__desktop-footer">
-          <span>New student? <Link to="/auth/signup">Create account</Link></span>
-          <span>Need help? Office of the Registrar</span>
-        </div>
-      )}
-      {(mode !== 'login' || invited) && (
+      {(mode === 'recovery' || mode === 'reset' || invited) && (
         <div className="connected-entrance__secondary">
           {mode === 'login' ? (
             <Link to="/auth/login">Back to regular sign in</Link>

@@ -108,7 +108,7 @@
   border: 1px solid #f4c7d1;
   border-radius: 10px;
   background: #fff7f8;
-  color: #7a2840;
+  color: var(--primary);
 }
 .registration-scanner h2:focus {
   outline: 2px solid var(--accent, #8a2f50);

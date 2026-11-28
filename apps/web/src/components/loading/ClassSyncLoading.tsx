@@ -61,3 +61,19 @@ export function ClassSyncSkeleton({
     </div>
   );
 }
+
+/** Page-shaped placeholder inside the shell: header, command bar, then the primary view. */
+export function ClassSyncPageSkeleton({ path, label }: { path: string; label: string }) {
+  const layout: SkeletonLayout = /\/dashboard$/.test(path)
+    ? 'kpis'
+    : /\/(schedule|calendar)$/.test(path)
+      ? 'timetable'
+      : 'table';
+  return (
+    <div className="page-view classsync-page-skeleton">
+      <span className="classsync-page-skeleton__heading classsync-skeleton__item" aria-hidden="true" />
+      <span className="classsync-page-skeleton__bar classsync-skeleton__item" aria-hidden="true" />
+      <ClassSyncSkeleton layout={layout} rows={layout === 'timetable' ? 12 : 6} label={label} />
+    </div>
+  );
+}

@@ -464,17 +464,6 @@
   font-weight: 600;
 }
 /* Campus Companion: Student-only refinements using the existing Soft Rouge tokens. */
-.student-header-location {
-  display: none;
-}
-.student-shell {
-  --sidebar-width: 232px;
-  --header-height: 60px;
-}
-.student-shell .topbar {
-  background: var(--surface);
-  backdrop-filter: none;
-}
 .student-shell .student-home,
 .student-shell .room-discovery,
 .student-shell .notice-list {
@@ -612,57 +601,12 @@
 .student-shell .notice-list article:last-child {
   border-bottom: 0;
 }
-@media (min-width: 1024px) {
-  .student-shell .sidebar {
-    padding: 18px 14px 14px;
-    overflow-y: auto;
-  }
-  .student-shell .brand {
-    margin-bottom: 16px;
-  }
-  .student-shell .sidebar-navigation {
-    gap: 4px;
-  }
-  .student-shell .nav-item {
-    min-height: 42px;
-    gap: 12px;
-  }
-  .student-shell .sidebar-user {
-    margin-top: auto;
-    padding-top: 12px;
-  }
-  .student-shell .topbar {
-    min-height: 60px;
-    padding: 8px 28px;
-    gap: 12px;
-  }
-  .student-shell .student-header-location {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.8125rem;
-    color: var(--ink-soft);
-  }
-  .student-shell .student-header-location strong {
-    color: var(--ink);
-    font-weight: 600;
-  }
-  .student-shell .global-search {
-    width: min(240px, 30%);
-  }
-  .student-shell .main-content {
-    padding: 28px 32px 48px;
-  }
-}
 @media (max-width: 1100px) {
   .student-shell .student-home-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 600px) {
-  .student-shell .topbar {
-    min-height: 60px;
-  }
   .student-shell .student-home-heading {
     gap: 8px;
   }

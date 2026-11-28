@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AccountOnboardingPanel } from './AccountOnboardingPanel';
 import { UniversitySessionContext } from './university-session-context';
@@ -172,8 +172,9 @@ it('shows the completed email step and uses an email-neutral placeholder', async
   });
   render(panel());
   await screen.findByLabelText('Student number');
-  expect(screen.getByText('Step 1 · Email verified')).toBeInTheDocument();
-  expect(screen.getByText('Step 2 of 2 · Confirm Registration Form')).toBeInTheDocument();
+  const steps = within(screen.getByRole('list', { name: 'Account setup steps' })).getAllByRole('listitem');
+  expect(steps.map((step) => step.textContent)).toEqual(['Email (complete)', 'Student record', 'Password']);
+  expect(steps[1]).toHaveAttribute('aria-current', 'step');
   expect(screen.getByLabelText('Email address')).toHaveAttribute('placeholder', 'student@example.com');
 });
 
@@ -252,7 +253,7 @@ it('recomputes both persisted onboarding cooldowns while same-second ticks conti
   expect(screen.getByRole('button', { name: 'Resend verification email in 2s' })).toBeDisabled();
   await act(async () => { vi.advanceTimersByTime(1500); });
   expect(screen.getByRole('button', { name: 'Resend verification email' })).toBeEnabled();
-  fireEvent.click(screen.getByRole('button', { name: 'I verified my email' }));
+  fireEvent.click(screen.getByRole('button', { name: 'I’ve verified — Continue' }));
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   expect(screen.getByRole('button', { name: 'Send verification code in 2s' })).toBeDisabled();
   await act(async () => { vi.advanceTimersByTime(500); });

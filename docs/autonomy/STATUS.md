@@ -3420,3 +3420,43 @@ account (row-level security), `--apply` does.
 
 IMPLEMENTED-UNVERIFIED: real Firebase Admin behaviour, the hosted database role's attributes and a
 live sign-in. Next: owner reviews, commits and runs the dry run; E1 awaits a separate session.
+
+### 28 November 2026 — Phase E, Slice E1: design tokens, auth/onboarding and AppShell (local only)
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD `06878a9` (uncommitted). No
+commit, push, deployment, migration or new npm package; no Neon, Firebase, Render, Resend or Gemini
+contact. E2 and E3 not started.
+
+IMPLEMENTED: `tokens.css` (imported first; palette, geometry, select chevron, tabular figures,
+`.page-view`/`.page-header`/`.command-bar`/`.table`); legacy variables mapped in `theme.css`; old
+shell rules removed from five stylesheets into `components/layout/app-shell.css`; previous rouge
+hexes retired. Entrance: lazy `EntranceShowcase`, CSS transition instead of eager `motion/react`,
+one unkeyed form with a Sign in / Create account switcher, first-field focus, blur validation,
+shared show/hide password field, three-step onboarding with "I've verified — Continue", claim form
+shown directly with the locked email and COR scan as the secondary action, mapped network and reset
+errors. Shell: 240px light sidebar with active bar, 56px top bar (breadcrumb, time zone, page
+switcher, account menu), page-shaped route skeleton, drawer now covers the top bar.
+
+VERIFIED locally: `npm run lint`, `npm run typecheck`, `npm run test:web` (88 files, 1,104 passed),
+`npm run build`, `git diff --check`. Main entry **87,119 bytes** raw (soft stop 98,000, limit
+101,376; previously recorded 87,719). Rendered check in the built-in browser through a temporary
+harness (stubbed session and Turnstile, no env files; removed afterwards): sign-in at 1440px,
+sign-up at 1280px, both at 360px; shell with sample content at 1440, 1280 and 360px including drawer
+and account menu. No horizontal overflow at 360px after fixing two defects found there (`.page-view`
+column and the legacy 620px table minimum). Keyboard focus outline observed on a link and the skip
+link.
+
+Existing assertions changed because E1 replaces the behaviour: first-time help appears once (was
+twice) in two tests; sign-up focuses the email field (was the heading); onboarding step text; the
+verification button's new name.
+
+Choices to review: `--focus-ring` stays a solid crimson outline with the 16% halo added on controls,
+because the halo alone would not reach 3:1; input borders use `#8A94A6` rather than `#CBD5E1` for the
+same reason; status text uses darker shades of the status accents. Auto-focus on phones will open the
+keyboard on arrival.
+
+IMPLEMENTED-UNVERIFIED / open: verification, onboarding and email-link screens were not rendered in
+a browser (component tests only); real Turnstile widget sizing; real sign-in; pages under E2/E3
+inherit the palette but were not visually reviewed, including Student pages whose shell overrides
+were removed; native 200% zoom, 390/768/1024px, coarse-pointer 44px and screen-reader checks. Next:
+owner reviews and commits E1; E2 awaits a separate session.

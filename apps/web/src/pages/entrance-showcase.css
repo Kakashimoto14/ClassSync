@@ -1,0 +1,83 @@
+/* Loaded with the lazy showcase chunk. Visibility and grid placement live in the entrance sheet. */
+.entrance-showcase h2 {
+  max-width: 22ch;
+  color: var(--ink-primary);
+  font-size: clamp(1.75rem, 2.8vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.entrance-showcase__school {
+  margin-bottom: 12px;
+  color: var(--brand-crimson);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.entrance-showcase__lead {
+  max-width: 48ch;
+  margin-top: 12px;
+  color: var(--ink-secondary);
+  font-size: 0.9375rem;
+}
+.entrance-week {
+  margin: 28px 0 0;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
+}
+.entrance-week__grid {
+  display: grid;
+  grid-template-columns: 40px repeat(5, minmax(0, 1fr));
+  grid-template-rows: 24px repeat(5, 40px);
+  gap: 4px;
+}
+.entrance-week__day {
+  grid-row: 1;
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+.entrance-week__time {
+  grid-column: 1;
+  color: var(--ink-muted);
+  font-size: 0.6875rem;
+}
+.entrance-week__session {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 6px 4px 8px;
+  overflow: hidden;
+  border-left: 3px solid var(--session-lecture);
+  border-radius: 6px;
+  background: var(--session-lecture-soft);
+  color: var(--ink-primary);
+  font-size: 0.6875rem;
+  line-height: 1.25;
+}
+.entrance-week__session small {
+  color: var(--ink-secondary);
+  font-size: 0.6875rem;
+}
+.entrance-week__session--computer-lab {
+  border-color: var(--session-computer-lab);
+  background: var(--session-computer-lab-soft);
+}
+.entrance-week__session--science-lab {
+  border-color: var(--session-science-lab);
+  background: var(--session-science-lab-soft);
+}
+.entrance-week__session--athletic {
+  border-color: var(--session-athletic);
+  background: var(--session-athletic-soft);
+}
+.entrance-week figcaption {
+  margin-top: 10px;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}

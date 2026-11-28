@@ -35,6 +35,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [commandOpen, setCommandOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountMenu = useRef<HTMLDetailsElement>(null);
   const main = useRef<HTMLElement>(null);
   const commandTrigger = useRef<HTMLButtonElement>(null);
   const commandMenu = useRef<HTMLElement>(null);
@@ -45,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     closeMenu();
     setQuery('');
     setCommandOpen(false);
+    setAccountOpen(false);
     // Also runs when switching screen families remounts the shell.
     main.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -84,6 +87,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     document.addEventListener('pointerdown', closeOutside);
     return () => document.removeEventListener('pointerdown', closeOutside);
   }, [commandOpen]);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      const menu = accountMenu.current;
+      if (menu && event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    return () => document.removeEventListener('pointerdown', closeOutside);
+  }, [accountOpen]);
 
   if (!role) return <Navigate to={institutional ? '/auth/login' : '/dev/role-preview'} replace />;
   const profile = institutional
@@ -338,20 +351,124 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ClassSyncLogo size="small" decorative />
             </Link>
           </div>
-          {role === 'student' && (
-            <div className="student-header-location">
-              <span>Student</span>
-              <span aria-hidden="true">/</span>
-              <strong>
-                {routeDefinitions.find((route) => route.id === owner)?.navigationLabel ??
-                  'Workspace'}
-              </strong>
-            </div>
+          {trail.length > 1 ? (
+            <nav className="breadcrumbs" aria-label="Breadcrumb">
+              <ol>
+                {trail.map((crumb, index) => (
+                  <li key={crumb.label}>
+                    {crumb.path ? (
+                      <Link to={crumb.path}>{crumb.label}</Link>
+                    ) : (
+                      <span aria-current={index === trail.length - 1 ? 'page' : undefined}>
+                        {crumb.label}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          ) : (
+            <span className="topbar-title" aria-hidden="true">
+              {routeDefinitions.find((route) => route.id === owner)?.navigationLabel}
+            </span>
           )}
-          <div className="semester">
+          <div className="topbar-actions">
+            <span className="workspace-chip">Asia/Manila · PHT</span>
+            {role === 'administrator' ? (
+              <div className="global-search command-navigation">
+                <button
+                  ref={commandTrigger}
+                  className="header-search command-trigger"
+                  type="button"
+                  aria-label="Open page menu"
+                  aria-haspopup="menu"
+                  aria-expanded={commandOpen}
+                  aria-controls="admin-command-menu"
+                  onClick={() => setCommandOpen((open) => !open)}
+                >
+                  <Search size={18} aria-hidden="true" />
+                  <span>Choose a page</span>
+                </button>
+                {commandOpen && (
+                  <nav
+                    id="admin-command-menu"
+                    ref={commandMenu}
+                    className="command-menu"
+                    role="menu"
+                    aria-label="Administrator destinations"
+                    aria-orientation="vertical"
+                    onKeyDown={handleCommandKeyDown}
+                  >
+                    {commandGroups.map((group) => (
+                      <div role="group" aria-label={group.title} key={group.title}>
+                        <p>{group.title}</p>
+                        {group.routes.map((route) => (
+                          <Link
+                            role="menuitem"
+                            tabIndex={-1}
+                            key={route.id}
+                            to={route.path}
+                            ref={(element) => {
+                              const index = commandRoutes.findIndex((item) => item.id === route.id);
+                              commandItems.current[index] = element;
+                            }}
+                            onClick={() => setCommandOpen(false)}
+                            aria-current={location.pathname === route.path ? 'page' : undefined}
+                          >
+                            <route.icon size={16} aria-hidden="true" />
+                            <span>{route.title}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </nav>
+                )}
+              </div>
+            ) : (
+              <div
+                className="global-search"
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setQuery('');
+                }}
+              >
+                <label className="header-search">
+                  <Search size={18} aria-hidden="true" />
+                  <input
+                    aria-label="Search ClassSync"
+                    placeholder="Find a page"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                  />
+                </label>
+                {query.trim() && (
+                  <div className="search-results">
+                    <nav aria-label="Search destinations">
+                      {results.map((route) => (
+                        <Link to={route.path} key={route.id} onClick={() => setQuery('')}>
+                          <route.icon size={16} aria-hidden="true" />
+                          <span>{route.title}</span>
+                        </Link>
+                      ))}
+                    </nav>
+                    {!results.length && <p role="status">No matching pages in your workspace.</p>}
+                  </div>
+                )}
+              </div>
+            )}
+            {!institutional && (
+              <Link
+                className="icon-button header-alerts"
+                aria-label="Notifications"
+                to={rolePath(role, 'notifications')}
+              >
+                <Bell />
+              </Link>
+            )}
             <details
               className="preview-indicator"
+              ref={accountMenu}
               key={location.pathname}
+              onToggle={(event) => setAccountOpen(event.currentTarget.open)}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {
                   event.currentTarget.open = false;
@@ -360,6 +477,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               }}
             >
               <summary>
+                <UserRound size={18} aria-hidden="true" />
                 {profile.label} {institutional ? 'Workspace' : 'demo'}{' '}
                 <ChevronDown size={14} aria-hidden="true" />
               </summary>
@@ -379,121 +497,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                       : 'Account access'
                     : 'Switch preview role'}
                 </Link>
+                {accountOpen && (
+                  <button type="button" className="text-action" onClick={leaveDemo}>
+                    {institutional ? 'Sign out' : 'Exit demo'}
+                  </button>
+                )}
               </div>
             </details>
-            {role !== 'student' && (
-              <strong className="workspace-chip">Asia/Manila · PHT</strong>
-            )}
           </div>
-          {role === 'administrator' ? (
-            <div className="global-search command-navigation">
-              <button
-                ref={commandTrigger}
-                className="header-search command-trigger"
-                type="button"
-                aria-label="Open page menu"
-                aria-haspopup="menu"
-                aria-expanded={commandOpen}
-                aria-controls="admin-command-menu"
-                onClick={() => setCommandOpen((open) => !open)}
-              >
-                <Search size={18} aria-hidden="true" />
-                <span>Choose a page</span>
-              </button>
-              {commandOpen && (
-                <nav
-                  id="admin-command-menu"
-                  ref={commandMenu}
-                  className="command-menu"
-                  role="menu"
-                  aria-label="Administrator destinations"
-                  aria-orientation="vertical"
-                  onKeyDown={handleCommandKeyDown}
-                >
-                  {commandGroups.map((group) => (
-                    <div role="group" aria-label={group.title} key={group.title}>
-                      <p>{group.title}</p>
-                      {group.routes.map((route) => (
-                        <Link
-                          role="menuitem"
-                          tabIndex={-1}
-                          key={route.id}
-                          to={route.path}
-                          ref={(element) => {
-                            const index = commandRoutes.findIndex((item) => item.id === route.id);
-                            commandItems.current[index] = element;
-                          }}
-                          onClick={() => setCommandOpen(false)}
-                          aria-current={location.pathname === route.path ? 'page' : undefined}
-                        >
-                          <route.icon size={16} aria-hidden="true" />
-                          <span>{route.title}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  ))}
-                </nav>
-              )}
-            </div>
-          ) : (
-            <div
-              className="global-search"
-              onKeyDown={(event) => {
-                if (event.key === 'Escape') setQuery('');
-              }}
-            >
-              <label className="header-search">
-                <Search size={18} aria-hidden="true" />
-                <input
-                  aria-label="Search ClassSync"
-                  placeholder="Find a page"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              </label>
-              {query.trim() && (
-                <div className="search-results">
-                  <nav aria-label="Search destinations">
-                    {results.map((route) => (
-                      <Link to={route.path} key={route.id} onClick={() => setQuery('')}>
-                        <route.icon size={16} aria-hidden="true" />
-                        <span>{route.title}</span>
-                      </Link>
-                    ))}
-                  </nav>
-                  {!results.length && <p role="status">No matching pages in your workspace.</p>}
-                </div>
-              )}
-            </div>
-          )}
-          {!institutional && (
-            <Link
-              className="icon-button header-alerts"
-              aria-label="Notifications"
-              to={rolePath(role, 'notifications')}
-            >
-              <Bell />
-            </Link>
-          )}
         </header>
         <main id="main-content" className="main-content" ref={main} tabIndex={-1}>
-          {trail.length > 1 && (
-            <nav className="breadcrumbs" aria-label="Breadcrumb">
-              <ol>
-                {trail.map((crumb, index) => (
-                  <li key={crumb.label}>
-                    {crumb.path ? (
-                      <Link to={crumb.path}>{crumb.label}</Link>
-                    ) : (
-                      <span aria-current={index === trail.length - 1 ? 'page' : undefined}>
-                        {crumb.label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          )}
           {children}
         </main>
       </div>

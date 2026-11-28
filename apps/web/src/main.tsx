@@ -23,3 +23,4 @@ import './class-session.css';
 import './operational-ui.css';
 
 import './claude-student.css';
+import './components/layout/app-shell.css';

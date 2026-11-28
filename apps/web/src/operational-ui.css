@@ -190,33 +190,6 @@ details[open] > summary::after {
 }
 
 /* Administrator command menu is a fixed overlay within the locked topbar. */
-.topbar { height: 64px; min-height: 64px; max-height: 64px; position: sticky; top: 0; z-index: 30; overflow: visible; }
-.topbar .command-navigation { position: relative; margin-left: auto; flex: 0 1 360px; min-width: 0; }
-.topbar .command-trigger { display: flex; align-items: center; width: 100%; min-width: 0; height: 40px; white-space: nowrap; }
-.topbar .command-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.topbar .command-menu {
-  position: absolute; inset: auto 0 auto auto; top: calc(100% + 8px);
-  width: min(520px, calc(100vw - 32px)); max-height: min(480px, calc(100vh - 84px));
-  overflow-y: auto; overscroll-behavior: contain; z-index: 50;
-  scrollbar-width: thin; scrollbar-color: rgba(102, 112, 133, 0.25) transparent;
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px;
-  padding: 14px 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--surface); box-shadow: var(--shadow-overlay);
-}
-.topbar .command-menu::-webkit-scrollbar { width: 5px; }
-.topbar .command-menu::-webkit-scrollbar-thumb { background: rgba(102, 112, 133, 0.25); border-radius: 999px; }
-.topbar .command-menu [role='group'] { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 2px; min-width: 0; }
-.topbar .command-menu [role='group'] + [role='group'] { margin: 0; padding: 0; border: 0; }
-.topbar .command-menu [role='group'] > p { margin: 0; padding: 6px 10px 4px; color: var(--ink-soft); font-size: .6875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.topbar .command-menu [role='menuitem'] { display: flex; flex-direction: row; align-items: center; gap: 10px; min-width: 0; min-height: 38px; padding: 8px 10px; border-radius: 8px; color: var(--ink); font-size: .8125rem; font-weight: 500; text-decoration: none; white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }
-.topbar .command-menu [role='menuitem'] svg { flex: 0 0 16px; color: var(--ink-soft); transition: color 150ms ease; }
-.topbar .command-menu [role='menuitem'] span { min-width: 0; overflow: visible; text-overflow: clip; white-space: nowrap; }
-.topbar .command-menu [role='menuitem']:hover,
-.topbar .command-menu [role='menuitem']:focus-visible { background: var(--surface-strong); color: var(--ink); outline: none; }
-.topbar .command-menu [role='menuitem']:hover svg { color: var(--primary); }
-.topbar .command-menu [role='menuitem']:focus-visible { box-shadow: 0 0 0 2px var(--primary-soft), 0 0 0 3.5px var(--primary); }
-.topbar .command-menu [role='menuitem'][aria-current='page'] { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
-.topbar .command-menu [role='menuitem'][aria-current='page'] svg { color: var(--primary); }
 
 /* Prevent common admin controls and status pills from splitting at laptop widths. */
 :is(.admin-command-center,.academic-management,.academic-setup,.ux-generation-flow,.admin-conflicts,.admin-requests,.admin-notifications) :is(.button,button,.status,.status-badge,.admin-filter-pills button) { flex-shrink: 0; word-break: keep-all; overflow-wrap: normal; }
@@ -337,8 +310,6 @@ details[open] > summary::after {
   .ux-generation-flow > .ux-generation-setup > .readiness-resolve { grid-column: 2; }
 }
 @media (max-width: 767px) {
-  .topbar { gap: 6px; }
-  .topbar .command-menu { right: -8px; grid-template-columns: 1fr; gap: 8px; }
   .admin-screen-header { align-items: stretch; flex-direction: column; }
   .admin-screen-actions { justify-content: flex-start; }
   .academic-setup__progress { align-items: flex-start; flex-direction: column; gap: 4px; }
@@ -363,7 +334,6 @@ details[open] > summary::after {
   .academic-setup__jump button { justify-content: space-between; }
   .admin-filter-pills { gap: 4px; }
   .admin-filter-pills button { padding-inline: 8px; font-size: 11px; }
-  .topbar .command-trigger { padding-inline: 6px; }
 }
 @media (min-width: 1024px) {
   .admin-overview-content {

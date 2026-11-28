@@ -305,3 +305,15 @@ The Administrator popover and active secondary screen dimensions have fresh foll
 | Provisioned Student/Teacher resolves a Gateway session and reads the published schedule with `verification_source='unverified'` | Real Gateway and Scheduling routes, runtime role | VERIFIED locally |
 | Live-account script keeps its behaviour on shared helpers | `scripts/lib/identity_provisioning.py`; 13 existing tests | VERIFIED for tested paths; live path not run |
 | Owner runbook | `docs/production/SEEDED_LOGINS.md` | IMPLEMENTED; not executed against hosted services |
+
+### 28 November 2026 — Phase E, Slice E1 design system, entrance and shell
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Skill palette and unified geometry; legacy variables inherit it | `tokens.css`, `theme.css`; token and no-override assertions in `AppShell.phase-e.test.tsx` | IMPLEMENTED; un-migrated pages not visually reviewed |
+| Mode switching keeps input; first-field focus; show/hide; default-button submit; blur validation; mapped errors | `InstitutionalEntrance.tsx`, `PasswordInput.tsx`; `InstitutionalEntrance.phase-e.test.tsx` | VERIFIED in jsdom; sign-in and sign-up rendered |
+| Three-step onboarding, resend cooldown, continue, prefilled locked claim email; existing OTP backend step kept | `AccountOnboardingPanel.tsx`; onboarding tests | VERIFIED in jsdom; not rendered or run live |
+| One active sidebar item and open group on every nested route; top bar contents | `AppShell.tsx`, `app-shell.css`; `AppShell.phase-e.test.tsx` | VERIFIED in jsdom and sample render |
+| Page-shaped loading skeleton | `ClassSyncPageSkeleton`, `RouteGuard.tsx` | VERIFIED in jsdom |
+| Main entry within 98,000 / 101,376 bytes; no new package | `check_bundle_budget.mjs`: 87,119 bytes; `package.json` unchanged | VERIFIED locally |
+| WCAG 2.2 AA | Existing accessible-name and focus tests pass; solid focus outline | PARTIAL: zoom, screen reader and coarse-pointer checks open |
