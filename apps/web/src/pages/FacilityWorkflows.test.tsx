@@ -62,7 +62,11 @@ beforeEach(() => {
 
 it('submits a Teacher report with a client key and the chosen room', async () => {
   fixture.request.mockResolvedValue({ issues: [] });
-  render(<TeacherIssueReportPage />);
+  render(
+    <MemoryRouter>
+      <TeacherIssueReportPage />
+    </MemoryRouter>,
+  );
   fireEvent.change(screen.getByLabelText('Room'), { target: { value: room.id } });
   fireEvent.change(screen.getByLabelText('Describe the issue'), {
     target: { value: 'Invented projector fault' },

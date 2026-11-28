@@ -1,6 +1,6 @@
 import { timeRange } from '../../lib/student-presentation';
 import { facultyDisplayName } from '../../lib/presentation-sample';
-import { sessionRoomPath } from '../../lib/session-room';
+import { sessionRoomPath, teacherClassPath } from '../../lib/session-room';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { DialogSurface } from '../ui/DialogSurface';
@@ -104,12 +104,20 @@ export function ClassSessionDetails({
       </div>
       <footer className="class-session-footer">
         {role === 'teacher' && !sample && published && (period || params.get('period')) && (
-          <Link
-            className="button"
-            to={`/teacher/change-requests/new?${new URLSearchParams({ period: period || params.get('period')!, date: session.date, occurrence: session.id })}`}
-          >
-            Request classroom change
-          </Link>
+          <>
+            <Link
+              className="button"
+              to={teacherClassPath('room-change', period || params.get('period')!, session)}
+            >
+              Request room change
+            </Link>
+            <Link
+              className="button button--secondary"
+              to={teacherClassPath('issue', period || params.get('period')!, session)}
+            >
+              Report room issue
+            </Link>
+          </>
         )}
         {roomPath && (
           <Link className="button button--secondary" to={roomPath}>

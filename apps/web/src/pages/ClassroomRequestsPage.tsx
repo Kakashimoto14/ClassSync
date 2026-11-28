@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
+import { StatusBadge } from '../components/ui/StatusBadge';
 import { institutionalRequest } from '../lib/institutional-api';
 import { rolePath } from '../routes/route-config';
 import { IssueTriagePanel } from './IssueTriagePanel';
@@ -33,6 +35,12 @@ const stateLabel = {
   rejected: 'Not approved',
   fulfilled: 'Classroom change published',
 };
+const stateTone = {
+  pending: 'warning',
+  approved: 'info',
+  rejected: 'neutral',
+  fulfilled: 'success',
+} as const;
 type Preflight = {
   state: 'clear' | 'conflict' | 'stale' | 'decided';
   reasons: string[];
@@ -76,11 +84,13 @@ function StatusHistory({ request }: { request: ClassroomRequest }) {
 
 function RequestPreflight({
   requestId,
+  move,
   auto,
   refresh,
   onResult,
 }: {
   requestId: string;
+  move: string;
   auto: boolean;
   refresh: number;
   onResult: (result: Preflight | null) => void;
@@ -117,29 +127,33 @@ function RequestPreflight({
     // onResult is a stable state setter wrapper owned by the parent card.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId, requested, refresh]);
-  const label =
-    result?.state === 'clear'
-      ? 'No conflicts · ready to publish'
-      : result?.state === 'conflict'
-        ? 'Conflict found'
-        : result?.state === 'stale'
-          ? 'Request out of date'
-          : null;
+  // "No conflicts" is shown only for a completed server check that reported none.
+  const [label, tone] =
+    !checking && result?.state === 'clear'
+      ? (['No conflicts', 'success'] as const)
+      : !checking && result?.state === 'conflict'
+        ? (['Conflict found', 'danger'] as const)
+        : !checking && result?.state === 'stale'
+          ? (['Request out of date', 'warning'] as const)
+          : (['Not yet validated', 'neutral'] as const);
   return (
     <div className="admin-request-preflight" aria-live="polite">
+      <p className="move-summary">
+        <span className="move-pill">{move}</span>
+        <StatusBadge tone={tone}>{label}</StatusBadge>
+        {!checking && result?.reasons?.length ? <span>{result.reasons.join(' ')}</span> : null}
+      </p>
       {checking && <p className="muted">Checking live schedule conflicts…</p>}
-      {!checking && label && (
-        <p>
-          <span className={`admin-request-status admin-request-status--${result?.state}`}>
-            {label}
-          </span>
-          {result?.reasons?.length ? ` ${result.reasons.join(' ')}` : ''}
-        </p>
+      {!checking && failed && (
+        <InlineError
+          title="Couldn't check conflicts"
+          message={failed}
+          onRetry={() => setRequested((value) => value + 1)}
+        />
       )}
-      {!checking && failed && <p role="alert">{failed}</p>}
-      {!checking && (
+      {!checking && !failed && (
         <Button variant="secondary" onClick={() => setRequested((value) => value + 1)}>
-          {result || failed ? 'Re-check conflicts' : 'Check conflicts'}
+          {result ? 'Re-check conflicts' : 'Check conflicts'}
         </Button>
       )}
     </div>
@@ -162,6 +176,7 @@ export function ClassroomRequestsPage({
   const [requests, setRequests] = useState<ClassroomRequest[] | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
@@ -173,6 +188,7 @@ export function ClassroomRequestsPage({
     const controller = new AbortController();
     setRequests(null);
     setError('');
+    setLoadError('');
     setNotice('');
     setMissing(false);
     if (detail && !detailId) {
@@ -196,7 +212,7 @@ export function ClassroomRequestsPage({
         if (controller.signal.aborted) return;
         // A malformed, unknown or foreign identifier is reported the same way.
         if (detail && [403, 404, 422].includes(failure.status)) setMissing(true);
-        else setError(failure.message);
+        else setLoadError(failure.message);
       });
     return () => controller.abort();
   }, [role, reload, create, detail, detailId]);
@@ -294,9 +310,16 @@ export function ClassroomRequestsPage({
           })}
         </div>
       )}
+      {loadError && (
+        <InlineError
+          title={detail ? "Couldn't load this request" : "Couldn't load classroom requests"}
+          message={loadError}
+          onRetry={() => setReload((value) => value + 1)}
+        />
+      )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      {!requests && !error && !missing && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
+      {!requests && !loadError && !missing && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
       {unavailable && <p className="workspace-card admin-empty" role="status">{NOT_FOUND}</p>}
       {!detail && requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
       {!detail && requests?.length && !shown?.length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
@@ -305,14 +328,14 @@ export function ClassroomRequestsPage({
         const blocked = ['conflict', 'stale'].includes(preflight[request.id]?.state ?? '');
         return (
         <article className="workspace-card admin-request-card" key={request.id}>
-          <header className="admin-request-card__header"><div><span className={`admin-request-status admin-request-status--${request.status}`}>{stateLabel[request.status]}</span><h2>
+          <header className="admin-request-card__header"><div><StatusBadge tone={stateTone[request.status]}>{stateLabel[request.status]}</StatusBadge><h2>
             {request.context.class.subject.code} · {request.context.class.subject.name}
           </h2></div><span className="admin-request-card__date">{request.context.class.date}</span></header>
           <div className="admin-request-metadata"><span>
             {request.context.class.date} · {request.context.class.section.name}
-          </span><span>
+          </span>{!(role === 'administrator' && request.status === 'pending') && <span>
             {request.context.class.room.name} → {request.context.proposed_room.name}
-          </span></div>
+          </span>}</div>
           <p className="admin-request-card__reason">{request.reason}</p>
           {request.decision_note && <p className="muted">Decision: {request.decision_note}</p>}
           {detail ? (
@@ -329,6 +352,7 @@ export function ClassroomRequestsPage({
             <div>
               <RequestPreflight
                 requestId={request.id}
+                move={`${request.context.class.room.name} → ${request.context.proposed_room.name}`}
                 auto={pendingIndex >= 0 && pendingIndex < AUTO_PREFLIGHT_LIMIT}
                 refresh={recheck}
                 onResult={(result) =>
@@ -406,6 +430,7 @@ function CreateClassroomRequest() {
   const [reason, setReason] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
   const [error, setError] = useState('');
+  const [optionsError, setOptionsError] = useState('');
   const [busy, setBusy] = useState(false);
   const [refreshOptions, setRefreshOptions] = useState(0);
   const [conflict, setConflict] = useState('');
@@ -416,6 +441,7 @@ function CreateClassroomRequest() {
     setOptions(null);
     setRoom('');
     setError('');
+    setOptionsError('');
     setKey(crypto.randomUUID());
     if (eventId && eventDate) {
       const query = new URLSearchParams({
@@ -431,7 +457,7 @@ function CreateClassroomRequest() {
           if (!controller.signal.aborted) setOptions(value);
         })
         .catch((failure) => {
-          if (!controller.signal.aborted) setError(failure.message);
+          if (!controller.signal.aborted) setOptionsError(failure.message);
         });
     }
     return () => controller.abort();
@@ -478,7 +504,17 @@ function CreateClassroomRequest() {
         Approval re-checks conflicts and publishes the new room for you and your students.
       </p>
       <Link to="/teacher/change-requests">Your requests</Link>
-      {(error || workspace.error) && <p role="alert">{error || workspace.error}</p>}
+      {workspace.error && (
+        <InlineError title="Couldn't load your classes" message={workspace.error} onRetry={workspace.retry} />
+      )}
+      {optionsError && (
+        <InlineError
+          title="Couldn't load eligible rooms"
+          message={optionsError}
+          onRetry={() => setRefreshOptions((value) => value + 1)}
+        />
+      )}
+      {error && <p role="alert">{error}</p>}
       {conflict && !error && <p role="alert">{conflict}</p>}
       {workspace.loading && <ClassSyncSkeleton layout="table" label="Loading your published classes" />}
       <form className="academic-create-period" onSubmit={(event) => void submit(event)}>
@@ -525,7 +561,7 @@ function CreateClassroomRequest() {
         {!workspace.loading && !workspace.error && workspace.records.length === 0 && (
           <p>No assigned published classes in this date range.</p>
         )}
-        {event && !options && !error && <ClassSyncSkeleton rows={2} label="Checking eligible rooms" />}
+        {event && !options && !optionsError && <ClassSyncSkeleton rows={2} label="Checking eligible rooms" />}
         {options && (
           <div>
             <label htmlFor="request-room">Proposed classroom</label>

@@ -142,3 +142,23 @@ def test_roster_update_and_delete_use_admin_repository_methods(monkeypatch):
         ("update", "period-a", "24-00101", "24-00109"),
         ("delete", "period-a", "24-00109", 5),
     ]
+
+
+def test_roster_read_passes_the_status_query_to_the_repository(monkeypatch):
+    calls = []
+
+    class Repository:
+        def roster_page(self, period_id, **filters):
+            calls.append((period_id, filters["status"]))
+            return {"items": []}
+
+    monkeypatch.setattr(
+        academic, "authorize", lambda request, sandbox: ("administrator", "admin-uid")
+    )
+    monkeypatch.setattr(academic, "connected_repository", lambda request, owner: Repository())
+    client = TestClient(academic.app)
+    path = "/api/v1/academic/periods/period-a/roster"
+    assert client.get(path, params={"status": "inactive"}).status_code == 200
+    assert client.get(path).status_code == 200
+    assert client.get(path, params={"status": "graduated"}).status_code == 422
+    assert calls == [("period-a", "inactive"), ("period-a", None)]

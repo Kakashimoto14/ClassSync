@@ -1,6 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { periodLabel } from '../lib/workspace-context';
 import {
@@ -29,6 +31,9 @@ export function TeacherIssueReportPage() {
   const [listError, setListError] = useState('');
   const [reload, setReload] = useState(0);
   const event = workspace.records.find((item) => item.id === selected);
+  const [params] = useSearchParams();
+  const requested = params.get('occurrence') ?? '';
+  const prefilled = useRef(false);
 
   // A changed report is a new submission; an unchanged retry keeps its key.
   useEffect(() => setKey(crypto.randomUUID()), [event?.id, room, category, description]);
@@ -50,6 +55,18 @@ export function TeacherIssueReportPage() {
     const next = workspace.records.find((item) => item.id === id);
     if (next && schedulableRooms.some((item) => item.id === next.room.id)) setRoom(next.room.id);
   }
+  // Prefill once, after the classes arrive, and never over a choice already made.
+  useEffect(() => {
+    if (prefilled.current || !requested) return;
+    if (!workspace.records.some((item) => item.id === requested)) return;
+    prefilled.current = true;
+    if (!selected && !room) chooseClass(requested);
+  });
+  const requestedMissing =
+    Boolean(requested) &&
+    !workspace.loading &&
+    !workspace.error &&
+    !workspace.records.some((item) => item.id === requested);
   async function submit(submitEvent: FormEvent) {
     submitEvent.preventDefault();
     if (busy) return;
@@ -92,7 +109,14 @@ export function TeacherIssueReportPage() {
         {error && <p role="alert">{error}</p>}
         {notice && <p role="status">{notice}</p>}
         {workspace.error && (
-          <p role="alert">Your classes could not be loaded. You can still report a room.</p>
+          <InlineError
+            title="Couldn't load your classes"
+            message="You can still report a room."
+            onRetry={workspace.retry}
+          />
+        )}
+        {requestedMissing && (
+          <p role="status">That class is not in the loaded dates. Choose the class or room below.</p>
         )}
         <form className="academic-create-period" onSubmit={(value) => void submit(value)}>
           <div>
@@ -179,12 +203,11 @@ export function TeacherIssueReportPage() {
       <section className="workspace-card" aria-labelledby="own-issues-heading">
         <h2 id="own-issues-heading">Your reports</h2>
         {listError ? (
-          <div role="alert">
-            <p>{listError}</p>
-            <Button variant="secondary" onClick={() => setReload((value) => value + 1)}>
-              Try again
-            </Button>
-          </div>
+          <InlineError
+            title="Couldn't load your reports"
+            message={listError}
+            onRetry={() => setReload((value) => value + 1)}
+          />
         ) : !issues ? (
           <ClassSyncSkeleton rows={2} label="Loading your reports" />
         ) : issues.length ? (

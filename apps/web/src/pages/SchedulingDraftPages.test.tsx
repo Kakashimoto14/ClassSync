@@ -126,7 +126,7 @@ describe('persistent scheduling draft workflow', () => {
     vi.mocked(api.loadSchedulingDraft).mockRejectedValueOnce(new Error('Draft not found'));
     detail();
     expect(await screen.findByRole('alert')).toHaveTextContent('Draft not found');
-    fireEvent.click(screen.getByRole('button', { name: 'Retry loading draft' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await screen.findByRole('heading', { name: 'Monday review' });
   });
   it('never offers a save action for infeasible output', async () => {

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
+import { StatusBadge } from '../components/ui/StatusBadge';
 import { listRestrictions, type SavedRestriction } from '../lib/admin-operations-api';
 import { rolePath } from '../routes/route-config';
 import {
@@ -14,6 +16,13 @@ import {
   type FacilityIssue,
   type IssueStatus,
 } from '../lib/facility-issues';
+
+const issueTone = {
+  open: 'warning',
+  in_progress: 'info',
+  resolved: 'success',
+  dismissed: 'neutral',
+} as const;
 
 function restrictionPath(issue: FacilityIssue) {
   const room = issueRoom(issue.room_id);
@@ -34,6 +43,7 @@ export function IssueTriagePanel() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [links, setLinks] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
@@ -41,12 +51,13 @@ export function IssueTriagePanel() {
   useEffect(() => {
     const controller = new AbortController();
     setIssues(null);
+    setLoadError('');
     listIssues('administrator', controller.signal)
       .then((value) => {
         if (!controller.signal.aborted) setIssues(value.issues);
       })
       .catch((failure) => {
-        if (!controller.signal.aborted) setError(failure.message);
+        if (!controller.signal.aborted) setLoadError(failure.message);
       });
     setRestrictionError(false);
     listRestrictions()
@@ -95,12 +106,19 @@ export function IssueTriagePanel() {
           Reload issue reports
         </Button>
       </div>
+      {loadError && (
+        <InlineError title="Couldn't load issue reports" message={loadError} onRetry={refresh} />
+      )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
       {restrictionError && (
-        <p role="status">Room restrictions could not be loaded, so none can be linked.</p>
+        <InlineError
+          title="Couldn't load room restrictions"
+          message="Reports stay readable, but no restriction can be linked yet."
+          onRetry={refresh}
+        />
       )}
-      {!issues && !error && <ClassSyncSkeleton layout="rows" label="Loading issue reports" />}
+      {!issues && !loadError && <ClassSyncSkeleton layout="rows" label="Loading issue reports" />}
       {issues?.length === 0 && <p className="workspace-card admin-empty">No issue reports yet.</p>}
       {issues?.map((issue) => {
         const room = issueRoom(issue.room_id)?.name ?? issue.room_id;
@@ -115,7 +133,9 @@ export function IssueTriagePanel() {
           <article className="workspace-card admin-request-card" key={issue.id}>
             <header className="admin-request-card__header">
               <div>
-                <span className="admin-request-status">{issueStatusLabel[issue.status]}</span>
+                <StatusBadge tone={issueTone[issue.status]}>
+                  {issueStatusLabel[issue.status]}
+                </StatusBadge>
                 <h2>
                   {room} · {issueCategories[issue.category]}
                 </h2>

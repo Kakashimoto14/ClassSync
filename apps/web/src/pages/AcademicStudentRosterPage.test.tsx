@@ -49,6 +49,16 @@ describe('connected academic student roster', () => {
     });
   });
 
+  it('filters by enrollment status on the server and returns to the first page', async () => {
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'unverified' } });
+    await waitFor(() => expect(loadAcademicRoster).toHaveBeenLastCalledWith('period', {
+      limit: 20, offset: 0, search: '', status: 'unverified',
+    }));
+    expect(await screen.findByText('1 unverified records · 20 per page')).toBeInTheDocument();
+  });
+
   it('creates a student with the selected period section and current revision', async () => {
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
     expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
@@ -175,12 +185,15 @@ describe('connected academic student roster', () => {
     expect(screen.getByText('1 need a name and email before activation.')).toBeInTheDocument();
   });
 
-  it('filters the loaded page by enrollment status', async () => {
+  it('shows the server result when no record has the chosen status', async () => {
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
     expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Status on this page'), { target: { value: 'active' } });
+    vi.mocked(loadAcademicRoster).mockResolvedValue({
+      items: [], total: 0, limit: 20, offset: 0, period_revision: 7, sections: [],
+    });
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'active' } });
+    expect(await screen.findByText('No roster records match these filters.')).toBeInTheDocument();
     expect(screen.queryByText('Aira Santos')).not.toBeInTheDocument();
-    expect(screen.getByText('No roster records match these filters.')).toBeInTheDocument();
   });
 
   it('offers Retry when the roster cannot be read', async () => {

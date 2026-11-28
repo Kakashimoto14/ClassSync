@@ -50,6 +50,7 @@ it('prioritizes a sourced next class, chronological agenda, duration and room pa
     }),
   ).toBeInTheDocument();
   expect(screen.getByText('Synthetic Building · 2')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Week' }));
   expect(screen.getByRole('link', { name: /Fri, Oct 30, 1 classes/ })).toHaveAttribute(
     'href',
     '/student/schedule?period=p&date=2026-10-30',

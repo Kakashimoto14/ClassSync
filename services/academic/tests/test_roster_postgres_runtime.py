@@ -185,6 +185,40 @@ def test_runtime_role_creates_activates_rekeys_and_deletes_a_student(database):
     ]
 
 
+def test_runtime_role_filters_the_roster_by_enrollment_status(database):
+    runtime = database.repository("runtime")
+    section = _section(runtime)
+    ids = ["95-00001", "95-00002", "95-00003"]
+    for student_id, status in zip(ids, ("active", "inactive", "unverified"), strict=True):
+        runtime.create_roster_student(PERIOD_ID, _student(
+            runtime, section, student_id, name=f"Status {status}", status=status
+        ))
+    totals = {}
+    for status in ("active", "inactive", "unverified"):
+        page = runtime.roster_page(PERIOD_ID, status=status, limit=25)
+        assert {item["enrollment_status"] for item in page["items"]} == {status}
+        totals[status] = page["total"]
+    # The three statuses partition the whole roster, across pages and not only the first.
+    assert sum(totals.values()) == runtime.roster_page(PERIOD_ID)["total"]
+    for student_id, status in zip(ids, ("active", "inactive", "unverified"), strict=True):
+        combined = runtime.roster_page(
+            PERIOD_ID,
+            status=status,
+            year_level=section.year_level,
+            section_id=section.id,
+            search="95-0000",
+        )
+        assert [item["student_id"] for item in combined["items"]] == [student_id]
+        assert combined["total"] == 1
+    with pytest.raises(AcademicError) as invalid:
+        runtime.roster_page(PERIOD_ID, status="graduated")
+    assert invalid.value.status == 422
+    for student_id in ids:
+        runtime.delete_roster_student(
+            PERIOD_ID, student_id, runtime.snapshot(PERIOD_ID).period.revision
+        )
+
+
 def test_roster_stays_scoped_to_its_administrator(database):
     with pytest.raises(AcademicError) as other:
         database.repository("runtime", "other-admin").roster_page(PERIOD_ID)

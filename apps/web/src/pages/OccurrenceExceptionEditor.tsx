@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import type { DraftDetail } from '../lib/scheduling-api';
+import { assignmentLabel } from '../lib/scheduling-labels';
 type Exception = {
   date: string;
   reason: string;
@@ -57,9 +58,7 @@ export function OccurrenceExceptionEditor({
             <option value="">All classes on this date (holiday)</option>
             {draft.generation_result.assignments.map((a) => (
               <option key={a.id} value={a.id}>
-                {draft.input_snapshot.offerings?.find((o) => o.id === a.offering_id)?.subject_name}{' '}
-                · weekly day {a.day + 1} · {Math.floor(a.start / 60)}:
-                {String(a.start % 60).padStart(2, '0')}
+                {assignmentLabel(a, draft.input_snapshot)}
               </option>
             ))}
           </select>

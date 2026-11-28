@@ -1,3 +1,4 @@
+import { assignmentLabel, readableText } from '../lib/scheduling-labels';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { SaveDraftPanel } from './SchedulingDraftPages';
 import { useEffect, useRef, useState } from 'react';
@@ -173,7 +174,7 @@ export function WeeklySchedulingPage() {
         <section className="workspace-card" aria-labelledby="inputs-step">
           <h2 id="inputs-step">2. Review scheduling inputs</h2>
           <p>
-            <strong>{input.period_id}</strong> · Data version {input.data_version}
+            <strong>Loaded scenario</strong> · Data version {input.data_version}
           </p>
           <p className="muted">{input.scope_description}</p>
           <dl className="scheduler-counts">
@@ -279,8 +280,9 @@ export function WeeklySchedulingPage() {
             {result.diagnostics.map((d, i) => (
               <li key={i}>
                 <strong>{d.code.replaceAll('_', ' ')}</strong>
-                {d.offering_id && ` · ${d.offering_id}`}
-                <p>{d.message}</p>
+                {d.offering_id &&
+                  ` · ${offerings.find((o) => o.id === d.offering_id)?.subject_name ?? 'Unknown subject'}`}
+                <p>{input ? readableText(d.message, result.assignments, input) : d.message}</p>
               </li>
             ))}
           </ul>
@@ -302,7 +304,12 @@ export function WeeklySchedulingPage() {
                   </p>
                   {validation.conflicts.map((c, i) => (
                     <p key={i}>
-                      {c.message} · {c.assignment_ids?.join(', ')}
+                      {readableText(c.message, result.assignments, input)}
+                      {result.assignments
+                        .filter((a) => c.assignment_ids?.includes(a.id))
+                        .map((a) => (
+                          <span key={a.id}> · {assignmentLabel(a, input)}</span>
+                        ))}
                     </p>
                   ))}
                 </section>

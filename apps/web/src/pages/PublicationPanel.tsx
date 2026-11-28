@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
+import { InlineError } from '../components/ui/InlineError';
 import { timetableRequest } from '../lib/publication-api';
 import { env } from '../lib/env';
 import { appMode, liveFetch } from '../config/runtime-config';
@@ -55,6 +56,8 @@ function PublicationContent({
   const [versions, setVersions] = useState<Version[]>([]);
   const [state, setState] = useState('draft');
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [attempt, setAttempt] = useState(0);
   const [busy, setBusy] = useState(false);
   const [report, setReport] = useState<Version['review'] | null>(null);
   const [key, setKey] = useState(() => crypto.randomUUID());
@@ -62,6 +65,7 @@ function PublicationContent({
   useEffect(() => {
     let ignore = false;
     if (source !== 'academic') return;
+    setLoadError('');
     Promise.all([
       appMode === 'institutional'
         ? loadAcademicPeriod(draft.period_id).then((data) => ({ data }))
@@ -127,12 +131,12 @@ function PublicationContent({
         setRevision(h.versions[0]?.revision ?? 0);
       })
       .catch((e) => {
-        if (!ignore) setError(e.message);
+        if (!ignore) setLoadError(e.message);
       });
     return () => {
       ignore = true;
     };
-  }, [draft.id, draft.period_id, source, dataset, requestId]);
+  }, [draft.id, draft.period_id, source, dataset, requestId, attempt]);
   async function act(publish: boolean) {
     if (!calendar || busy) return;
     setBusy(true);
@@ -276,6 +280,13 @@ function PublicationContent({
           Prepare revised version
         </Button>
       )}
+      {loadError && (
+        <InlineError
+          title="Couldn't load publication details"
+          message={loadError}
+          onRetry={() => setAttempt((value) => value + 1)}
+        />
+      )}
       {error && <p role="alert">{error}</p>}
       {appMode === 'institutional' && (
         <p>
@@ -307,7 +318,6 @@ function PublicationContent({
             {versions.map((v) => (
               <li key={v.id}>
                 {v.status} · version {v.revision} · {v.created_at} · {v.actor}
-                <p className="draft-id">{v.id}</p>
               </li>
             ))}
           </ul>

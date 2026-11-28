@@ -2,8 +2,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { institutionalRequest } from '../../lib/institutional-api';
 import { calendarDateLabel, type CalendarOccurrence } from '../../lib/calendar-model';
 import { timeRange } from '../../lib/student-presentation';
-import { Button } from '../ui/Button';
 import { ClassSyncSkeleton } from '../loading/ClassSyncLoading';
+import { InlineError } from '../ui/InlineError';
+import { AlertTriangle, Megaphone } from 'lucide-react';
+import './alerts-feed.css';
 
 interface Notice {
   id: string;
@@ -58,9 +60,13 @@ export function AlertsFeed({
     ...changes.map((item) => ({
       key: `change:${item.id}`,
       at: Date.parse(item.starts_at),
+      urgent: true,
       node: (
         <>
-          <p className="eyebrow">Class change</p>
+          <p className="alert-entry__label">
+            <AlertTriangle size={15} aria-hidden="true" />
+            Urgent · Class change
+          </p>
           <h3>{item.subject.name}</h3>
           <p>
             {calendarDateLabel(item.date)} · {timeRange(item.starts_at, item.ends_at)}
@@ -75,11 +81,15 @@ export function AlertsFeed({
     ...(notices ?? []).map((item) => ({
       key: `notice:${item.id}`,
       at: Date.parse(item.updated_at),
+      urgent: false,
       node: (
         <>
-          <p className="eyebrow">Announcement</p>
-          <h3 style={{ overflowWrap: 'anywhere' }}>{item.title}</h3>
-          <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{item.body}</p>
+          <p className="alert-entry__label">
+            <Megaphone size={15} aria-hidden="true" />
+            Announcement
+          </p>
+          <h3>{item.title}</h3>
+          <p className="alert-entry__body">{item.body}</p>
           <p className="muted">Updated {published(item.updated_at)}</p>
         </>
       ),
@@ -87,19 +97,22 @@ export function AlertsFeed({
   ].sort((a, b) => b.at - a.at);
 
   return (
-    <section aria-labelledby="alerts-feed-heading">
+    <section className="alerts-feed" aria-labelledby="alerts-feed-heading">
       <h2 id="alerts-feed-heading">Alerts and announcements</h2>
       {failed && (
-        <div role="alert">
-          <p>Announcements are unavailable right now.</p>
-          <Button variant="secondary" onClick={() => setReload((value) => value + 1)}>
-            Retry announcements
-          </Button>
-        </div>
+        <InlineError
+          title="Couldn't load announcements"
+          message="Class changes from your timetable are still listed."
+          retryLabel="Retry announcements"
+          onRetry={() => setReload((value) => value + 1)}
+        />
       )}
       {!notices && !failed && <ClassSyncSkeleton rows={2} label="Loading announcements" />}
       {entries.map((entry) => (
-        <article className="workspace-card" key={entry.key}>
+        <article
+          className={`workspace-card alert-entry alert-entry--${entry.urgent ? 'urgent' : 'notice'}`}
+          key={entry.key}
+        >
           {entry.node}
         </article>
       ))}

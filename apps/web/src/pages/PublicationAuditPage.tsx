@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { timetableRequest } from '../lib/publication-api';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 
 const HISTORY_PAGE_SIZE = 50;
 
@@ -37,20 +38,25 @@ export function PublicationAuditPage() {
   const [period, setPeriod] = useState('');
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [error, setError] = useState('');
+  const [periodsError, setPeriodsError] = useState('');
+  const [periodsAttempt, setPeriodsAttempt] = useState(0);
+  const [attempt, setAttempt] = useState(0);
   const [historyOffset, setHistoryOffset] = useState(0);
   const [historyHasMore, setHistoryHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setPeriodsError('');
     timetableRequest<{ periods: Array<{ id: string; title: string }> }>(
       (schedulingSandboxEnabled ? 'sandbox/' : '') + 'periods',
     )
       .then((v) => setPeriods(v.periods))
-      .catch((e) => setError(e.message));
-  }, []);
+      .catch((e) => setPeriodsError(e.message));
+  }, [periodsAttempt]);
   useEffect(() => {
     if (!period) return;
     let ignore = false;
     setError('');
+    setEvents([]);
     setHistoryHasMore(false);
     setLoading(true);
     const historyRequest = schedulingSandboxEnabled
@@ -101,7 +107,7 @@ export function PublicationAuditPage() {
     return () => {
       ignore = true;
     };
-  }, [period, historyOffset]);
+  }, [period, historyOffset, attempt]);
   return (
     <section className="workspace-card">
       <h2>{schedulingSandboxEnabled ? 'Preview publication history' : 'Administrator activity'}</h2>
@@ -122,7 +128,20 @@ export function PublicationAuditPage() {
           ))}
         </select>
       </label>
-      {error && <p role="alert">{error}</p>}
+      {periodsError && (
+        <InlineError
+          title="Couldn't load academic periods"
+          message={periodsError}
+          onRetry={() => setPeriodsAttempt((value) => value + 1)}
+        />
+      )}
+      {error && (
+        <InlineError
+          title="Couldn't load activity"
+          message={error}
+          onRetry={() => setAttempt((value) => value + 1)}
+        />
+      )}
       {loading && <ClassSyncSkeleton layout="table" label="Loading activity" />}
       {period && !error && !loading && events.length === 0 && (
         <p role="status">No activity is recorded for this period.</p>

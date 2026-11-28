@@ -46,7 +46,19 @@ export function PolishSummary({ report, input }: { report: PolishReport; input: 
   return (
     <section className="workspace-card" aria-label="Commuter-friendly polish">
       <h3>Commuter-friendly polish</h3>
-      <table>
+      <ul className="polish-metrics" aria-label="Polish results before saving">
+        <li>
+          <strong>{report.after.orphan_section_days}</strong> one-class section-days
+        </li>
+        <li>
+          <strong>{report.after.over_span_section_days}</strong> days over the length limit
+        </li>
+        <li>
+          <strong>{hours(report.after.max_span_minutes)}</strong> longest section day
+        </li>
+      </ul>
+      <div className="polish-table" role="region" aria-label="Polish comparison" tabIndex={0}>
+        <table>
         <thead>
           <tr>
             <th scope="col">Measure</th>
@@ -63,7 +75,8 @@ export function PolishSummary({ report, input }: { report: PolishReport; input: 
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
       {report.unmet.length ? (
         <details>
           <summary>Section-days still outside the preferences: {report.unmet.length}</summary>

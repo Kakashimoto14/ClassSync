@@ -66,11 +66,17 @@ export function AcademicStudentRosterPage() {
       limit: 20, offset, search,
       ...(year === 'all' ? {} : { year_level: Number(year) }),
       ...(section === 'all' ? {} : { section_id: section }),
-    }).then((result) => { if (!ignore) setPage(result); })
+      ...(statusFilter === 'all' ? {} : { status: statusFilter }),
+    }).then((result) => {
+      if (ignore) return;
+      // A filtered page can empty out (for example after activation): step back.
+      if (!result.items.length && offset > 0) setOffset(Math.max(0, offset - 20));
+      else setPage(result);
+    })
       .catch((cause: unknown) => { if (!ignore) setLoadError(cause instanceof Error ? cause.message : 'Roster could not be loaded.'); })
       .finally(() => { if (!ignore) setLoading(false); });
     return () => { ignore = true; };
-  }, [periodId, offset, search, year, section, reload]);
+  }, [periodId, offset, search, year, section, statusFilter, reload]);
 
   if (appMode !== 'institutional') {
     return <section className="workspace-card">
@@ -82,9 +88,7 @@ export function AcademicStudentRosterPage() {
   const activeSections = (page?.sections ?? []).filter((item) => item.active);
   const sectionsForYear = activeSections.filter((item) => item.year_level === form.year_level);
   const busy = saving || Boolean(deletingId);
-  // The roster API has no status filter, so this narrows only the loaded page.
-  const rows = (page?.items ?? []).filter(
-    (item) => statusFilter === 'all' || item.enrollment_status === statusFilter);
+  const rows = page?.items ?? [];
   const pageIds = rows.map((item) => item.student_id);
   const unverified = rows.filter((item) => item.enrollment_status === 'unverified');
   // The server rejects a whole batch if one student lacks a name or email.
@@ -139,12 +143,14 @@ export function AcademicStudentRosterPage() {
     setError('');
     setNotice('');
   }
-  async function reloadRoster(nextOffset: number) {
+  async function reloadRoster(nextOffset: number): Promise<void> {
     const result = await loadAcademicRoster(periodId, {
       limit: 20, offset: nextOffset, search,
       ...(year === 'all' ? {} : { year_level: Number(year) }),
       ...(section === 'all' ? {} : { section_id: section }),
+      ...(statusFilter === 'all' ? {} : { status: statusFilter }),
     });
+    if (!result.items.length && nextOffset > 0) return reloadRoster(Math.max(0, nextOffset - 20));
     setPage(result);
     setOffset(nextOffset);
   }
@@ -226,7 +232,7 @@ export function AcademicStudentRosterPage() {
   return <section className="workspace-card academic-records" aria-labelledby="student-roster-title">
     <div className="student-roster-heading">
       <div><h2 id="student-roster-title">Student roster</h2>
-        {page && <p className="academic-record-summary">{page.total} roster records · 20 per page</p>}
+        {page && <p className="academic-record-summary">{page.total} {statusFilter === 'all' ? 'roster' : statusFilter} records · 20 per page</p>}
       </div>
       <div className="student-roster-actions">
         <Button type="button" variant="secondary" disabled={!page || loading || busy} onClick={() => { setNotice(''); setImportOpen(true); }}>Import CSV</Button>
@@ -244,7 +250,7 @@ export function AcademicStudentRosterPage() {
       <label>Section<select value={section} onChange={(event) => { setSection(event.target.value); setOffset(0); }}>
         <option value="all">All sections</option>{page?.sections.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
       </select></label>
-      <label>Status on this page<select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setSelected([]); }}>
+      <label>Status<select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setOffset(0); setSelected([]); }}>
         <option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="unverified">Unverified</option>
       </select></label>
     </div>

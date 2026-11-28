@@ -173,6 +173,9 @@ def roster(
     search: str = Query(default="", max_length=100),
     year_level: int | None = Query(default=None, ge=1, le=4),
     section_id: str | None = Query(default=None, max_length=80),
+    enrollment_status: Literal["active", "inactive", "unverified"] | None = Query(
+        default=None, alias="status"
+    ),
 ):
     _, owner = authorize(request, False)
     return connected_repository(request, owner).roster_page(
@@ -182,6 +185,7 @@ def roster(
         search=search,
         year_level=year_level,
         section_id=section_id,
+        status=enrollment_status,
     )
 
 

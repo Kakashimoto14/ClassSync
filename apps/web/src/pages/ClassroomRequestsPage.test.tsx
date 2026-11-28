@@ -56,7 +56,7 @@ it('approves only after a clear live check and reports the published change', as
       <ClassroomRequestsPage role="administrator" />
     </MemoryRouter>,
   );
-  expect(await screen.findByText('No conflicts · ready to publish')).toBeInTheDocument();
+  expect(await screen.findByText('No conflicts')).toBeInTheDocument();
   expect(fixture.request).toHaveBeenCalledWith(
     'timetables/requests/owned-request/preflight',
     expect.objectContaining({ role: 'administrator' }),
@@ -106,7 +106,7 @@ it('re-checks conflicts after an approval is rejected by the server', async () =
       <ClassroomRequestsPage role="administrator" />
     </MemoryRouter>,
   );
-  await screen.findByText('No conflicts · ready to publish');
+  await screen.findByText('No conflicts');
   fireEvent.change(screen.getByLabelText('Decision note for TEST101'), {
     target: { value: 'Approve this change' },
   });

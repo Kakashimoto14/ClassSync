@@ -25,6 +25,7 @@ import { SchedulingTimetable } from './SchedulingTimetable';
 import { WeeklySchedulingPage } from './WeeklySchedulingPage';
 import { IndependentValidation } from './TimetableValidation';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 
 export function SchedulingSourcePage() {
   const [search] = useSearchParams();
@@ -222,7 +223,8 @@ function AcademicGenerationPage() {
   const [error, setError] = useState(''),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
-    [retry, setRetry] = useState(0);
+    [retry, setRetry] = useState(0),
+    [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'idle'>('idle');
   const active = useRef(false),
     heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -277,6 +279,7 @@ function AcademicGenerationPage() {
     setBusy(true);
     setError('');
     setResult(null);
+    setSaveStatus('idle');
     try {
       setResult(await generateAcademicSchedule(checked.period.id, checked.period.revision));
     } catch (e) {
@@ -292,13 +295,17 @@ function AcademicGenerationPage() {
   }
   const success =
     result && ['feasible', 'optimal'].includes(result.solver_status) && result.validation?.valid;
+  // Publishing happens on the saved draft, so it is the active step once a save is confirmed.
+  const afterGeneration = saveStatus === 'saved' ? 4 : saveStatus === 'saving' ? 3 : 2;
+  const step = success ? afterGeneration : period ? 1 : 0;
   return (
     <div className="ux-generation-flow" aria-busy={busy}>
       <ol className="ux-steps" aria-label="Scheduling steps">
-        <li>Select period</li>
-        <li>Generate</li>
-        <li>Review</li>
-        <li>Save draft</li>
+        {['Select period', 'Generate', 'Review', 'Save draft', 'Publish'].map((name, index) => (
+          <li key={name} aria-current={index === step ? 'step' : undefined}>
+            {name}
+          </li>
+        ))}
       </ol>
       <section className="workspace-card ux-generation-setup">
         <div className="ux-section-heading">
@@ -315,6 +322,7 @@ function AcademicGenerationPage() {
             onChange={(e) => {
               setPeriod(e.target.value);
               setResult(null);
+              setSaveStatus('idle');
               setError('');
               const next = new URLSearchParams(search);
               next.set('period', e.target.value);
@@ -407,18 +415,15 @@ function AcademicGenerationPage() {
         </details>
       </section>
       {error && (
-        <div role="alert" className="workspace-card">
-          <p>{error}</p>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setError('');
-              setRetry((n) => n + 1);
-            }}
-          >
-            Retry loading scheduling data
-          </Button>
-        </div>
+        <InlineError
+          // A failed generation is not a failed read, so it says so.
+          title={checked ? "Couldn't generate the timetable" : "Couldn't load scheduling data"}
+          message={error}
+          onRetry={() => {
+            setError('');
+            setRetry((n) => n + 1);
+          }}
+        />
       )}
       {!result && periods.length > 0 && (
         <Link className="button button--secondary" to="/admin/academic">
@@ -474,14 +479,15 @@ function AcademicGenerationPage() {
           )}
           {success && checked?.inputs && (
             <>
-              <SchedulingTimetable key={result.run_id} input={checked.inputs} result={result} />
-              <IndependentValidation input={checked.inputs} assignments={result.assignments} />
               <SaveDraftPanel
                 key={'save:' + result.run_id}
                 result={result}
                 source="academic"
                 defaultTitle={`${periodLabel(checked.period)} — Draft`}
+                onStatus={setSaveStatus}
               />
+              <SchedulingTimetable key={result.run_id} input={checked.inputs} result={result} />
+              <IndependentValidation input={checked.inputs} assignments={result.assignments} />
             </>
           )}
         </section>

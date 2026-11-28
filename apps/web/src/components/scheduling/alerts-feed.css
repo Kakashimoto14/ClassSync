@@ -1,0 +1,9 @@
+/* Published class changes read as urgent; announcements stay neutral. Lazy chunks only. */
+.alerts-feed { display: grid; gap: 12px; min-width: 0; }
+.alerts-feed > h2, .alerts-feed > p { margin: 0; }
+.alert-entry { display: grid; gap: 6px; min-width: 0; overflow-wrap: anywhere; border-left: 4px solid var(--line); }
+.alert-entry :is(h3, p) { margin: 0; }
+.alert-entry--urgent { border-left-color: var(--warning); background: var(--warning-soft, var(--surface)); }
+.alert-entry__label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+.alert-entry--urgent .alert-entry__label { color: var(--warning); }
+.alert-entry__body { white-space: pre-wrap; }

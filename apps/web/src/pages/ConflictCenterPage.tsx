@@ -10,6 +10,7 @@ import { IndependentValidation } from './TimetableValidation';
 import { SchedulingTimetable } from './SchedulingTimetable';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 import { appMode } from '../config/runtime-config';
 const connectedWorkspace = appMode === 'institutional' || schedulingSandboxEnabled;
 export function ConflictCenterPage() {
@@ -75,10 +76,14 @@ export function ConflictCenterPage() {
       </label><Button disabled={!id || loading} onClick={() => setRetry((n) => n + 1)}>Validate selected draft</Button></div>
       <p className="conflict-validation-note">Deterministic independent validation · language-model explanations are not enabled.</p>
       {error && (
-        <div role="alert">
-          <p>{error}</p>
-          <Button onClick={() => setRetry((n) => n + 1)}>Retry</Button>
-        </div>
+        <InlineError
+          title="Couldn't load saved timetables"
+          message={error}
+          onRetry={() => {
+            setError('');
+            setRetry((n) => n + 1);
+          }}
+        />
       )}
       {loading && <ClassSyncSkeleton layout="table" label="Loading saved timetables" />}
       {!loading && !drafts.length && !error && (

@@ -696,3 +696,14 @@
   color: var(--ink-soft);
 }
 @media (min-width:601px) { .student-shell .student-schedule-options label:first-of-type {width:min(100%,300px);} }
+
+/* Phase D2: next-class hero action, Today/Week segments and narrow-screen stacking. */
+.student-home-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.student-range { display: inline-flex; padding: 3px; gap: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.student-range button { min-height: 40px; min-width: 88px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.student-range button[aria-pressed='true'] { background: var(--primary); color: var(--text-on-action); }
+.student-week-day h3 { margin: 16px 0 4px; font-size: 0.8rem; }
+@media (max-width: 600px) {
+  .student-home-tools { display: grid; }
+  .student-range { display: grid; grid-template-columns: 1fr 1fr; }
+}

@@ -10,6 +10,7 @@ import {
 import { provisionalCdmRooms } from '../data/cdm-room-inventory';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { InlineError } from '../components/ui/InlineError';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { rolePath } from '../routes/route-config';
 import './admin-operations.css';
@@ -44,6 +45,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
   const selectedRoom = params.get('room') ?? '';
   const [restrictions, setRestrictions] = useState<SavedRestriction[] | null>(null);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
   const [attempt, setAttempt] = useState(0);
   // A facility issue link opens a prefilled form; saving still needs the usual check.
@@ -60,10 +62,11 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
 
   useEffect(() => {
     let ignore = false;
+    setLoadError('');
     listRestrictions()
       .then((result) => { if (!ignore) setRestrictions(result.restrictions); })
       .catch((cause: unknown) => {
-        if (!ignore) setError(cause instanceof Error ? cause.message : 'Restrictions could not be loaded.');
+        if (!ignore) setLoadError(cause instanceof Error ? cause.message : 'Restrictions could not be loaded.');
       });
     return () => { ignore = true; };
   }, [attempt]);
@@ -153,6 +156,14 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
     });
   };
 
+  const readFailure = loadError && (
+    <InlineError
+      title="Couldn't load room restrictions"
+      message={loadError}
+      onRetry={() => setAttempt((value) => value + 1)}
+    />
+  );
+
   if (!detail)
     return (
       <div className="admin-ops">
@@ -161,7 +172,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
           {provisionalCdmRooms.filter((room) => !room.schedulable).length} excluded spaces from the
           supplied campus inventory. Physical condition is not verified.
         </p>
-        {error && <p role="alert" className="scheduler-error">{error}</p>}
+        {readFailure}
         <div className="admin-ops__grid">
           {buildings.map((name) => {
             const members = provisionalCdmRooms.filter((room) => room.building === name);
@@ -197,6 +208,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
       ) : (
         <>
           {notice && <p role="status">{notice}</p>}
+          {readFailure}
           {error && <p role="alert" className="scheduler-error">{error}</p>}
           <section className="workspace-card" aria-label="Schedulable rooms">
             <h2>{building}: {schedulable.length} schedulable rooms</h2>
@@ -298,7 +310,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
               <h2>Dated restrictions{selectedRoom ? ` · ${roomName(selectedRoom)}` : ''}</h2>
               <Button disabled={busy || !schedulable.length} onClick={() => open()}>Add restriction</Button>
             </div>
-            {restrictions === null && !error && <ClassSyncSkeleton label="Loading restrictions" />}
+            {restrictions === null && !loadError && <ClassSyncSkeleton label="Loading restrictions" />}
             {restrictions !== null && !shown.length && <p className="muted">No restrictions recorded.</p>}
             <ul className="admin-ops__list">
               {shown.map((item) => (

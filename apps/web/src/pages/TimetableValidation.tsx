@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { sectionLabel } from '../lib/scheduling-labels';
+import { assignmentLabel, readableText } from '../lib/scheduling-labels';
 import { Button } from '../components/ui/Button';
 import {
   validateWeeklySchedule,
@@ -56,7 +56,7 @@ export function IndependentValidation({
             {result.conflicts.map((c, i) => (
               <li key={i}>
                 <strong>Blocking · {c.code.replaceAll('_', ' ')}</strong>
-                <p>{c.message}</p>
+                <p>{readableText(c.message, assignments, input)}</p>
                 {(c.assignment_ids ?? []).map((id) => {
                   const a = assignments.find((v) => v.id === id);
                   return a ? (
@@ -73,13 +73,8 @@ export function IndependentValidation({
                         }
                       }}
                     >
-                      {input.offerings?.find((o) => o.id === a.offering_id)?.subject_name} ·{' '}
-                      {input.rooms?.find((r) => r.id === a.room_id)?.name} ·{' '}
-                      {input.teachers?.find((t) => t.id === a.teacher_id)?.name} ·{' '}
-                      {sectionLabel(
-                        input.sections?.find((s) => s.id === a.section_id),
-                        input,
-                      )}
+                      {assignmentLabel(a, input)} ·{' '}
+                      {input.teachers?.find((t) => t.id === a.teacher_id)?.name}
                     </a>
                   ) : null;
                 })}

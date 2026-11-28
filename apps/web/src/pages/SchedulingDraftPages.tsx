@@ -16,7 +16,16 @@ import { requestDraftAdvice, saveDraftRevision } from '../lib/scheduling-api';
 import { appMode } from '../config/runtime-config';
 const schedulingWorkspaceEnabled = appMode === 'institutional' || schedulingSandboxEnabled;
 import { SchedulingTimetable } from './SchedulingTimetable';
-import { draftPath } from '../lib/scheduling-labels';
+import {
+  assignmentLabel,
+  clockLabel,
+  DAY_NAMES,
+  draftPath,
+  readableText,
+  roomLabel,
+  slotLabel,
+} from '../lib/scheduling-labels';
+import { InlineError } from '../components/ui/InlineError';
 import { PublicationPanel } from './PublicationPanel';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
@@ -27,10 +36,12 @@ export function SaveDraftPanel({
   result,
   source = 'synthetic',
   defaultTitle,
+  onStatus,
 }: {
   result: GenerationResult;
   source?: 'synthetic' | 'academic';
   defaultTitle?: string;
+  onStatus?: (status: 'saving' | 'saved' | 'idle') => void;
 }) {
   const [title, setTitle] = useState(defaultTitle ?? `${result.period_id} — review draft`);
   const [busy, setBusy] = useState(false);
@@ -47,6 +58,7 @@ export function SaveDraftPanel({
     active.current = true;
     setBusy(true);
     setError('');
+    onStatus?.('saving');
     try {
       const body = {
         run_id: result.run_id,
@@ -59,7 +71,9 @@ export function SaveDraftPanel({
           ? saveSchedulingDraft(body, source)
           : saveSchedulingDraft(body)),
       );
+      onStatus?.('saved');
     } catch (e) {
+      onStatus?.('idle');
       setError(e instanceof Error ? e.message : 'Draft save failed. Retry safely.');
     } finally {
       active.current = false;
@@ -78,7 +92,6 @@ export function SaveDraftPanel({
       {saved ? (
         <>
           <p role="status">Saved as “{saved.title}”. Draft · Unpublished.</p>
-          <p className="draft-id">Draft ID: {saved.id}</p>
           <Link className="button" to={draftPath(saved.id, source)}>
             Open saved draft
           </Link>
@@ -211,14 +224,7 @@ function DraftListContent({
         </Link>
       </div>
       {!data && !error && <ClassSyncSkeleton layout="table" label="Loading saved drafts" />}
-      {error && (
-        <div className="scheduler-error" role="alert">
-          <p>{error}</p>
-          <Button variant="secondary" onClick={reload}>
-            Retry loading drafts
-          </Button>
-        </div>
-      )}
+      {error && <InlineError title="Couldn't load saved drafts" message={error} onRetry={reload} />}
       {data && (
         <>
           <p role="status">
@@ -304,6 +310,8 @@ function DraftDetailContent({
   const [retry, setRetry] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const navigate = useNavigate();
+  const [editTarget, setEditTarget] = useState<{ id: string; request: number } | null>(null);
+  const editable = source === 'academic' && appMode === 'institutional';
   useEffect(() => {
     if (!schedulingWorkspaceEnabled) return;
     let ignore = false;
@@ -332,18 +340,14 @@ function DraftDetailContent({
       </Link>
       {!draft && !error && <ClassSyncSkeleton layout="timetable" label="Loading saved timetable" />}
       {error && (
-        <div className="scheduler-error" role="alert">
-          <p>{error}</p>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setError('');
-              setRetry((n) => n + 1);
-            }}
-          >
-            Retry loading draft
-          </Button>
-        </div>
+        <InlineError
+          title="Couldn't load this draft"
+          message={error}
+          onRetry={() => {
+            setError('');
+            setRetry((n) => n + 1);
+          }}
+        />
       )}
       {draft && (
         <>
@@ -373,18 +377,21 @@ function DraftDetailContent({
               instructional minutes · {draft.hard_conflict_count} hard conflicts
             </p>
             <p>
-              {draft.period_id} · Saved{' '}
-              <time dateTime={draft.created_at}>{created(draft.created_at)}</time>
+              Saved <time dateTime={draft.created_at}>{created(draft.created_at)}</time>
             </p>
-            <p className="draft-id">Draft ID: {draft.id}</p>
           </section>
           <SchedulingTimetable
             key={draft.id}
             input={draft.input_snapshot}
             result={draft.generation_result}
+            onEdit={
+              editable
+                ? (id) => setEditTarget((current) => ({ id, request: (current?.request ?? 0) + 1 }))
+                : undefined
+            }
           />
-          {source === 'academic' && appMode === 'institutional' && <DraftAdvisorPanel draft={draft} />}
-          {source === 'academic' && appMode === 'institutional' && <DraftAssignmentEditor draft={draft} onSaved={(value) => navigate(draftPath(value.id, 'academic'))} />}
+          {editable && <DraftAdvisorPanel draft={draft} />}
+          {editable && <DraftAssignmentEditor draft={draft} target={editTarget} onSaved={(value) => navigate(draftPath(value.id, 'academic'))} />}
           <PublicationPanel draft={draft} source={source} />
           {source === 'academic' && draft.input_snapshot.synthetic && (
             <Link
@@ -403,6 +410,7 @@ function DraftDetailContent({
           </section>
           <details>
             <summary>Saved draft provenance</summary>
+            <p>Draft reference: {draft.id}</p>
             <p>
               Creator: {draft.creator} · Data version: {draft.data_version} · Schema:{' '}
               {draft.schema_version}
@@ -431,6 +439,8 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
   } | null>(null);
   const [error, setError] = useState('');
   const [targetId, setTargetId] = useState(draft.generation_result.assignments[0]?.id ?? '');
+  const readable = (text: string) =>
+    readableText(text, draft.generation_result.assignments, draft.input_snapshot);
   async function analyze(kind: 'health' | 'conflict') {
     if (busy) return;
     setBusy(true);
@@ -476,33 +486,60 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
       <p>Suggestions are advisory. Deterministic validation remains the authority.</p>
       <label>Assignment to review<select value={targetId} onChange={(event) => setTargetId(event.target.value)}>
         {draft.generation_result.assignments.map((item) => <option key={item.id} value={item.id}>
-          {draft.input_snapshot.offerings?.find((offering) => offering.id === item.offering_id)?.subject_name ?? item.offering_id}
+          {assignmentLabel(item, draft.input_snapshot)}
         </option>)}
       </select></label>
       <div className="draft-actions">
         <Button loading={busy} disabled={busy} onClick={() => void analyze('conflict')}>Ask AI for conflict options</Button>
         <Button variant="secondary" loading={busy} disabled={busy} onClick={() => void analyze('health')}>Analyze Draft with AI</Button>
       </div>
-      {error && <p role="alert">{error}</p>}
-      {advice && <div role="status"><p>{advice.message}</p><ul>{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
-        {typeof item === 'string' ? item : <>{item.reason} · Day {item.assignment.day + 1}, {String(Math.floor(item.assignment.start / 60)).padStart(2, '0')}:{String(item.assignment.start % 60).padStart(2, '0')} · {draft.input_snapshot.rooms?.find((room) => room.id === item.assignment.room_id)?.name}<Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment, item.also_moves)}>Apply as validated revision</Button></>}
+      {error && <p role="alert">{readable(error)}</p>}
+      {advice && <div role="status"><p>{readable(advice.message)}</p><ul>{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
+        {typeof item === 'string' ? readable(item) : <>
+          <span>{readable(item.reason)}</span>
+          {[item.assignment, ...(item.also_moves ? [item.also_moves] : [])].map((move) => <MoveSummary key={move.id} move={move} draft={draft} />)}
+          <Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment, item.also_moves)}>Apply as validated revision</Button>
+        </>}
       </li>)}</ul></div>}
     </section>
   );
 }
 
+/** Before and after of one proposed move, e.g. `NB-204 → NB-301`. */
+function MoveSummary({ move, draft }: { move: Assignment; draft: DraftDetail }) {
+  const input = draft.input_snapshot;
+  const before = draft.generation_result.assignments.find((item) => item.id === move.id);
+  if (!before) return null;
+  const changes = [
+    before.room_id !== move.room_id &&
+      `${roomLabel(before.room_id, input)} → ${roomLabel(move.room_id, input)}`,
+    (before.day !== move.day || before.start !== move.start) &&
+      `${slotLabel(before)} → ${slotLabel(move)}`,
+  ].filter(Boolean);
+  return (
+    <p className="move-summary">
+      <span>{input.offerings?.find((item) => item.id === move.offering_id)?.subject_name}</span>
+      <span className="move-pill">{changes.join(' · ') || 'No change'}</span>
+    </p>
+  );
+}
+
 function DraftAssignmentEditor({
   draft,
+  target,
   onSaved,
 }: {
   draft: DraftDetail;
+  target: { id: string; request: number } | null;
   onSaved: (draft: DraftDetail) => void;
 }) {
+  const section = useRef<HTMLElement>(null);
+  const picker = useRef<HTMLSelectElement>(null);
   const assignments: Assignment[] = draft.generation_result.assignments;
   const [selectedId, setSelectedId] = useState(assignments[0]?.id ?? '');
   const [room, setRoom] = useState(assignments[0]?.room_id ?? '');
   const [day, setDay] = useState(assignments[0]?.day ?? 0);
-  const [start, setStart] = useState(assignments[0] ? `${String(Math.floor(assignments[0].start / 60)).padStart(2, '0')}:${String(assignments[0].start % 60).padStart(2, '0')}` : '08:00');
+  const [start, setStart] = useState(assignments[0] ? clockLabel(assignments[0].start) : '08:00');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const selected = assignments.find((item) => item.id === selectedId);
@@ -512,8 +549,16 @@ function DraftAssignmentEditor({
     setSelectedId(id);
     setRoom(assignment.room_id);
     setDay(assignment.day);
-    setStart(`${String(Math.floor(assignment.start / 60)).padStart(2, '0')}:${String(assignment.start % 60).padStart(2, '0')}`);
+    setStart(clockLabel(assignment.start));
   }
+  useEffect(() => {
+    if (!target) return;
+    select(target.id);
+    section.current?.scrollIntoView?.({ block: 'start' });
+    picker.current?.focus({ preventScroll: true });
+    // Each card click is a new request, even for the same session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
   async function save() {
     if (!selected || busy) return;
     const startMinutes = Number(start.slice(0, 2)) * 60 + Number(start.slice(3));
@@ -536,16 +581,16 @@ function DraftAssignmentEditor({
     }
   }
   return (
-    <section className="workspace-card" aria-labelledby="draft-edit-heading" aria-busy={busy}>
+    <section ref={section} className="workspace-card draft-editor" aria-labelledby="draft-edit-heading" aria-busy={busy}>
       <h2 id="draft-edit-heading">Edit draft assignment</h2>
       <p>Changes create a separate draft. The original remains unchanged until you review and publish the revision.</p>
-      <label>Class assignment<select value={selectedId} onChange={(event) => select(event.target.value)}>{assignments.map((item) => <option key={item.id} value={item.id}>{(draft.input_snapshot.offerings ?? []).find((offering) => offering.id === item.offering_id)?.subject_name ?? item.offering_id} · {item.id}</option>)}</select></label>
+      <label>Class assignment<select ref={picker} value={selectedId} onChange={(event) => select(event.target.value)}>{assignments.map((item) => <option key={item.id} value={item.id}>{assignmentLabel(item, draft.input_snapshot)}</option>)}</select></label>
       {selected && <>
         <label>Room<select value={room} onChange={(event) => setRoom(event.target.value)}>{(draft.input_snapshot.rooms ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <label>Day<select value={day} onChange={(event) => setDay(Number(event.target.value))}>{['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((item, index) => <option key={item} value={index}>{item}</option>)}</select></label>
+        <label>Day<select value={day} onChange={(event) => setDay(Number(event.target.value))}>{DAY_NAMES.map((item, index) => <option key={item} value={index}>{item}</option>)}</select></label>
         <label>Start time<input type="time" value={start} onChange={(event) => setStart(event.target.value)} /></label>
       </>}
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{readableText(error, assignments, draft.input_snapshot)}</p>}
       <Button loading={busy} disabled={busy || !selected} onClick={() => void save()}>Save validated revision</Button>
     </section>
   );

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 import {
   listAcademicPeriods,
   loadAcademicPeriod,
@@ -88,18 +89,14 @@ export function SchedulingRulesPage() {
         )}
       </section>
       {error && (
-        <div role="alert" className="workspace-card">
-          <p>{error}</p>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setError('');
-              setReload((n) => n + 1);
-            }}
-          >
-            Retry
-          </Button>
-        </div>
+        <InlineError
+          title="Couldn't load scheduling rules"
+          message={error}
+          onRetry={() => {
+            setError('');
+            setReload((n) => n + 1);
+          }}
+        />
       )}
       {period && !snapshot && !error && (
         <ClassSyncSkeleton layout="kpis" label="Loading scheduling rules" />

@@ -148,6 +148,7 @@ export interface RosterStudentWrite {
 }
 export const loadAcademicRoster = (period: string, filters: {
   limit?: number; offset?: number; search?: string; year_level?: number; section_id?: string;
+  status?: RosterStudentWrite['enrollment_status'];
 }) => {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {

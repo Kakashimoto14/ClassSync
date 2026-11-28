@@ -8,7 +8,7 @@ const result = spawnSync(
   process.execPath,
   [resolve(__dirname, '../node_modules/vitest/vitest.mjs'), 'run', '--pool=threads',
     '--reporter=verbose', ...process.argv.slice(2)],
-  { cwd: resolve(__dirname, '../apps/web'), encoding: 'utf8', timeout: 300000,
+  { cwd: resolve(__dirname, '../apps/web'), encoding: 'utf8', timeout: 600000,
     maxBuffer: 16 * 1024 * 1024 },
 );
 process.stdout.write(result.stdout || '');

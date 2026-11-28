@@ -19,6 +19,7 @@ import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import './student-home.css';
 import { AlertsFeed } from '../components/scheduling/AlertsFeed';
 import { appMode } from '../config/runtime-config';
+import { ExportIcsButton } from '../components/scheduling/ExportIcsButton';
 
 export function StudentHome({
   rooms = false,
@@ -33,6 +34,7 @@ export function StudentHome({
   const w = useScheduleWorkspace('student', !roomDetail);
   const [selected, setSelected] = useState<CalendarOccurrence | null>(null);
   const [roomQuery, setRoomQuery] = useState('');
+  const [range, setRange] = useState<'today' | 'week'>('today');
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30000);
@@ -189,7 +191,7 @@ export function StudentHome({
           </details>
         </div>
       ) : w.loading && !w.data ? (
-      <div className="student-panel student-loading" aria-busy="true">
+        <div className="student-panel student-loading" aria-busy="true">
           <ClassSyncSkeleton layout="kpis" label="Loading your timetable" />
           <div />
           <div />
@@ -320,7 +322,7 @@ export function StudentHome({
                     className="button button--primary student-room-action"
                     to={`/student/rooms/detail?id=${encodeURIComponent(next.room.id)}&date=${next.date}&schedule=1`}
                   >
-                    Room details <ArrowRight size={16} aria-hidden="true" />
+                    Find room <ArrowRight size={16} aria-hidden="true" />
                   </Link>
                   {next.changed && <p>Schedule changed</p>}
                 </>
@@ -331,56 +333,92 @@ export function StudentHome({
                 </>
               )}
             </article>
-            <section className="student-panel">
-              <div className="student-section-heading">
-                <h2>Today's classes</h2>
-                <span>
-                  {today.length} {today.length === 1 ? 'class' : 'classes'}
-                </span>
+            <div className="student-home-tools">
+              <div className="student-range" role="group" aria-label="Schedule range">
+                {(['today', 'week'] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={range === value}
+                    onClick={() => setRange(value)}
+                  >
+                    {value === 'today' ? 'Today' : 'Week'}
+                  </button>
+                ))}
               </div>
-              {today.length ? (
-                today.map(session)
-              ) : (
-                <p className="student-empty">No classes today. Your weekly overview is below.</p>
+              {w.context.mode === 'published' && (
+                <ExportIcsButton
+                  records={w.records}
+                  role="student"
+                  view={range === 'today' ? 'day' : 'week'}
+                  date={w.date}
+                />
               )}
-            </section>
-            <section className="student-panel">
-              <div className="student-section-heading">
-                <h2>This week</h2>
-                <Link to={`${schedulePath}&date=${w.date}`}>
-                  View full schedule <ArrowRight size={15} aria-hidden="true" />
-                </Link>
-              </div>
-              <nav className="student-week-strip" aria-label="This week's classes">
-                {days.map((day) => {
-                  const count = records.filter((item) => item.date === day).length;
-                  return (
-                    <Link
-                      key={day}
-                      to={`${schedulePath}&date=${day}`}
-                      aria-label={`${calendarDateLabel(day)}, ${count} classes`}
-                      aria-current={day === w.date ? 'date' : undefined}
-                      className={count ? '' : 'student-empty-day'}
-                    >
-                      <span>
-                        {new Date(day + 'T00:00:00Z').toLocaleDateString('en', {
-                          weekday: 'short',
-                          timeZone: 'UTC',
-                        })}
-                      </span>
-                      <strong>{Number(day.slice(-2))}</strong>
-                      <small>
-                        {count}
-                        <span className="student-class-word">
-                          {' '}
-                          {count === 1 ? 'class' : 'classes'}
+            </div>
+            {range === 'today' ? (
+              <section className="student-panel">
+                <div className="student-section-heading">
+                  <h2>Today's classes</h2>
+                  <span>
+                    {today.length} {today.length === 1 ? 'class' : 'classes'}
+                  </span>
+                </div>
+                {today.length ? (
+                  today.map(session)
+                ) : (
+                  <p className="student-empty">
+                    No classes today. Choose Week to see what is ahead.
+                  </p>
+                )}
+              </section>
+            ) : (
+              <section className="student-panel">
+                <div className="student-section-heading">
+                  <h2>This week</h2>
+                  <Link to={`${schedulePath}&date=${w.date}`}>
+                    View full schedule <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
+                <nav className="student-week-strip" aria-label="This week's classes">
+                  {days.map((day) => {
+                    const count = records.filter((item) => item.date === day).length;
+                    return (
+                      <Link
+                        key={day}
+                        to={`${schedulePath}&date=${day}`}
+                        aria-label={`${calendarDateLabel(day)}, ${count} classes`}
+                        aria-current={day === w.date ? 'date' : undefined}
+                        className={count ? '' : 'student-empty-day'}
+                      >
+                        <span>
+                          {new Date(day + 'T00:00:00Z').toLocaleDateString('en', {
+                            weekday: 'short',
+                            timeZone: 'UTC',
+                          })}
                         </span>
-                      </small>
-                    </Link>
-                  );
+                        <strong>{Number(day.slice(-2))}</strong>
+                        <small>
+                          {count}
+                          <span className="student-class-word">
+                            {' '}
+                            {count === 1 ? 'class' : 'classes'}
+                          </span>
+                        </small>
+                      </Link>
+                    );
+                  })}
+                </nav>
+                {days.map((day) => {
+                  const classes = records.filter((item) => item.date === day);
+                  return classes.length ? (
+                    <div className="student-week-day" key={day}>
+                      <h3>{calendarDateLabel(day)}</h3>
+                      {classes.map(session)}
+                    </div>
+                  ) : null;
                 })}
-              </nav>
-            </section>
+              </section>
+            )}
           </div>
           <aside className="student-home-secondary">
             <section className="student-panel">

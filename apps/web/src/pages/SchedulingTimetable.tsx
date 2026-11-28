@@ -1,20 +1,25 @@
 import { useState } from 'react';
-import { sectionLabel } from '../lib/scheduling-labels';
+import {
+  assignmentLabel,
+  clockLabel as time,
+  DAY_NAMES as days,
+  sectionLabel,
+  sessionType,
+} from '../lib/scheduling-labels';
 import type {
   Assignment,
   GenerationInput,
   GenerationResult,
 } from '../../../../packages/shared-types/src/scheduling';
 import { INSTITUTES, instituteCode } from '../lib/program-scope';
-const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const time = (minutes: number) =>
-  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 export function SchedulingTimetable({
   input,
   result,
+  onEdit,
 }: {
   input: GenerationInput;
   result: GenerationResult;
+  onEdit?: (assignmentId: string) => void;
 }) {
   const [grouping, setGrouping] = useState('day');
   const [filters, setFilters] = useState({
@@ -41,12 +46,24 @@ export function SchedulingTimetable({
   });
   return (
     <>
+      <div className="institute-chips" role="group" aria-label="Institute">
+        {['', ...INSTITUTES].map((code) => (
+          <button
+            key={code || 'all'}
+            type="button"
+            aria-pressed={filters.institute === code}
+            // A program or section from another institute would silently empty the grid.
+            onClick={() => setFilters({ ...filters, institute: code, program: '', section: '' })}
+          >
+            {code || 'All'}
+          </button>
+        ))}
+      </div>
       <details className="ux-timetable-filters">
-        <summary>Filter timetable · Institute, program, section, teacher, room and day</summary>
+        <summary>Filter timetable · Program, section, teacher, room and day</summary>
         <div className="scheduler-filters" aria-label="Timetable filters">
           {(
             [
-              ['institute', 'Institute', INSTITUTES.map((code) => [code, code])],
               ['program', 'Program', (input.programs ?? [])
                 .filter((p) => !filters.institute || programInstitute.get(p.id) === filters.institute)
                 .map((p) => [p.id, p.acronym])],
@@ -107,6 +124,7 @@ export function SchedulingTimetable({
                     assignment={a}
                     input={input}
                     showDay={grouping === 'section'}
+                    onEdit={onEdit}
                   />
                 ))}
               </section>
@@ -123,7 +141,7 @@ export function SchedulingTimetable({
           {result.coverage.map((c) => (
             <li key={c.offering_id}>
               <strong>
-                {offerings.find((o) => o.id === c.offering_id)?.subject_name ?? c.offering_id}
+                {offerings.find((o) => o.id === c.offering_id)?.subject_name ?? 'Unknown subject'}
               </strong>
               <span>
                 {sectionLabel(
@@ -148,20 +166,25 @@ function AssignmentCard({
   assignment: a,
   input,
   showDay = false,
+  onEdit,
 }: {
   assignment: Assignment;
   input: GenerationInput;
   showDay?: boolean;
+  onEdit?: (assignmentId: string) => void;
 }) {
   const offering = input.offerings?.find((o) => o.id === a.offering_id);
   const room = input.rooms?.find((r) => r.id === a.room_id);
+  const kind = sessionType(offering);
   return (
     <article
       id={'assignment-' + a.id}
       tabIndex={-1}
       className="generated-session"
       data-assignment-id={a.id}
+      data-session-type={kind.type}
     >
+      <span className="session-type">{kind.label}</span>
       <time>
         {showDay && `${days[a.day]} · `}
         {time(a.start)}–{time(a.end)}
@@ -178,6 +201,16 @@ function AssignmentCard({
         {room?.name} · {room?.building}
       </p>
       <small>{a.end - a.start} instructional minutes</small>
+      {onEdit && (
+        <button
+          type="button"
+          className="button button--secondary generated-session__edit"
+          aria-label={`Edit ${assignmentLabel(a, input)}`}
+          onClick={() => onEdit(a.id)}
+        >
+          Edit
+        </button>
+      )}
     </article>
   );
 }

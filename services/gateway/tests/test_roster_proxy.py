@@ -44,6 +44,15 @@ def test_administrator_roster_operations_are_forwarded(
     ]
 
 
+def test_roster_status_filter_is_forwarded_with_the_other_filters(identity_adapters, forwarded):
+    identity_adapters(main, "administrator")
+    path = f"/api/v1/academic/periods/{uuid4()}/roster"
+    query = {"status": "unverified", "year_level": "3", "search": "24-"}
+    response = TestClient(main.app).get(path, params=query, headers=HEADERS)
+    assert response.status_code == 200
+    assert forwarded == [("academic", "GET", path, query)]
+
+
 @pytest.mark.parametrize("role", ["teacher", "student"])
 def test_non_administrators_never_reach_the_roster(identity_adapters, forwarded, role):
     identity_adapters(main, role)

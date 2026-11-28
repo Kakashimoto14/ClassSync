@@ -366,9 +366,22 @@ class PostgresAcademicRepository(RosterOperations):
             return self.snapshot_in(db, period_id)
 
     def roster_page(
-        self, period_id, *, limit=20, offset=0, search="", year_level=None, section_id=None
+        self,
+        period_id,
+        *,
+        limit=20,
+        offset=0,
+        search="",
+        year_level=None,
+        section_id=None,
+        status=None,
     ):
-        if not 1 <= limit <= 25 or not 0 <= offset <= 100000 or len(search) > 100:
+        if (
+            not 1 <= limit <= 25
+            or not 0 <= offset <= 100000
+            or len(search) > 100
+            or status not in (None, "active", "inactive", "unverified")
+        ):
             raise AcademicError(422, "invalid_roster_page", "Roster page filters are invalid.")
         with self.session() as db:
             period = self.period_in(db, period_id)
@@ -418,6 +431,8 @@ class PostgresAcademicRepository(RosterOperations):
                       AND (CAST(:year AS integer) IS NULL
                            OR year_level=CAST(:year AS integer))
                       AND (CAST(:section AS text) IS NULL OR section_id=CAST(:section AS text))
+                      AND (CAST(:status AS text) IS NULL
+                           OR enrollment_status::text=CAST(:status AS text))
                     ORDER BY year_level,section_label,student_id
                     LIMIT :limit OFFSET :offset
                 """),
@@ -427,6 +442,7 @@ class PostgresAcademicRepository(RosterOperations):
                         "query": f"%{search.strip()}%" if search.strip() else "",
                         "year": year_level,
                         "section": section_id,
+                        "status": status,
                         "limit": limit,
                         "offset": offset,
                     },

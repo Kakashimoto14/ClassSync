@@ -13,7 +13,7 @@ import {
   manilaToday,
   type CalendarOccurrence,
 } from '../lib/calendar-model';
-import { sessionRoomPath } from '../lib/session-room';
+import { sessionRoomPath, teacherClassPath } from '../lib/session-room';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import {
   facultyDisplayName,
@@ -403,7 +403,24 @@ export function RoleScheduleWorkspace({
           </p>
           {next.changed && <span className="ux-update">Schedule changed</span>}
           <div className="draft-actions">
-            <Link className="button" to={base + '/schedule'}>
+            {role === 'teacher' && !isSample && context.mode === 'published' && context.period && (
+              <>
+                <Link className="button" to={teacherClassPath('room-change', context.period, next)}>
+                  Request room change
+                </Link>
+                <Link
+                  className="button button--secondary"
+                  to={teacherClassPath('issue', context.period, next)}
+                >
+                  Report room issue
+                </Link>
+              </>
+            )}
+            <Link
+              // The room-change action is the primary one when it is offered.
+              className={`button ${role === 'teacher' && !isSample && context.mode === 'published' && context.period ? 'button--secondary' : ''}`.trim()}
+              to={base + '/schedule'}
+            >
               Open Schedule
             </Link>
             {sessionRoomPath(role, next.room.id) && (

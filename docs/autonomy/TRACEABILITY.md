@@ -1,5 +1,22 @@
 # Requirements -> implementation -> evidence
 
+### 28 November 2026 — Phase D / Slice D2
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Session type shown by colour and text; institute toggle chips | `SchedulingTimetable.tsx`, `weekly-scheduling.css`; `PhaseD2.test.tsx` | VERIFIED by Vitest and harness render |
+| No raw identifiers in draft dropdowns and lists; Edit preselects | `scheduling-labels.ts`, `SchedulingDraftPages.tsx`; same test | VERIFIED by Vitest |
+| Advisor before/after pill | `SchedulingDraftPages.tsx`; same test | VERIFIED by Vitest with mocked advice; no live Gemini |
+| Publish step, active step, polish totals, Open saved draft | `AcademicGenerationPage.tsx`, `PolishSummary.tsx` | Steps IMPLEMENTED-UNVERIFIED by automated test; checked in harness |
+| `No conflicts` only after a clear server check | `ClassroomRequestsPage.tsx`; `PhaseD2.test.tsx` | VERIFIED by Vitest |
+| Failed reads say what failed and offer Retry | Admin and Teacher pages; `NoDeadEnds.test.tsx` | VERIFIED by Vitest for ten routes; publication panel and issue restrictions IMPLEMENTED-UNVERIFIED |
+| Server-side roster status filter, combined with other filters | `academic/app/main.py`, `postgres_repository.py`; `test_roster_postgres_runtime.py`, `test_roster_crud.py`, `test_roster_proxy.py`, roster page test | VERIFIED on disposable PostgreSQL (483 passed, no skips); hosted not verified |
+| Teacher shortcuts and `?occurrence=` prefill | `RoleScheduleWorkspace.tsx`, `ClassSessionDetails.tsx`, `TeacherIssueReportPage.tsx`; `PhaseD2.test.tsx` | VERIFIED by Vitest (card and prefill) |
+| Student Find room, Today/Week, `.ics` export | `StudentHome.tsx`; `PhaseD2.test.tsx` | VERIFIED by Vitest with mocked exporter; download not verified |
+| Urgent changes distinct from announcements; no 360px overflow | `AlertsFeed.tsx`, `alerts-feed.css`; same test | VERIFIED by Vitest and harness render |
+| Main entry at most 101,376 bytes | budget script | VERIFIED: 87,719 bytes |
+| `npm run test:web` completes | `scripts/test-web.cjs` limit raised from 300 to 600 s | VERIFIED: 1064 passed in 357 s; the run before had 2 timing failures |
+
 ### 28 November 2026 — Phase D / Slice D1
 
 | Requirement | Implementation / evidence | Current status |

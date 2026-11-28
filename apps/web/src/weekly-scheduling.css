@@ -210,3 +210,49 @@
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   }
 }
+
+/* Phase D2: session types, institute chips, move summaries and polish metrics. */
+.generated-session[data-session-type] { border-left-width: 4px; }
+.generated-session[data-session-type='lecture'] { border-left-color: var(--primary); }
+.generated-session[data-session-type='computer_lab'] { border-left-color: var(--info); }
+.generated-session[data-session-type='science_lab'] { border-left-color: var(--success); }
+.generated-session[data-session-type='athletic'] { border-left-color: var(--warning); }
+.session-type { color: var(--ink-soft); font-size: 0.75rem; font-weight: 700; }
+.generated-session__edit { justify-self: start; }
+.draft-editor { scroll-margin-top: 96px; }
+.institute-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.institute-chips button {
+  min-height: 40px;
+  min-width: 64px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.institute-chips button[aria-pressed='true'] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--text-on-action);
+}
+.move-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
+.move-pill {
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.polish-metrics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.polish-metrics li { padding: 6px 12px; border: 1px solid var(--line); border-radius: var(--radius); }
+.polish-table { min-width: 0; overflow-x: auto; }
+.weekly-scheduler :is(th, td) { white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }
+.polish-table tbody th { white-space: normal; text-align: left; }
+.polish-table :is(th, td) { padding: 6px 8px; }
+.polish-table table { width: 100%; min-width: 0; }
+.ux-steps li[aria-current='step'] { color: var(--primary); font-weight: 700; }

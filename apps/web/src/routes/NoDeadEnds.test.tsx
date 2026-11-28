@@ -13,9 +13,31 @@ vi.mock('../config/runtime-config', async () => {
   return { appMode: 'institutional', capabilities: capabilitiesFor('institutional') };
 });
 // Every service read stays pending: only which screen a route renders matters here.
-const pending = vi.hoisted(() => () => new Promise<never>(() => {}));
+// The recovery cases below switch the same reads to fail.
+const reads = vi.hoisted(() => ({ fail: false }));
+const pending = vi.hoisted(() => () =>
+  reads.fail
+    ? Promise.reject(new Error('Owned service failure'))
+    : new Promise<never>(() => {}),
+);
 vi.mock('../lib/institutional-api', () => ({ institutionalRequest: pending }));
 vi.mock('../lib/student-timetable-api', () => ({ studentTimetableRequest: pending }));
+vi.mock('../lib/academic-api', async (original) => ({
+  ...(await original<typeof import('../lib/academic-api')>()),
+  listAcademicPeriods: pending,
+}));
+vi.mock('../lib/admin-operations-api', async (original) => ({
+  ...(await original<typeof import('../lib/admin-operations-api')>()),
+  listRestrictions: pending,
+}));
+vi.mock('../lib/scheduling-api', async (original) => ({
+  ...(await original<typeof import('../lib/scheduling-api')>()),
+  listSchedulingDrafts: pending,
+}));
+vi.mock('../lib/publication-api', async (original) => ({
+  ...(await original<typeof import('../lib/publication-api')>()),
+  timetableRequest: pending,
+}));
 vi.mock('../components/layout/AppShell', () => ({
   AppShell: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
 }));
@@ -108,4 +130,29 @@ it('redirects the retired academic detail page to Sections', async () => {
   view(definition, definition.path);
   expect(await screen.findByText('Redirect target')).toBeInTheDocument();
   expect(screen.getByTestId('location')).toHaveTextContent('/admin/sections');
+});
+
+describe('failed reads offer recovery', () => {
+  it.each([
+    '/admin/reports',
+    '/admin/buildings',
+    '/admin/requests',
+    '/admin/audit-logs',
+    '/admin/schedule-manager/drafts',
+    '/admin/conflicts',
+    '/admin/ai-scheduling',
+    '/admin/institutional-rules',
+    '/teacher/change-requests',
+    '/teacher/report-issue',
+  ])('%s says what could not load and offers Retry', async (path) => {
+    reads.fail = true;
+    const definition = routeDefinitions.find((item) => item.path === path)!;
+    expect(definition, path).toBeDefined();
+    view(definition, path);
+    expect(
+      (await screen.findAllByText(/^Couldn't load /, undefined, { timeout: 15000 })).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Retry/ }).length).toBeGreaterThan(0);
+    reads.fail = false;
+  }, 20000);
 });

@@ -12,6 +12,8 @@
 .admin-ops table { width: 100%; border-collapse: collapse; }
 .admin-ops th, .admin-ops td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
 .admin-ops__scroll { max-height: 420px; overflow: auto; }
+/* Wide tables scroll inside their region instead of splitting words. */
+.admin-ops :is(th, td) { white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }
 .admin-ops__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
 .admin-ops__form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; align-items: end; }
 .admin-ops__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

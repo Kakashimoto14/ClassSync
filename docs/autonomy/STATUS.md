@@ -1,5 +1,56 @@
 # ClassSync — autonomy status ledger
 
+## 28 November 2026 — Phase D / Slice D2: timetables, requests, recovery, Teacher and Student
+
+Branch `main`, base/current HEAD `76f2825`, uncommitted (no commit, push or deploy). Approval:
+`APPROVALS.md` Phase D entry and the owner's D2 instruction for this session. No Neon, Firebase,
+Render, Resend or Gemini contact; no `--apply`; no migration.
+
+**Delivered.** Session-type colour plus text label; `All/ICS/IBE/ITE` toggle chips; readable
+`Subject · Section · Day time · Room` labels in the draft editor, advisor, exceptions and
+validation; `Edit` on timetable cards; before/after pill on advisor moves; five generation steps
+with `aria-current`, polish totals and Save placed above the timetable; approval summary pill;
+shared status badges; `Couldn't load …` with Retry on requests, issues, reports, buildings, audit,
+drafts, conflicts, generation, rules and publication; server-side roster `status` filter; Teacher
+`Request room change` and `Report room issue` with `?occurrence=` prefill; Student `Find room`,
+Today/Week and `.ics` export; urgent class changes distinct from announcements.
+
+**Choices and limits (please confirm).**
+- The approval pill reads `No conflicts` only after a `clear` server check. A completed check that
+  failed reads `Conflict found` or `Request out of date`, not `Not yet validated`.
+- The Gateway already forwarded roster query parameters, so only a test was added there.
+- Session type comes from the activity type and required room type. ROTC counts as athletic;
+  assemblies and special bookings use the lecture colour with their own label.
+- Draft and run references remain only inside collapsed provenance. Audit rows still show the
+  Administrator account id.
+- Teacher shortcuts appear only on published university timetables, not samples.
+
+**Evidence (Windows).** `npm run lint`, `npm run typecheck`, `npm run build`: passed.
+`npm run test:web` first stopped twice at the runner's 300-second limit (`ETIMEDOUT`); a direct
+Vitest run passed 1064 / 86 files in 305 s. With the owner's approval the limit in
+`scripts/test-web.cjs` is now 600 seconds. First run after that: 1062 passed, 2 failed in 422 s
+(`AdminSchedulingHome` readiness link, `PresentationRoutes` Student calendar). Both files were
+unchanged, passed alone (19/19), and the next full run passed 1064 / 86 files in 357 s. Likely the
+default 1-second `findBy` wait under load; not diagnosed further. Main entry 87,719 bytes of 101,376 (D1: 87,595). `ruff check scripts services
+packages` and contract `--check`: passed. Pytest `services/academic services/gateway` with
+repo-local `TEMP`/`--basetemp` on disposable PostgreSQL: 483 passed, no skips; `.pytest_tmp` removed.
+`git diff --check`: passed with line-ending notices.
+
+**Test expectations changed by intent.** Approval label text; `Retry` button name on draft load;
+Teacher issue page test now has a router; Student week strip is behind `Week`; the roster
+page-only filter test now expects a server result.
+
+**Rendered check.** Temporary Vite harness with synthetic data and a fake session (removed
+afterwards, with its `.claude/launch.json`): 13 Admin, Teacher and Student screens showed no page
+overflow at 1440, 1280 and 360px; keyboard focus checked on the draft editor and institute chips.
+It found and led to fixes for a duplicate React key in the draft page, a polish table that hid its
+numbers at 360px, and two primary buttons on the Teacher card.
+
+**Open.** No signed-in institutional run, screen-reader or 200% zoom check, real `.ics` import, or
+Linux CI. Full pytest outside Academic and Gateway not rerun. Self-review only.
+
+**Rollback.** Revert the uncommitted files. No data or schema change.
+
 ## 28 November 2026 — Phase D / Slice D1: shell, states, Admin setup and student roster
 
 Branch `main`, base/current HEAD `7a50716`, uncommitted (no commit, push or deploy). Approval:

@@ -3,6 +3,7 @@ import { listAcademicPeriods, type AcademicPeriod } from '../lib/academic-api';
 import { loadSchedulingReport, type SchedulingReport } from '../lib/admin-operations-api';
 import { downloadCsv, toCsv, type CsvValue } from '../lib/csv';
 import { Button } from '../components/ui/Button';
+import { InlineError } from '../components/ui/InlineError';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import './admin-operations.css';
 
@@ -130,7 +131,16 @@ export function ReportsPage({ utilization = false }: { utilization?: boolean }) 
           </Button>
         </div>
         {loading && <ClassSyncSkeleton label="Loading report" />}
-        {error && <p role="alert" className="scheduler-error">{error}</p>}
+        {error && (
+          <InlineError
+            title={periodId ? "Couldn't load the report" : "Couldn't load academic periods"}
+            message={error}
+            onRetry={() => {
+              setError('');
+              setAttempt((value) => value + 1);
+            }}
+          />
+        )}
         {report && (
           <>
             <p role="status">
