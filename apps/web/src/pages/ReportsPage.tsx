@@ -5,6 +5,12 @@ import { downloadCsv, toCsv, type CsvValue } from '../lib/csv';
 import { Button } from '../components/ui/Button';
 import { InlineError } from '../components/ui/InlineError';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { DataTable, type Column } from '../components/ui/DataTable';
+import { Meter } from '../components/ui/Meter';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
+import { KpiStrip } from '../components/layout/KpiStrip';
+import { MetaDetails } from '../components/layout/MetaDetails';
 import './admin-operations.css';
 
 const hours = (minutes: number) => Math.round((minutes / 60) * 10) / 10;
@@ -23,9 +29,27 @@ function ReportTable({
   rows: CsvValue[][];
   empty: string;
 }) {
+  const meterColumn = (name: string) => name === 'Utilization' || name === 'Load';
+  const columns: Column<CsvValue[]>[] = header.map((name, column) => ({
+    header: name,
+    numeric: !meterColumn(name) && rows.some((row) => typeof row[column] === 'number'),
+    cell: (row) => {
+      const value = row[column];
+      if (!meterColumn(name)) return <span>{value ?? '—'}</span>;
+      // Faculty load is over the limit above 100%; rooms are crowded above 90%.
+      return (
+        <Meter
+          label={`${row[0]} ${name.toLowerCase()}`}
+          value={typeof value === 'string' && value.endsWith('%') ? parseFloat(value) : null}
+          high={name === 'Load' ? 85 : 70}
+          over={name === 'Load' ? 100 : 90}
+        />
+      );
+    },
+  }));
   return (
-    <section className="workspace-card" aria-label={title}>
-      <div className="admin-ops__bar">
+    <section aria-label={title}>
+      <div className="section-bar">
         <h2>{title}</h2>
         {rows.length > 0 && (
           <Button
@@ -38,18 +62,13 @@ function ReportTable({
         )}
       </div>
       {rows.length ? (
-        <div className="table-wrap admin-ops__scroll" tabIndex={0} role="region" aria-label={`${title} table`}>
-          <table>
-            <thead>
-              <tr>{header.map((name) => <th key={name} scope="col">{name}</th>)}</tr>
-            </thead>
-            <tbody>
-              {rows.map((row, index) => (
-                <tr key={index}>{row.map((cell, column) => <td key={column}>{cell ?? '—'}</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          label={title}
+          columns={columns}
+          rows={rows}
+          rowKey={(_, index) => String(index)}
+          scroll
+        />
       ) : (
         <p className="muted">{empty}</p>
       )}
@@ -57,7 +76,13 @@ function ReportTable({
   );
 }
 
-export function ReportsPage({ utilization = false }: { utilization?: boolean }) {
+export function ReportsPage({
+  utilization = false,
+  title = utilization ? 'Utilization' : 'Reports',
+}: {
+  utilization?: boolean;
+  title?: string;
+}) {
   const [periods, setPeriods] = useState<AcademicPeriod[]>([]);
   const [periodId, setPeriodId] = useState('');
   const [report, setReport] = useState<SchedulingReport | null>(null);
@@ -113,63 +138,74 @@ export function ReportsPage({ utilization = false }: { utilization?: boolean }) 
 
   return (
     <div className="admin-ops">
-      <section className="workspace-card">
-        <div className="admin-ops__bar">
-          <label>
-            Academic period
-            <select value={periodId} onChange={(event) => setPeriodId(event.target.value)}>
-              {!periods.length && <option value="">No periods saved</option>}
-              {periods.map((period) => (
-                <option key={period.id} value={period.id}>
-                  {period.title}{period.archived_at ? ' (Archived)' : ''}
-                </option>
-              ))}
-            </select>
-          </label>
+      <PageHeader
+        title={title}
+        meta={
+          report && (
+            <span role="status">
+              {report.published
+                ? `Published revision ${report.published.revision} of this period.`
+                : 'This period has no published timetable, so its faculty loads and class counts are empty.'}
+            </span>
+          )
+        }
+      />
+      <CommandBar label="Report period">
+        <CommandField label="Academic period" wide>
+          <select value={periodId} onChange={(event) => setPeriodId(event.target.value)}>
+            {!periods.length && <option value="">No periods saved</option>}
+            {periods.map((period) => (
+              <option key={period.id} value={period.id}>
+                {period.title}{period.archived_at ? ' (Archived)' : ''}
+              </option>
+            ))}
+          </select>
+        </CommandField>
+        <div className="command-bar__end">
           <Button variant="secondary" disabled={loading} onClick={() => setAttempt((value) => value + 1)}>
             Refresh report
           </Button>
         </div>
-        {loading && <ClassSyncSkeleton label="Loading report" />}
-        {error && (
-          <InlineError
-            title={periodId ? "Couldn't load the report" : "Couldn't load academic periods"}
-            message={error}
-            onRetry={() => {
-              setError('');
-              setAttempt((value) => value + 1);
-            }}
+      </CommandBar>
+      {loading && <ClassSyncSkeleton label="Loading report" />}
+      {error && (
+        <InlineError
+          title={periodId ? "Couldn't load the report" : "Couldn't load academic periods"}
+          message={error}
+          onRetry={() => {
+            setError('');
+            setAttempt((value) => value + 1);
+          }}
+        />
+      )}
+      {report && (
+        <>
+          <KpiStrip
+            label="Report summary"
+            items={[
+              { label: 'Schedulable rooms', value: report.rooms.length },
+              {
+                label: 'Overall room utilization',
+                value: share(available ? Math.round((booked * 1000) / available) / 10 : null),
+              },
+              { label: 'Instructors', value: report.faculty.length },
+              { label: 'Scheduled sections', value: report.sections.length },
+            ]}
           />
-        )}
-        {report && (
-          <>
-            <p role="status">
-              {report.published
-                ? `Published revision ${report.published.revision} of this period.`
-                : 'This period has no published timetable, so its faculty loads and class counts are empty.'}
-            </p>
+          <MetaDetails summary="How utilization is calculated">
             {report.basis ? (
-              <p className="muted">
+              <p>
                 Utilization covers {report.basis.instructional_dates} instructional dates,{' '}
                 {report.basis.effective_start} to {report.basis.effective_end}: published class time
                 divided by operating hours less active room restrictions. Rooms are shared, so every
                 published timetable dated in this range counts.
               </p>
             ) : (
-              <p className="muted">Save a period calendar to calculate room utilization.</p>
+              <p>Save a period calendar to calculate room utilization.</p>
             )}
-            <dl className="admin-ops__facts">
-              <div><dt>Schedulable rooms</dt><dd>{report.rooms.length}</dd></div>
-              <div>
-                <dt>Overall room utilization</dt>
-                <dd>{share(available ? Math.round((booked * 1000) / available) / 10 : null)}</dd>
-              </div>
-              <div><dt>Instructors</dt><dd>{report.faculty.length}</dd></div>
-              <div><dt>Scheduled sections</dt><dd>{report.sections.length}</dd></div>
-            </dl>
-          </>
-        )}
-      </section>
+          </MetaDetails>
+        </>
+      )}
       {report && (
         <>
           <ReportTable

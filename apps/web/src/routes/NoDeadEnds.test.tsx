@@ -125,6 +125,32 @@ describe.each(['administrator', 'teacher', 'student'] as const)('%s routes', (ro
   );
 });
 
+describe('redesigned Administrator pages', () => {
+  it.each([
+    ['/admin/dashboard', 'Academic setup'],
+    ['/admin/programs', 'Programs'],
+    ['/admin/teachers', 'Faculty'],
+    ['/admin/students', 'Student roster'],
+    ['/admin/ai-scheduling', 'Generate a weekly timetable'],
+    ['/admin/schedule-manager/drafts', 'Saved drafts'],
+    ['/admin/calendar', 'Published timetable'],
+    ['/admin/conflicts', 'Conflict center'],
+    ['/admin/reports', 'Reports'],
+    ['/admin/buildings', 'Buildings'],
+    ['/admin/requests', 'Requests and issue reports'],
+    ['/admin/announcements', 'Announcements'],
+    ['/admin/audit-logs', 'Administrator activity'],
+    ['/admin/institutional-rules', 'Institutional Scheduling Rules'],
+  ])('%s has exactly one page heading while loading', async (path, name) => {
+    const definition = routeDefinitions.find((item) => item.path === path)!;
+    view(definition, path);
+    expect(
+      await screen.findByRole('heading', { level: 1, name }, { timeout: 15000 }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  }, 20000);
+});
+
 it('redirects the retired academic detail page to Sections', async () => {
   const definition = routeDefinitions.find((item) => item.path === '/admin/academic/details')!;
   view(definition, definition.path);

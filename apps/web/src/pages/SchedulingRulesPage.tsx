@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { InlineError } from '../components/ui/InlineError';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
 import {
   listAcademicPeriods,
   loadAcademicPeriod,
@@ -59,16 +61,13 @@ export function SchedulingRulesPage() {
   }, [period, reload]);
 
   return (
-    <div>
-      <div className="page-heading">
-        <div>
-          <h1>Institutional Scheduling Rules</h1>
-          <p>Commuter-friendly day shape and 180-minute subject patterns, per academic period.</p>
-        </div>
-      </div>
-      <section className="workspace-card">
-        <label>
-          Academic period
+    <div className="page-view">
+      <PageHeader
+        title="Institutional Scheduling Rules"
+        meta={<span>Commuter-friendly day shape and 180-minute subject patterns, per academic period.</span>}
+      />
+      <CommandBar label="Rules period">
+        <CommandField label="Academic period" wide>
           <select
             value={period}
             onChange={(e) => setParams(e.target.value ? { period: e.target.value } : {})}
@@ -80,14 +79,14 @@ export function SchedulingRulesPage() {
               </option>
             ))}
           </select>
-        </label>
-        {!periods && !error && <ClassSyncSkeleton layout="kpis" label="Loading academic periods" />}
-        {periods?.length === 0 && (
-          <p>
-            <Link to="/admin/academic">Create an academic period</Link> before setting its rules.
-          </p>
-        )}
-      </section>
+        </CommandField>
+      </CommandBar>
+      {!periods && !error && <ClassSyncSkeleton layout="kpis" label="Loading academic periods" />}
+      {periods?.length === 0 && (
+        <p>
+          <Link to="/admin/academic">Create an academic period</Link> before setting its rules.
+        </p>
+      )}
       {error && (
         <InlineError
           title="Couldn't load scheduling rules"

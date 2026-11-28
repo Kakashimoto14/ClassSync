@@ -1,21 +1,147 @@
-/* Administrator operations pages; loaded only with their lazy chunks. */
-.admin-ops { display: grid; gap: 16px; min-width: 0; }
-.admin-ops h2, .admin-ops h3, .admin-ops p { margin: 0; }
-.admin-ops .workspace-card { display: grid; gap: 12px; min-width: 0; }
-.admin-ops__bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
-.admin-ops label { display: grid; gap: 6px; min-width: 0; font-weight: 600; }
-.admin-ops input, .admin-ops select { min-width: 0; min-height: 40px; max-width: 100%; }
-.admin-ops__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
-.admin-ops__facts div { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
-.admin-ops__facts dt { color: var(--ink-soft); font-size: .8125rem; }
-.admin-ops__facts dd { margin: 4px 0 0; font-size: 1.375rem; font-weight: 700; }
-.admin-ops table { width: 100%; border-collapse: collapse; }
-.admin-ops th, .admin-ops td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
-.admin-ops__scroll { max-height: 420px; overflow: auto; }
-/* Wide tables scroll inside their region instead of splitting words. */
-.admin-ops :is(th, td) { white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }
-.admin-ops__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
-.admin-ops__form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; align-items: end; }
-.admin-ops__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.admin-ops__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.admin-ops__list li { display: grid; gap: 6px; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+/* Administrator operations pages (reports, buildings, audit, import); lazy with those chunks. */
+.admin-ops {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+.admin-ops :is(h2, h3, p) {
+  margin: 0;
+}
+.admin-ops > section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+}
+.admin-ops__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-ops label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+}
+.admin-ops :is(input, select) {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-ops .command-bar label {
+  margin: 0;
+}
+
+/* Import preview table (dialog). Wide tables scroll inside their region. */
+.admin-ops table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-ops :is(th, td) {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.admin-ops__scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+.admin-ops__scroll:not(.data-table) :is(th, td) {
+  white-space: nowrap;
+}
+
+.admin-ops__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.admin-ops__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.admin-ops > form {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+/* Active restrictions read as a timeline. */
+.restriction-timeline {
+  display: grid;
+  margin: 0;
+  padding: 4px 0 0 6px;
+  list-style: none;
+}
+.restriction-timeline > li {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-width: 0;
+  padding: 0 0 16px 20px;
+  border-left: 2px solid var(--border-strong);
+}
+.restriction-timeline > li:last-child {
+  border-left-color: transparent;
+}
+.restriction-timeline > li::before {
+  position: absolute;
+  top: 4px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--status-warning-ink);
+  border-radius: 50%;
+  background: var(--status-warning-ink);
+  content: '';
+}
+.restriction-timeline > li[data-status='cancelled']::before {
+  background: var(--surface-primary);
+  border-color: var(--border-control);
+}
+.restriction-timeline__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.restriction-timeline__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.restriction-timeline time {
+  font-size: 0.8125rem;
+}
+
+.space-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.space-chips li {
+  padding: 4px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  font-size: 0.8125rem;
+}
+
+.history-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}

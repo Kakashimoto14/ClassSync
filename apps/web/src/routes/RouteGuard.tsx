@@ -206,21 +206,7 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
             <ConflictCenterPage />
           ) : definition.role === 'administrator' &&
             ['calendar', 'schedule'].includes(definition.kind) ? (
-            <>
-              <nav aria-label="Schedule management" className="draft-actions">
-                <Link className="button" to="/admin/schedule-manager/create">
-                  Generate timetable
-                </Link>
-                <Link
-                  className="button button--secondary"
-                  to="/admin/schedule-manager/drafts?source=academic"
-                >
-                  Review drafts
-                </Link>
-                <Link to="/admin/academic">Manage academic inputs</Link>
-              </nav>
-              <StructuredCalendarPage role="administrator" />
-            </>
+            <StructuredCalendarPage role="administrator" />
           ) : (
             <section className="workspace-card">
               <h1>This service is not connected</h1>

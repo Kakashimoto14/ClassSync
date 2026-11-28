@@ -3,6 +3,8 @@ import { institutionalRequest } from '../lib/institutional-api';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import type { UserRole } from '../types/ui';
+import { PageHeader } from '../components/layout/PageHeader';
+import './triage.css';
 
 interface Announcement {
   id: string;
@@ -96,17 +98,64 @@ export function AnnouncementsPage({ role }: { role: UserRole }) {
       setBusy(false);
     }
   }
+  const campus = role === 'administrator';
+  const refreshButton = (
+    <Button variant="secondary" disabled={busy} onClick={() => reload((value) => value + 1)}>
+      Refresh announcements
+    </Button>
+  );
+  const articles = rows?.map((row) => (
+    <article className={campus ? undefined : 'workspace-card'} key={row.id}>
+      <h2 style={{ overflowWrap: 'anywhere' }}>{row.title}</h2>
+      <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{row.body}</p>
+      <small>
+        Updated{' '}
+        {new Intl.DateTimeFormat('en-PH', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+          timeZone: 'Asia/Manila',
+        }).format(new Date(row.updated_at))}
+      </small>
+      {campus && (
+        <div className="draft-actions">
+          <Button
+            disabled={busy}
+            variant="secondary"
+            onClick={() => {
+              edit(row);
+              setTitle(row.title);
+              setBody(row.body);
+              setAudience(row.audience);
+            }}
+          >
+            Edit {row.title}
+          </Button>
+          <Button disabled={busy} variant="ghost" onClick={() => void archive(row)}>
+            Archive {row.title}
+          </Button>
+        </div>
+      )}
+    </article>
+  ));
   return (
-    <section className="workspace-card" aria-busy={busy}>
-      <h1>Announcements</h1>
-      <p>Current notices from your university.</p>
+    <section className={campus ? 'triage' : 'workspace-card'} aria-busy={busy}>
+      {campus ? (
+        <PageHeader
+          title="Announcements"
+          meta={<span>Current notices from your university.</span>}
+          actions={refreshButton}
+        />
+      ) : (
+        <>
+          <h1>Announcements</h1>
+          <p>Current notices from your university.</p>
+        </>
+      )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      <Button variant="secondary" disabled={busy} onClick={() => reload((value) => value + 1)}>
-        Refresh announcements
-      </Button>
-      {role === 'administrator' && (
-        <details open={!!editing}>
+      {!campus && refreshButton}
+      {campus && (
+        <details className="notice-composer" open={!!editing}>
           <summary>{editing ? 'Edit announcement' : 'Create announcement'}</summary>
           <form onSubmit={save} className="academic-create-period">
             <label htmlFor="announcement-title">Title</label>
@@ -164,39 +213,7 @@ export function AnnouncementsPage({ role }: { role: UserRole }) {
       )}
       {!rows && !error && <ClassSyncSkeleton layout="table" label="Loading announcements" />}
       {rows?.length === 0 && <p>No announcements yet.</p>}
-      {rows?.map((row) => (
-        <article className="workspace-card" key={row.id}>
-          <h2 style={{ overflowWrap: 'anywhere' }}>{row.title}</h2>
-          <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{row.body}</p>
-          <small>
-            Updated{' '}
-            {new Intl.DateTimeFormat('en-PH', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-              timeZone: 'Asia/Manila',
-            }).format(new Date(row.updated_at))}
-          </small>
-          {role === 'administrator' && (
-            <div className="draft-actions">
-              <Button
-                disabled={busy}
-                variant="secondary"
-                onClick={() => {
-                  edit(row);
-                  setTitle(row.title);
-                  setBody(row.body);
-                  setAudience(row.audience);
-                }}
-              >
-                Edit {row.title}
-              </Button>
-              <Button disabled={busy} variant="secondary" onClick={() => void archive(row)}>
-                Archive {row.title}
-              </Button>
-            </div>
-          )}
-        </article>
-      ))}
+      {campus && rows?.length ? <div className="notice-list">{articles}</div> : articles}
     </section>
   );
 }

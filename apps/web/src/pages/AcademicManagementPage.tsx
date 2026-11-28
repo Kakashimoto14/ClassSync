@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { StatusBadge } from '../components/ui/StatusBadge';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
+import { MetaDetails } from '../components/layout/MetaDetails';
+import { AcademicRecordTable } from './AcademicRecordTable';
+import './academic-setup.css';
 import {
   checkAcademicReadiness,
   createAcademicPeriod,
@@ -239,9 +243,8 @@ function ManagementContent({
       ? 'Connected academic records · source and revision are shown for each period'
       : 'Server-saved workspace · not verified institutional records';
   const periodControls = (
-    <div className="academic-period-controls">
-      <label>
-        Academic period
+    <>
+      <CommandField label="Academic period" wide>
         <select value={periodId} disabled={busy} onChange={(e) => onPeriod(e.target.value)}>
           <option value="">Choose a period</option>
           {periods.map((p) => (
@@ -250,18 +253,23 @@ function ManagementContent({
             </option>
           ))}
         </select>
-      </label>
-      <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
-        New academic period
-      </Button>
-    </div>
+      </CommandField>
+      {setupLanding && (
+        <div className="command-bar__end">
+          <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
+            New academic period
+          </Button>
+        </div>
+      )}
+    </>
   );
   // Exactly one solid action: validate first, then generate once the period is ready.
   const ready = checked?.ready === true;
+  // Record pages keep their solid action for adding a record.
   const validateAction = (
     <Button
       key="validate"
-      variant={ready ? 'secondary' : 'primary'}
+      variant={ready || !setupLanding ? 'secondary' : 'primary'}
       disabled={busy}
       loading={busy}
       onClick={readiness}
@@ -272,7 +280,7 @@ function ManagementContent({
   const generateAction = (
     <Link
       key="generate"
-      className={ready ? 'button' : 'button button--secondary'}
+      className={ready && setupLanding ? 'button' : 'button button--secondary'}
       to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(periodId)}`}
     >
       Generate from this period
@@ -326,27 +334,52 @@ function ManagementContent({
       setBusy(false);
     }
   }
+  const addLabel =
+    kind === 'constraints'
+      ? 'Edit Scheduling Constraints'
+      : `Add ${kind === 'faculty' ? 'Faculty' : kind === 'offerings' ? 'Subject Offering' : kind === 'resources' ? 'Resource' : current.label.replace(/s$/, '')}`;
   return (
     <div className="weekly-scheduler academic-management">
-      {!unified && (
-        <p className="academic-workspace-note">
-          <strong>
-            {appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'}
-          </strong>
-          <span>{workspaceNote}</span>
-        </p>
-      )}
       {snapshot && !setupLanding && (
-        <AcademicCalendarEditor
-          key={snapshot.period.revision}
-          snapshot={snapshot}
-          onSaved={(saved) => {
-            setSnapshot(saved);
-            setChecked(null);
-            setNotice('Academic calendar saved. Recheck scheduling readiness before generation.');
-          }}
-        />
+        <>
+          <nav className="academic-tabs" aria-label="Academic data categories">
+            <Link to={academicPath('programs', periodId)}>Setup overview</Link>
+            {academicTabs.map((t) => (
+              <Link
+                key={t.kind}
+                to={academicPath(t.kind, periodId)}
+                aria-current={kind === t.kind ? 'page' : undefined}
+              >
+                {t.label}
+              </Link>
+            ))}
+          </nav>
+          <PageHeader
+            title={current.label}
+            meta={<span>{periodLabel(snapshot.period)}</span>}
+            actions={
+              <>
+                <Button variant="ghost" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
+                  New academic period
+                </Button>
+                {readinessActions}
+                {editing === null && (
+                  <Button
+                    onClick={() => {
+                      setEditingKind(kind);
+                      setEditing(kind === 'constraints' ? 'rules' : 'new');
+                      setNotice('');
+                    }}
+                  >
+                    {addLabel}
+                  </Button>
+                )}
+              </>
+            }
+          />
+        </>
       )}
+      {!snapshot && <PageHeader title={setupLanding ? 'Academic setup' : current.label} />}
       {loadError && (
         <InlineError
           title="Couldn't load academic data"
@@ -359,12 +392,11 @@ function ManagementContent({
           }}
         />
       )}
-      {(!unified || createOpen || loading) && !(loadError && !periods.length) && (
+      {(!hasSelectedPeriod || createOpen || loading) && !(loadError && !periods.length) && (
       <section className="workspace-card">
         {!hasSelectedPeriod && (
           <div className="academic-start">
             <div className="academic-start__intro">
-              <p className="academic-setup__eyebrow">Academic setup</p>
               <h2>
                 {periods.length
                   ? 'Choose a period to continue'
@@ -438,7 +470,6 @@ function ManagementContent({
             </section>
           </div>
         )}
-        {hasSelectedPeriod && !unified && periodControls}
         {loading && <ClassSyncSkeleton label="Loading academic records" />}
         {createOpen && (
           <form className="academic-create-period" onSubmit={create}>
@@ -486,6 +517,9 @@ function ManagementContent({
         )}
       </section>
       )}
+      {hasSelectedPeriod && !snapshot && (
+        <CommandBar label="Period selection">{periodControls}</CommandBar>
+      )}
       {error && (
         <div className="scheduler-error" role="alert">
           <p>{error}</p>
@@ -503,28 +537,6 @@ function ManagementContent({
       )}
       {snapshot && (
         <>
-          {!setupLanding && (
-            <nav className="academic-tabs" aria-label="Academic data categories">
-              <Link to={academicPath('programs', periodId)}>Setup overview</Link>
-              {academicTabs.map((t) => (
-                <Link
-                  key={t.kind}
-                  to={academicPath(t.kind, periodId)}
-                  aria-current={kind === t.kind ? 'page' : undefined}
-                >
-                  {t.label}
-                </Link>
-              ))}
-            </nav>
-          )}
-          {!setupLanding && (
-            <div className="academic-review-actions">
-              <p>
-                {periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}
-              </p>
-              {readinessActions}
-            </div>
-          )}
           {checked && !setupLanding && <ReadinessSummary checked={checked} />}
           {setupLanding ? (
             <AcademicPeriodSetup
@@ -586,69 +598,55 @@ function ManagementContent({
             />
           ) : (
             <section className="academic-records" aria-label={`${current.label} records`}>
-              <div className="academic-list-toolbar">
-                <label>
-                  Search records
+              <CommandBar label={`${current.label} filters`}>
+                {periodControls}
+                <CommandField label="Search records" wide>
                   <input type="search" value={recordSearch} placeholder={`Search ${current.label.toLowerCase()}`} onChange={(e) => { setRecordSearch(e.target.value); setPage(0); }} />
-                </label>
+                </CommandField>
                 {scopedKinds.includes(kind) && <>
-                  <label>
-                    Institute
+                  <CommandField label="Institute">
                     <select value={instituteFilter} onChange={(e) => { setInstituteFilter(e.target.value); setProgramFilter('all'); setPage(0); }}>
                       <option value="all">All institutes</option>
                       {INSTITUTES.map((code) => <option key={code} value={code}>{code}</option>)}
                     </select>
-                  </label>
-                  <label>
-                    Program
+                  </CommandField>
+                  <CommandField label="Program">
                     <select value={programFilter} onChange={(e) => { setProgramFilter(e.target.value); setPage(0); }}>
                       <option value="all">All programs</option>
                       {programChoices.map((p) => <option key={p.id} value={p.id}>{p.acronym}</option>)}
                     </select>
-                  </label>
+                  </CommandField>
                 </>}
                 {['subjects', 'sections', 'offerings'].includes(kind) && (
-                  <label>
-                    Year level
+                  <CommandField label="Year level">
                     <select value={yearFilter} onChange={(e) => { setYearFilter(e.target.value as typeof yearFilter); setPage(0); }}>
                       <option value="all">All years</option>
                       {[1, 2, 3, 4].map((year) => <option key={year} value={year}>{year}{year === 1 ? 'st' : year === 2 ? 'nd' : year === 3 ? 'rd' : 'th'} Year</option>)}
                     </select>
-                  </label>
+                  </CommandField>
                 )}
                 {kind === 'offerings' && (
-                  <label>
-                    Section
+                  <CommandField label="Section">
                     <select value={sectionFilter} onChange={(e) => { setSectionFilter(e.target.value); setPage(0); }}>
                       <option value="all">All sections</option>
                       {sections.map((section) => section.kind === 'sections' && <option key={section.id} value={section.id}>{academicLabel(section, snapshot!)}</option>)}
                     </select>
-                  </label>
+                  </CommandField>
                 )}
-                <label>
-                  Record status
+                <CommandField label="Record status">
                   <select value={recordFilter} onChange={(e) => { setRecordFilter(e.target.value as typeof recordFilter); setPage(0); }}>
                     <option value="all">All records</option>
                     <option value="active">Active records</option>
                     <option value="inactive">Inactive records</option>
                   </select>
-                </label>
-                <Button
-                  onClick={() => {
-                    setEditingKind(kind);
-                    setEditing(kind === 'constraints' ? 'rules' : 'new');
-                    setNotice('');
-                  }}
-                >
-                  {kind === 'constraints'
-                    ? 'Edit Scheduling Constraints'
-                    : `Add ${kind === 'faculty' ? 'Faculty' : kind === 'offerings' ? 'Subject Offering' : kind === 'resources' ? 'Resource' : current.label.replace(/s$/, '')}`}
-                </Button>
-                {kind === 'resources' && <>
-                  <p role="status" className="academic-record-summary">{verifiedRooms}/{schedulableRooms.length} schedulable rooms ready · {excludedRooms.length} excluded spaces preserved</p>
+                </CommandField>
+              </CommandBar>
+              {kind === 'resources' && (
+                <div className="section-bar">
+                  <p role="status" className="academic-record-count">{verifiedRooms}/{schedulableRooms.length} schedulable rooms ready · {excludedRooms.length} excluded spaces preserved</p>
                   <Button type="button" variant="secondary" disabled={busy || roomsNeedingVerification.length === 0} loading={busy} onClick={verifySchedulableRooms}>Verify Schedulable Rooms</Button>
-                </>}
-              </div>
+                </div>
+              )}
               {!matching.length && (
                 <p>
                   No {current.label.toLowerCase()}{' '}
@@ -657,77 +655,21 @@ function ManagementContent({
                     : 'saved for this period. Add the records required by the intended timetable.'}
                 </p>
               )}
-              <ul className="academic-record-list">
-                {visible.map((e) => (
-                  <li key={e.record.id} className="workspace-card academic-record-row">
-                    <div>
-                      <h2>
-                        {academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)}
-                      </h2>
-                      {e.record.kind === 'subjects' && (
-                        <p>
-                          {e.record.required_weekly_minutes ?? 'Missing'} weekly contact minutes ·{' '}
-                          {e.record.patterns?.length ?? 0} allowed patterns
-                        </p>
-                      )}
-                      {e.record.kind === 'faculty' && (
-                        <p>
-                          {e.record.subject_ids?.length ?? 0} eligible subjects ·{' '}
-                          {e.record.availability?.length ?? 0} availability windows
-                        </p>
-                      )}
-                      {e.record.kind === 'resources' && (
-                        <p>
-                          {e.record.condition === 'operational' && e.record.schedulable
-                            ? 'Operational metadata entered'
-                            : 'Not verified for scheduling'}{' '}
-                          ·{' '}
-                          {e.record.capacity_verified
-                            ? `${e.record.capacity} verified capacity`
-                            : 'Capacity unverified'}
-                        </p>
-                      )}
-                      {e.record.kind === 'offerings' && (
-                        <p>
-                          {e.record.teacher_ids?.length ?? 0} assigned/eligible faculty ·{' '}
-                          {e.record.room_ids?.length ?? 0} eligible classrooms
-                        </p>
-                      )}
-                      {e.record.kind === 'constraints' && (
-                        <p>{e.record.operating_windows?.length ?? 0} permitted operating windows</p>
-                      )}
-                    </div>
-                    <div className="draft-actions">
-                      <StatusBadge
-                        tone={
-                          'active' in e.record && e.record.active === false ? 'warning' : 'neutral'
-                        }
-                      >
-                        {'active' in e.record && e.record.active === false ? 'Inactive' : 'Saved'}
-                      </StatusBadge>
-                      <Button
-                        variant="secondary"
-                        onClick={() => {
-                          setEditingKind(kind);
-                          setEditing(e.record.id!);
-                          setNotice('');
-                        }}
-                        aria-label={`Edit ${academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)}`}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="danger"
-                        disabled={busy}
-                        onClick={() => void removeRecord(e)}
-                        aria-label={`Delete ${academicLabel(e.record as Parameters<typeof academicLabel>[0], snapshot)}`}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {visible.length > 0 && (
+                <AcademicRecordTable
+                  kind={kind}
+                  label={current.label}
+                  snapshot={snapshot}
+                  entries={visible}
+                  busy={busy}
+                  onEdit={(id) => {
+                    setEditingKind(kind);
+                    setEditing(id);
+                    setNotice('');
+                  }}
+                  onDelete={(entry) => void removeRecord(entry)}
+                />
+              )}
               {matching.length > 20 && (
                 <nav className="draft-actions" aria-label="Academic record pagination">
                   <Button
@@ -754,7 +696,33 @@ function ManagementContent({
           <p role="status" tabIndex={-1} ref={feedback}>
             {notice}
           </p>
+          {!setupLanding && (
+            <>
+              <AcademicCalendarEditor
+                key={snapshot.period.revision}
+                snapshot={snapshot}
+                onSaved={(saved) => {
+                  setSnapshot(saved);
+                  setChecked(null);
+                  setNotice('Academic calendar saved. Recheck scheduling readiness before generation.');
+                }}
+              />
+              <MetaDetails summary="Source and revision">
+                <p>Source revision {snapshot.period.revision}</p>
+              </MetaDetails>
+            </>
+          )}
         </>
+      )}
+      {!unified && (
+        <MetaDetails summary="About this workspace">
+          <p>
+            <strong>
+              {appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'}
+            </strong>{' '}
+            · {workspaceNote}
+          </p>
+        </MetaDetails>
       )}
       {setupLanding && appMode === 'sandbox' && (
         <section className="academic-dev-tools" id="sample-scenario" aria-label="Development tools">

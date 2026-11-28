@@ -100,7 +100,7 @@ export function IssueTriagePanel() {
   }
 
   return (
-    <div aria-busy={busy}>
+    <div className="triage" aria-busy={busy}>
       <div className="admin-screen-actions admin-requests-actions">
         <Button variant="secondary" disabled={busy} onClick={refresh}>
           Reload issue reports
@@ -188,19 +188,20 @@ export function IssueTriagePanel() {
                     </option>
                   ))}
                 </select>
-                <Link className="text-action" to={restrictionPath(issue)}>
+                <Link className="button button--secondary triage-issue-link" to={restrictionPath(issue)}>
                   Add a restriction for {room}
                 </Link>
                 <div className="draft-actions">
                   {issue.status === 'open' && (
                     <Button
+                      variant="secondary"
                       disabled={busy || badNote}
                       onClick={() => void update(issue, 'in_progress')}
                     >
                       Start work
                     </Button>
                   )}
-                  <Button disabled={noClose} onClick={() => void update(issue, 'resolved')}>
+                  <Button variant="secondary" disabled={noClose} onClick={() => void update(issue, 'resolved')}>
                     Mark resolved
                   </Button>
                   <Button

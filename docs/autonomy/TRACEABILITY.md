@@ -317,3 +317,19 @@ The Administrator popover and active secondary screen dimensions have fresh foll
 | Page-shaped loading skeleton | `ClassSyncPageSkeleton`, `RouteGuard.tsx` | VERIFIED in jsdom |
 | Main entry within 98,000 / 101,376 bytes; no new package | `check_bundle_budget.mjs`: 87,119 bytes; `package.json` unchanged | VERIFIED locally |
 | WCAG 2.2 AA | Existing accessible-name and focus tests pass; solid focus outline | PARTIAL: zoom, screen reader and coarse-pointer checks open |
+
+### 28 November 2026 — Phase E, Slice E2 Administrator workspaces
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Shared page header, command bar, KPI strip, collapsed metadata, table and meter in lazy chunks | `components/layout/*`, `components/ui/DataTable.tsx`, `Meter.tsx`; bundle budget 87,264 bytes | VERIFIED locally |
+| One week matrix and agenda list with text-labelled session accents, keyboard movement, names, phone default | `WeekGrid.tsx`, `week-grid.css`; `WeekGrid.phase-e.test.tsx`; sample render | VERIFIED in jsdom and sample render; screen reader open |
+| Draft and published timetables use the matrix, institute chips and one-click Edit | `SchedulingTimetable.tsx`, `PublishedTimetable.tsx`; existing draft tests | VERIFIED locally; live published data IMPLEMENTED-UNVERIFIED |
+| Dashboard and academic setup fit 1280x720; hairline record tables | `AcademicPeriodSetup.tsx`, `AcademicRecordTable.tsx`; sample render | VERIFIED with sample data |
+| Roster command row, server status filter, sticky bulk activation | `AcademicStudentRosterPage.tsx`; roster tests including bar order and single solid action | VERIFIED in jsdom and sample render |
+| Generation progress, before/after polish cards, advisor diff | `scheduling.css`, `PolishSummary.tsx`, `SchedulingDraftPages.tsx` | VERIFIED locally; live advisor not contacted |
+| Utilization and faculty load meters with green/amber/red thresholds | `Meter.tsx`, `ReportsPage.tsx`; threshold tests (rooms 70/90, load 85/100) | VERIFIED locally; thresholds are a design choice, not CdM policy |
+| 41 schedulable / 12 excluded directory and restriction timeline | `BuildingsPage.tsx`; existing restriction tests | VERIFIED locally |
+| Triage layout, audit table, one h1 per redesigned page | `triage.css`, `PublicationAuditPage.tsx`; `NoDeadEnds.test.tsx` | VERIFIED in jsdom and sample render |
+| RBAC and optimistic revision checks unchanged | No service, API or route-guard authorization change; 1,127 web tests | VERIFIED by existing tests |
+| WCAG 2.2 AA | E1 tokens retained | PARTIAL: zoom, screen reader, coarse-pointer checks open |

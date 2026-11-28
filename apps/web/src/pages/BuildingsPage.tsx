@@ -13,6 +13,8 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { InlineError } from '../components/ui/InlineError';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { rolePath } from '../routes/route-config';
+import { DataTable } from '../components/ui/DataTable';
+import { PageHeader } from '../components/layout/PageHeader';
 import './admin-operations.css';
 
 const buildings = [...new Set(provisionalCdmRooms.map((room) => room.building))].sort();
@@ -59,6 +61,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
   );
   const [impact, setImpact] = useState<RestrictionImpact | null>(null);
   const [busy, setBusy] = useState(false);
+  const [directory, setDirectory] = useState<'schedulable' | 'excluded'>('schedulable');
 
   useEffect(() => {
     let ignore = false;
@@ -164,45 +167,160 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
     />
   );
 
-  if (!detail)
+  const schedulableTotal = provisionalCdmRooms.filter((room) => room.schedulable);
+  const excludedTotal = provisionalCdmRooms.filter((room) => !room.schedulable);
+  const buildingPath = (name: string) =>
+    `${rolePath('administrator', 'building-detail')}?building=${encodeURIComponent(name)}`;
+  const timeline = (items: SavedRestriction[]) => (
+    <ol className="restriction-timeline">
+      {items.map((item) => (
+        <li key={item.id} data-status={item.status}>
+          <div className="restriction-timeline__body">
+            <span className="restriction-timeline__title">
+              <strong>{roomName(item.room_id)}</strong>
+              <StatusBadge tone={item.status === 'active' ? 'warning' : 'neutral'}>
+                {item.status === 'active' ? 'Active' : 'Cancelled'}
+              </StatusBadge>
+            </span>
+            <time>{`${readable(item.starts_at)} to ${readable(item.ends_at)}`}</time>
+            <span className="muted">{item.reason}</span>
+          </div>
+          {detail && item.status === 'active' && (
+            <div className="admin-ops__actions">
+              <Button
+                variant="secondary"
+                disabled={busy}
+                aria-label={`Edit ${roomName(item.room_id)} restriction`}
+                onClick={() => open(item)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={busy}
+                aria-label={`Cancel ${roomName(item.room_id)} restriction`}
+                onClick={() => cancel(item)}
+              >
+                Cancel restriction
+              </Button>
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+
+  if (!detail) {
+    const active = (restrictions ?? []).filter((item) => item.status === 'active');
     return (
       <div className="admin-ops">
-        <p className="muted">
-          {provisionalCdmRooms.filter((room) => room.schedulable).length} schedulable rooms and{' '}
-          {provisionalCdmRooms.filter((room) => !room.schedulable).length} excluded spaces from the
-          supplied campus inventory. Physical condition is not verified.
-        </p>
+        <PageHeader
+          title="Buildings"
+          meta={<span>Supplied campus inventory. Physical condition is not verified.</span>}
+        />
         {readFailure}
-        <div className="admin-ops__grid">
-          {buildings.map((name) => {
-            const members = provisionalCdmRooms.filter((room) => room.building === name);
-            const active = members.reduce((sum, room) => sum + activeFor(room.id), 0);
-            return (
-              <article className="workspace-card" key={name}>
-                <h2>{name}</h2>
-                <p>
-                  {members.filter((room) => room.schedulable).length} schedulable ·{' '}
-                  {members.filter((room) => !room.schedulable).length} excluded
-                </p>
-                <p className="muted">
-                  {restrictions === null ? 'Restrictions not loaded' : `${active} active restrictions`}
-                </p>
-                <Link
-                  className="text-action"
-                  to={`${rolePath('administrator', 'building-detail')}?building=${encodeURIComponent(name)}`}
-                >
-                  Open {name}
-                </Link>
-              </article>
-            );
-          })}
+        <div className="segmented" role="group" aria-label="Space directory">
+          <button type="button" aria-pressed={directory === 'schedulable'} onClick={() => setDirectory('schedulable')}>
+            Schedulable ({schedulableTotal.length})
+          </button>
+          <button type="button" aria-pressed={directory === 'excluded'} onClick={() => setDirectory('excluded')}>
+            Excluded ({excludedTotal.length})
+          </button>
         </div>
+        {directory === 'schedulable' ? (
+          <DataTable
+            label="Buildings"
+            rows={buildings}
+            rowKey={(name) => name}
+            columns={[
+              { header: 'Building', cell: (name) => <span className="cell-title">{name}</span> },
+              {
+                header: 'Schedulable',
+                numeric: true,
+                cell: (name) => <span>{schedulableTotal.filter((room) => room.building === name).length}</span>,
+              },
+              {
+                header: 'Excluded',
+                numeric: true,
+                cell: (name) => <span>{excludedTotal.filter((room) => room.building === name).length}</span>,
+              },
+              {
+                header: 'Active restrictions',
+                numeric: true,
+                cell: (name) => (
+                  <span>
+                    {restrictions === null
+                      ? 'Not loaded'
+                      : provisionalCdmRooms
+                          .filter((room) => room.building === name)
+                          .reduce((sum, room) => sum + activeFor(room.id), 0)}
+                  </span>
+                ),
+              },
+              {
+                header: 'Actions',
+                unlabelled: true,
+                cell: (name) => (
+                  <div className="row-actions">
+                    <Link className="button button--secondary" aria-label={`Open ${name}`} to={buildingPath(name)}>
+                      Open
+                    </Link>
+                  </div>
+                ),
+              },
+            ]}
+          />
+        ) : (
+          <DataTable
+            label="Excluded spaces"
+            rows={excludedTotal}
+            rowKey={(room) => room.id}
+            scroll
+            columns={[
+              { header: 'Space', cell: (room) => <span className="cell-title">{room.name}</span> },
+              { header: 'Building', cell: (room) => <span>{room.building}</span> },
+              { header: 'Floor', cell: (room) => <span>{room.floor ?? 'Not recorded'}</span> },
+            ]}
+          />
+        )}
+        <section aria-label="Active restrictions">
+          <h2>Active restrictions</h2>
+          {restrictions === null && !loadError && <ClassSyncSkeleton label="Loading restrictions" />}
+          {restrictions !== null && !active.length && <p className="muted">No active restrictions.</p>}
+          {timeline(active)}
+        </section>
       </div>
     );
+  }
 
   return (
     <div className="admin-ops">
-      <Link className="text-action" to={rolePath('administrator', 'buildings')}>Back to buildings</Link>
+      <PageHeader
+        title={building && rooms.length ? building : 'Building'}
+        back={
+          <Link className="page-header__back" to={rolePath('administrator', 'buildings')}>
+            Back to buildings
+          </Link>
+        }
+        meta={
+          rooms.length > 0 && (
+            <span>
+              {schedulable.length} schedulable rooms · {excluded.length} excluded spaces
+            </span>
+          )
+        }
+        actions={
+          rooms.length > 0 && (
+            <Button
+              variant={draft ? 'secondary' : 'primary'}
+              disabled={busy || !schedulable.length}
+              onClick={() => open()}
+            >
+              Add restriction
+            </Button>
+          )
+        }
+      />
       {!rooms.length ? (
         <p>Choose a building from the directory.</p>
       ) : (
@@ -210,35 +328,6 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
           {notice && <p role="status">{notice}</p>}
           {readFailure}
           {error && <p role="alert" className="scheduler-error">{error}</p>}
-          <section className="workspace-card" aria-label="Schedulable rooms">
-            <h2>{building}: {schedulable.length} schedulable rooms</h2>
-            {schedulable.length ? (
-              <ul className="admin-ops__list">
-                {schedulable.map((room) => (
-                  <li key={room.id}>
-                    <strong>{room.name}</strong>
-                    <span className="muted">
-                      {room.floor ?? 'Floor not recorded'} · {activeFor(room.id)} active restrictions
-                    </span>
-                    <div className="admin-ops__actions">
-                      <Link
-                        className="text-action"
-                        aria-current={selectedRoom === room.id ? 'true' : undefined}
-                        to={`${rolePath('administrator', 'building-detail')}?building=${encodeURIComponent(building)}&room=${encodeURIComponent(room.id)}`}
-                      >
-                        Show {room.name} restrictions
-                      </Link>
-                      <Button variant="secondary" disabled={busy} onClick={() => open(undefined, room.id)}>
-                        Restrict {room.name}
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">No schedulable rooms in this building.</p>
-            )}
-          </section>
           {draft && (
             <form className="workspace-card" aria-label="Room restriction" onSubmit={check}>
               <h2>{draft.revision ? 'Edit restriction' : 'New restriction'}</h2>
@@ -305,40 +394,62 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
               </div>
             </form>
           )}
-          <section className="workspace-card" aria-label="Dated restrictions">
-            <div className="admin-ops__bar">
-              <h2>Dated restrictions{selectedRoom ? ` · ${roomName(selectedRoom)}` : ''}</h2>
-              <Button disabled={busy || !schedulable.length} onClick={() => open()}>Add restriction</Button>
-            </div>
+          <section aria-label="Dated restrictions">
+            <h2>Dated restrictions{selectedRoom ? ` · ${roomName(selectedRoom)}` : ''}</h2>
             {restrictions === null && !loadError && <ClassSyncSkeleton label="Loading restrictions" />}
             {restrictions !== null && !shown.length && <p className="muted">No restrictions recorded.</p>}
-            <ul className="admin-ops__list">
-              {shown.map((item) => (
-                <li key={item.id}>
-                  <strong>{roomName(item.room_id)}</strong>
-                  <StatusBadge tone={item.status === 'active' ? 'warning' : 'neutral'}>
-                    {item.status === 'active' ? 'Active' : 'Cancelled'}
-                  </StatusBadge>
-                  <span>{readable(item.starts_at)} to {readable(item.ends_at)}</span>
-                  <span className="muted">{item.reason}</span>
-                  {item.status === 'active' && (
-                    <div className="admin-ops__actions">
-                      <Button variant="secondary" disabled={busy} onClick={() => open(item)}>
-                        Edit {roomName(item.room_id)} restriction
-                      </Button>
-                      <Button variant="danger" disabled={busy} onClick={() => cancel(item)}>
-                        Cancel {roomName(item.room_id)} restriction
-                      </Button>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {timeline(shown)}
           </section>
-          <section className="workspace-card" aria-label="Excluded spaces">
+          <section aria-label="Schedulable rooms">
+            <h2>{schedulable.length} schedulable rooms</h2>
+            {schedulable.length ? (
+              <DataTable
+                label="Schedulable rooms"
+                rows={schedulable}
+                rowKey={(room) => room.id}
+                scroll
+                columns={[
+                  { header: 'Room', cell: (room) => <span className="cell-title">{room.name}</span> },
+                  { header: 'Floor', cell: (room) => <span>{room.floor ?? 'Not recorded'}</span> },
+                  {
+                    header: 'Active restrictions',
+                    numeric: true,
+                    cell: (room) => <span>{activeFor(room.id)}</span>,
+                  },
+                  {
+                    header: 'Actions',
+                    unlabelled: true,
+                    cell: (room) => (
+                      <div className="row-actions">
+                        <Link
+                          className="button button--ghost"
+                          aria-label={`Show ${room.name} restrictions`}
+                          aria-current={selectedRoom === room.id ? 'true' : undefined}
+                          to={`${buildingPath(building)}&room=${encodeURIComponent(room.id)}`}
+                        >
+                          History
+                        </Link>
+                        <Button
+                          variant="secondary"
+                          disabled={busy}
+                          aria-label={`Restrict ${room.name}`}
+                          onClick={() => open(undefined, room.id)}
+                        >
+                          Restrict
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            ) : (
+              <p className="muted">No schedulable rooms in this building.</p>
+            )}
+          </section>
+          <section aria-label="Excluded spaces">
             <h2>{excluded.length} excluded spaces</h2>
             <p className="muted">These spaces are never scheduled and cannot be restricted or booked.</p>
-            <ul>{excluded.map((room) => <li key={room.id}>{room.name}</li>)}</ul>
+            <ul className="space-chips">{excluded.map((room) => <li key={room.id}>{room.name}</li>)}</ul>
           </section>
         </>
       )}

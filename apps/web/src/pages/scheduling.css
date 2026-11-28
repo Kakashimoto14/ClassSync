@@ -1,0 +1,201 @@
+/* Generation, drafts, conflicts and published timetables. Lazy with those pages. */
+.scheduling-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+.scheduling-page :is(h2, h3) {
+  margin: 0;
+}
+
+/* Five-step progress bar. */
+.ux-generation-flow > .ux-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  counter-reset: steps;
+  list-style: none;
+}
+.ux-generation-flow > .ux-steps li {
+  display: block;
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 4px solid var(--border-strong);
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
+  counter-increment: steps;
+}
+.ux-generation-flow > .ux-steps li::before {
+  display: block;
+  width: auto;
+  height: auto;
+  background: none;
+  color: inherit;
+  content: counter(steps);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.ux-generation-flow > .ux-steps li[data-done] {
+  border-top-color: var(--status-success-ink);
+}
+.ux-generation-flow > .ux-steps li[aria-current='step'] {
+  border-top-color: var(--brand-crimson);
+  color: var(--brand-crimson);
+  font-weight: 700;
+}
+
+/* Polish: each measure is a card with the solver and polished values side by side. */
+.polish-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 176px), 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.polish-compare__head {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.polish-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: space-between;
+  gap: 6px 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+.polish-card > [role='rowheader'] {
+  grid-column: 1 / -1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.polish-card > [role='cell'] {
+  display: grid;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface-subtle);
+  font-size: 1.125rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.polish-card > [role='cell']::before {
+  color: var(--ink-secondary);
+  content: attr(data-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.polish-card > [role='cell'][data-label='After polish'] {
+  background: var(--status-success-soft);
+}
+
+/* Advisor suggestions as before/after diff cards. */
+.advice-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.advice-list > li {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+.diff-label {
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Hairline-separated panels under a timetable; no boxes inside boxes. */
+.panel-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  align-items: end;
+  gap: 12px;
+}
+.panel-form label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.panel-form :is(input, select) {
+  width: 100%;
+  min-width: 0;
+}
+
+.draft-list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  list-style: none;
+}
+.draft-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.draft-list > li:last-child {
+  border-bottom: 0;
+}
+.draft-list h2 {
+  font-size: 0.9375rem;
+}
+.draft-list p {
+  margin: 2px 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.published-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.published-nav strong {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.published-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.command-bar:has(.published-nav) .command-field {
+  flex: 0 1 148px;
+}
+@media (max-width: 599px) {
+  .command-bar:has(.published-nav) .command-field {
+    flex-basis: 100%;
+  }
+}
+.scheduling-page .draft-save > .button {
+  justify-self: start;
+}
+.ux-calendar .ux-context-settings > summary {
+  padding-inline: 12px;
+}
+.scheduling-page .draft-editor > .button {
+  justify-self: start;
+}

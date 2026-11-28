@@ -4,6 +4,10 @@ import { listAcademicPeriods, loadAcademicRoster, createAcademicRosterStudent,
   type AcademicPeriod, type AcademicRosterPage, type RosterStudentWrite } from '../lib/academic-api';
 import { Button } from '../components/ui/Button';
 import { InlineError } from '../components/ui/InlineError';
+import { DataTable } from '../components/ui/DataTable';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
+import './roster.css';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { appMode } from '../config/runtime-config';
@@ -229,31 +233,29 @@ export function AcademicStudentRosterPage() {
     }
   }
 
-  return <section className="workspace-card academic-records" aria-labelledby="student-roster-title">
-    <div className="student-roster-heading">
-      <div><h2 id="student-roster-title">Student roster</h2>
-        {page && <p className="academic-record-summary">{page.total} {statusFilter === 'all' ? 'roster' : statusFilter} records · 20 per page</p>}
-      </div>
-      <div className="student-roster-actions">
-        <Button type="button" variant="secondary" disabled={!page || loading || busy} onClick={() => { setNotice(''); setImportOpen(true); }}>Import CSV</Button>
-        <Button type="button" disabled={!page || loading || saving || Boolean(deletingId)} onClick={beginCreate}>+ Add Student</Button>
-      </div>
-    </div>
-    <div className="academic-list-toolbar student-roster-toolbar">
-      <label>Search roster<input type="search" value={search} placeholder="Name, student ID, or email" onChange={(event) => { setSearch(event.target.value); setOffset(0); }}/></label>
-      <label>Academic period<select value={periodId} onChange={(event) => { setPeriodId(event.target.value); setOffset(0); setFormOpen(false); setSelected([]); }}>
+  return <section className="page-view student-roster" aria-labelledby="student-roster-title">
+    <PageHeader title="Student roster" titleId="student-roster-title"
+      meta={page && <span>{page.total} {statusFilter === 'all' ? 'roster' : statusFilter} records · 20 per page</span>}/>
+    <CommandBar label="Roster filters">
+      <CommandField label="Search roster" wide><input type="search" value={search} placeholder="Name, student ID, or email" onChange={(event) => { setSearch(event.target.value); setOffset(0); }}/></CommandField>
+      <CommandField label="Academic period"><select value={periodId} onChange={(event) => { setPeriodId(event.target.value); setOffset(0); setFormOpen(false); setSelected([]); }}>
         <option value="">Choose a period</option>{periods.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
-      </select></label>
-      <label>Year level<select value={year} onChange={(event) => { setYear(event.target.value); setOffset(0); }}>
+      </select></CommandField>
+      <CommandField label="Year level"><select value={year} onChange={(event) => { setYear(event.target.value); setOffset(0); }}>
         <option value="all">All years</option>{[1, 2, 3, 4].map((value) => <option key={value} value={value}>{value}{value === 1 ? 'st' : value === 2 ? 'nd' : value === 3 ? 'rd' : 'th'} Year</option>)}
-      </select></label>
-      <label>Section<select value={section} onChange={(event) => { setSection(event.target.value); setOffset(0); }}>
+      </select></CommandField>
+      <CommandField label="Section"><select value={section} onChange={(event) => { setSection(event.target.value); setOffset(0); }}>
         <option value="all">All sections</option>{page?.sections.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-      </select></label>
-      <label>Status<select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setOffset(0); setSelected([]); }}>
+      </select></CommandField>
+      <CommandField label="Status"><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setOffset(0); setSelected([]); }}>
         <option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="unverified">Unverified</option>
-      </select></label>
-    </div>
+      </select></CommandField>
+      <div className="command-bar__end">
+        <Button type="button" variant="secondary" disabled={!page || loading || busy} onClick={() => { setNotice(''); setImportOpen(true); }}>Import CSV</Button>
+        {/* While rows are selected the bulk bar carries the one solid action. */}
+        <Button type="button" variant={selected.length ? 'secondary' : 'primary'} disabled={!page || loading || saving || Boolean(deletingId)} onClick={beginCreate}>+ Add Student</Button>
+      </div>
+    </CommandBar>
     {notice && <p role="status" aria-live="polite">{notice}</p>}
     {loading && <ClassSyncSkeleton label="Loading student roster" />}
     {loadError && <InlineError title="Couldn't load the roster" message={loadError}
@@ -292,7 +294,59 @@ export function AcademicStudentRosterPage() {
           .catch(() => setError(`${count} students imported, but the roster could not be reloaded.`));
       }}/>
     </Suspense>}
-    {selected.length > 0 && <div className="student-roster-actions" role="group" aria-label="Bulk roster actions">
+    {!loading && page?.items.length ? <>
+      <div className="student-roster-select">
+        <Button type="button" variant="secondary" disabled={busy || !activatable.length} onClick={() => toggle(activatable.map((item) => item.student_id), true)}>Select unverified on this page</Button>
+        {unverified.length > activatable.length && <small className="muted">{unverified.length - activatable.length} need a name and email before activation.</small>}
+      </div>
+      <DataTable
+        label="Student roster"
+        rows={rows}
+        rowKey={(item) => item.student_id}
+        columns={[
+          {
+            header: 'Select',
+            unlabelled: true,
+            head: <input type="checkbox" aria-label="Select all students on this page" checked={pageSelected} disabled={busy} onChange={(event) => toggle(pageIds, event.target.checked)}/>,
+            cell: (item) => <input type="checkbox" aria-label={`Select ${item.student_id}`} checked={selected.includes(item.student_id)} disabled={busy} onChange={(event) => toggle([item.student_id], event.target.checked)}/>,
+          },
+          {
+            header: 'Student',
+            className: 'student-roster-name',
+            cell: (item) => <span><strong>{item.display_name ?? 'Name not entered'}</strong><small>{item.registered_email ?? 'Email not entered'}</small></span>,
+          },
+          { header: 'Student ID', className: 'student-roster-id', cell: (item) => <span data-numeric="">{item.student_id}</span> },
+          { header: 'Section', className: 'student-roster-section', cell: (item) => <span>{item.section_label}<small>Year {item.year_level}</small></span> },
+          {
+            header: 'Enrollment',
+            className: 'student-roster-status',
+            cell: (item) => <StatusBadge tone={item.enrollment_status === 'active' ? 'success' : 'warning'}>{statusLabels[item.enrollment_status]}</StatusBadge>,
+          },
+          {
+            header: 'Actions',
+            unlabelled: true,
+            cell: (item) => {
+              const incomplete = !item.registered_email || !item.display_name;
+              return <div>
+                <div className="row-actions">
+                  {item.enrollment_status !== 'active' &&
+                    <Button type="button" variant="secondary" aria-label={`Activate ${item.student_id}`} disabled={saving || Boolean(deletingId) || incomplete} aria-describedby={incomplete ? `activate-hint-${item.student_id}` : undefined} onClick={() => void markActive(item)}>Activate</Button>}
+                  <Button type="button" variant="secondary" aria-label={`Edit ${item.student_id}`} disabled={saving || Boolean(deletingId)} onClick={() => beginEdit(item)}>Edit</Button>
+                  <Button type="button" variant="ghost" aria-label={`Delete ${item.student_id}`} loading={deletingId === item.student_id} disabled={saving || Boolean(deletingId)} onClick={() => void removeStudent(item)}>Delete</Button>
+                </div>
+                {item.enrollment_status !== 'active' && incomplete && <small className="student-roster-hint" id={`activate-hint-${item.student_id}`}>Add the student’s name and institutional email first.</small>}
+              </div>;
+            },
+          },
+        ]}
+      />
+      <div className="student-roster-pagination" aria-label="Roster pagination">
+        <Button variant="secondary" disabled={offset === 0 || loading || saving || Boolean(deletingId)} onClick={() => setOffset((value) => Math.max(0, value - 20))}>Previous</Button>
+        <span>{offset + 1}–{Math.min(offset + page.items.length, page.total)} of {page.total}</span>
+        <Button variant="secondary" disabled={offset + 20 >= page.total || loading || saving || Boolean(deletingId)} onClick={() => setOffset((value) => value + 20)}>Next</Button>
+      </div>
+    </> : null}
+    {selected.length > 0 && <div className="bulk-bar" role="group" aria-label="Bulk roster actions">
       <strong role="status">{selected.length} selected</strong>
       <label>New status <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value as StudentForm['enrollment_status'])}>
         <option value="active">Active</option><option value="inactive">Inactive</option><option value="unverified">Unverified</option>
@@ -302,37 +356,5 @@ export function AcademicStudentRosterPage() {
       <Button type="button" variant="secondary" disabled={busy} onClick={() => setSelected([])}>Clear selection</Button>
       {selected.length > BULK_LIMIT && <small>Select at most {BULK_LIMIT} students at a time.</small>}
     </div>}
-    {!loading && page?.items.length ? <>
-      <div className="student-roster-select">
-        <Button type="button" variant="secondary" disabled={busy || !activatable.length} onClick={() => toggle(activatable.map((item) => item.student_id), true)}>Select unverified on this page</Button>
-        {unverified.length > activatable.length && <small className="muted">{unverified.length - activatable.length} need a name and email before activation.</small>}
-      </div>
-      {rows.length > 0 && <div className="table-wrap"><table className="student-roster-table">
-        <thead><tr><th><input type="checkbox" aria-label="Select all students on this page" checked={pageSelected} disabled={busy} onChange={(event) => toggle(pageIds, event.target.checked)}/></th><th>Student</th><th>Student ID</th><th>Section</th><th>Enrollment</th><th>Actions</th></tr></thead>
-        <tbody>{rows.map((item) => {
-          const incomplete = !item.registered_email || !item.display_name;
-          return <tr key={item.student_id}>
-          <td><input type="checkbox" aria-label={`Select ${item.student_id}`} checked={selected.includes(item.student_id)} disabled={busy} onChange={(event) => toggle([item.student_id], event.target.checked)}/></td>
-          <td className="student-roster-name"><strong>{item.display_name ?? 'Name not entered'}</strong><span>{item.registered_email ?? 'Email not entered'}</span></td>
-          <td className="student-roster-id">{item.student_id}</td>
-          <td className="student-roster-section">{item.section_label}<small>Year {item.year_level}</small></td>
-          <td className="student-roster-status"><StatusBadge tone={item.enrollment_status === 'active' ? 'success' : 'warning'}>{statusLabels[item.enrollment_status]}</StatusBadge></td>
-          <td><div className="student-roster-row-actions">
-            {item.enrollment_status !== 'active' &&
-              <Button type="button" aria-label={`Activate ${item.student_id}`} disabled={saving || Boolean(deletingId) || incomplete} aria-describedby={incomplete ? `activate-hint-${item.student_id}` : undefined} onClick={() => void markActive(item)}>Activate</Button>}
-            <Button type="button" variant="secondary" aria-label={`Edit ${item.student_id}`} disabled={saving || Boolean(deletingId)} onClick={() => beginEdit(item)}>Edit</Button>
-            <Button type="button" variant="ghost" aria-label={`Delete ${item.student_id}`} loading={deletingId === item.student_id} disabled={saving || Boolean(deletingId)} onClick={() => void removeStudent(item)}>Delete</Button>
-          </div>
-          {item.enrollment_status !== 'active' && incomplete && <small className="student-roster-hint" id={`activate-hint-${item.student_id}`}>Add the student’s name and institutional email first.</small>}
-          </td>
-        </tr>;
-        })}</tbody>
-      </table></div>}
-      <div className="draft-actions" aria-label="Roster pagination">
-        <Button variant="secondary" disabled={offset === 0 || loading || saving || Boolean(deletingId)} onClick={() => setOffset((value) => Math.max(0, value - 20))}>Previous</Button>
-        <span>{offset + 1}–{Math.min(offset + page.items.length, page.total)} of {page.total}</span>
-        <Button variant="secondary" disabled={offset + 20 >= page.total || loading || saving || Boolean(deletingId)} onClick={() => setOffset((value) => value + 20)}>Next</Button>
-      </div>
-    </> : null}
   </section>;
 }

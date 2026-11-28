@@ -57,7 +57,7 @@ export function PeriodLifecycleControls({
       )}
       <Button variant="secondary" onClick={() => setDialog('clone')}>Clone period</Button>
       {!period.archived_at && (
-        <Button variant="danger" onClick={() => setDialog('archive')}>Archive period</Button>
+        <Button variant="ghost" className="quiet-danger" onClick={() => setDialog('archive')}>Archive period</Button>
       )}
       {dialog === 'clone' && (
         <Modal title="Clone academic period" onClose={close}>

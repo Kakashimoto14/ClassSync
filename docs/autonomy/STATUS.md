@@ -3460,3 +3460,52 @@ a browser (component tests only); real Turnstile widget sizing; real sign-in; pa
 inherit the palette but were not visually reviewed, including Student pages whose shell overrides
 were removed; native 200% zoom, 390/768/1024px, coarse-pointer 44px and screen-reader checks. Next:
 owner reviews and commits E1; E2 awaits a separate session.
+
+### 28 November 2026 — Phase E, Slice E2: Administrator page re-layout (local only)
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD `f2578c6` (uncommitted). No
+commit, push, deployment, migration or new npm package; no Neon, Firebase, Render, Resend or Gemini
+contact. E3 not started.
+
+IMPLEMENTED: lazy primitives (`PageHeader`, `CommandBar`, `KpiStrip`, `MetaDetails`, `DataTable`,
+`Meter`, `WeekGrid` with `week-grid.css`, `InstituteChips`). Dashboard/Academic Setup, record tables
+for programs, subjects, sections, faculty, offerings, rooms and constraints, institutional rules,
+student roster with a sticky bulk bar, generation progress and before/after polish cards, drafts,
+advisor diff pills, published timetable, conflicts, reports with meters, buildings
+(Schedulable/Excluded tabs, restriction timeline), requests and issue triage, announcements and
+audit. Revisions, references and the audit account reference moved into collapsed details.
+Superseded global CSS removed; legacy hard-coded colours and `!important` removed from the four
+named stylesheets.
+
+VERIFIED locally: `npm run lint`, `npm run typecheck`, `npm run test:web` (89 files, 1,127 passed),
+`npm run build`, `git diff --check`. Main entry **87,264 bytes** raw (E1: 87,119; soft stop 98,000;
+limit 101,376). After the last full test run one CSS-only block was added to `academic-setup.css`;
+build, budget, diff check and 88 affected tests were rerun, not the full suite.
+
+Rendered check in the built-in browser through a temporary harness (in-memory sample data, stubbed
+session, no network; harness and `.claude/launch.json` removed afterwards): 20 Administrator routes
+at 1440x900, 1280x720 and 360x780 showed no horizontal page overflow, no controls outside the
+viewport and one h1 each. The six setup cards end at 596px of a 720px viewport. Draft and published
+timetables open on the agenda list at 360px. Arrow-key movement was observed in the real grid.
+Small CSS adjustments made after the sweeps (phone KPI last tile, editor button alignment, context
+control padding, setup editor surface) were not re-rendered.
+
+Existing assertions changed: none. `NoDeadEnds` and roster tests gained cases.
+
+Choices to review:
+- The Administrator published timetable replaces the month calendar, week strip and per-date agenda
+  with week navigation, a date field, the week matrix and agenda list; day/week/month export stays.
+- Published meetings carry no activity type, so their accent and label follow the recorded room
+  type ("Lecture room", "Computer lab", ...), not the class activity.
+- The matrix rows are start-hour bands, so concurrent classes stack in a cell; very large drafts
+  scroll inside the grid and are long. Filters narrow them.
+- The Teacher date grid is unchanged; its CSS moved into `week-grid.css` (E3 can replace it).
+- The Schedulable/Excluded tabs are on the building directory; the building detail keeps both lists.
+- `PeriodLifecycleControls` "Archive period" is now quiet until its confirmation dialog.
+- Generation-page readiness figures and some record editors still sit inside a card.
+
+IMPLEMENTED-UNVERIFIED / open: real data volume (hundreds of sessions), live services, native 200%
+zoom, 390/768/1024px, coarse-pointer 44px, screen readers (including stacked phone tables), roster
+import dialog and record editor forms not visually reviewed. `/admin/rooms`,
+`/admin/academic/resources` editor, notifications, profile and settings were outside the listed E2
+routes or only palette-inherited. Next: owner reviews and commits E2; E3 awaits a separate session.

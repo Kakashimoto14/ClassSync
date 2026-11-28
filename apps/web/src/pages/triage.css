@@ -1,0 +1,85 @@
+/* Administrator request and issue triage, and announcements. Lazy with those pages. */
+.triage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.triage .admin-request-card {
+  margin: 0;
+}
+.triage .admin-request-card textarea {
+  width: 100%;
+  max-width: 640px;
+}
+/* Proposed change and its live check read as one pill group. */
+.triage .move-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.triage .move-pill {
+  background: var(--surface-subtle);
+}
+.triage-issue-link {
+  justify-self: start;
+}
+
+.notice-list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+}
+.notice-list > article {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.notice-list > article:last-child {
+  border-bottom: 0;
+}
+.notice-list h2 {
+  margin: 0;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+.notice-list p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.notice-list small {
+  color: var(--ink-secondary);
+}
+.notice-composer {
+  padding: 4px 16px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+}
+.notice-composer > summary {
+  min-height: var(--control-h);
+  padding: 10px 0 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.notice-composer fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.notice-composer fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-h);
+}
+.notice-composer .button {
+  justify-self: start;
+}

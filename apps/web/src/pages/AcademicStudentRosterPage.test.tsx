@@ -196,6 +196,24 @@ describe('connected academic student roster', () => {
     expect(screen.queryByText('Aira Santos')).not.toBeInTheDocument();
   });
 
+  it('floats the bulk bar after the list and gives it the only solid action', async () => {
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
+    const add = screen.getByRole('button', { name: '+ Add Student' });
+    expect(add).toHaveClass('button--primary');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select 26-00101' }));
+    const bar = screen.getByRole('group', { name: 'Bulk roster actions' });
+    expect(bar).toHaveClass('bulk-bar');
+    // Sticky positioning only works when the bar follows the rows in document order.
+    expect(screen.getByRole('table').compareDocumentPosition(bar))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(add).toHaveClass('button--secondary');
+    expect(document.querySelectorAll('.button--primary')).toHaveLength(1);
+    expect(within(bar).getByRole('button', { name: 'Activate selected' })).toHaveClass('button--primary');
+    fireEvent.click(within(bar).getByRole('button', { name: 'Clear selection' }));
+    expect(screen.queryByRole('group', { name: 'Bulk roster actions' })).not.toBeInTheDocument();
+  });
+
   it('offers Retry when the roster cannot be read', async () => {
     vi.mocked(loadAcademicRoster).mockRejectedValueOnce(new Error("Couldn't load from the university service."));
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);

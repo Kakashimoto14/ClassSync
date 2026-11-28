@@ -2,6 +2,7 @@ import type {
   GenerationInput,
   PolishReport,
 } from '../../../../packages/shared-types/src/scheduling';
+import './scheduling.css';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const problems = {
@@ -44,38 +45,25 @@ export function PolishSummary({ report, input }: { report: PolishReport; input: 
     ],
   ];
   return (
-    <section className="workspace-card" aria-label="Commuter-friendly polish">
+    <section className="workspace-card scheduling-page" aria-label="Commuter-friendly polish">
       <h3>Commuter-friendly polish</h3>
-      <ul className="polish-metrics" aria-label="Polish results before saving">
-        <li>
-          <strong>{report.after.orphan_section_days}</strong> one-class section-days
-        </li>
-        <li>
-          <strong>{report.after.over_span_section_days}</strong> days over the length limit
-        </li>
-        <li>
-          <strong>{hours(report.after.max_span_minutes)}</strong> longest section day
-        </li>
-      </ul>
-      <div className="polish-table" role="region" aria-label="Polish comparison" tabIndex={0}>
-        <table>
-        <thead>
-          <tr>
-            <th scope="col">Measure</th>
-            <th scope="col">Solver</th>
-            <th scope="col">After polish</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(([label, before, after]) => (
-            <tr key={label}>
-              <th scope="row">{label}</th>
-              <td>{before}</td>
-              <td>{after}</td>
-            </tr>
-          ))}
-        </tbody>
-        </table>
+      <div className="polish-compare" role="table" aria-label="Polish comparison, before saving">
+        <div className="polish-compare__head" role="row">
+          <span role="columnheader">Measure</span>
+          <span role="columnheader">Solver</span>
+          <span role="columnheader">After polish</span>
+        </div>
+        {rows.map(([label, before, after]) => (
+          <div className="polish-card" role="row" key={label}>
+            <span role="rowheader">{label}</span>
+            <span role="cell" data-label="Solver">
+              {before}
+            </span>
+            <span role="cell" data-label="After polish">
+              {after}
+            </span>
+          </div>
+        ))}
       </div>
       {report.unmet.length ? (
         <details>

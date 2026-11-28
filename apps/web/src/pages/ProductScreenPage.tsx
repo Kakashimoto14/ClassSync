@@ -23,6 +23,7 @@ import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 import { EmptyState } from '../components/ui/EmptyState';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { rolePath, type RouteDefinition } from '../routes/route-config';
+import { NestedPageHeading } from '../components/layout/page-heading-context';
 
 const PreviewRequestsView = lazy(() =>
   import('./PreviewOperationsViews').then((module) => ({ default: module.PreviewRequestsView })),
@@ -141,6 +142,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
   return (
     <Suspense fallback={<ClassSyncPageLoader label="Loading this page…" />}>
     <AppShell>
+      <NestedPageHeading.Provider value={!ownHeading}>
       <div className="page-heading" hidden={ownHeading}>
         <div>
           {!compactHeading && (
@@ -215,6 +217,7 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       {definition.kind === 'profile' && <ProfileScreen role={definition.role} />}
       {definition.kind === 'settings' && <SettingsScreen />}
       {definition.kind === 'audit' && <AuditScreen />}
+      </NestedPageHeading.Provider>
     </AppShell>
     </Suspense>
   );

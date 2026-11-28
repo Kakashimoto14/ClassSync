@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   assignmentLabel,
-  clockLabel as time,
   DAY_NAMES as days,
   sectionLabel,
   sessionType,
@@ -11,7 +10,9 @@ import type {
   GenerationInput,
   GenerationResult,
 } from '../../../../packages/shared-types/src/scheduling';
-import { INSTITUTES, instituteCode } from '../lib/program-scope';
+import { instituteCode } from '../lib/program-scope';
+import { InstituteChips } from '../components/scheduling/InstituteChips';
+import { WeekGrid, type WeekEntry } from '../components/scheduling/WeekGrid';
 export function SchedulingTimetable({
   input,
   result,
@@ -44,21 +45,34 @@ export function SchedulingTimetable({
       (!filters.day || a.day === Number(filters.day))
     );
   });
+  const entry = (a: Assignment): WeekEntry => {
+    const offering = offerings.find((o) => o.id === a.offering_id);
+    const room = input.rooms?.find((r) => r.id === a.room_id);
+    const kind = sessionType(offering);
+    return {
+      id: a.id,
+      elementId: 'assignment-' + a.id,
+      day: a.day,
+      start: a.start,
+      end: a.end,
+      type: kind.type,
+      typeLabel: kind.label,
+      title: offering?.subject_name ?? 'Unknown subject',
+      section: sectionLabel(sections.find((s) => s.id === a.section_id), input),
+      teacher: input.teachers?.find((t) => t.id === a.teacher_id)?.name ?? 'Unknown instructor',
+      room: room ? `${room.name} · ${room.building}` : 'Unknown room',
+      note: `${a.end - a.start} instructional minutes`,
+      onEdit: onEdit ? () => onEdit(a.id) : undefined,
+      editLabel: `Edit ${assignmentLabel(a, input)}`,
+    };
+  };
   return (
     <>
-      <div className="institute-chips" role="group" aria-label="Institute">
-        {['', ...INSTITUTES].map((code) => (
-          <button
-            key={code || 'all'}
-            type="button"
-            aria-pressed={filters.institute === code}
-            // A program or section from another institute would silently empty the grid.
-            onClick={() => setFilters({ ...filters, institute: code, program: '', section: '' })}
-          >
-            {code || 'All'}
-          </button>
-        ))}
-      </div>
+      <InstituteChips
+        value={filters.institute}
+        // A program or section from another institute would silently empty the grid.
+        onChange={(code) => setFilters({ ...filters, institute: code, program: '', section: '' })}
+      />
       <details className="ux-timetable-filters">
         <summary>Filter timetable · Program, section, teacher, room and day</summary>
         <div className="scheduler-filters" aria-label="Timetable filters">
@@ -93,44 +107,30 @@ export function SchedulingTimetable({
           Showing {filtered.length} of {result.assignments.length} generated sessions. Coverage
           below always describes the complete run.
         </p>
-        <label className="scheduler-grouping">
-          Group timetable by
-          <select value={grouping} onChange={(e) => setGrouping(e.target.value)}>
-            <option value="day">Day</option>
-            <option value="section">Section</option>
-          </select>
-        </label>
       </details>
-      <div className="weekly-grid">
-        {(grouping === 'day'
-          ? days.map((day, index) => ({
-              id: String(index),
-              label: day,
-              values: filtered.filter((a) => a.day === index),
-            }))
-          : sections.map((section) => ({
-              id: section.id,
-              label: sectionLabel(section, input),
-              values: filtered.filter((a) => a.section_id === section.id),
-            }))
-        ).map(
-          (group) =>
-            group.values.length > 0 && (
-              <section key={group.id} aria-label={`${group.label} timetable`}>
-                <h3>{group.label}</h3>
-                {group.values.map((a) => (
-                  <AssignmentCard
-                    key={a.id}
-                    assignment={a}
-                    input={input}
-                    showDay={grouping === 'section'}
-                    onEdit={onEdit}
-                  />
-                ))}
-              </section>
-            ),
-        )}
-      </div>
+      <WeekGrid
+        label="Weekly timetable"
+        entries={filtered.map(entry)}
+        agendaShowsDay={grouping === 'section'}
+        agendaGroups={
+          grouping === 'section'
+            ? sections.map((section) => ({
+                id: section.id,
+                label: sectionLabel(section, input),
+                entries: filtered.filter((a) => a.section_id === section.id).map(entry),
+              }))
+            : undefined
+        }
+        agendaControls={
+          <label>
+            Group timetable by
+            <select value={grouping} onChange={(e) => setGrouping(e.target.value)}>
+              <option value="day">Day</option>
+              <option value="section">Section</option>
+            </select>
+          </label>
+        }
+      />
       {!filtered.length && (
         <p>No sessions match these filters. Choose All to recover the complete timetable.</p>
       )}
@@ -159,58 +159,5 @@ export function SchedulingTimetable({
         </ul>
       </details>
     </>
-  );
-}
-
-function AssignmentCard({
-  assignment: a,
-  input,
-  showDay = false,
-  onEdit,
-}: {
-  assignment: Assignment;
-  input: GenerationInput;
-  showDay?: boolean;
-  onEdit?: (assignmentId: string) => void;
-}) {
-  const offering = input.offerings?.find((o) => o.id === a.offering_id);
-  const room = input.rooms?.find((r) => r.id === a.room_id);
-  const kind = sessionType(offering);
-  return (
-    <article
-      id={'assignment-' + a.id}
-      tabIndex={-1}
-      className="generated-session"
-      data-assignment-id={a.id}
-      data-session-type={kind.type}
-    >
-      <span className="session-type">{kind.label}</span>
-      <time>
-        {showDay && `${days[a.day]} · `}
-        {time(a.start)}–{time(a.end)}
-      </time>
-      <h4>{offering?.subject_name}</h4>
-      <strong>
-        {sectionLabel(
-          input.sections?.find((s) => s.id === a.section_id),
-          input,
-        )}
-      </strong>
-      <p>{input.teachers?.find((t) => t.id === a.teacher_id)?.name}</p>
-      <p>
-        {room?.name} · {room?.building}
-      </p>
-      <small>{a.end - a.start} instructional minutes</small>
-      {onEdit && (
-        <button
-          type="button"
-          className="button button--secondary generated-session__edit"
-          aria-label={`Edit ${assignmentLabel(a, input)}`}
-          onClick={() => onEdit(a.id)}
-        >
-          Edit
-        </button>
-      )}
-    </article>
   );
 }

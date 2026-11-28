@@ -18,16 +18,23 @@ const TeacherIssueReportPage = lazy(() =>
 export function ConnectedOperationsPage({ definition }: { definition: RouteDefinition }) {
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>{definition.title}</h1>
+      {/* Administrator reports and buildings render their own page header. */}
+      {definition.kind === 'report-issue' && (
+        <div className="page-heading">
+          <div>
+            <h1>{definition.title}</h1>
+          </div>
         </div>
-      </div>
+      )}
       <Suspense fallback={<ClassSyncPageLoader label="Loading this page…" />}>
         {definition.kind === 'report-issue' ? (
           <TeacherIssueReportPage />
         ) : definition.kind === 'reports' ? (
-          <ReportsPage key={definition.id} utilization={definition.id.endsWith('.utilization')} />
+          <ReportsPage
+            key={definition.id}
+            title={definition.title}
+            utilization={definition.id.endsWith('.utilization')}
+          />
         ) : (
           <BuildingsPage key={definition.id} detail={definition.kind === 'building-detail'} />
         )}

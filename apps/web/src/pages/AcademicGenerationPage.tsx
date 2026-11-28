@@ -26,15 +26,14 @@ import { WeeklySchedulingPage } from './WeeklySchedulingPage';
 import { IndependentValidation } from './TimetableValidation';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { InlineError } from '../components/ui/InlineError';
+import { PageHeader } from '../components/layout/PageHeader';
+import { MetaDetails } from '../components/layout/MetaDetails';
+import './scheduling.css';
 
 export function SchedulingSourcePage() {
   const [search] = useSearchParams();
   return (
     <div className="weekly-scheduler ux-generator">
-      <p className="ux-engine-note">
-        Constraint-based automated scheduling · OR-Tools. Language-model recommendations are
-        planned.
-      </p>
       {appMode === 'sandbox' && search.get('source') === 'synthetic' ? (
         <>
           <p>Explicit synthetic engine test scenario</p>
@@ -43,6 +42,12 @@ export function SchedulingSourcePage() {
       ) : (
         <AcademicGenerationPage />
       )}
+      <MetaDetails summary="About generation">
+        <p>
+          Constraint-based automated scheduling · OR-Tools. Language-model recommendations are
+          planned.
+        </p>
+      </MetaDetails>
     </div>
   );
 }
@@ -299,21 +304,30 @@ function AcademicGenerationPage() {
   const afterGeneration = saveStatus === 'saved' ? 4 : saveStatus === 'saving' ? 3 : 2;
   const step = success ? afterGeneration : period ? 1 : 0;
   return (
-    <div className="ux-generation-flow" aria-busy={busy}>
+    <div className="ux-generation-flow scheduling-page" aria-busy={busy}>
+      <PageHeader
+        title="Generate a weekly timetable"
+        meta={
+          <span>{checked?.inputs?.synthetic ? 'Sample data' : 'Local academic records'}</span>
+        }
+        actions={
+          <Link className="button button--secondary" to="/admin/schedule-manager/drafts?source=academic">
+            Saved Drafts
+          </Link>
+        }
+      />
       <ol className="ux-steps" aria-label="Scheduling steps">
         {['Select period', 'Generate', 'Review', 'Save draft', 'Publish'].map((name, index) => (
-          <li key={name} aria-current={index === step ? 'step' : undefined}>
+          <li
+            key={name}
+            data-done={index < step || undefined}
+            aria-current={index === step ? 'step' : undefined}
+          >
             {name}
           </li>
         ))}
       </ol>
       <section className="workspace-card ux-generation-setup">
-        <div className="ux-section-heading">
-          <h2>Generate a weekly timetable</h2>
-          <span className="muted">
-            {checked?.inputs?.synthetic ? 'Sample data' : 'Local academic records'}
-          </span>
-        </div>
         <label>
           Academic period
           <select
@@ -492,9 +506,6 @@ function AcademicGenerationPage() {
           )}
         </section>
       )}
-      <Link className="text-action" to="/admin/schedule-manager/drafts?source=academic">
-        Saved Drafts
-      </Link>
     </div>
   );
 }

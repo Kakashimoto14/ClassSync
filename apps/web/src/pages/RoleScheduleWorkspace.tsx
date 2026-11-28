@@ -25,6 +25,9 @@ import { periodLabel, shouldAnnounceConnectionLoss } from '../lib/workspace-cont
 import type { UserRole } from '../types/ui';
 import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
 import { INSTITUTES, instituteCode } from '../lib/program-scope';
+import { PublishedTimetable } from './PublishedTimetable';
+import { PageHeader } from '../components/layout/PageHeader';
+import '../components/scheduling/week-grid.css';
 
 const catalogInstitutes = new Map(
   suppliedAcademicProgramCatalog.map((program) => [program.id, instituteCode(program.institute)]),
@@ -55,6 +58,8 @@ export function RoleScheduleWorkspace({
     : allRecords;
   const [expanded, setExpanded] = useState(false);
   const view = context.view ?? 'week';
+  // The Administrator timetable has its own command bar and week matrix.
+  const campus = role === 'administrator' && !dashboard;
   const isPresentation = context.mode === 'presentation';
   const isSample = schedulingSandboxEnabled || isPresentation;
   const settings = useRef<HTMLDetailsElement>(null);
@@ -115,6 +120,36 @@ export function RoleScheduleWorkspace({
       className={`structured-calendar ux-calendar ${dashboard ? 'is-dashboard' : ''}`}
       data-published-version={context.mode === 'published' ? (data?.version ?? '') : ''}
     >
+      {campus && (
+        <PageHeader
+          title={
+            context.mode === 'review'
+              ? 'Timetable review'
+              : isPresentation
+                ? 'Sample timetable'
+                : 'Published timetable'
+          }
+          meta={<span>{scopeLabel}</span>}
+          actions={
+            !isSample && (
+              <nav aria-label="Schedule management" className="page-header__actions">
+                <Link className="button button--secondary" to="/admin/academic">
+                  Manage academic inputs
+                </Link>
+                <Link
+                  className="button button--secondary"
+                  to="/admin/schedule-manager/drafts?source=academic"
+                >
+                  Review drafts
+                </Link>
+                <Link className="button" to="/admin/schedule-manager/create">
+                  Generate timetable
+                </Link>
+              </nav>
+            )
+          }
+        />
+      )}
       {dashboard && (
         <div className="ux-day-heading">
           <p className="eyebrow">{calendarDateLabel(manilaToday())}</p>
@@ -141,7 +176,7 @@ export function RoleScheduleWorkspace({
         <details className="ux-context-settings" ref={settings}>
           <summary>Change context</summary>
           <div className="ux-context-controls">
-            {role === 'administrator' && (data?.sections.length ?? 0) > 0 && (
+            {role === 'administrator' && !campus && (data?.sections.length ?? 0) > 0 && (
               <>
                 <label>
                   Institute
@@ -450,7 +485,25 @@ export function RoleScheduleWorkspace({
           </Link>
         </div>
       )}
-      {!dashboard && data && !unpublished && (
+      {campus && data && !unpublished && !error && (
+        <PublishedTimetable
+          records={records}
+          date={date}
+          onDate={(value) => change({ date: value })}
+          institute={institute}
+          onInstitute={(value) => {
+            setInstitute(value);
+            setProgram('all');
+          }}
+          program={program}
+          programIds={programIds}
+          onProgram={setProgram}
+          exportable={context.mode === 'published' && !loading}
+          loading={loading}
+          onSelect={setSelected}
+        />
+      )}
+      {!campus && !dashboard && data && !unpublished && (
         <>
           <div className="calendar-toolbar">
             <Button variant="secondary" aria-label="Previous month" onClick={() => move(-1)}>
@@ -605,7 +658,7 @@ export function RoleScheduleWorkspace({
           )}
         </>
       )}
-      {data && !unpublished && !error && (!dashboard || agenda.length > 0) && (
+      {!campus && data && !unpublished && !error && (!dashboard || agenda.length > 0) && (
         <section className="ux-agenda" aria-live="polite">
           <div className="ux-section-heading">
             <h2>{dashboard ? 'Remaining today' : calendarDateLabel(date)}</h2>

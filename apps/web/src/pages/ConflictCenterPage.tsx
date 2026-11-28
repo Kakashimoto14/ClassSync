@@ -11,6 +11,10 @@ import { SchedulingTimetable } from './SchedulingTimetable';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { InlineError } from '../components/ui/InlineError';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
+import { MetaDetails } from '../components/layout/MetaDetails';
+import './scheduling.css';
 import { appMode } from '../config/runtime-config';
 const connectedWorkspace = appMode === 'institutional' || schedulingSandboxEnabled;
 export function ConflictCenterPage() {
@@ -65,16 +69,31 @@ export function ConflictCenterPage() {
       </p>
     );
   return (
-    <div className="weekly-scheduler admin-conflicts">
-      <header className="admin-conflicts__intro"><p className="eyebrow">Deterministic validation</p><p>Validate a saved timetable against its exact academic snapshot before review or publication.</p><span className="status status--info">Independent validator</span></header>
-      <div className="admin-conflicts__toolbar"><label>
-        Timetable draft
-        <select value={id} onChange={(e) => setId(e.target.value)}>
-          <option value="">{drafts.length ? 'Choose a draft' : 'No saved drafts'}</option>
-          {drafts.map((d) => (<option key={d.id} value={d.id}>{d.title}</option>))}
-        </select>
-      </label><Button disabled={!id || loading} onClick={() => setRetry((n) => n + 1)}>Validate selected draft</Button></div>
-      <p className="conflict-validation-note">Deterministic independent validation · language-model explanations are not enabled.</p>
+    <div className="weekly-scheduler admin-conflicts scheduling-page">
+      <PageHeader
+        title="Conflict center"
+        meta={<span>Check a saved timetable against its exact academic snapshot.</span>}
+        actions={
+          <Button disabled={!id || loading} onClick={() => setRetry((n) => n + 1)}>
+            Validate selected draft
+          </Button>
+        }
+      />
+      <CommandBar label="Draft to validate">
+        <CommandField label="Timetable draft" wide>
+          <select value={id} onChange={(e) => setId(e.target.value)}>
+            <option value="">{drafts.length ? 'Choose a draft' : 'No saved drafts'}</option>
+            {drafts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.title}
+              </option>
+            ))}
+          </select>
+        </CommandField>
+      </CommandBar>
+      <MetaDetails summary="How validation works">
+        <p>Deterministic independent validation · language-model explanations are not enabled.</p>
+      </MetaDetails>
       {error && (
         <InlineError
           title="Couldn't load saved timetables"
@@ -88,7 +107,6 @@ export function ConflictCenterPage() {
       {loading && <ClassSyncSkeleton layout="table" label="Loading saved timetables" />}
       {!loading && !drafts.length && !error && (
         <section className="workspace-card conflict-empty-state">
-          <p className="academic-setup__eyebrow">Nothing to validate yet</p>
           <h2>Generate a draft first</h2>
           <p>
             The conflict center reviews saved timetable drafts against their original academic

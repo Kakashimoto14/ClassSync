@@ -1,0 +1,276 @@
+/* Administrator Dashboard and Academic Setup. Lazy with AcademicManagementPage. */
+.academic-management {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.academic-management > .workspace-card {
+  margin: 0;
+  padding: 16px;
+}
+.academic-management .academic-cta {
+  margin: 0;
+}
+.academic-management .academic-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.academic-management .academic-tabs a {
+  min-height: var(--control-h);
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.academic-management .academic-tabs a[aria-current='page'] {
+  border-bottom-color: var(--brand-crimson);
+  color: var(--brand-crimson);
+  font-weight: 650;
+}
+.academic-record-count {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+}
+
+.academic-setup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.academic-setup__progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.academic-setup__progress strong {
+  font-weight: 600;
+}
+.academic-setup__progress progress {
+  width: 140px;
+  height: 8px;
+  accent-color: var(--brand-crimson);
+}
+
+/* Six steps share one surface; hairlines separate them. */
+.academic-setup__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  list-style: none;
+}
+.academic-setup__step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 1fr auto;
+  align-items: start;
+  gap: 4px 8px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--surface-primary);
+}
+.academic-setup__step-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand-crimson-soft);
+  color: var(--brand-crimson);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.academic-setup__step--ready .academic-setup__step-number {
+  background: var(--status-success-soft);
+  color: var(--status-success-ink);
+}
+.academic-setup__step h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.academic-setup__step > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.academic-setup__step > .academic-setup__step-count {
+  grid-column: 1 / 3;
+  align-self: center;
+  color: var(--ink-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.academic-setup__step > .button {
+  grid-column: 3;
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: 0.8125rem;
+}
+@media (min-width: 640px) {
+  .academic-setup__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .academic-setup__steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (pointer: coarse) {
+  .academic-setup__step > .button {
+    min-height: var(--control-h);
+  }
+}
+
+.academic-setup__calendar {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+}
+.academic-setup__calendar > summary {
+  min-height: var(--control-h);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.academic-setup__calendar > .ux-calendar {
+  margin: 0;
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Setup areas: a tab row over one surface. */
+.academic-setup__jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.academic-setup__jump button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-h);
+  padding: 4px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-primary);
+  color: var(--ink-primary);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.academic-setup__jump button[aria-pressed='true'] {
+  border-color: var(--brand-crimson);
+  background: var(--brand-crimson-soft);
+  color: var(--brand-crimson);
+}
+.academic-setup-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
+  scroll-margin-top: 96px;
+}
+.academic-setup-card--editing {
+  border-color: var(--brand-crimson);
+}
+.academic-setup-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.academic-setup-card__header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.academic-setup-card__header p {
+  margin: 2px 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+}
+.academic-setup-card__records {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.academic-setup-card__records li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+.academic-setup-card__records li > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.academic-setup-card__records :is(span, strong) {
+  overflow-wrap: break-word;
+}
+.academic-setup-card__records span,
+.academic-setup-card__empty {
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+}
+.academic-setup-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.academic-program-preview {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+/* Destructive actions stay quiet until the confirmation dialog. */
+.academic-setup .button.quiet-danger {
+  color: var(--status-danger-ink);
+}
+.academic-setup .button.quiet-danger:hover:not(:disabled) {
+  background: var(--status-danger-soft);
+}
+
+/* The record editor sits on the area's surface rather than in a card of its own. */
+.academic-setup-card .academic-record-form {
+  margin: 0;
+  padding: 12px 0 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  box-shadow: none;
+}
+.academic-setup__calendar .workspace-card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+}

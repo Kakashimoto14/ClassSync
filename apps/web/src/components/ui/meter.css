@@ -1,0 +1,47 @@
+.meter {
+  display: inline-grid;
+  grid-template-columns: minmax(64px, 160px) 6ch 4ch;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.meter__track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-subtle);
+}
+.meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+/* Fills keep at least 3:1 against the track. */
+.meter--ok .meter__fill {
+  background: var(--status-success-ink);
+}
+.meter--high .meter__fill {
+  background: var(--status-warning-ink);
+}
+.meter--over .meter__fill {
+  background: var(--status-danger-ink);
+}
+.meter__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.meter__tone {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.meter--high .meter__tone {
+  color: var(--status-warning-ink);
+}
+.meter--over .meter__tone {
+  color: var(--status-danger-ink);
+}
+.meter--empty {
+  display: inline;
+  color: var(--ink-secondary);
+}

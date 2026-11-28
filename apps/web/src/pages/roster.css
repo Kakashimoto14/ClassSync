@@ -1,0 +1,147 @@
+/* Administrator student roster. Lazy with AcademicStudentRosterPage. */
+.student-roster .student-roster-select {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.student-roster .data-table .table :is(th, td) {
+  padding: 8px 10px;
+}
+.student-roster .data-table .table :is(.student-roster-id, .student-roster-status) {
+  white-space: nowrap;
+}
+.student-roster input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand-crimson);
+}
+.student-roster-name strong {
+  display: block;
+}
+.student-roster-name small,
+.student-roster-section small {
+  display: block;
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.student-roster .row-actions .button--ghost {
+  border: 1px solid transparent;
+  color: var(--status-danger-ink);
+}
+.student-roster .row-actions .button--ghost:hover:not(:disabled) {
+  border-color: var(--status-danger-border);
+  background: var(--status-danger-soft);
+}
+.student-roster-hint {
+  display: block;
+  max-width: 240px;
+  margin: 4px 0 0 auto;
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
+  text-align: right;
+}
+.student-roster-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Floats over the list while rows are selected, clear of the phone navigation. */
+.bulk-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-elevated);
+}
+.bulk-bar > strong {
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+}
+.bulk-bar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+.bulk-bar .button {
+  width: auto;
+}
+@media (max-width: 1023px) {
+  .bulk-bar {
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 8px);
+  }
+}
+@media (max-width: 699px) {
+  /* Keep "select all" reachable when rows stack. */
+  .student-roster .data-table--stack .table thead {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .student-roster .data-table--stack .table thead tr {
+    display: block;
+    padding: 4px 0;
+  }
+  .student-roster .data-table--stack .table thead th {
+    display: none;
+  }
+  .student-roster .data-table--stack .table thead th:first-child {
+    display: flex;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+  }
+  .student-roster .data-table--stack .table thead th:first-child::after {
+    content: 'Select all on this page';
+  }
+  .student-roster-hint {
+    margin-left: 0;
+    text-align: left;
+  }
+}
+
+.student-roster .student-roster-form {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  align-items: start;
+}
+.student-roster .student-roster-form > :is(h3, p, .draft-actions) {
+  grid-column: 1 / -1;
+}
+
+/* Search, four filters and both actions fit one row from 1280px. */
+.student-roster .command-bar .command-field {
+  flex: 1 1 112px;
+}
+.student-roster .command-bar .command-field--wide {
+  flex: 2 1 168px;
+}
+@media (max-width: 599px) {
+  .student-roster .command-bar :is(.command-field, .command-field--wide) {
+    flex-basis: 100%;
+  }
+}
+@media (min-width: 1280px) {
+  .student-roster .command-bar .command-field:nth-of-type(2) {
+    flex: 0 1 184px;
+  }
+  .student-roster .command-bar .command-field:nth-of-type(n + 3) {
+    flex: 0 1 128px;
+  }
+  .student-roster .command-bar .command-field--wide {
+    flex: 1 1 150px;
+  }
+}

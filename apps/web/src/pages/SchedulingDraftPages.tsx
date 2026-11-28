@@ -26,6 +26,10 @@ import {
   slotLabel,
 } from '../lib/scheduling-labels';
 import { InlineError } from '../components/ui/InlineError';
+import { PageHeader } from '../components/layout/PageHeader';
+import { KpiStrip } from '../components/layout/KpiStrip';
+import { MetaDetails } from '../components/layout/MetaDetails';
+import './scheduling.css';
 import { PublicationPanel } from './PublicationPanel';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 
@@ -195,14 +199,30 @@ function DraftListContent({
     setOffset(next);
   };
   return (
-    <div className="weekly-scheduler">
-      <p className="scheduling-boundary">
-        {appMode === 'institutional' ? 'University academic schedules' : 'Development sandbox'} ·{' '}
-        {source === 'academic'
-          ? 'Saved user-entered academic drafts'
-          : 'Saved synthetic test drafts'}{' '}
-        · Unpublished
-      </p>
+    <div className="weekly-scheduler scheduling-page">
+      <PageHeader
+        title="Saved drafts"
+        meta={<span>Unpublished timetables awaiting review.</span>}
+        actions={
+          <>
+            <Link className="button button--secondary" to="/admin/schedule-manager">
+              Back to Schedule Manager
+            </Link>
+            <Link className="button" to="/admin/ai-scheduling">
+              Generate Weekly Schedule
+            </Link>
+          </>
+        }
+      />
+      <MetaDetails summary="About these drafts">
+        <p>
+          {appMode === 'institutional' ? 'University academic schedules' : 'Development sandbox'} ·{' '}
+          {source === 'academic'
+            ? 'Saved user-entered academic drafts'
+            : 'Saved synthetic test drafts'}{' '}
+          · Unpublished
+        </p>
+      </MetaDetails>
       {schedulingSandboxEnabled && (
         <details>
           <summary>Browse another draft collection</summary>
@@ -215,14 +235,6 @@ function DraftListContent({
           </label>
         </details>
       )}
-      <div className="draft-actions">
-        <Link className="button" to="/admin/ai-scheduling">
-          Generate Weekly Schedule
-        </Link>
-        <Link className="text-action" to="/admin/schedule-manager">
-          Back to Schedule Manager
-        </Link>
-      </div>
       {!data && !error && <ClassSyncSkeleton layout="table" label="Loading saved drafts" />}
       {error && <InlineError title="Couldn't load saved drafts" message={error} onRetry={reload} />}
       {data && (
@@ -232,9 +244,9 @@ function DraftListContent({
               ? `Showing ${offset + 1}–${offset + data.drafts.length} saved drafts.`
               : 'No saved drafts yet. Generate and validate a timetable, then save it here.'}
           </p>
-          <ul className="saved-drafts-list" aria-label="Saved scheduling drafts">
+          <ul className="draft-list" aria-label="Saved scheduling drafts">
             {data.drafts.map((draft) => (
-              <li key={draft.id} className="workspace-card saved-draft-row">
+              <li key={draft.id}>
                 <div>
                   <h2>{draft.title}</h2>
                   <p>
@@ -243,7 +255,12 @@ function DraftListContent({
                   <p>
                     {draft.offerings_scheduled}/{draft.offerings_requested} offerings ·{' '}
                     {draft.session_count} sessions · {draft.allocated_minutes}/
-                    {draft.required_minutes} min
+                    {draft.required_minutes} min ·{' '}
+                    {draft.source === 'development-entered'
+                      ? 'Local academic records'
+                      : draft.source === 'synthetic-preview'
+                        ? 'Synthetic engine sample'
+                        : 'Institutional'}
                   </p>
                 </div>
                 <div className="draft-actions">
@@ -253,14 +270,6 @@ function DraftListContent({
                       ? `Validated · ${draft.hard_conflict_count} conflicts`
                       : 'Validation unavailable'}
                   </StatusBadge>
-                  <span className="source-label">
-                    {draft.source === 'development-entered'
-                      ? 'Local academic records'
-                      : draft.source === 'synthetic-preview'
-                        ? 'Synthetic engine sample'
-                        : 'Institutional'}{' '}
-                    · {draft.solver_status}
-                  </span>
                   <Link
                     className="button button--secondary"
                     to={draftPath(draft.id, source)}
@@ -330,14 +339,14 @@ function DraftDetailContent({
     if (draft) heading.current?.focus({ preventScroll: true });
   }, [draft]);
   if (!schedulingWorkspaceEnabled) return <DraftUnavailable />;
+  const back = `/admin/schedule-manager/drafts${source === 'academic' ? '?source=academic' : ''}`;
   return (
-    <div className="weekly-scheduler">
-      <Link
-        className="text-action"
-        to={`/admin/schedule-manager/drafts${source === 'academic' ? '?source=academic' : ''}`}
-      >
-        Back to Saved Drafts
-      </Link>
+    <div className="weekly-scheduler scheduling-page">
+      {!draft && (
+        <Link className="page-header__back" to={back}>
+          Back to Saved Drafts
+        </Link>
+      )}
       {!draft && !error && <ClassSyncSkeleton layout="timetable" label="Loading saved timetable" />}
       {error && (
         <InlineError
@@ -351,35 +360,40 @@ function DraftDetailContent({
       )}
       {draft && (
         <>
-          <section
-            className="workspace-card saved-draft-summary"
-            aria-labelledby="saved-draft-title"
-          >
-            <h2 id="saved-draft-title" tabIndex={-1} ref={heading}>
-              {draft.title}
-            </h2>
-            <div className="draft-actions">
-              <StatusBadge tone="neutral">Draft · Unpublished</StatusBadge>
-              <StatusBadge tone="success">{`Validated · ${draft.solver_status}`}</StatusBadge>
-            </div>
-            <p className="scheduling-boundary">
-              {draft.source === 'synthetic-preview'
-                ? 'Synthetic preview'
-                : draft.source === 'development-entered'
-                  ? 'Development-entered academic data'
-                  : 'Institutional data'}{' '}
-              · Immutable draft snapshot. Publication creates a separate version; saving or
-              reopening this draft never publishes it.
-            </p>
-            <p role="status">
-              {draft.offerings_scheduled}/{draft.offerings_requested} offerings ·{' '}
-              {draft.session_count} sessions · {draft.allocated_minutes}/{draft.required_minutes}{' '}
-              instructional minutes · {draft.hard_conflict_count} hard conflicts
-            </p>
-            <p>
-              Saved <time dateTime={draft.created_at}>{created(draft.created_at)}</time>
-            </p>
-          </section>
+          <PageHeader
+            title={draft.title}
+            titleId="saved-draft-title"
+            titleRef={heading}
+            back={
+              <Link className="page-header__back" to={back}>
+                Back to Saved Drafts
+              </Link>
+            }
+            meta={
+              <>
+                <StatusBadge tone="neutral">Draft · Unpublished</StatusBadge>
+                <StatusBadge tone="success">{`Validated · ${draft.solver_status}`}</StatusBadge>
+                <span>
+                  Saved <time dateTime={draft.created_at}>{created(draft.created_at)}</time>
+                </span>
+              </>
+            }
+          />
+          <KpiStrip
+            label="Draft summary"
+            items={[
+              {
+                label: 'Offerings scheduled',
+                value: `${draft.offerings_scheduled}/${draft.offerings_requested}`,
+              },
+              { label: 'Weekly sessions', value: draft.session_count },
+              {
+                label: 'Instructional minutes',
+                value: `${draft.allocated_minutes}/${draft.required_minutes}`,
+              },
+              { label: 'Hard conflicts', value: draft.hard_conflict_count },
+            ]}
+          />
           <SchedulingTimetable
             key={draft.id}
             input={draft.input_snapshot}
@@ -408,8 +422,16 @@ function DraftDetailContent({
               regeneration was performed.
             </p>
           </section>
-          <details>
-            <summary>Saved draft provenance</summary>
+          <MetaDetails summary="Saved draft provenance">
+            <p>
+              {draft.source === 'synthetic-preview'
+                ? 'Synthetic preview'
+                : draft.source === 'development-entered'
+                  ? 'Development-entered academic data'
+                  : 'Institutional data'}{' '}
+              · Immutable draft snapshot. Publication creates a separate version; saving or
+              reopening this draft never publishes it.
+            </p>
             <p>Draft reference: {draft.id}</p>
             <p>
               Creator: {draft.creator} · Data version: {draft.data_version} · Schema:{' '}
@@ -424,7 +446,7 @@ function DraftDetailContent({
               {draft.generation_result.metadata.objective ?? 'unavailable'} · bound{' '}
               {draft.generation_result.metadata.best_bound ?? 'unavailable'}
             </p>
-          </details>
+          </MetaDetails>
         </>
       )}
     </div>
@@ -484,21 +506,21 @@ function DraftAdvisorPanel({ draft }: { draft: DraftDetail }) {
     <section className="workspace-card" aria-labelledby="draft-advisor-heading" aria-busy={busy}>
       <h2 id="draft-advisor-heading">Optional schedule advisor</h2>
       <p>Suggestions are advisory. Deterministic validation remains the authority.</p>
-      <label>Assignment to review<select value={targetId} onChange={(event) => setTargetId(event.target.value)}>
+      <div className="panel-form"><label>Assignment to review<select value={targetId} onChange={(event) => setTargetId(event.target.value)}>
         {draft.generation_result.assignments.map((item) => <option key={item.id} value={item.id}>
           {assignmentLabel(item, draft.input_snapshot)}
         </option>)}
-      </select></label>
+      </select></label></div>
       <div className="draft-actions">
-        <Button loading={busy} disabled={busy} onClick={() => void analyze('conflict')}>Ask AI for conflict options</Button>
+        <Button variant="secondary" loading={busy} disabled={busy} onClick={() => void analyze('conflict')}>Ask AI for conflict options</Button>
         <Button variant="secondary" loading={busy} disabled={busy} onClick={() => void analyze('health')}>Analyze Draft with AI</Button>
       </div>
       {error && <p role="alert">{readable(error)}</p>}
-      {advice && <div role="status"><p>{readable(advice.message)}</p><ul>{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
+      {advice && <div role="status"><p>{readable(advice.message)}</p><ul className="advice-list">{advice.suggestions.map((item, index) => <li key={typeof item === 'string' ? item : `${item.assignment.id}-${index}`}>
         {typeof item === 'string' ? readable(item) : <>
           <span>{readable(item.reason)}</span>
           {[item.assignment, ...(item.also_moves ? [item.also_moves] : [])].map((move) => <MoveSummary key={move.id} move={move} draft={draft} />)}
-          <Button loading={busy} disabled={busy} onClick={() => void apply(item.assignment, item.also_moves)}>Apply as validated revision</Button>
+          <Button variant="secondary" loading={busy} disabled={busy} onClick={() => void apply(item.assignment, item.also_moves)}>Apply as validated revision</Button>
         </>}
       </li>)}</ul></div>}
     </section>
@@ -511,15 +533,24 @@ function MoveSummary({ move, draft }: { move: Assignment; draft: DraftDetail }) 
   const before = draft.generation_result.assignments.find((item) => item.id === move.id);
   if (!before) return null;
   const changes = [
-    before.room_id !== move.room_id &&
+    before.room_id !== move.room_id && [
+      'Room',
       `${roomLabel(before.room_id, input)} → ${roomLabel(move.room_id, input)}`,
-    (before.day !== move.day || before.start !== move.start) &&
+    ],
+    (before.day !== move.day || before.start !== move.start) && [
+      'Time',
       `${slotLabel(before)} → ${slotLabel(move)}`,
-  ].filter(Boolean);
+    ],
+  ].filter((change): change is string[] => Boolean(change));
   return (
     <p className="move-summary">
       <span>{input.offerings?.find((item) => item.id === move.offering_id)?.subject_name}</span>
-      <span className="move-pill">{changes.join(' · ') || 'No change'}</span>
+      {changes.map(([kind, text]) => (
+        <span className="move-change" key={kind}>
+          <span className="diff-label">{kind}</span> <span className="move-pill">{text}</span>
+        </span>
+      ))}
+      {!changes.length && <span className="move-pill">No change</span>}
     </p>
   );
 }
@@ -584,12 +615,12 @@ function DraftAssignmentEditor({
     <section ref={section} className="workspace-card draft-editor" aria-labelledby="draft-edit-heading" aria-busy={busy}>
       <h2 id="draft-edit-heading">Edit draft assignment</h2>
       <p>Changes create a separate draft. The original remains unchanged until you review and publish the revision.</p>
-      <label>Class assignment<select ref={picker} value={selectedId} onChange={(event) => select(event.target.value)}>{assignments.map((item) => <option key={item.id} value={item.id}>{assignmentLabel(item, draft.input_snapshot)}</option>)}</select></label>
+      <div className="panel-form"><label>Class assignment<select ref={picker} value={selectedId} onChange={(event) => select(event.target.value)}>{assignments.map((item) => <option key={item.id} value={item.id}>{assignmentLabel(item, draft.input_snapshot)}</option>)}</select></label>
       {selected && <>
         <label>Room<select value={room} onChange={(event) => setRoom(event.target.value)}>{(draft.input_snapshot.rooms ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <label>Day<select value={day} onChange={(event) => setDay(Number(event.target.value))}>{DAY_NAMES.map((item, index) => <option key={item} value={index}>{item}</option>)}</select></label>
         <label>Start time<input type="time" value={start} onChange={(event) => setStart(event.target.value)} /></label>
-      </>}
+      </>}</div>
       {error && <p role="alert">{readableText(error, assignments, draft.input_snapshot)}</p>}
       <Button loading={busy} disabled={busy || !selected} onClick={() => void save()}>Save validated revision</Button>
     </section>

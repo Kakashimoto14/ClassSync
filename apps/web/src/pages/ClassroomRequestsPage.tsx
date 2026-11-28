@@ -7,6 +7,9 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { institutionalRequest } from '../lib/institutional-api';
 import { rolePath } from '../routes/route-config';
 import { IssueTriagePanel } from './IssueTriagePanel';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar } from '../components/layout/CommandBar';
+import './triage.css';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { periodLabel } from '../lib/workspace-context';
 import type { CalendarOccurrence } from '../lib/calendar-model';
@@ -262,8 +265,15 @@ export function ClassroomRequestsPage({
     detail ? request.id === detailId : statusFilter === 'all' || request.status === statusFilter,
   );
   const unavailable = detail && (missing || (requests !== null && !shown?.length));
-  const tabs = role === 'administrator' && !detail && (
-    <div className="admin-filter-pills" role="group" aria-label="Request type">
+  const campus = role === 'administrator';
+  const header = campus && (
+    <PageHeader
+      title={detail ? 'Classroom request' : 'Requests and issue reports'}
+      meta={<span>Teacher classroom changes and facility reports awaiting a decision.</span>}
+    />
+  );
+  const tabs = campus && !detail && (
+    <div className="segmented" role="group" aria-label="Request type">
       {(['requests', 'issues'] as const).map((tab) => (
         <button
           key={tab}
@@ -278,36 +288,46 @@ export function ClassroomRequestsPage({
   );
   if (issuesTab)
     return (
-      <section className="admin-requests">
+      <section className="admin-requests triage">
+        {header}
         {tabs}
         <IssueTriagePanel />
       </section>
     );
   return (
-    <section className="admin-requests" aria-busy={busy}>
+    <section className={`admin-requests${campus ? ' triage' : ''}`} aria-busy={busy}>
+      {header}
       {tabs}
-      <div className="admin-screen-actions admin-requests-actions">
-        {detail && (
-          <Link className="text-action" to={rolePath(role, 'requests')}>
-            Back to requests
-          </Link>
-        )}
-        {role === 'teacher' && !detail && (
-          <Link className="button" to="/teacher/change-requests/new">
-            Request a classroom change
-          </Link>
-        )}
-        <Button variant="secondary" onClick={() => setReload((value) => value + 1)} disabled={busy}>
-          Reload requests
-        </Button>
-      </div>
-      {role === 'administrator' && !detail && (
-        <div className="admin-filter-pills" role="group" aria-label="Filter classroom requests">
-          {(['all', 'pending', 'approved', 'rejected', 'fulfilled'] as const).map((status) => {
-            const count = status === 'all' ? requests?.length ?? 0 : requests?.filter((item) => item.status === status).length ?? 0;
-            const label = status === 'all' ? 'All' : stateLabel[status];
-            return <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}>{label}<span>{count}</span></button>;
-          })}
+      {campus && !detail ? (
+        <CommandBar label="Request filters">
+          <div className="admin-filter-pills" role="group" aria-label="Filter classroom requests">
+            {(['all', 'pending', 'approved', 'rejected', 'fulfilled'] as const).map((status) => {
+              const count = status === 'all' ? requests?.length ?? 0 : requests?.filter((item) => item.status === status).length ?? 0;
+              const label = status === 'all' ? 'All' : stateLabel[status];
+              return <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}>{label}<span>{count}</span></button>;
+            })}
+          </div>
+          <div className="command-bar__end">
+            <Button variant="secondary" onClick={() => setReload((value) => value + 1)} disabled={busy}>
+              Reload requests
+            </Button>
+          </div>
+        </CommandBar>
+      ) : (
+        <div className="admin-screen-actions admin-requests-actions">
+          {detail && (
+            <Link className="text-action" to={rolePath(role, 'requests')}>
+              Back to requests
+            </Link>
+          )}
+          {role === 'teacher' && !detail && (
+            <Link className="button" to="/teacher/change-requests/new">
+              Request a classroom change
+            </Link>
+          )}
+          <Button variant="secondary" onClick={() => setReload((value) => value + 1)} disabled={busy}>
+            Reload requests
+          </Button>
         </div>
       )}
       {loadError && (
@@ -372,6 +392,8 @@ export function ClassroomRequestsPage({
               />
               <div className="draft-actions">
                 <Button
+                  // One solid action: the oldest listed pending request.
+                  variant={pendingIndex === 0 ? 'primary' : 'secondary'}
                   loading={busy}
                   disabled={busy || blocked || (notes[request.id]?.trim().length ?? 0) < 3}
                   onClick={() => void decide(request, 'approved')}

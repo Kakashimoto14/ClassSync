@@ -3,6 +3,12 @@ import { timetableRequest } from '../lib/publication-api';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { InlineError } from '../components/ui/InlineError';
+import { Button } from '../components/ui/Button';
+import { DataTable } from '../components/ui/DataTable';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar, CommandField } from '../components/layout/CommandBar';
+import { MetaDetails } from '../components/layout/MetaDetails';
+import './admin-operations.css';
 
 const HISTORY_PAGE_SIZE = 50;
 
@@ -31,6 +37,17 @@ const eventLabel: Record<string, string> = {
   'academic.student.deleted': 'Student removed from roster',
   'academic.roster.imported': 'Student roster imported',
   'scheduling.restriction.saved': 'Room restriction saved',
+};
+
+const moment = (value: string) => {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? value
+    : new Intl.DateTimeFormat('en-PH', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Asia/Manila',
+      }).format(parsed);
 };
 
 export function PublicationAuditPage() {
@@ -109,25 +126,28 @@ export function PublicationAuditPage() {
     };
   }, [period, historyOffset, attempt]);
   return (
-    <section className="workspace-card">
-      <h2>{schedulingSandboxEnabled ? 'Preview publication history' : 'Administrator activity'}</h2>
-      <label>
-        Academic period
-        <select
-          value={period}
-          onChange={(e) => {
-            setHistoryOffset(0);
-            setPeriod(e.target.value);
-          }}
-        >
-          <option value="">Choose a period</option>
-          {periods.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.title}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="admin-ops">
+      <PageHeader
+        title={schedulingSandboxEnabled ? 'Preview publication history' : 'Administrator activity'}
+      />
+      <CommandBar label="Activity filters">
+        <CommandField label="Academic period" wide>
+          <select
+            value={period}
+            onChange={(e) => {
+              setHistoryOffset(0);
+              setPeriod(e.target.value);
+            }}
+          >
+            <option value="">Choose a period</option>
+            {periods.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </CommandField>
+      </CommandBar>
       {periodsError && (
         <InlineError
           title="Couldn't load academic periods"
@@ -146,34 +166,65 @@ export function PublicationAuditPage() {
       {period && !error && !loading && events.length === 0 && (
         <p role="status">No activity is recorded for this period.</p>
       )}
-      <ul>
-        {events.map((event) => (
-          <li key={event.event_id}>
-            <strong>{eventLabel[event.event_type] ?? 'Administrative activity'}</strong>
-            {' · '}{event.entity_type}
-            {event.revision !== null && ` · revision ${event.revision}`}
-            {' · '}<time dateTime={event.created_at}>{event.created_at}</time>
-            {' · '}Administrator {event.actor_uid}
-          </li>
-        ))}
-      </ul>
+      {events.length > 0 && (
+        <DataTable
+          label="Recorded activity"
+          rows={events}
+          rowKey={(event) => event.event_id}
+          columns={[
+            {
+              header: 'Event',
+              cell: (event) => (
+                <span className="cell-title">
+                  {eventLabel[event.event_type] ?? 'Administrative activity'}
+                </span>
+              ),
+            },
+            { header: 'Record type', cell: (event) => <span>{event.entity_type}</span> },
+            {
+              header: 'Revision',
+              className: 'nowrap',
+              cell: (event) => (
+                <span>{event.revision === null ? '—' : `revision ${event.revision}`}</span>
+              ),
+            },
+            {
+              header: 'When',
+              className: 'nowrap',
+              cell: (event) => (
+                <time dateTime={event.created_at}>{moment(event.created_at)}</time>
+              ),
+            },
+            {
+              header: 'Actor',
+              cell: (event) => (
+                <MetaDetails summary="Administrator">
+                  <p>Account reference: {event.actor_uid}</p>
+                </MetaDetails>
+              ),
+            },
+          ]}
+        />
+      )}
       {schedulingSandboxEnabled && period && !error && (
-        <nav aria-label="Publication history pages">
-          <button
+        <nav className="history-pager" aria-label="Publication history pages">
+          <Button
             type="button"
+            variant="secondary"
             disabled={loading || historyOffset === 0}
             onClick={() => setHistoryOffset((current) => Math.max(0, current - HISTORY_PAGE_SIZE))}
           >
             Newer history
-          </button>
+          </Button>
           <span>Page {Math.floor(historyOffset / HISTORY_PAGE_SIZE) + 1}</span>
-          <button
+          <Button
             type="button"
+            variant="secondary"
             disabled={loading || !historyHasMore}
             onClick={() => setHistoryOffset((current) => current + HISTORY_PAGE_SIZE)}
           >
             Older history
-          </button>
+          </Button>
         </nav>
       )}
       <p className="muted">
@@ -181,6 +232,6 @@ export function PublicationAuditPage() {
           ? 'Preview mode shows publication history only; it is not an authoritative activity audit.'
           : 'Events are recorded by PostgreSQL and contain event metadata only, not academic record payloads.'}
       </p>
-    </section>
+    </div>
   );
 }

@@ -9,6 +9,10 @@ import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicRecordEditor } from './AcademicRecordEditor';
 import { suppliedAcademicProgramCatalog } from '../data/academic-program-catalog';
 import { appMode } from '../config/runtime-config';
+import { PageHeader } from '../components/layout/PageHeader';
+import { CommandBar } from '../components/layout/CommandBar';
+import { KpiStrip } from '../components/layout/KpiStrip';
+import { MetaDetails } from '../components/layout/MetaDetails';
 
 const PeriodLifecycleControls = lazy(() =>
   import('./PeriodLifecycleControls').then((module) => ({ default: module.PeriodLifecycleControls })),
@@ -162,28 +166,31 @@ export function AcademicPeriodSetup({
 
   return (
     <section className="academic-setup" aria-labelledby="academic-setup-title">
-      <header className="academic-setup__header">
-        <div className="academic-setup__title">
-          <h2 id="academic-setup-title">Set up {periodLabel(snapshot.period)}</h2>
-          <p className="academic-setup__meta">
-            <StatusBadge tone="neutral">{`Revision ${snapshot.period.revision}`}</StatusBadge>
-            {note && <span>{note}</span>}
-          </p>
-        </div>
-        {periodControls}
-        {actions}
-        <div className="academic-setup__progress">
-          <strong role="status">
-            {startedSteps} of {steps.length} setup steps have saved information
-          </strong>
-          <progress value={startedSteps} max={steps.length} aria-label="Setup progress" />
-          <span>
-            This counts saved records only. It does not certify source accuracy or scheduling
-            readiness.
-          </span>
-        </div>
-      </header>
+      <PageHeader
+        titleId="academic-setup-title"
+        title={`Set up ${periodLabel(snapshot.period)}`}
+        meta={
+          <div className="academic-setup__progress">
+            <strong role="status">
+              {startedSteps} of {steps.length} setup steps have saved information
+            </strong>
+            <progress value={startedSteps} max={steps.length} aria-label="Setup progress" />
+          </div>
+        }
+        actions={actions}
+      />
+      {periodControls && <CommandBar label="Period selection">{periodControls}</CommandBar>}
       {notices}
+      <KpiStrip
+        label="Saved records this period"
+        items={[
+          { label: 'Sections', value: sections.length, to: academicPath('sections', snapshot.period.id) },
+          { label: 'Offerings', value: offerings.length, to: academicPath('offerings', snapshot.period.id) },
+          { label: 'Faculty', value: faculty.length, to: academicPath('faculty', snapshot.period.id) },
+          { label: 'Rooms', value: resources.length, to: academicPath('resources', snapshot.period.id) },
+          { label: 'Students', value: rosterCount, to: '/admin/students' },
+        ]}
+      />
 
       {!snapshot.period.calendar && calendarSetup}
 
@@ -196,15 +203,13 @@ export function AcademicPeriodSetup({
               className={`academic-setup__step${step.ready ? ' academic-setup__step--ready' : ''}`}
               key={step.title}
             >
-              <div className="academic-setup__step-heading">
-                <span className="academic-setup__step-number">{index + 1}</span>
-                <StatusBadge tone={step.ready ? 'success' : count ? 'info' : 'warning'}>{status}</StatusBadge>
-              </div>
+              <span className="academic-setup__step-number">{index + 1}</span>
               <h3>{step.title}</h3>
+              <StatusBadge tone={step.ready ? 'success' : count ? 'info' : 'warning'}>{status}</StatusBadge>
               <p>{step.detail}</p>
               <p className="academic-setup__step-count">{step.count}</p>
               <Link className="button button--secondary" to={academicPath(step.kind, snapshot.period.id)}>
-                {count ? 'Manage' : 'Set up'} <span aria-hidden="true">→</span>
+                {count ? 'Manage' : 'Set up'}
               </Link>
             </li>
           );
@@ -257,7 +262,6 @@ export function AcademicPeriodSetup({
             >
               <header className="academic-setup-card__header">
                 <div>
-                  <p className="academic-setup-card__eyebrow">Setup area</p>
                   <h3 id={`setup-${tab.kind}-title`}>{tab.label}</h3>
                   <p>{setupDescriptions[tab.kind]}</p>
                 </div>
@@ -306,6 +310,7 @@ export function AcademicPeriodSetup({
                   )}
                   <div className="academic-setup-card__actions">
                     <Button
+                      variant="secondary"
                       disabled={allCatalogProgramsSaved}
                       onClick={() =>
                         onEdit(
@@ -333,6 +338,14 @@ export function AcademicPeriodSetup({
           );
         })}
       </div>
+      <MetaDetails summary="Revision and data notes">
+        <p>Revision {snapshot.period.revision}</p>
+        {note && <p>{note}</p>}
+        <p>
+          Setup progress counts saved records only. It does not certify source accuracy or
+          scheduling readiness.
+        </p>
+      </MetaDetails>
     </section>
   );
 }
