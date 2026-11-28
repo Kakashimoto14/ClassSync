@@ -7,7 +7,6 @@ creates a tenant, student roster entry, or faculty record from command-line data
 from __future__ import annotations
 
 import argparse
-import ipaddress
 import json
 import os
 import re
@@ -15,54 +14,36 @@ import secrets
 import string
 import sys
 from getpass import getpass
+from pathlib import Path
 from typing import Any
 
-from classync_contracts.email_address import normalize_email
-from classync_contracts.firebase import FirebaseSettings, initialize_firebase
-from classync_persistence.database import postgres_engine
-from classync_persistence.schema import migrate
-from firebase_admin import auth
-from sqlalchemy import text
-from sqlalchemy.engine import URL, make_url
+# Standalone runs place scripts/ (not the repository root) on sys.path.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from classync_contracts.email_address import normalize_email  # noqa: E402
+from classync_contracts.firebase import FirebaseSettings, initialize_firebase  # noqa: E402
+from classync_persistence.database import postgres_engine  # noqa: E402
+from classync_persistence.schema import migrate  # noqa: E402
+from firebase_admin import auth  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+
+from scripts.lib.identity_provisioning import (  # noqa: E402
+    bind_membership as _membership,
+)
+from scripts.lib.identity_provisioning import (  # noqa: E402
+    require_restricted_role,
+    require_tenant_project,
+    upsert_firebase_account,
+    validate_database_target,
+    validate_password,
+)
+from scripts.lib.identity_provisioning import (  # noqa: E402
+    verified_operator as _verified_operator,
+)
 
 STUDENT_ID_PATTERN = re.compile(r"^[0-9]{2}-[0-9]{5}$")
 CONFIRMATION_TEXT = "PROVISION LIVE CLASSSYNC ACCOUNTS"
 BOOTSTRAP_ACTOR = "bootstrap:provision_live_accounts"
-
-
-def validate_database_target(value: str) -> tuple[URL, str]:
-    """Accept only an explicit remote PostgreSQL endpoint with TLS enabled."""
-    try:
-        url = make_url(value)
-        if url.drivername == "postgresql":
-            url = url.set(drivername="postgresql+psycopg")
-        try:
-            is_loopback = ipaddress.ip_address(url.host).is_loopback if url.host else False
-        except ValueError:
-            is_loopback = False
-        if (
-            url.drivername != "postgresql+psycopg"
-            or not url.host
-            or not url.port
-            or not url.username
-            or not url.password
-            or "." not in url.host
-            or url.host.lower() in {"localhost", "host.docker.internal"}
-            or is_loopback
-            or not url.database
-        ):
-            raise ValueError
-        query = dict(url.query)
-        if set(query) - {"sslmode"}:
-            raise ValueError
-        sslmode = query.get("sslmode")
-        if isinstance(sslmode, tuple) or sslmode not in {"require", "verify-full"}:
-            raise ValueError
-        return url.set(query={}), sslmode
-    except Exception:
-        raise ValueError(
-            "DATABASE_URL must be a remote PostgreSQL URL with sslmode=require or verify-full"
-        ) from None
 
 
 def validate_student_identity(student_id: str, email: str) -> tuple[str, str]:
@@ -108,17 +89,6 @@ def action_actor(*, operator_uid: str | None, bootstrap_first_admin: bool, admin
         "Supply an existing Administrator --operator-uid, or use the explicitly marked "
         "first-Administrator bootstrap mode."
     )
-
-
-def validate_password(value: str) -> str:
-    if (
-        len(value) < 12
-        or len(value) > 128
-        or not value.isascii()
-        or not value.isprintable()
-    ):
-        raise ValueError("Passwords must be 12–128 printable ASCII characters without line breaks.")
-    return value
 
 
 def _email(value: str, *, student: bool = False) -> str:
@@ -171,47 +141,13 @@ def _credential(args: argparse.Namespace, option: str, role: str) -> str:
     return validate_password(provided)
 
 
-def _set_identity_context(
-    connection, tenant_id: str, uid: str | None = None, actor_uid: str | None = None
-) -> None:
-    connection.execute(
-        text("SELECT set_config('classsync.tenant_id', :tenant_id, true)"),
-        {"tenant_id": tenant_id},
-    )
-    if uid is not None:
-        connection.execute(text("SELECT set_config('classsync.uid', :uid, true)"), {"uid": uid})
-    if actor_uid is not None:
-        connection.execute(
-            text("SELECT set_config('classsync.actor_uid', :actor_uid, true)"),
-            {"actor_uid": actor_uid},
-        )
-
-
 def _preflight(engine, tenant_id: str, firebase_project_id: str, args: argparse.Namespace):
     with engine.begin() as connection:
-        role = (
-            connection.execute(
-                text("""SELECT r.rolsuper, r.rolbypassrls
-                      FROM pg_roles r WHERE r.rolname = current_user""")
-            )
-            .mappings()
-            .one()
+        require_restricted_role(
+            connection,
+            "Use the dedicated non-superuser, non-BYPASSRLS migration/provisioning role.",
         )
-        if role["rolsuper"] or role["rolbypassrls"]:
-            raise RuntimeError(
-                "Use the dedicated non-superuser, non-BYPASSRLS migration/provisioning role."
-            )
-        _set_identity_context(connection, tenant_id)
-        tenant = (
-            connection.execute(
-                text("SELECT firebase_project_id FROM classsync_identity.tenants WHERE id=:tenant"),
-                {"tenant": tenant_id},
-            )
-            .mappings()
-            .one_or_none()
-        )
-        if not tenant or tenant["firebase_project_id"] != firebase_project_id:
-            raise RuntimeError("The existing tenant does not match the Firebase project.")
+        require_tenant_project(connection, tenant_id, firebase_project_id)
         profiles = {}
         if args.student_id:
             row = (
@@ -243,82 +179,6 @@ def _preflight(engine, tenant_id: str, firebase_project_id: str, args: argparse.
                 )
             profiles["teacher"] = str(row["person_id"])
         return profiles
-
-
-def _membership(
-    connection, tenant_id, uid, person_id, role, *, actor_uid, student_id=None, faculty_id=None
-):
-    _set_identity_context(connection, tenant_id, uid, actor_uid)
-    if role == "administrator":
-        connection.execute(
-            text("""INSERT INTO classsync_identity.people (tenant_id,id)
-                      VALUES (:tenant,:person) ON CONFLICT (tenant_id,id) DO NOTHING"""),
-            {"tenant": tenant_id, "person": person_id},
-        )
-    result = connection.execute(
-        text("""INSERT INTO classsync_identity.memberships
-                    (tenant_id,uid,person_id,student_id,faculty_id,roles,state,revision)
-                 VALUES (:tenant,:uid,:person,:student,:faculty,ARRAY[:role]::text[],'active',1)
-                 ON CONFLICT (tenant_id,uid) DO UPDATE
-                    SET state='active', revision=classsync_identity.memberships.revision+1
-                 WHERE classsync_identity.memberships.person_id=EXCLUDED.person_id
-                   AND classsync_identity.memberships.student_id
-                       IS NOT DISTINCT FROM EXCLUDED.student_id
-                   AND classsync_identity.memberships.faculty_id
-                       IS NOT DISTINCT FROM EXCLUDED.faculty_id
-                   AND classsync_identity.memberships.roles=EXCLUDED.roles"""),
-        {
-            "tenant": tenant_id,
-            "uid": uid,
-            "person": person_id,
-            "student": student_id,
-            "faculty": faculty_id,
-            "role": role,
-        },
-    )
-    if result.rowcount != 1:
-        raise RuntimeError(
-            "Existing membership has a different role or record link; refusing to replace it."
-        )
-    if student_id:
-        connection.execute(
-            text("""UPDATE classsync_identity.students SET password_configured=true
-                      WHERE tenant_id=:tenant AND id=:student"""),
-            {"tenant": tenant_id, "student": student_id},
-        )
-
-
-def _firebase_account(app, email: str, password: str) -> tuple[str, bool]:
-    try:
-        existing = auth.get_user_by_email(email, app=app)
-    except auth.UserNotFoundError:
-        created = auth.create_user(email=email, password=password, email_verified=True, app=app)
-        return created.uid, True
-    updated = auth.update_user(
-        existing.uid, email=email, password=password, email_verified=True, app=app
-    )
-    return updated.uid, False
-
-
-def _verified_operator(engine, tenant_id: str, operator_uid: str) -> str:
-    if not operator_uid or len(operator_uid) > 128 or any(ch.isspace() for ch in operator_uid):
-        raise ValueError("Operator UID is malformed.")
-    with engine.begin() as connection:
-        _set_identity_context(connection, tenant_id, operator_uid)
-        row = (
-            connection.execute(
-                text("""SELECT roles,state FROM classsync_identity.memberships
-                      WHERE tenant_id=:tenant AND uid=:uid"""),
-                {"tenant": tenant_id, "uid": operator_uid},
-            )
-            .mappings()
-            .one_or_none()
-        )
-        if not row or row["state"] != "active" or "administrator" not in row["roles"]:
-            raise RuntimeError(
-                "The operator UID must have an active Administrator membership in this tenant."
-            )
-    return operator_uid
 
 
 def _print_summary(accounts: list[tuple[str, str, str, str]]) -> None:
@@ -401,16 +261,9 @@ def main() -> int:
         engine = postgres_engine(database_url, connect_args={"sslmode": sslmode})
         try:
             with engine.begin() as connection:
-                role = (
-                    connection.execute(
-                        text("""SELECT r.rolsuper, r.rolbypassrls FROM pg_roles r
-                              WHERE r.rolname=current_user""")
-                    )
-                    .mappings()
-                    .one()
+                require_restricted_role(
+                    connection, "Use a non-superuser, non-BYPASSRLS database role."
                 )
-                if role["rolsuper"] or role["rolbypassrls"]:
-                    raise RuntimeError("Use a non-superuser, non-BYPASSRLS database role.")
                 migrate(connection, target="head")
             profiles = _preflight(engine, args.tenant_id, app.project_id, args)
             actor_uid = (
@@ -427,7 +280,7 @@ def main() -> int:
             created_users = []
             try:
                 for _, email, *_ in requested:
-                    uid, created = _firebase_account(app, email, passwords[email])
+                    uid, created = upsert_firebase_account(app, email, passwords[email])
                     firebase_records[email] = (uid, created)
                     if created:
                         created_users.append(uid)

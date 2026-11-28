@@ -3386,3 +3386,37 @@ suite — 894 tests across 71 files passed. Production build passed; main entry 
 26.19 kB gzip. PostgreSQL migration/RLS runtime behavior remains IMPLEMENTED-UNVERIFIED. A fresh
 disposable qualification attempt could not start PostgreSQL (`pg_ctl` restricted-token error 87);
 the server did not start and no Neon/live database connection was made. No commit or push.
+
+### 28 November 2026 — Phase E, Slice E0: seeded Teacher and Student logins (local only)
+
+Worktree: `C:\Projects\ClassSync`, branch `main`, base/current HEAD
+`f04a9b6` (uncommitted). No commit, push, deployment, migration or `--apply`; no Neon, Firebase,
+Render, Resend or Gemini contact. E1–E3 not started.
+
+IMPLEMENTED: `scripts/provision_seeded_logins.py` (dry-run default, confirmed apply, seed-provenance
+targeting, Administrator protection, conflict probe, per-account transaction with compensating
+Firebase deletion, throttling, git-ignored credential file, optional enrollment activation);
+shared helpers in `scripts/lib/identity_provisioning.py`; `provision_live_accounts.py` refactored to
+use them; `.local/` ignored; runbook `docs/production/SEEDED_LOGINS.md`. No migration.
+
+VERIFIED locally: `ruff check scripts services packages` passed; focused provisioning tests 57
+passed (13 existing live-account tests unchanged); full Python suite **1,490 passed**, no skips, one
+existing Starlette/httpx deprecation warning; `git diff --check` passed. The real-PostgreSQL test
+migrates to head, runs the seed, publishes a timetable, provisions as the non-superuser,
+non-BYPASSRLS migration owner with a fake Firebase Auth, repeats with zero writes, resolves Gateway
+sessions for a Student and a Teacher, and reads the published calendar as the runtime role. The
+documented `cmd` service-account loader was exercised with a dummy file. Web tests and the bundle
+budget were not run: no web files changed.
+
+Behaviour to know: `--activate-enrollment` bumps the academic period revision (as Admin "Mark
+active" does). The published timetable stays readable, but republishing the earlier draft, including
+request approval, is refused with `academic_input_changed` until a new draft is generated and
+published. Pinned by test; runbook says to activate before publishing.
+
+Choices differing from the plan: the credential CSV merges new rows instead of refusing an existing
+file (a stored password is only replaced when a new one is set); an existing unverified Firebase
+account is skipped unless `--rotate-passwords`; dry run cannot detect a record held by a different
+account (row-level security), `--apply` does.
+
+IMPLEMENTED-UNVERIFIED: real Firebase Admin behaviour, the hosted database role's attributes and a
+live sign-in. Next: owner reviews, commits and runs the dry run; E1 awaits a separate session.

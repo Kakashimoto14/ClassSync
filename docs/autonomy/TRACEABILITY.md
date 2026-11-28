@@ -293,3 +293,15 @@ The Administrator popover and active secondary screen dimensions have fresh foll
 | Seed script and defense dataset | `scripts/seed_campus_data.py`; deterministic dry-run/apply gate, stable records, exact tenant confirmation, 41/12 room boundary, unverified roster statuses; seed regression tests | IMPLEMENTED-UNVERIFIED; 12 seed and migration regression tests pass. No Neon connection or `--apply`; curriculum/room/faculty defense defaults are not Registrar/Facilities verified |
 | Student roster search/filter/pagination and Admin CRUD | `AcademicStudentRosterPage.tsx`, Academic roster endpoint/query and CRUD routes, migration `0025_student_roster_crud.py`, `test_roster_crud.py` | IMPLEMENTED locally; focused backend and UI tests pass. PostgreSQL/RLS migration runtime qualification remains open; no live database used |
 | Python, contracts and Web quality gates | 1201 Python tests pass; seed/migration focused set 12 pass; Ruff, contract check, lint, typecheck, final Web 891 tests pass, build 97.62 kB raw / 26.19 kB gzip, `git diff --check` pass | Local checks VERIFIED; PostgreSQL migration/RLS runtime qualification remains open |
+
+### 28 November 2026 — Phase E, Slice E0 seeded logins
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Dry-run default; explicit confirmed apply; tenant, project, role, operator and emulator gates | `scripts/provision_seeded_logins.py`; argument, gate and wrong-target tests | VERIFIED locally |
+| Only seed-provenance rows; program/section/count targeting; explicit faculty domain | `select_targets`; selection tests over 432 students and 57 teachers | VERIFIED on disposable PostgreSQL |
+| Idempotent single-role binding with audit actor; Admin and conflict protection; compensating delete | `test_provision_seeded_logins_postgres.py` with fake Firebase | VERIFIED locally; live Firebase IMPLEMENTED-UNVERIFIED |
+| Credentials only in git-ignored `.local/`; never printed | `.gitignore`, `CredentialFile`, output and ignore tests | VERIFIED locally |
+| Provisioned Student/Teacher resolves a Gateway session and reads the published schedule with `verification_source='unverified'` | Real Gateway and Scheduling routes, runtime role | VERIFIED locally |
+| Live-account script keeps its behaviour on shared helpers | `scripts/lib/identity_provisioning.py`; 13 existing tests | VERIFIED for tested paths; live path not run |
+| Owner runbook | `docs/production/SEEDED_LOGINS.md` | IMPLEMENTED; not executed against hosted services |

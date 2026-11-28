@@ -440,3 +440,34 @@ Execution scope for the current session, quoted: "Implement **ONLY Slice D1** (S
 Loading/Error States, Admin Setup & Student Roster) in this session, then **STOP**". D2 (scheduling,
 timetables, requests, reports, Teacher and Student polish) is a separate later session. The main
 entry limit stays at 101,376 bytes. No new npm UI, icon or animation library.
+
+## 28 November 2026 — Phase E approval: seeded logins (E0) and institutional UI redesign (E1–E3)
+
+Owner instruction, quoted: "Phase E plan approved for local code, tests, and docs only — do NOT
+commit, push, deploy, or contact live Neon, Firebase, Render, Resend, or Gemini."
+
+Owner answers to the plan's open questions:
+1. Seeded email domain (E0): the existing `@student.pnm.edu.ph` seeded student addresses are safe
+   for defense/sandbox login provisioning, and teacher logins must require an explicit
+   `--faculty-email-domain` flag with no default.
+2. Password policy (E0): a random 20-character password per account written only to gitignored
+   `.local/seeded-logins.csv`; the optional `CLASSSYNC_SEEDED_LOGIN_PASSWORD` environment override
+   stays available and is off by default.
+3. `verification_source` (E0): Option A. Activated seeded students stay `unverified` (no new
+   migration), verified by a real-PostgreSQL Gateway session test showing they resolve and read
+   published schedules.
+4. Control geometry (E1–E3): `36px` desktop controls and `44px` under `pointer: coarse`.
+5. Brand redesign and accessibility (E1–E3): explicit approval to replace Soft Rouge (`#872e49`
+   and the dark sidebar) with the `#991B2E` ClassSync crimson palette and a light sidebar per
+   `.claude/skills/classsync-unslop-design/SKILL.md`, targeting WCAG 2.2 AA. This supersedes the
+   "preserve Soft Rouge" instruction in `AGENTS.md` for this redesign only. The skill file must not
+   be modified or deleted.
+6. Student OTP step (E1): keep the existing backend one-time-code verification; improve the UX by
+   prefilling/locking the verified email, preserving form state across Sign In / Create Account and
+   showing the three-step verification flow.
+
+Execution scope for the current session, quoted: "Implement **ONLY Slice E0 (Seeded Teacher &
+Student Login Provisioning CLI)** in this session, then **STOP** before touching E1–E3". The
+assistant may not run `--apply` against any hosted project; the owner runs the reviewed commands.
+These logins are defense/sandbox accounts for owner-authorized synthetic records and are not
+Registrar-verified identities.

@@ -42,3 +42,6 @@ Thumbs.db
 .venv-main-junction/
 var/p4d-evidence/
 .codex-attachments/
+
+# Owner-run provisioning output (credentials)
+.local/
