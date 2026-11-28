@@ -1,5 +1,18 @@
 # Requirements -> implementation -> evidence
 
+### 28 November 2026 — Phase D / Slice D1
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Skip link hidden until keyboard focus | `styles.css`; `AppShell.phase-d.test.tsx` | VERIFIED by Vitest and harness render |
+| Sidebar group opens and highlights on nested pages; breadcrumbs | `route-config.ts`, `AppShell.tsx`; same test | VERIFIED by Vitest |
+| Branded access cards, waking skeleton | `RouteGuard.tsx`, `UniversitySessionPanel.tsx`; `RouteGuard.states.test.tsx` | VERIFIED by Vitest and harness render |
+| Read failures worded apart from save failures, with Retry (setup, roster) | `academic-api.ts`, `publication-api.ts`, `institutional-api.ts`, `InlineError.tsx` | Academic and roster VERIFIED by Vitest; publication and institutional wording IMPLEMENTED-UNVERIFIED |
+| Setup counter never exceeds 6; one primary action | `AcademicPeriodSetup.tsx`, `AcademicManagementPage.tsx` and test | VERIFIED by Vitest and harness render |
+| Roster row actions, accessible names, bulk activation, page status filter | `AcademicStudentRosterPage.tsx` and test | VERIFIED by Vitest with mocked API |
+| Main entry at most 101,376 bytes | `data/preview-profiles.ts`; budget script | VERIFIED: 87,595 bytes |
+| No dead ends | `NoDeadEnds.test.tsx` | VERIFIED by Vitest |
+
 ### 28 November 2026 — Phase C / Slice C3
 
 | Requirement | Implementation / evidence | Current status |

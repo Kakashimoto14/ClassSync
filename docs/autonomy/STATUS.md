@@ -1,5 +1,49 @@
 # ClassSync — autonomy status ledger
 
+## 28 November 2026 — Phase D / Slice D1: shell, states, Admin setup and student roster
+
+Branch `main`, base/current HEAD `7a50716`, uncommitted (no commit, push or deploy). Approval:
+`APPROVALS.md` Phase D entry. No Neon, Firebase, Render, Resend or Gemini contact. Web and docs
+only; no `services/`, `packages/` or `scripts/` file changed, so ruff and pytest were not rerun.
+
+**Delivered.** Clip-based skip link shown only on keyboard focus; Title Case workspace labels and
+`Asia/Manila · PHT` chip; breadcrumbs on nested pages; sidebar ownership for `/admin/teachers`,
+`/admin/subjects`, `/admin/sections`; branded access cards and waking skeleton; separate read and
+save error copy with Retry on Admin setup and roster; corrected setup counter with progress bar;
+one setup header with a single solid action and no duplicate Generate link; compact roster table
+with Activate/Edit/Delete, status filter and "Select unverified" then "Activate selected".
+
+**Bundle.** Main entry 87,595 bytes of 101,376 (was 100,200). Most of the saving came from moving
+`previewProfiles` into `data/preview-profiles.ts`: the shell had been pulling the sample schedules
+and campus room catalog into the entry chunk. `PasswordStrengthChecklist` is now lazy. The sign-up
+and reset fields were not split further, and `AuthPage` was not lazy-loaded (budget passes).
+
+**Choices and limits (please confirm).**
+- The roster API has no enrollment-status filter and backend changes were out of scope, so the
+  filter is labelled "Status on this page" and narrows only the 20 loaded rows.
+- Bulk activation keeps its confirmation dialog, so it is two clicks plus OK.
+- "Select unverified" skips students without a name or email; the server rejects the whole batch.
+- Roster email now sits under the student name instead of in its own column.
+- Profile and Settings pages have no sidebar group; they stay under the account links.
+- On 1024px and wider, the long workspace note in the setup header is screen-reader only.
+- Retry banners on Reports, Buildings, Audit and scheduling pages are left for D2.
+
+**Evidence (Windows).** `npm run lint`, `npm run typecheck`, `npm run build`,
+`node scripts/check_bundle_budget.mjs` and `git diff --check`: passed. `npm run test:web`:
+1042 passed / 85 files. The one expectation changed by intent: the setup counter test now expects
+3 of 6 (it expected the miscounted 4); roster queries use "Activate".
+
+**Rendered check.** A temporary Vite harness with fake academic data and a fake session (removed
+afterwards) at 1440x900, 1280x720 and 360x780: all six setup cards visible at 1280x720, no page
+overflow on dashboard or roster, no roster table scroll at 1280 or 1440, keyboard focus reveals the
+skip link, unavailable, waking and load-failure states render. It found and led to fixes for a
+360px setup-header overflow and an empty-state card shown under a load failure.
+
+**Open.** No signed-in institutional browser run, no screen-reader or 200% zoom check, Linux CI
+not run. Self-review only.
+
+**Rollback.** Web-only; revert the uncommitted files. No data or schema change.
+
 ## 28 November 2026 — Phase C / Slice C3: Teacher and Student workflows, no dead ends
 
 Branch `main`, base/current HEAD `c31c1e4` (C1 and C2 committed), uncommitted (no commit or push).

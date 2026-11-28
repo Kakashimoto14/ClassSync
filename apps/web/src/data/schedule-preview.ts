@@ -1,4 +1,5 @@
 import type { UserRole } from '../types/ui';
+import { previewProfiles } from './preview-profiles';
 import { provisionalCdmRooms } from './cdm-room-inventory';
 import type { ActivityType } from '../../../../packages/shared-types/src/scheduling';
 
@@ -77,25 +78,13 @@ export interface SchedulePreviewData {
   updates: readonly PreviewUpdate[];
 }
 
+export { previewProfiles };
+
 export const previewContext = {
   reference: '2026-10-12T09:45',
   label: 'Mon, 12 Oct 2026 · 09:45',
   period: 'Sample teaching week',
 } as const;
-
-export const previewProfiles: Record<
-  UserRole,
-  { id: string; name: string; initials: string; label: string }
-> = {
-  student: { id: 'student-maria', name: 'Maria Santos', initials: 'MS', label: 'Student' },
-  teacher: { id: 'teacher-santos', name: 'Prof. Maria Santos', initials: 'MS', label: 'Teacher' },
-  administrator: {
-    id: 'admin-preview',
-    name: 'Admin User',
-    initials: 'AU',
-    label: 'Administrator',
-  },
-};
 
 const teachers = {
   santos: { id: 'teacher-santos', name: 'Prof. Maria Santos' },

@@ -771,6 +771,33 @@ export function mobileNavigationForRole(role: UserRole): RouteDefinition[] {
   );
 }
 
+function routeFor(path: string): RouteDefinition | undefined {
+  const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
+  return (
+    routesByPath.get(pathname) ??
+    routeDefinitions.find(
+      (item) => item.path.includes('/:') && matchPath({ path: item.path, end: true }, pathname),
+    )
+  );
+}
+
+/** Sidebar group, owning page and current page. Entries without a path are not links. */
+export function navigationTrail(path: string): { label: string; path?: string }[] {
+  const route = routeFor(path);
+  const ownerId = route && navigationOwner(path);
+  const owner = ownerId && routeDefinitions.find((item) => item.id === ownerId);
+  if (!route || !owner || route.kind === 'dashboard') return [];
+  const label = owner.navigationLabel ?? owner.title;
+  const group = navigationForRole(route.role).find((item) =>
+    item.items.some((entry) => entry.id === owner.id),
+  )?.title;
+  const trail: { label: string; path?: string }[] =
+    group && group !== label ? [{ label: group }] : [];
+  if (owner.id === route.id) trail.push({ label });
+  else trail.push({ label, path: owner.path }, { label: route.navigationLabel ?? route.title });
+  return trail;
+}
+
 // Explicit ownership preserves section context without prefix-matching unrelated routes.
 const navigationParents: Partial<Record<RouteId, RouteId>> = {
   'administrator.schedule-manager': 'administrator.ai-scheduling',
@@ -798,6 +825,9 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
   'administrator.academic-detail': 'administrator.sections',
   'administrator.programs': 'administrator.academic-data',
   'administrator.offerings': 'administrator.academic-data',
+  'administrator.teachers': 'administrator.academic-data',
+  'administrator.subjects': 'administrator.academic-data',
+  'administrator.sections': 'administrator.academic-data',
   'administrator.resource-metadata': 'administrator.academic-data',
   'administrator.scheduling-constraints': 'administrator.academic-data',
   'administrator.utilization': 'administrator.reports',
@@ -805,12 +835,7 @@ const navigationParents: Partial<Record<RouteId, RouteId>> = {
 };
 
 export function navigationOwner(path: string, mobile = false): RouteId | undefined {
-  const pathname = path.split(/[?#]/, 1)[0].replace(/\/+$/, '');
-  let route =
-    routesByPath.get(pathname) ??
-    routeDefinitions.find(
-      (item) => item.path.includes('/:') && matchPath({ path: item.path, end: true }, pathname),
-    );
+  let route = routeFor(path);
   const visited = new Set<RouteId>();
   while (route && !visited.has(route.id)) {
     visited.add(route.id);

@@ -451,18 +451,64 @@ textarea {
 .main-content:focus {
   outline: none;
 }
+/* Clipped to nothing until keyboard focus, so it can never show over a page. */
 .skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip-link:focus-visible {
   position: fixed;
   top: 8px;
   left: 16px;
-  z-index: 30;
-  transform: translateY(-200%);
+  z-index: 40;
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip-path: none;
   background: var(--surface);
+  color: var(--ink);
   padding: 12px 16px;
   border-radius: var(--radius);
+  box-shadow: var(--shadow-overlay);
 }
-.skip-link:focus {
-  transform: translateY(0);
+/* .main-content breaks anywhere for long text; table cells must not split words. */
+.main-content table {
+  overflow-wrap: normal;
+}
+.nav-group--active > summary {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.breadcrumbs li + li::before {
+  content: '/';
+  margin-right: 8px;
+}
+.breadcrumbs a {
+  color: var(--primary);
+}
+.breadcrumbs [aria-current='page'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.workspace-chip {
+  white-space: nowrap;
 }
 .bottom-nav {
   position: fixed;
@@ -1941,6 +1987,21 @@ tr:hover td {
 }
 .system-state > svg {
   color: var(--primary);
+}
+.system-state {
+  width: 100%;
+  border-top: 4px solid var(--primary);
+}
+.system-state__actions,
+.system-state .university-session__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.system-state .university-session {
+  width: 100%;
+  margin-top: 0;
 }
 .system-state > p:not(.eyebrow) {
   color: var(--ink-soft);

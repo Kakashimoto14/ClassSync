@@ -419,3 +419,24 @@ bounded deterministic polish pass (at most 1.0 s), Administrator rule UI, seed d
 created constraints records only, and their tests. Bundle limit stays at 101,376 bytes. C2 and C3
 are separate later sessions. The new-period defaults (minimum 2, maximum 4, span 540 minutes,
 `flexible`) are owner-authorized defaults, not Registrar-verified CdM policy.
+
+## 28 November 2026 — Phase D approval: UI/UX polish and fewer-steps workflows
+
+Owner instruction, quoted: "Phase D plan approved for local frontend/CSS/test/doc changes only — do
+NOT commit, push, deploy, or contact live Neon, Firebase, Render, Resend, or Gemini."
+
+Owner answers to the plan's open questions:
+1. Bundle headroom: start with the low-risk trims (lazy-load `PasswordStrengthChecklist` and the
+   register/recovery-only parts of `InstitutionalEntrance`; keep any shared inline error/Retry
+   inside lazy chunks). Lazy-load `AuthPage` as a whole only if
+   `scripts/check_bundle_budget.mjs` fails.
+2. ICS/IBE/ITE chips (D2): replace the Institute dropdown with one-click toggle chips
+   (`All`, `ICS`, `IBE`, `ITE`, using `aria-pressed`).
+
+Additional D1 check: audit `navigationParents` for every nested Administrator, Teacher and Student
+route so the active sidebar group expands and highlights on every subpage.
+
+Execution scope for the current session, quoted: "Implement **ONLY Slice D1** (Shell, Navigation,
+Loading/Error States, Admin Setup & Student Roster) in this session, then **STOP**". D2 (scheduling,
+timetables, requests, reports, Teacher and Student polish) is a separate later session. The main
+entry limit stays at 101,376 bytes. No new npm UI, icon or animation library.

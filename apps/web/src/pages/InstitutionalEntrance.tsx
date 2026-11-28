@@ -21,7 +21,6 @@ import {
 import { identityEndpoint } from '../auth/university-session-driver';
 import { TurnstileWidget } from '../auth/TurnstileWidget';
 import type { TurnstileWidgetHandle } from '../auth/TurnstileWidget';
-import { PasswordStrengthChecklist } from '../auth/PasswordStrengthChecklist';
 import { passwordStrengthComplete } from '../auth/password-strength';
 import { formatLoginIdentifier, isValidAccountEmail, normalizeAccountEmail } from '../auth/student-number';
 import { cooldownRemaining, retryAfterFrom, startCooldown } from '../auth/cooldown';
@@ -35,6 +34,11 @@ const AccountOnboardingPanel = lazy(() =>
 );
 const AccountAdministrationPanel = lazy(() =>
   import('../auth/AccountAdministrationPanel').then((module) => ({ default: module.AccountAdministrationPanel })),
+);
+
+// Only sign-up and password reset show the checklist.
+const PasswordStrengthChecklist = lazy(() =>
+  import('../auth/PasswordStrengthChecklist').then((module) => ({ default: module.PasswordStrengthChecklist })),
 );
 
 const invitePath = '/auth/teacher-invite';
@@ -606,7 +610,11 @@ function CredentialsForm({
             )}
           </div>
         )}
-        {(signup || resetting) && <PasswordStrengthChecklist password={password} confirmPassword={confirmation} />}
+        {(signup || resetting) && (
+          <Suspense fallback={null}>
+            <PasswordStrengthChecklist password={password} confirmPassword={confirmation} />
+          </Suspense>
+        )}
         {resetting && resetCodeChecking && <p role="status">Checking your password reset link…</p>}
         {(mode === 'login' || recovery) && <TurnstileWidget ref={turnstileRef} onToken={onTurnstileToken} />}
         {connecting && busy && (

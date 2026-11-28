@@ -123,3 +123,65 @@
 }
 @media (max-width: 900px) { .academic-setup__steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .academic-setup__steps { grid-template-columns: 1fr; } }
+
+/* Phase D: one header for period, revision, progress and the two actions. */
+.academic-management .academic-setup__header { display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.academic-management .academic-setup__title { flex: 1 1 260px; min-width: 0; }
+.academic-management .academic-setup__header .academic-setup__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; max-width: none; margin: 4px 0 0; font-size: 12px; }
+.academic-management .academic-setup__header .academic-period-controls { flex: 1 1 280px; min-width: 0; }
+.academic-management .academic-setup__header .academic-cta { margin: 0; align-items: center; }
+.academic-management .academic-setup__header .academic-setup__progress { display: flex; flex: 1 0 100%; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 4px 12px; padding: 8px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; font-size: 12px; }
+.academic-setup__progress progress { width: min(220px, 100%); height: 8px; accent-color: var(--primary); }
+.academic-management .academic-setup__header .academic-setup__progress span { margin-left: auto; text-align: right; }
+.academic-management .academic-setup__step { gap: 6px; padding: 12px; }
+.academic-management .academic-setup__step p { font-size: 12.5px; line-height: 1.4; }
+.academic-management .academic-setup__step--ready { border-color: var(--success-border); }
+.academic-management .academic-setup__step--ready .status--success { background: var(--success); color: var(--text-on-action); }
+@media (max-width: 600px) {
+  .academic-management .academic-setup__header .academic-cta > * { flex: 1 1 100%; }
+  .academic-management .academic-setup__header .academic-setup__progress span { margin-left: 0; text-align: left; }
+}
+
+/* Phase D: student roster. Identifiers and statuses never split mid-word. */
+.student-roster-toolbar.academic-list-toolbar { grid-template-columns: minmax(0, 1fr); }
+.student-roster-toolbar label { display: grid; gap: 4px; min-width: 0; font-size: 12px; font-weight: 600; }
+.student-roster-toolbar :is(input, select) { width: 100%; min-width: 0; padding-inline: 8px; }
+.student-roster-table th, .student-roster-table td { padding: 8px 10px; vertical-align: middle; }
+.student-roster-table :is(th, .student-roster-id, .student-roster-section, .student-roster-status) { white-space: nowrap; }
+.student-roster-name { min-width: 220px; }
+.student-roster-name strong { display: block; }
+.student-roster-name span { display: block; color: var(--ink-soft); font-size: .8125rem; white-space: nowrap; }
+.student-roster-section small { display: block; color: var(--ink-soft); }
+.student-roster-table .status { white-space: nowrap; }
+.student-roster-row-actions { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 6px; }
+.student-roster-row-actions .button { width: auto; min-height: 36px; padding: 6px 10px; font-size: .8125rem; white-space: nowrap; }
+.student-roster-row-actions .button--ghost { color: var(--danger); border: 1px solid var(--danger-border); }
+.student-roster-hint { display: block; max-width: 240px; margin: 4px 0 0 auto; color: var(--ink-soft); font-size: .75rem; text-align: right; }
+.student-roster-select { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (min-width: 640px) {
+  .student-roster-toolbar.academic-list-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .student-roster-toolbar.academic-list-toolbar { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.1fr); }
+}
+/* Phase D: keep all six cards visible on a 1280px laptop screen. */
+.academic-management { gap: 8px; }
+@media (min-width: 1024px) {
+  .academic-management .academic-setup { gap: 8px; }
+  .academic-management .academic-setup__header { align-items: center; gap: 6px 12px; padding: 8px 12px; }
+  .academic-management .academic-setup__title { flex: 1 1 200px; }
+  .academic-management .academic-setup__header h2 { font-size: 15px; }
+  .academic-management .academic-setup__header .academic-setup__meta > span:last-child:not(.status) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .academic-management .academic-setup__header .academic-period-controls { flex: 0 1 430px; flex-wrap: nowrap; }
+  .academic-management .academic-setup__header .academic-period-controls label { min-width: 0; }
+  .academic-management .academic-setup__header :is(.button, select) { min-height: 36px; padding-block: 5px; font-size: 12.5px; }
+  .academic-management .academic-setup__header .academic-setup__progress { padding-top: 6px; }
+  .academic-management .academic-setup__steps { gap: 8px; }
+  .academic-management .academic-setup__step { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; padding: 10px; }
+  .academic-management .academic-setup__step > :is(.academic-setup__step-heading, h3, p:not(.academic-setup__step-count)) { grid-column: 1 / -1; }
+  .academic-management .academic-setup__step h3 { font-size: 13.5px; line-height: 1.3; }
+  .academic-management .academic-setup__step p { font-size: 12px; line-height: 1.35; }
+  .academic-management .academic-setup__step-count { align-self: center; }
+  .academic-management .academic-setup__step .button { min-height: 32px; padding: 4px 10px; font-size: 12px; justify-self: end; }
+  .academic-management .academic-setup__step-number { width: 22px; height: 22px; font-size: 12px; }
+}

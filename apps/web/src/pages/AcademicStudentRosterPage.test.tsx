@@ -42,7 +42,7 @@ describe('connected academic student roster', () => {
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
     expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
     expect(screen.getByText('26-00101')).toBeInTheDocument();
-    expect(screen.getByText('Unverified')).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Unverified' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Year level'), { target: { value: '1' } });
     expect(loadAcademicRoster).toHaveBeenLastCalledWith('period', {
       limit: 20, offset: 0, search: '', year_level: 1,
@@ -94,7 +94,7 @@ describe('connected academic student roster', () => {
 
   it('marks a seeded student active with the current profile and period revision', async () => {
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: 'Mark 26-00101 active' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Activate 26-00101' }));
     await waitFor(() => expect(updateAcademicRosterStudent).toHaveBeenCalledWith('period', '26-00101', {
       student_id: '26-00101', full_name: 'Aira Santos',
       email: 'student.26.00101@student.pnm.edu.ph', year_level: 1, section_id: 'section',
@@ -112,7 +112,7 @@ describe('connected academic student roster', () => {
       sections: [{ id: 'section', year_level: 1, label: 'BSIT-1A', active: true }],
     });
     render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
-    const button = await screen.findByRole('button', { name: 'Mark 26-00103 active' });
+    const button = await screen.findByRole('button', { name: 'Activate 26-00103' });
     expect(button).toBeDisabled();
     expect(button).toHaveAccessibleDescription('Add the student’s name and institutional email first.');
     expect(updateAcademicRosterStudent).not.toHaveBeenCalled();
@@ -150,5 +150,46 @@ describe('connected academic student roster', () => {
       expected_period_revision: 7, student_ids: ['26-00101'], enrollment_status: 'inactive',
     }));
     expect(await screen.findByText('1 students updated · 0 already inactive.')).toBeInTheDocument();
+  });
+
+  it('selects activatable unverified students and activates them in two clicks', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    bulkRosterStatus.mockResolvedValue({ updated: 1, skipped: 0, period_revision: 8 });
+    const student = (id: string, email: string | null, status: 'unverified' | 'active') => ({
+      student_id: id, display_name: 'Student ' + id, registered_email: email,
+      enrollment_status: status, section_id: 'section', section_label: 'BSIT-1A', year_level: 1,
+    });
+    vi.mocked(loadAcademicRoster).mockResolvedValue({
+      items: [student('26-00101', 'a@student.pnm.edu.ph', 'unverified'),
+        student('26-00102', null, 'unverified'),
+        student('26-00103', 'c@student.pnm.edu.ph', 'active')],
+      total: 3, limit: 20, offset: 0, period_revision: 7,
+      sections: [{ id: 'section', year_level: 1, label: 'BSIT-1A', active: true }],
+    });
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Select unverified on this page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Activate selected' }));
+    await waitFor(() => expect(bulkRosterStatus).toHaveBeenCalledWith('period', {
+      expected_period_revision: 7, student_ids: ['26-00101'], enrollment_status: 'active',
+    }));
+    expect(screen.getByText('1 need a name and email before activation.')).toBeInTheDocument();
+  });
+
+  it('filters the loaded page by enrollment status', async () => {
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Status on this page'), { target: { value: 'active' } });
+    expect(screen.queryByText('Aira Santos')).not.toBeInTheDocument();
+    expect(screen.getByText('No roster records match these filters.')).toBeInTheDocument();
+  });
+
+  it('offers Retry when the roster cannot be read', async () => {
+    vi.mocked(loadAcademicRoster).mockRejectedValueOnce(new Error("Couldn't load from the university service."));
+    render(<MemoryRouter><AcademicStudentRosterPage /></MemoryRouter>);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("Couldn't load the roster");
+    expect(alert).not.toHaveTextContent('No save');
+    fireEvent.click(within(alert).getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('Aira Santos')).toBeInTheDocument();
   });
 });

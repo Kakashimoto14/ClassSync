@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -69,6 +69,10 @@ export function AcademicPeriodSetup({
   onSaved,
   onReload,
   onCloned,
+  note,
+  periodControls,
+  actions,
+  notices,
 }: {
   snapshot: AcademicSnapshot;
   readiness?: AcademicReadiness | null;
@@ -79,12 +83,12 @@ export function AcademicPeriodSetup({
   onSaved: (next: AcademicSnapshot) => void;
   onReload: () => void;
   onCloned?: (periodId: string) => void;
+  note?: string;
+  periodControls?: ReactNode;
+  actions?: ReactNode;
+  notices?: ReactNode;
 }) {
   const [activeKind, setActiveKind] = useState<AcademicKind>('programs');
-  const populatedAreas = academicTabs.filter((tab) =>
-    snapshot.records.some((entry) => entry.record.kind === tab.kind),
-  ).length;
-  const startedAreas = populatedAreas + Number(Boolean(snapshot.period.calendar));
   const records = <Kind extends AcademicKind>(kind: Kind): Extract<AcademicRecord, { kind: Kind }>[] =>
     snapshot.records
       .filter((entry) => entry.record.kind === kind)
@@ -148,19 +152,66 @@ export function AcademicPeriodSetup({
     },
   ];
 
+  const startedSteps = steps.filter((step) => step.started).length;
+  const calendarSetup = (
+    <details className="academic-setup__calendar" open={!snapshot.period.calendar}>
+      <summary>Calendar setup</summary>
+      <AcademicCalendarEditor snapshot={snapshot} onSaved={onSaved} open={!snapshot.period.calendar} />
+    </details>
+  );
+
   return (
     <section className="academic-setup" aria-labelledby="academic-setup-title">
       <header className="academic-setup__header">
-        <div>
-          <p className="academic-setup__eyebrow">Academic period setup</p>
+        <div className="academic-setup__title">
           <h2 id="academic-setup-title">Set up {periodLabel(snapshot.period)}</h2>
-          <p>
-            Enter approved records from one workspace. Each save is confirmed separately, so you can
-            pause and continue later.
+          <p className="academic-setup__meta">
+            <StatusBadge tone="neutral">{`Revision ${snapshot.period.revision}`}</StatusBadge>
+            {note && <span>{note}</span>}
           </p>
         </div>
-        <StatusBadge tone="neutral">{`Revision ${snapshot.period.revision}`}</StatusBadge>
+        {periodControls}
+        {actions}
+        <div className="academic-setup__progress">
+          <strong role="status">
+            {startedSteps} of {steps.length} setup steps have saved information
+          </strong>
+          <progress value={startedSteps} max={steps.length} aria-label="Setup progress" />
+          <span>
+            This counts saved records only. It does not certify source accuracy or scheduling
+            readiness.
+          </span>
+        </div>
       </header>
+      {notices}
+
+      {!snapshot.period.calendar && calendarSetup}
+
+      <ol className="academic-setup__steps" aria-label="Six setup steps">
+        {steps.map((step, index) => {
+          const count = records(step.kind).length;
+          const status = step.ready ? 'Ready' : step.started ? 'In progress' : 'Not started';
+          return (
+            <li
+              className={`academic-setup__step${step.ready ? ' academic-setup__step--ready' : ''}`}
+              key={step.title}
+            >
+              <div className="academic-setup__step-heading">
+                <span className="academic-setup__step-number">{index + 1}</span>
+                <StatusBadge tone={step.ready ? 'success' : count ? 'info' : 'warning'}>{status}</StatusBadge>
+              </div>
+              <h3>{step.title}</h3>
+              <p>{step.detail}</p>
+              <p className="academic-setup__step-count">{step.count}</p>
+              <Link className="button button--secondary" to={academicPath(step.kind, snapshot.period.id)}>
+                {count ? 'Manage' : 'Set up'} <span aria-hidden="true">→</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+
+      {snapshot.period.calendar && calendarSetup}
 
       {appMode === 'institutional' && onCloned && (
         <Suspense fallback={null}>
@@ -172,45 +223,6 @@ export function AcademicPeriodSetup({
           />
         </Suspense>
       )}
-
-      <div className="academic-setup__progress" role="status">
-        <strong>{startedAreas} of 6 setup steps have saved information</strong>
-        <span>
-          This counts saved records only. It does not certify source accuracy or scheduling
-          readiness.
-        </span>
-      </div>
-
-      <details className="academic-setup__calendar" open={!snapshot.period.calendar}>
-        <summary>Calendar setup</summary>
-        <AcademicCalendarEditor snapshot={snapshot} onSaved={onSaved} open={!snapshot.period.calendar} />
-      </details>
-
-      <ol className="academic-setup__steps" aria-label="Six setup steps">
-        {steps.map((step, index) => {
-          const count = records(step.kind).length;
-          const status = step.ready ? 'Ready' : step.started ? 'In progress' : 'Not started';
-          return (
-            <li className="academic-setup__step" key={step.title}>
-              <div className="academic-setup__step-heading">
-                <span className="academic-setup__step-number">{index + 1}</span>
-                <StatusBadge tone={step.ready ? 'success' : count ? 'info' : 'warning'}>{status}</StatusBadge>
-              </div>
-              <h3>{step.title}</h3>
-              <p>{step.detail}</p>
-              <p className="academic-setup__step-count">{step.count}</p>
-              <Link className="button button--secondary" to={academicPath(step.kind, snapshot.period.id)}>
-                {count ? 'Manage' : 'Set up'} <span aria-hidden="true">→</span>
-              </Link>
-              {step.kind === 'offerings' && (
-                <Link to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(snapshot.period.id)}`}>
-                  Generate from this period
-                </Link>
-              )}
-            </li>
-          );
-        })}
-      </ol>
 
       <nav className="academic-setup__jump" aria-label="Academic setup areas">
         {academicTabs.map((tab) => (

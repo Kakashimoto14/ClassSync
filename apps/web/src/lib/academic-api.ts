@@ -34,10 +34,18 @@ async function academicRequest<T>(path: string, body?: unknown, method = 'GET'):
       signal: controller.signal,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     }).catch(() => {
-      throw new Error('Could not reach the academic service. No save or generation was confirmed.');
+      throw new Error(
+        method === 'GET'
+          ? "Couldn't load from the academic service. Check the running services, then retry."
+          : 'Could not reach the academic service. No save or generation was confirmed.',
+      );
     });
     if (!response.headers.get('content-type')?.includes('application/json'))
-      throw new Error('Academic service unavailable. Check the running services, then retry.');
+      throw new Error(
+        method === 'GET'
+          ? "Couldn't load from the academic service. Check the running services, then retry."
+          : 'Academic service unavailable. No save or generation was confirmed.',
+      );
     const payload = await response.json();
     if (!response.ok) {
       const detail = payload.error?.message ?? payload.detail ?? 'Academic request failed.';

@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { ClassSyncLogo } from '../brand/ClassSyncLogo';
 import './loading.css';
 
-export function ClassSyncPageLoader({ label = 'Syncing academic workspace…' }: { label?: string }) {
+export function ClassSyncPageLoader({
+  label = 'Syncing academic workspace…',
+  skeleton = false,
+}: {
+  label?: string;
+  skeleton?: boolean;
+}) {
   const [slow, setSlow] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => setSlow(true), 4000);
@@ -13,7 +19,20 @@ export function ClassSyncPageLoader({ label = 'Syncing academic workspace…' }:
       <ClassSyncLogo variant="symbol" size="small" decorative />
       <span className="classsync-loading-ring" aria-hidden="true" />
       <strong>{label}</strong>
-      {slow && <span>Waking ClassSync services — this takes a few seconds on first load.</span>}
+      {slow && (
+        <span>
+          {label.startsWith('Waking')
+            ? 'This takes a few seconds on first load.'
+            : 'Waking ClassSync services — this takes a few seconds on first load.'}
+        </span>
+      )}
+      {skeleton && (
+        <span className="classsync-page-loader__bars" aria-hidden="true">
+          <span className="classsync-skeleton__item" />
+          <span className="classsync-skeleton__item" />
+          <span className="classsync-skeleton__item" />
+        </span>
+      )}
     </main>
   );
 }

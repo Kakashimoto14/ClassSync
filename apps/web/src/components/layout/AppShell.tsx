@@ -7,6 +7,7 @@ import {
   mobileNavigationForRole,
   navigationForRole,
   navigationOwner,
+  navigationTrail,
   rolePath,
   routeDefinitions,
   type RouteDefinition,
@@ -14,8 +15,10 @@ import {
 import { Drawer } from '../ui/Drawer';
 import { ClassSyncLogo } from '../brand/ClassSyncLogo';
 import { capabilities } from '../../config/runtime-config';
-import { previewProfiles } from '../../data/schedule-preview';
+import { previewProfiles } from '../../data/preview-profiles';
 import { useUniversitySession } from '../../auth/university-session-context';
+
+const roleNames = { student: 'Student', teacher: 'Teacher', administrator: 'Administrator' };
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -84,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (!role) return <Navigate to={institutional ? '/auth/login' : '/dev/role-preview'} replace />;
   const profile = institutional
-    ? { name: 'University account', initials: 'CS', label: role === 'student' ? 'Student' : role }
+    ? { name: 'University account', initials: 'CS', label: roleNames[role] }
     : previewProfiles[role];
   const availableRoute = (route: RouteDefinition) =>
     !route.plannedFeature &&
@@ -204,6 +207,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   };
   const owner = navigationOwner(location.pathname);
+  // Top-level sidebar destinations need no breadcrumb; every nested page gets one.
+  const trail = primaryItems.some((item) => item.path === location.pathname)
+    ? []
+    : navigationTrail(location.pathname);
   const mobileOwner = navigationOwner(location.pathname, true);
   const leaveDemo = () => {
     // Leave the guarded route before clearing its role, so its missing-session
@@ -230,7 +237,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
   const secondaryNavigation = secondaryGroups.map((group) => (
     <details
-      className="nav-group"
+      className={
+        'nav-group' +
+        (group.items.some((route) => route.id === owner) ? ' nav-group--active' : '')
+      }
       key={group.title + location.pathname}
       open={group.items.some((route) => route.id === owner)}
     >
@@ -350,7 +360,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               }}
             >
               <summary>
-                {profile.label} {institutional ? 'workspace' : 'demo'}{' '}
+                {profile.label} {institutional ? 'Workspace' : 'demo'}{' '}
                 <ChevronDown size={14} aria-hidden="true" />
               </summary>
               <div className="preview-menu">
@@ -372,9 +382,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </details>
             {role !== 'student' && (
-              <strong>
-                Asia/Manila · {institutional ? 'University workspace' : 'Preview workspace'}
-              </strong>
+              <strong className="workspace-chip">Asia/Manila · PHT</strong>
             )}
           </div>
           {role === 'administrator' ? (
@@ -469,6 +477,23 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </header>
         <main id="main-content" className="main-content" ref={main} tabIndex={-1}>
+          {trail.length > 1 && (
+            <nav className="breadcrumbs" aria-label="Breadcrumb">
+              <ol>
+                {trail.map((crumb, index) => (
+                  <li key={crumb.label}>
+                    {crumb.path ? (
+                      <Link to={crumb.path}>{crumb.label}</Link>
+                    ) : (
+                      <span aria-current={index === trail.length - 1 ? 'page' : undefined}>
+                        {crumb.label}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
           {children}
         </main>
       </div>

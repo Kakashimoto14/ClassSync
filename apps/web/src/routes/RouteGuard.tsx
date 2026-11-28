@@ -10,6 +10,7 @@ import { UniversitySessionProvider } from '../auth/UniversitySessionProvider';
 import { useUniversitySession } from '../auth/university-session-context';
 import { UniversitySessionPanel } from '../auth/UniversitySessionPanel';
 import type { ReactNode } from 'react';
+import { ClassSyncLogo } from '../components/brand/ClassSyncLogo';
 import { ClassSyncPageLoader } from '../components/loading/ClassSyncLoading';
 
 const OperationsPreviewPage = lazy(() =>
@@ -86,12 +87,13 @@ function LazyPage({ children }: { children: ReactNode }) {
 }
 
 function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition }) {
-  const { state } = useUniversitySession();
+  const { state, signOut } = useUniversitySession();
   const location = useLocation();
   if (state.status === 'checking')
     return (
       <ClassSyncPageLoader
         label={state.waking ? 'Waking university services…' : 'Checking university access…'}
+        skeleton
       />
     );
   if (state.status === 'signed-out')
@@ -115,9 +117,10 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
     return (
       <main className="system-state-page">
         <section className="system-state">
+          <ClassSyncLogo size="medium" />
           <h1>University access unavailable</h1>
           <UniversitySessionPanel />
-          <Link className="button button--secondary" to="/auth/login">
+          <Link className="text-action" to="/auth/login">
             Return to access
           </Link>
         </section>
@@ -127,9 +130,17 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
     return (
       <main className="system-state-page">
         <section className="system-state">
+          <ClassSyncLogo size="medium" />
           <h1>University access unavailable</h1>
           <p>This page requires your university to grant the matching workspace role.</p>
-          <Link to="/auth/login">Check access</Link>
+          <div className="system-state__actions">
+            <Link className="button" to="/auth/login">
+              Check access
+            </Link>
+            <button type="button" className="button button--secondary" onClick={() => signOut()}>
+              Sign out
+            </button>
+          </div>
         </section>
       </main>
     );
@@ -280,6 +291,7 @@ export function ForbiddenPage() {
   return (
     <div className="system-state-page">
       <section className="system-state">
+        <ClassSyncLogo size="medium" />
         <p className="eyebrow">Access restricted</p>
         <h1>This page is not available for your demo role.</h1>
         <p>Your current development preview is set to {role}.</p>

@@ -192,9 +192,46 @@ describe('persisted academic data management', () => {
         <AcademicManagementPage />
       </MemoryRouter>,
     );
-    expect(await screen.findByText('4 of 6 setup steps have saved information')).toBeInTheDocument();
+    expect(await screen.findByText('3 of 6 setup steps have saved information')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Setup progress' })).toHaveAttribute('value', '3');
+    expect(screen.getAllByRole('link', { name: 'Generate from this period' })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Validate Readiness' })).toHaveClass('button--primary');
     const steps = screen.getByRole('list', { name: 'Six setup steps' });
     expect(within(steps).getByText('1 sections · 2 students')).toBeInTheDocument();
+  });
+
+  it('never counts more saved setup steps than there are steps', async () => {
+    const full = structuredClone(snapshot);
+    for (const kind of ['sections', 'faculty', 'resources', 'offerings', 'constraints'] as const)
+      full.records.push({
+        revision: 1,
+        updated_at: period.created_at,
+        updated_by: 'development-academic-sandbox',
+        record: { kind, id: kind, period_id: period.id } as never,
+      });
+    vi.mocked(api.loadAcademicPeriod).mockResolvedValueOnce(full);
+    render(
+      <MemoryRouter initialEntries={['/admin/academic?period=period-a']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('6 of 6 setup steps have saved information')).toBeInTheDocument();
+  });
+
+  it('shows a load failure with its own Retry and no save wording', async () => {
+    vi.mocked(api.listAcademicPeriods).mockRejectedValueOnce(
+      new Error("Couldn't load from the academic service."),
+    );
+    render(
+      <MemoryRouter initialEntries={['/admin/academic']}>
+        <AcademicManagementPage />
+      </MemoryRouter>,
+    );
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("Couldn't load academic data");
+    expect(alert).not.toHaveTextContent('No save');
+    fireEvent.click(within(alert).getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
 
   it('bulk verification updates only unverified schedulable rooms and preserves excluded spaces', async () => {

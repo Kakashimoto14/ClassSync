@@ -106,12 +106,12 @@ export function UniversitySessionPanel() {
       {state.status !== 'signed-out' && (
         <div className="university-session__actions">
           {(state.status === 'denied' || state.status === 'unavailable') && (
-            <Button variant="secondary" onClick={() => refresh()}>
+            <Button onClick={() => refresh()}>
               Retry access check
             </Button>
           )}
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={() => {
               exiting.current = true;
               signOut();

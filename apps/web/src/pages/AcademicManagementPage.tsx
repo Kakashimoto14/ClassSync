@@ -24,6 +24,7 @@ import { periodLabel } from '../lib/workspace-context';
 import { AcademicCalendarEditor } from './AcademicCalendarEditor';
 import { AcademicPeriodSetup } from './AcademicPeriodSetup';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
+import { InlineError } from '../components/ui/InlineError';
 import { provisionalCdmRooms } from '../data/cdm-room-inventory';
 import { INSTITUTES, programScope, type ScopedRecord } from '../lib/program-scope';
 const schedulingSandboxEnabled = appMode !== 'presentation';
@@ -73,6 +74,7 @@ function ManagementContent({
   const [periods, setPeriods] = useState<AcademicPeriod[]>([]);
   const [snapshot, setSnapshot] = useState<AcademicSnapshot | null>(null);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -97,6 +99,7 @@ function ManagementContent({
     let ignore = false;
     setLoading(true);
     setError('');
+    setLoadError('');
     const periodsRequest = listAcademicPeriods(true)
       .then((data) => {
         if (!ignore) {
@@ -107,20 +110,19 @@ function ManagementContent({
         }
       })
       .catch((e) => {
-        if (!ignore) setError(e.message);
+        if (!ignore) setLoadError(e.message);
       });
     const selectedPeriodRequest = periodId
       ? loadAcademicPeriod(periodId)
           .then((period) => {
             if (!ignore) {
               setSnapshot(period);
-              setError('');
             }
           })
           .catch((e) => {
             if (!ignore) {
               setSnapshot(null);
-              setError(e instanceof Error ? e.message : 'Academic period could not be loaded.');
+              setLoadError(e instanceof Error ? e.message : 'Academic period could not be loaded.');
             }
           })
       : Promise.resolve().then(() => {
@@ -231,6 +233,56 @@ function ManagementContent({
     (e) => e.record.kind === editingKind && e.record.id === editing,
   );
   const hasSelectedPeriod = Boolean(periodId && periods.some((period) => period.id === periodId));
+  const unified = setupLanding && hasSelectedPeriod && snapshot !== null;
+  const workspaceNote =
+    appMode === 'institutional'
+      ? 'Connected academic records · source and revision are shown for each period'
+      : 'Server-saved workspace · not verified institutional records';
+  const periodControls = (
+    <div className="academic-period-controls">
+      <label>
+        Academic period
+        <select value={periodId} disabled={busy} onChange={(e) => onPeriod(e.target.value)}>
+          <option value="">Choose a period</option>
+          {periods.map((p) => (
+            <option value={p.id} key={p.id}>
+              {periodOption(p, periods)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
+        New academic period
+      </Button>
+    </div>
+  );
+  // Exactly one solid action: validate first, then generate once the period is ready.
+  const ready = checked?.ready === true;
+  const validateAction = (
+    <Button
+      key="validate"
+      variant={ready ? 'secondary' : 'primary'}
+      disabled={busy}
+      loading={busy}
+      onClick={readiness}
+    >
+      {busy ? 'Checking inputs…' : 'Validate Readiness'}
+    </Button>
+  );
+  const generateAction = (
+    <Link
+      key="generate"
+      className={ready ? 'button' : 'button button--secondary'}
+      to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(periodId)}`}
+    >
+      Generate from this period
+    </Link>
+  );
+  const readinessActions = (
+    <div className="draft-actions academic-cta">
+      {ready ? [generateAction, validateAction] : [validateAction, generateAction]}
+    </div>
+  );
   async function verifySchedulableRooms() {
     if (!snapshot || active.current || !roomsNeedingVerification.length) return;
     const summary = `${roomsNeedingVerification.length} schedulable rooms will receive editable capacity and availability defaults. ${excludedRooms.length} excluded spaces will be preserved.`;
@@ -276,16 +328,14 @@ function ManagementContent({
   }
   return (
     <div className="weekly-scheduler academic-management">
-      <p className="academic-workspace-note">
-        <strong>
-          {appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'}
-        </strong>
-        <span>
-          {appMode === 'institutional'
-            ? 'Connected academic records · source and revision are shown for each period'
-            : 'Server-saved workspace · not verified institutional records'}
-        </span>
-      </p>
+      {!unified && (
+        <p className="academic-workspace-note">
+          <strong>
+            {appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'}
+          </strong>
+          <span>{workspaceNote}</span>
+        </p>
+      )}
       {snapshot && !setupLanding && (
         <AcademicCalendarEditor
           key={snapshot.period.revision}
@@ -297,6 +347,19 @@ function ManagementContent({
           }}
         />
       )}
+      {loadError && (
+        <InlineError
+          title="Couldn't load academic data"
+          message={loadError}
+          onRetry={() => {
+            setLoadError('');
+            setError('');
+            setLoading(true);
+            setRetry((n) => n + 1);
+          }}
+        />
+      )}
+      {(!unified || createOpen || loading) && !(loadError && !periods.length) && (
       <section className="workspace-card">
         {!hasSelectedPeriod && (
           <div className="academic-start">
@@ -335,7 +398,7 @@ function ManagementContent({
                   New academic period
                 </Button>
               )}
-              {!createOpen && !periods.length && !loading && !error && (
+              {!createOpen && !periods.length && !loading && !error && !loadError && (
                 <Button disabled={busy} onClick={() => setCreateOpen(true)}>
                   Create Academic Period
                 </Button>
@@ -375,24 +438,7 @@ function ManagementContent({
             </section>
           </div>
         )}
-        {hasSelectedPeriod && (
-          <div className="academic-period-controls">
-            <label>
-              Academic period
-              <select value={periodId} disabled={busy} onChange={(e) => onPeriod(e.target.value)}>
-                <option value="">Choose a period</option>
-                {periods.map((p) => (
-                  <option value={p.id} key={p.id}>
-                    {periodOption(p, periods)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <Button variant="secondary" disabled={busy} onClick={() => setCreateOpen((v) => !v)}>
-              New academic period
-            </Button>
-          </div>
-        )}
+        {hasSelectedPeriod && !unified && periodControls}
         {loading && <ClassSyncSkeleton label="Loading academic records" />}
         {createOpen && (
           <form className="academic-create-period" onSubmit={create}>
@@ -439,6 +485,7 @@ function ManagementContent({
           </form>
         )}
       </section>
+      )}
       {error && (
         <div className="scheduler-error" role="alert">
           <p>{error}</p>
@@ -470,25 +517,21 @@ function ManagementContent({
               ))}
             </nav>
           )}
-          <div className="academic-review-actions">
-            <p>
-              {periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}
-            </p>
-            <div className="draft-actions">
-              <Button variant="secondary" disabled={busy} loading={busy} onClick={readiness}>
-                {busy ? 'Checking inputs…' : 'Validate Readiness'}
-              </Button>
-              <Link
-                className="button button--secondary"
-                to={`/admin/schedule-manager/create?source=academic&period=${encodeURIComponent(periodId)}`}
-              >
-                Generate from this period
-              </Link>
+          {!setupLanding && (
+            <div className="academic-review-actions">
+              <p>
+                {periodLabel(snapshot.period)} · Source revision {snapshot.period.revision}
+              </p>
+              {readinessActions}
             </div>
-          </div>
-          {checked && <ReadinessSummary checked={checked} />}
+          )}
+          {checked && !setupLanding && <ReadinessSummary checked={checked} />}
           {setupLanding ? (
             <AcademicPeriodSetup
+              note={`${appMode === 'institutional' ? 'Institutional workspace' : 'Development sandbox'} · ${workspaceNote}`}
+              periodControls={unified ? periodControls : undefined}
+              actions={readinessActions}
+              notices={checked && <ReadinessSummary checked={checked} />}
               snapshot={snapshot}
               readiness={checked}
               onCloned={(id) => {

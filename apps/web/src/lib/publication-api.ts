@@ -32,11 +32,17 @@ export async function timetableRequest<T>(
   }).catch((error) => {
     if (error.name === 'AbortError') throw error;
     throw new Error(
-      'Could not reach the Gateway timetable service. Start npm run dev, then retry. No publication was confirmed.',
+      body === undefined
+        ? "Couldn't load from the timetable service. Start npm run dev, then retry."
+        : 'Could not reach the Gateway timetable service. Start npm run dev, then retry. No publication was confirmed.',
     );
   });
   if (!response.headers.get('content-type')?.includes('application/json'))
-    throw new Error('Timetable service unavailable. No publication was confirmed.');
+    throw new Error(
+      body === undefined
+        ? "Couldn't load from the timetable service. Please retry."
+        : 'Timetable service unavailable. No publication was confirmed.',
+    );
   const p = await response.json();
   if (!response.ok) {
     const detail = p.error?.message ?? p.detail;

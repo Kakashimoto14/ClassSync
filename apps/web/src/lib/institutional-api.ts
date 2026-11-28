@@ -14,9 +14,19 @@ interface RequestOptions {
 
 /** Only reads are retried: a repeated mutation could be applied twice. */
 export function institutionalRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  return (options.method ?? 'GET') === 'GET'
+  const read = (options.method ?? 'GET') === 'GET';
+  const request = read
     ? retryTransientRead(() => send<T>(path, options), options.signal)
     : send<T>(path, options);
+  // fetch rejects with TypeError when the network drops; say what that means for the user.
+  return request.catch((error: unknown) => {
+    if (!(error instanceof TypeError)) throw error;
+    throw new Error(
+      read
+        ? "Couldn't load from the university service. Check your connection, then retry."
+        : 'The university service could not be reached. No change was confirmed.',
+    );
+  });
 }
 
 /** Same-origin transport only; every service independently checks current membership. */
@@ -76,9 +86,14 @@ async function send<T>(path: string, options: RequestOptions): Promise<T> {
       ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     });
     if (!response.headers.get('content-type')?.includes('application/json'))
-      throw Object.assign(new Error('The university service is unavailable. Please retry.'), {
-        status: response.status,
-      });
+      throw Object.assign(
+        new Error(
+          (options.method ?? 'GET') === 'GET'
+            ? "Couldn't load from the university service. Please retry."
+            : 'The university service is unavailable. No change was confirmed.',
+        ),
+        { status: response.status },
+      );
     const payload = await Promise.race([response.json(), aborted]);
     if (getAuth(firebaseApp!).currentUser !== user)
       throw Object.assign(new Error('Session changed.'), { status: 401 });
@@ -95,11 +110,14 @@ async function send<T>(path: string, options: RequestOptions): Promise<T> {
     return payload.data as T;
   } catch (error) {
     if (options.signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
-    if (controller.signal.aborted)
+    if (controller.signal.aborted) {
+      const message =
+        (options.method ?? 'GET') === 'GET'
+          ? "Couldn't load: the university request timed out. Please retry."
+          : 'The university request timed out. No change was confirmed. Refresh before retrying.';
       // A stalled sign-in token is not a service cold start; only retry a sent request.
-      throw sent
-        ? transientFailure('The university request timed out. Please retry.')
-        : new Error('The university request timed out. Please retry.');
+      throw sent ? transientFailure(message) : new Error(message);
+    }
     throw error;
   } finally {
     clearTimeout(timer);
