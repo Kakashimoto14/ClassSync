@@ -684,6 +684,15 @@ async def classroom_request_decision(request_id: UUID, request: Request):
     return response
 
 
+@app.post("/api/v1/timetables/issues/{issue_id}/transition")
+async def facility_issue_transition(issue_id: UUID, request: Request):
+    """Only an Administrator changes a report's status."""
+    await run_in_threadpool(require_administrator, request, settings)
+    return await service_proxy(
+        "scheduling", f"/api/v1/timetables/issues/{issue_id}/transition", request
+    )
+
+
 # Timetable publication is independent from the legacy Administrator-only proxy.
 # Each service verifies the token; preview reads are gated at both boundaries.
 @app.api_route("/api/v1/timetables/{operation:path}", methods=["GET", "POST", "PUT"])
@@ -696,7 +705,7 @@ async def timetable_proxy(operation: str, request: Request):
         if request.method != "GET":
             raise HTTPException(404, "No anonymous publication operation exists")
     else:
-        if operation == "requests" and request.method == "POST":
+        if operation in {"requests", "issues"} and request.method == "POST":
             await run_in_threadpool(request_identity, request, settings, UserRole.TEACHER)
         elif request.method != "GET" or operation.startswith(
             ("history/", "audit/", "reports/", "restrictions")

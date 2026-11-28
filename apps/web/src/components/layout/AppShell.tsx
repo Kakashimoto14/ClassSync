@@ -109,6 +109,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         'schedule-drafts',
         'schedule-draft-detail',
         'audit',
+        'academic-list',
+        'scheduling-rules',
+        'reports',
+        'buildings',
+        'report-issue',
       ].includes(route.kind) &&
         route.roomMode !== 'availability'));
   const groups = navigationForRole(role);

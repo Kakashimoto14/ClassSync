@@ -7,6 +7,14 @@ import { timeRange } from '../lib/student-presentation';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import type { UserRole } from '../types/ui';
+import { AlertsFeed } from '../components/scheduling/AlertsFeed';
+import {
+  issueCategories,
+  issueRoom,
+  issueStatusLabel,
+  listIssues,
+  type FacilityIssue,
+} from '../lib/facility-issues';
 
 type DecidedRequest = {
   id: string;
@@ -75,6 +83,53 @@ function RequestDecisions() {
   );
 }
 
+/** Teacher-only: status changes on this Teacher's own facility issue reports. */
+function IssueUpdates() {
+  const [issues, setIssues] = useState<FacilityIssue[] | null>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    listIssues('teacher', controller.signal)
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setIssues(
+          (data.issues ?? [])
+            .filter((item) => item.status !== 'open')
+            .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+            .slice(0, 10),
+        );
+      })
+      .catch((failure) => {
+        if (!controller.signal.aborted)
+          setError(failure instanceof Error ? failure.message : 'Issue updates unavailable.');
+      });
+    return () => controller.abort();
+  }, []);
+  return (
+    <section aria-labelledby="issue-updates-heading">
+      <h2 id="issue-updates-heading">Issue report updates</h2>
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : !issues ? (
+        <ClassSyncSkeleton rows={2} label="Loading issue report updates" />
+      ) : issues.length ? (
+        <ul>
+          {issues.map((item) => (
+            <li key={item.id}>
+              <strong>{issueStatusLabel[item.status]}</strong> ·{' '}
+              {issueRoom(item.room_id)?.name ?? item.room_id} · {issueCategories[item.category]}
+              {item.resolution_note && <p className="muted">Note: {item.resolution_note}</p>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No updates on your issue reports yet.</p>
+      )}
+      <Link to="/teacher/report-issue">Report a classroom issue</Link>
+    </section>
+  );
+}
+
 export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
   const w = useScheduleWorkspace(role, true);
   const base = role === 'administrator' ? '/admin' : `/${role}`;
@@ -111,7 +166,7 @@ export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
               onChange={(e) => w.change({ date: e.target.value })}
             />
           </label>
-          {changes.length ? (
+          {role === 'teacher' ? null : changes.length ? (
             changes.map((item) => (
               <article className="workspace-card" key={item.id}>
                 <h2>{item.subject.name}</h2>
@@ -136,7 +191,24 @@ export function ConnectedUpdatesPage({ role }: { role: UserRole }) {
           )}
         </>
       )}
-      {role === 'teacher' && <RequestDecisions />}
+      {role === 'teacher' && (
+        <>
+          <AlertsFeed
+            role="teacher"
+            changes={w.loading || w.error ? [] : changes}
+            scheduleReady={!w.loading && !w.error}
+            action={(item) => (
+              <Link
+                to={`/teacher/schedule?${new URLSearchParams({ period: w.context.period, date: item.date })}`}
+              >
+                View updated class
+              </Link>
+            )}
+          />
+          <RequestDecisions />
+          <IssueUpdates />
+        </>
+      )}
       <Link to={base + '/announcements'}>University announcements</Link>
       <p>
         {role === 'teacher'

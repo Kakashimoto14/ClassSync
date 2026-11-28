@@ -70,6 +70,9 @@ const ConnectedUpdatesPage = lazy(() =>
   import('../pages/ConnectedUpdatesPage').then((module) => ({ default: module.ConnectedUpdatesPage })),
 );
 
+const ConnectedOperationsPage = lazy(() =>
+  import('../pages/ConnectedOperationsPage').then((module) => ({ default: module.ConnectedOperationsPage })),
+);
 const SchedulingRulesPage = lazy(() =>
   import('../pages/SchedulingRulesPage').then((module) => ({ default: module.SchedulingRulesPage })),
 );
@@ -130,6 +133,7 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
         </section>
       </main>
     );
+  if (definition.kind === 'academic-detail') return <Navigate to="/admin/sections" replace />;
   if (
     ['announcements', 'profile', 'settings'].includes(definition.kind) ||
     (definition.kind === 'notifications' && definition.role !== 'student')
@@ -161,7 +165,12 @@ function ConnectedUniversityRoute({ definition }: { definition: RouteDefinition 
             <ClassroomRequestsPage
               role={definition.role}
               create={definition.kind === 'request-create'}
+              detail={definition.kind === 'request-detail'}
             />
+          ) : ['report-issue', 'reports', 'buildings', 'building-detail'].includes(
+              definition.kind,
+            ) ? (
+            <ConnectedOperationsPage definition={definition} />
           ) : definition.role === 'teacher' &&
             ['dashboard', 'schedule', 'calendar', 'notifications'].includes(definition.kind) ? (
             <StructuredCalendarPage role="teacher" dashboard={definition.kind === 'dashboard'} />
@@ -249,6 +258,7 @@ export function RoleRoute({ definition }: { definition: RouteDefinition }) {
         replace
       />
     );
+  if (definition.kind === 'academic-detail') return <Navigate to="/admin/sections" replace />;
   if (definition.kind === 'dashboard') return <LazyPage><OperationsPreviewPage /></LazyPage>;
   if (definition.kind === 'registration-scanner')
     return (

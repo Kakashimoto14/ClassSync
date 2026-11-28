@@ -1,5 +1,19 @@
 # Requirements -> implementation -> evidence
 
+### 28 November 2026 — Phase C / Slice C3
+
+| Requirement | Implementation / evidence | Current status |
+| --- | --- | --- |
+| Migration 0030: two forced-RLS tables, least-privilege grants, upgrade, downgrade refusal | `0030_facility_issue_reports.py`; `test_facility_issues_postgres_runtime.py` | VERIFIED on disposable PostgreSQL; Neon not migrated |
+| Teacher reports and reads only own; Admin reads tenant; transitions only by checked function | same migration and test | VERIFIED locally |
+| Append-only issue history; linked active restriction of the same room | same migration and test | VERIFIED locally |
+| Issue endpoints and Gateway routes | `facility_issues.py`, `gateway/app/main.py`; `test_facility_issue_proxy.py` | VERIFIED with test identity adapters |
+| Teacher report page, Admin Issue reports tab, prefilled restriction link, Teacher updates | `TeacherIssueReportPage.tsx`, `IssueTriagePanel.tsx`, `ConnectedUpdatesPage.tsx`; `FacilityWorkflows.test.tsx` | VERIFIED by Vitest; no browser check |
+| `.ics` export of the selected range for all three roles | `calendar-ics.ts`, `ExportIcsButton.tsx`; `calendar-ics.test.ts` | Serializer VERIFIED; button and download IMPLEMENTED-UNVERIFIED |
+| Request detail honors `?id=` with honest not-found | `ClassroomRequestsPage.tsx`; `FacilityWorkflows.test.tsx` | VERIFIED by Vitest |
+| Student and Teacher alerts merged with audience announcements | `AlertsFeed.tsx`, `StudentHome.tsx`, `ConnectedUpdatesPage.tsx`; `FacilityWorkflows.test.tsx` | Merge VERIFIED by Vitest; server isolation relies on existing announcement RLS tests |
+| No institutional route shows "This service is not connected"; academic detail redirects | `RouteGuard.tsx`; `NoDeadEnds.test.tsx` | VERIFIED by Vitest |
+
 ### 28 November 2026 — Phase C / Slice C2
 
 | Requirement | Implementation / evidence | Current status |

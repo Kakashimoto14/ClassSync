@@ -1,5 +1,56 @@
 # ClassSync — autonomy status ledger
 
+## 28 November 2026 — Phase C / Slice C3: Teacher and Student workflows, no dead ends
+
+Branch `main`, base/current HEAD `c31c1e4` (C1 and C2 committed), uncommitted (no commit or push).
+Approval: `APPROVALS.md` 27 November 2026 Phase C entry. No Neon, Firebase, Render, Resend or
+Gemini contact; seed `--apply` not run.
+
+**Delivered.** Migration `0030_facility_issue_reports`; issue endpoints and Gateway routes;
+`/teacher/report-issue`; Admin **Issue reports** tab with a prefilled restriction link; Teacher
+issue updates; `.ics` export for the selected day, week or month; request detail pages honoring
+`?id=` with status history; merged class changes and announcements for Student and Teacher;
+`/admin/academic/details` redirect; `NoDeadEnds.test.tsx`.
+
+**Pre-existing defect found and fixed.** The C2 Reports, Room Utilization, Buildings and Building
+Details pages were never wired into the institutional route guard, so a signed-in Administrator got
+"This service is not connected". The navigation also hid Students, Institutional Scheduling Rules,
+Reports and Buildings in institutional mode. C2 evidence did not exercise this route layer.
+
+**Choices beyond the instruction (please confirm).**
+- Categories: equipment, electrical, furniture, cleanliness, safety, other.
+- Allowed changes: open to in progress, resolved or dismissed; in progress to resolved or
+  dismissed. Resolved and dismissed are final and need a note.
+- The client chooses the report id, so an unchanged retry cannot create a duplicate. At most 8
+  reports per Teacher in 15 minutes.
+- A linked restriction must be active and for the reported room.
+- Triage does not show the reporter's name: the report stores only the account id.
+- `0030` grants `classsync_app` inside the migration (revoking first) when that role exists.
+- The `.ics` button appears only on published timetables, not samples or presentation.
+- The preview request detail page no longer shows the first record when `?id=` is missing.
+- The `0029` single-head test now pins `0030`.
+
+**Evidence (Windows, disposable PostgreSQL).** `ruff check scripts services packages` and contract
+`--check`: passed. Full pytest with repo-local `TEMP`/`--basetemp`: 1443 passed, no skips;
+`.pytest_tmp` removed. Web lint and typecheck passed; `npm run test:web` 1015 passed / 83 files;
+`npm run build`; main entry 100,200 bytes of 101,376 (was 99,532; +668 from route branches and
+preload file names; `calendar-ics` and the new pages are lazy); `git diff --check` passed with
+line-ending notices. With the new route branch temporarily removed, `NoDeadEnds.test.tsx` failed on
+the five affected pages. One earlier full web run had one failure
+(`StudentSchedule`, month navigation across the year); it passed alone and in the next full run and
+was not diagnosed.
+
+**Open.**
+- No rendered-browser or screen-reader check (360/1440 px, 200% zoom, the new forms, tabs, actual
+  `.ics` download and import into a calendar app).
+- Neon not migrated; hosted grants, Linux CI and PostgreSQL 16 not verified. Self-review only.
+- Pre-existing, not changed: the "Show changes from" date on the Teacher and Admin updates page
+  does not move the loaded range, which always starts from today.
+
+**Deploy order and rollback.** Apply `0030` (`docs/defense/RUNBOOK.md` section 0a), then deploy
+backend and web together. The migration only adds objects, so older services keep working.
+Downgrade is refused once any facility issue report exists.
+
 ## 28 November 2026 — Phase C / Slice C2 addendum: continuing students
 
 Same branch and HEAD `bde6403`, uncommitted. Owner instruction in chat: add enrollment of

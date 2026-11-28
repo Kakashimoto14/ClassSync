@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { TeacherRequestOverview } from '../components/scheduling/TeacherRequestOverview';
 import { Button } from '../components/ui/Button';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
+import { ExportIcsButton } from '../components/scheduling/ExportIcsButton';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import {
   addDays,
@@ -452,6 +453,9 @@ export function RoleScheduleWorkspace({
               Today
             </Button>
           </div>
+          {context.mode === 'published' && !error && !loading && (
+            <ExportIcsButton records={records} role={role} view={view} date={date} />
+          )}
           <div className="calendar-view-options">
             <Button
               className="calendar-mobile-expand"

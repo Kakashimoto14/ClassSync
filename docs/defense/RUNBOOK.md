@@ -10,8 +10,8 @@ Administrator account is never modified by these steps.
 
 ## 0. Prerequisites
 
-- The migration head is current (`0029_restrictions_and_period_lifecycle`). Apply it with section
-  0a **before** deploying services built for Slice C2. The deployed services never migrate. Use the
+- The migration head is current (`0030_facility_issue_reports`). Apply it with section 0a
+  **before** deploying services built for Slice C3. The deployed services never migrate. Use the
   migration owner role (`classsync_migrator`), never the runtime role.
 - The Administrator who will approve requests is the same Administrator who publishes the
   timetable. Publication heads are owner-scoped, and a different Admin's approval returns a clear
@@ -22,11 +22,14 @@ Administrator account is never modified by these steps.
 $env:PYTHONPATH = "packages/api-contracts;packages/persistence;."
 ```
 
-## 0a. Apply migration 0029 only (no seed, no data writes)
+## 0a. Apply migration 0030 and check grants (no seed, no data writes)
 
 The URL must name the migration owner and include the port (`:5432`). Take a Neon branch or restore
-point first. The command prints the connected role, the new head, and whether `classsync_app` holds
-the privileges Slice C2 uses; every value after the head should be `True`.
+point first. Upgrading to `0030` also applies `0029` if it is still pending. The command prints the
+connected role and new head, then the Slice C2 privileges, then the Slice C3 grant checks. **Every
+value on the second and third lines must be `True`.** The third line checks that `classsync_app` has
+only `SELECT`/`INSERT` on issue reports, only `SELECT` on their events, `EXECUTE` on the transition
+function, and that both new tables have forced row-level security.
 
 ```powershell
 $env:PYTHONPATH = "packages/api-contracts;packages/persistence;."
@@ -50,7 +53,7 @@ url, options = postgres_configuration(
     application_name="classsync-migrate", tls_root_cert=certifi.where())
 engine = postgres_engine(url, connect_args=options, pool_size=1, max_overflow=0)
 with engine.begin() as db:
-    migrate(db, target="0029_restrictions_and_period_lifecycle")
+    migrate(db, target="0030_facility_issue_reports")
 with engine.connect() as db:
     print(db.execute(text("SELECT current_user, version_num FROM public.alembic_version")).one())
     print(db.execute(text('''SELECT
@@ -62,13 +65,32 @@ with engine.connect() as db:
             'classsync_scheduling.audit_roster_import(text,bigint)','EXECUTE'),
         has_function_privilege('classsync_app',
             'classsync_scheduling.room_restriction_windows(text)','EXECUTE')''')).one())
+    print(db.execute(text('''SELECT
+        has_table_privilege('classsync_app',r,'SELECT'),
+        has_table_privilege('classsync_app',r,'INSERT'),
+        NOT has_table_privilege('classsync_app',r,'UPDATE'),
+        NOT has_table_privilege('classsync_app',r,'DELETE'),
+        has_table_privilege('classsync_app',e,'SELECT'),
+        NOT has_table_privilege('classsync_app',e,'INSERT'),
+        NOT has_table_privilege('classsync_app',e,'UPDATE'),
+        NOT has_table_privilege('classsync_app',e,'DELETE'),
+        has_function_privilege('classsync_app',
+            'classsync_scheduling.transition_facility_issue(uuid,integer,text,text,text)',
+            'EXECUTE'),
+        (SELECT bool_and(relrowsecurity AND relforcerowsecurity) FROM pg_class
+            WHERE oid IN (r::regclass, e::regclass))
+        FROM (VALUES ('classsync_scheduling.facility_issue_reports',
+                      'classsync_scheduling.facility_issue_events')) AS t(r,e)''')).one())
 engine.dispose()
 '@ | .venv\Scripts\python.exe -
 ```
 
-If a table privilege prints `False`, stop and review the runtime grants before deploying. Roll back
-by restoring the Neon restore point; the Alembic downgrade is refused once any restriction cancel,
-period archive or clone, or roster import has been recorded.
+If any value prints `False`, stop and review the runtime grants before deploying. The migration
+grants `classsync_app` itself when that role exists at upgrade time; if the runtime role was created
+or renamed later, grant exactly the privileges listed above as `classsync_migrator`. Roll back by
+restoring the Neon restore point; the Alembic downgrade is refused once any facility issue report,
+restriction cancel, period archive or clone, or roster import has been recorded. After applying,
+deploy backend and web together.
 
 ## 1. Seed (or re-seed) the defense dataset
 
@@ -149,11 +171,19 @@ Remove-Item Env:FIREBASE_AUTH_EMULATOR_HOST -ErrorAction SilentlyContinue
    the changed class. **Rooms → Check room availability** shows which of the 41 schedulable rooms
    have a published class at any 30-minute slot. The 12 excluded spaces never appear.
 
+5. **Facility issue** (needs migration `0030`): **Teacher** opens **Report Issue**
+   (`/teacher/report-issue`) and submits a room report. **Admin** opens **Requests → Issue reports**,
+   starts work, follows **Add a restriction** if the room must be closed, links it, and resolves with
+   a note. The Teacher sees the new status under **Notifications**.
+6. **Calendar file:** on a published schedule, **Export .ics** downloads the selected day, week or
+   month.
+
 ## Known limits (honest scope)
 
 - Requests are one-date room swaps only. Faculty availability is edited by Administrators.
 - Room reservations (restrictions) are visible only to Administrators. Teacher and Student
   occupancy reflects published classes, and approval enforces reservations.
-- `/teacher/report-issue` and the Admin reports, utilization and buildings pages are not connected
-  in the institutional workspace.
+- Issue triage does not show who reported an issue, and no email is sent for issue updates.
+- The `.ics` file is a one-time snapshot. It does not update when the timetable changes.
+- Classroom request history shows only the submission time, the current state and its last change.
 - Email goes only to the requesting Teacher. Students receive in-app updates only.

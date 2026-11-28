@@ -118,7 +118,8 @@ export function PreviewRequestsView({
     role === 'teacher' ? previewProfiles.teacher.id : undefined,
   ).slice().sort((a,b)=>Number(b.status==='pending')-Number(a.status==='pending'));
   const id = params.get('id');
-  const selected = id ? requests.find((item) => item.id === id) : requests[0];
+  // A detail page shows only the identifier asked for, never a substitute record.
+  const selected = detail ? requests.find((item) => item.id === id) : undefined;
   const shown = detail
     ? selected ? [selected] : []
     : requests.filter((request) => role !== 'administrator' || statusFilter === 'all' || request.status === statusFilter);

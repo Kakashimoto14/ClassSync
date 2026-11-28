@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import { institutionalRequest } from '../lib/institutional-api';
+import { rolePath } from '../routes/route-config';
+import { IssueTriagePanel } from './IssueTriagePanel';
 import { useScheduleWorkspace } from '../lib/use-schedule-workspace';
 import { periodLabel } from '../lib/workspace-context';
 import type { CalendarOccurrence } from '../lib/calendar-model';
@@ -16,6 +18,8 @@ export interface ClassroomRequest {
   revision: number;
   reason: string;
   decision_note: string | null;
+  created_at?: string;
+  updated_at?: string;
   context: {
     class: CalendarOccurrence;
     proposed_room: { id: string; name: string };
@@ -41,6 +45,34 @@ type RoomOption = {
 };
 // Each check reviews the whole semester, so only the first few pending cards auto-check.
 const AUTO_PREFLIGHT_LIMIT = 5;
+const NOT_FOUND = 'Request not found. It does not exist or it is not yours.';
+const moment = (value?: string) => {
+  const parsed = value ? new Date(value.replace(' ', 'T')) : null;
+  return parsed && !Number.isNaN(parsed.getTime())
+    ? new Intl.DateTimeFormat('en-PH', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Asia/Manila',
+      }).format(parsed)
+    : 'Time not recorded';
+};
+
+/** Only what the stored request records: submission, latest state and when it last changed. */
+function StatusHistory({ request }: { request: ClassroomRequest }) {
+  return (
+    <section aria-label="Status history">
+      <h3>Status history</h3>
+      <ol>
+        <li>Submitted · {moment(request.created_at)}</li>
+        {request.status === 'fulfilled' && <li>Approved by an Administrator</li>}
+        <li>
+          {stateLabel[request.status]}
+          {request.status !== 'pending' && ` · ${moment(request.updated_at)}`}
+        </li>
+      </ol>
+    </section>
+  );
+}
 
 function RequestPreflight({
   requestId,
@@ -114,7 +146,19 @@ function RequestPreflight({
   );
 }
 
-export function ClassroomRequestsPage({ role, create = false }: { role: Role; create?: boolean }) {
+export function ClassroomRequestsPage({
+  role,
+  create = false,
+  detail = false,
+}: {
+  role: Role;
+  create?: boolean;
+  detail?: boolean;
+}) {
+  const [params, setParams] = useSearchParams();
+  const detailId = detail ? (params.get('id') ?? '') : '';
+  const issuesTab = role === 'administrator' && !detail && params.get('tab') === 'issues';
+  const [missing, setMissing] = useState(false);
   const [requests, setRequests] = useState<ClassroomRequest[] | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
@@ -129,18 +173,33 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
     const controller = new AbortController();
     setRequests(null);
     setError('');
-    institutionalRequest<{ requests: ClassroomRequest[] }>('timetables/requests', {
-      role,
-      signal: controller.signal,
-    })
-      .then((data) => {
-        if (!controller.signal.aborted) setRequests(data.requests);
+    setNotice('');
+    setMissing(false);
+    if (detail && !detailId) {
+      setMissing(true);
+      return;
+    }
+    const options = { role, signal: controller.signal };
+    const load = detail
+      ? institutionalRequest<ClassroomRequest>(
+          `timetables/requests/${encodeURIComponent(detailId)}`,
+          options,
+        ).then((row) => [row])
+      : institutionalRequest<{ requests: ClassroomRequest[] }>('timetables/requests', options).then(
+          (data) => data.requests,
+        );
+    load
+      .then((rows) => {
+        if (!controller.signal.aborted) setRequests(rows);
       })
       .catch((failure) => {
-        if (!controller.signal.aborted) setError(failure.message);
+        if (controller.signal.aborted) return;
+        // A malformed, unknown or foreign identifier is reported the same way.
+        if (detail && [403, 404, 422].includes(failure.status)) setMissing(true);
+        else setError(failure.message);
       });
     return () => controller.abort();
-  }, [role, reload, create]);
+  }, [role, reload, create, detail, detailId]);
   const decide = async (
     request: ClassroomRequest,
     decision: 'approved' | 'rejected' | 'fulfilled',
@@ -182,10 +241,42 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
     }
   };
   if (create) return <CreateClassroomRequest />;
+  // A detail page only ever shows the requested identifier, never another request.
+  const shown = requests?.filter((request) =>
+    detail ? request.id === detailId : statusFilter === 'all' || request.status === statusFilter,
+  );
+  const unavailable = detail && (missing || (requests !== null && !shown?.length));
+  const tabs = role === 'administrator' && !detail && (
+    <div className="admin-filter-pills" role="group" aria-label="Request type">
+      {(['requests', 'issues'] as const).map((tab) => (
+        <button
+          key={tab}
+          type="button"
+          aria-pressed={issuesTab === (tab === 'issues')}
+          onClick={() => setParams(tab === 'issues' ? { tab } : {})}
+        >
+          {tab === 'issues' ? 'Issue reports' : 'Classroom requests'}
+        </button>
+      ))}
+    </div>
+  );
+  if (issuesTab)
+    return (
+      <section className="admin-requests">
+        {tabs}
+        <IssueTriagePanel />
+      </section>
+    );
   return (
     <section className="admin-requests" aria-busy={busy}>
+      {tabs}
       <div className="admin-screen-actions admin-requests-actions">
-        {role === 'teacher' && (
+        {detail && (
+          <Link className="text-action" to={rolePath(role, 'requests')}>
+            Back to requests
+          </Link>
+        )}
+        {role === 'teacher' && !detail && (
           <Link className="button" to="/teacher/change-requests/new">
             Request a classroom change
           </Link>
@@ -194,7 +285,7 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
           Reload requests
         </Button>
       </div>
-      {role === 'administrator' && (
+      {role === 'administrator' && !detail && (
         <div className="admin-filter-pills" role="group" aria-label="Filter classroom requests">
           {(['all', 'pending', 'approved', 'rejected', 'fulfilled'] as const).map((status) => {
             const count = status === 'all' ? requests?.length ?? 0 : requests?.filter((item) => item.status === status).length ?? 0;
@@ -205,11 +296,12 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
       )}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      {!requests && !error && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
-      {requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
-      {requests?.length && !requests.filter((request) => statusFilter === 'all' || request.status === statusFilter).length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
-      {requests?.filter((request) => statusFilter === 'all' || request.status === statusFilter).map((request) => {
-        const pendingIndex = requests.filter((item) => item.status === 'pending').indexOf(request);
+      {!requests && !error && !missing && <ClassSyncSkeleton layout="rows" label="Loading classroom requests" />}
+      {unavailable && <p className="workspace-card admin-empty" role="status">{NOT_FOUND}</p>}
+      {!detail && requests?.length === 0 && <p className="workspace-card admin-empty">No classroom requests yet.</p>}
+      {!detail && requests?.length && !shown?.length ? <p className="workspace-card admin-empty">No requests match this status.</p> : null}
+      {!missing && shown?.map((request) => {
+        const pendingIndex = (requests ?? []).filter((item) => item.status === 'pending').indexOf(request);
         const blocked = ['conflict', 'stale'].includes(preflight[request.id]?.state ?? '');
         return (
         <article className="workspace-card admin-request-card" key={request.id}>
@@ -223,6 +315,16 @@ export function ClassroomRequestsPage({ role, create = false }: { role: Role; cr
           </span></div>
           <p className="admin-request-card__reason">{request.reason}</p>
           {request.decision_note && <p className="muted">Decision: {request.decision_note}</p>}
+          {detail ? (
+            <StatusHistory request={request} />
+          ) : (
+            <Link
+              className="text-action"
+              to={`${rolePath(role, 'request-detail')}?id=${encodeURIComponent(request.id)}`}
+            >
+              View details for {request.context.class.subject.code}
+            </Link>
+          )}
           {role === 'administrator' && request.status === 'pending' && (
             <div>
               <RequestPreflight

@@ -51,6 +51,7 @@ from .catalog import catalogs, synthetic_scenario
 from .classroom_requests import router as classroom_requests_router
 from .draft_repository import DraftError, DraftRepository, calendar_review_allowed
 from .engine import generate_week
+from .facility_issues import router as facility_issues_router
 from .occurrences import occurrences
 from .provider import institutional_repository
 from .publication_api import router as publication_router
@@ -97,6 +98,7 @@ app = FastAPI(title="ClassSync Scheduling Service", version="1.0.0", lifespan=li
 install_identity_errors(app)
 app.include_router(publication_router)
 app.include_router(classroom_requests_router)
+app.include_router(facility_issues_router)
 
 
 @app.get("/api/v1/scheduling/sandbox/calendar-samples", response_model=DraftList)

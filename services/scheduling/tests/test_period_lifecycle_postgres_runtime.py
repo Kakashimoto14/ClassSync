@@ -38,7 +38,7 @@ from services.scheduling.app.postgres_publication_repository import PostgresPubl
 from services.testing.postgres_cluster import cluster, execute, provision  # noqa: F401
 
 TENANT, PROJECT, ADMIN = "cdm", "demo-classsync-lifecycle", "admin-uid"
-HEAD = "0029_restrictions_and_period_lifecycle"
+HEAD = "0030_facility_issue_reports"
 
 
 @pytest.fixture(scope="module")

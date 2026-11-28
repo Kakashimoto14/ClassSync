@@ -17,6 +17,8 @@ import {
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
 import './student-home.css';
+import { AlertsFeed } from '../components/scheduling/AlertsFeed';
+import { appMode } from '../config/runtime-config';
 
 export function StudentHome({
   rooms = false,
@@ -86,6 +88,53 @@ export function StudentHome({
       </button>
     );
   }
+  const detailsDialog = currentSelection && !w.error && w.data && (
+    <ClassSessionDetails
+      session={currentSelection}
+      role="student"
+      sample={schedulingSandboxEnabled || w.context.mode !== 'published'}
+      presentation={w.context.mode === 'presentation'}
+      published={w.context.mode === 'published' && w.data.status !== 'not-published'}
+      onClose={() => setSelected(null)}
+    />
+  );
+  // University alerts stay readable even when no timetable can be shown.
+  if (alerts && appMode === 'institutional')
+    return (
+      <section className="student-home" data-published-version={w.data?.version ?? ''}>
+        <StudentPageHeader
+          title="Schedule updates"
+          context={calendarDateLabel(w.date)}
+          term={termLabel(w.data?.calendar)}
+          action={
+            <Link className="button button--secondary" to={`${schedulePath}&date=${w.date}`}>
+              View full schedule
+            </Link>
+          }
+        />
+        {w.error && (
+          <div className="student-panel" role="alert">
+            <p>
+              {[401, 403].includes(w.errorStatus)
+                ? 'Your schedule is not accessible, so class changes are not shown.'
+                : 'Class changes are unavailable right now.'}
+            </p>
+            <Button onClick={w.retry}>Try again</Button>
+          </div>
+        )}
+        <AlertsFeed
+          role="student"
+          changes={w.error ? [] : changes}
+          scheduleReady={!w.error && !!w.data}
+          action={(item) => (
+            <button className="text-action" onClick={() => setSelected(item)}>
+              Review class
+            </button>
+          )}
+        />
+        {detailsDialog}
+      </section>
+    );
   return (
     <section className="student-home" data-published-version={w.data?.version ?? ''}>
       <StudentPageHeader
@@ -364,16 +413,7 @@ export function StudentHome({
           </aside>
         </div>
       )}
-      {currentSelection && !w.error && w.data && (
-        <ClassSessionDetails
-          session={currentSelection}
-          role="student"
-          sample={schedulingSandboxEnabled || w.context.mode !== 'published'}
-          presentation={w.context.mode === 'presentation'}
-          published={w.context.mode === 'published' && w.data.status !== 'not-published'}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      {detailsDialog}
     </section>
   );
 }

@@ -204,7 +204,6 @@ export function ProductScreenPage({ definition }: { definition: RouteDefinition 
       {definition.kind === 'academic-list' && (definition.id === 'administrator.students'
         ? <AcademicStudentRosterPage />
         : <AcademicListScreen definition={definition} />)}
-      {definition.kind === 'academic-detail' && <AcademicDetailScreen />}
       {definition.kind === 'reports' &&
         (appMode === 'institutional' ? (
           <ReportsPage key={definition.id} utilization={definition.id.endsWith('.utilization')} />
@@ -361,7 +360,7 @@ function AcademicListScreen({ definition }: { definition: RouteDefinition }) {
                       </td>
                       <td>{index + 1} assigned classes</td>
                       <td>
-                        <Link className="text-action" to="/admin/academic/details">
+                        <Link className="text-action" to="/admin/sections">
                           View record
                         </Link>
                       </td>
@@ -395,31 +394,6 @@ function AcademicListScreen({ definition }: { definition: RouteDefinition }) {
     </>
   );
 }
-function AcademicDetailScreen() {
-  return (
-    <section className="workspace-card">
-      <p className="eyebrow">Academic record</p>
-      <h2>BSIT 2A · Second Year</h2>
-      <dl className="detail-list">
-        <dt>Program</dt>
-        <dd>Bachelor of Science in Information Technology</dd>
-        <dt>Students</dt>
-        <dd>35 active students</dd>
-        <dt>Adviser</dt>
-        <dd>Prof. Maria Santos</dd>
-        <dt>Schedule</dt>
-        <dd>Published · 18 class periods</dd>
-      </dl>
-      <h3>Related subjects</h3>
-      <ul className="related-list">
-        <li>Database Management Systems</li>
-        <li>Web Systems</li>
-        <li>Human Computer Interaction</li>
-      </ul>
-    </section>
-  );
-}
-
 function ReportScreen({ utilization }: { utilization: boolean }) {
   return (
     <section className="workspace-card">

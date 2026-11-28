@@ -13,6 +13,7 @@ import { periodLabel } from '../lib/workspace-context';
 import { presentationEnabled, presentationOnlyBuild } from '../lib/presentation-sample';
 import { schedulingSandboxEnabled } from '../lib/scheduling-api';
 import { ClassSessionDetails } from '../components/scheduling/ClassSessionDetails';
+import { ExportIcsButton } from '../components/scheduling/ExportIcsButton';
 import { Button } from '../components/ui/Button';
 import { StudentPageHeader } from '../components/ui/StudentPageHeader';
 import { ClassSyncSkeleton } from '../components/loading/ClassSyncLoading';
@@ -149,6 +150,13 @@ export function StudentSchedule() {
           Today
         </Button>
       </div>
+      {w.context.mode === 'published' &&
+        !w.error &&
+        !w.loading &&
+        w.data &&
+        w.data.status !== 'not-published' && (
+          <ExportIcsButton records={records} role="student" view={view} date={w.date} />
+        )}
       <details className="student-schedule-options">
         <summary>Schedule options</summary>
         <label>

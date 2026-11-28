@@ -33,6 +33,11 @@ interface Draft {
   reason: string;
 }
 
+const newDraft = (roomId: string, reason = ''): Draft => ({
+  id: crypto.randomUUID(), revision: 0, room_id: roomId,
+  starts: '', ends: '', kind: 'operational', reason,
+});
+
 export function BuildingsPage({ detail = false }: { detail?: boolean }) {
   const [params] = useSearchParams();
   const building = params.get('building') ?? '';
@@ -41,7 +46,15 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [attempt, setAttempt] = useState(0);
-  const [draft, setDraft] = useState<Draft | null>(null);
+  // A facility issue link opens a prefilled form; saving still needs the usual check.
+  const [draft, setDraft] = useState<Draft | null>(() =>
+    params.get('restrict') === '1' &&
+    provisionalCdmRooms.some(
+      (room) => room.id === selectedRoom && room.schedulable && room.building === building,
+    )
+      ? newDraft(selectedRoom, (params.get('reason') ?? '').slice(0, 200))
+      : null,
+  );
   const [impact, setImpact] = useState<RestrictionImpact | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -80,10 +93,7 @@ export function BuildingsPage({ detail = false }: { detail?: boolean }) {
             starts: toLocalInput(item.starts_at), ends: toLocalInput(item.ends_at),
             kind: item.kind, reason: item.reason,
           }
-        : {
-            id: crypto.randomUUID(), revision: 0, room_id: roomId,
-            starts: '', ends: '', kind: 'operational', reason: '',
-          },
+        : newDraft(roomId),
     );
   }
   const command = (value: Draft) => ({
